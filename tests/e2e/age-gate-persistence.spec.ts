@@ -34,9 +34,7 @@ async function clearTheGate(page: Page) {
   await expect(page).toHaveURL(/\/primitives/)
 }
 
-test('the landing page does not send a cleared visitor back to the gate', async ({
-  page,
-}) => {
+test('the landing page does not send a cleared visitor back to the gate', async ({ page }) => {
   await clearTheGate(page)
 
   // The reported journey: a missing page, its way home, and back in.
@@ -44,16 +42,22 @@ test('the landing page does not send a cleared visitor back to the gate', async 
   await page.getByRole('link', { name: /revenir à l'accueil/i }).click()
   await expect(page).toHaveURL(/\/$/)
 
-  await page.getByRole('link', { name: 'Entrer' }).click()
+  /*
+   * The landing repeats its one call to action — header, hero, foot — the way
+   * a long page is supposed to. Every one of them is the same link, so the
+   * first is the one this journey meets; asserting the count keeps the
+   * repetition deliberate rather than accidental.
+   */
+  const enter = page.getByRole('link', { name: 'Entrer' })
+  expect(await enter.count()).toBeGreaterThan(1)
+  await enter.first().click()
 
   // The claim, stated the way a visitor would: no second date of birth.
   await expect(page).not.toHaveURL(/\/majorite/)
   await expect(page.getByLabel('Date de naissance')).toHaveCount(0)
 })
 
-test('reaching the gate directly, already cleared, passes straight through', async ({
-  page,
-}) => {
+test('reaching the gate directly, already cleared, passes straight through', async ({ page }) => {
   await clearTheGate(page)
 
   // A bookmark, the back button, an old link. A full navigation follows the

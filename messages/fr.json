@@ -136,5 +136,451 @@
     "submitPassword": "Se connecter",
     "submitLink": "Recevoir un lien",
     "orLink": "Pas de mot de passe ?"
+  },
+  "landing": {
+    "nav": {
+      "cigars": "Cigares",
+      "brands": "Marques",
+      "vitolas": "Vitoles",
+      "venues": "Lieux",
+      "journal": "Journal",
+      "shop": "Boutique",
+      "menu": "Ouvrir le menu",
+      "summary": "Aller au sommaire"
+    },
+    "hero": {
+      "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré et une cave numérique. Le réseau des amateurs francophones, les lieux où l'on fume, une boutique d'accessoires.",
+      "ledeEmphasis": "Rien à vendre, rien à promouvoir.",
+      "tocTitle": "Ce que contient le site"
+    },
+    "plate": {
+      "emberLabel": "La braise",
+      "emberValue": "Combustion — env. 90 min",
+      "bandLabel": "La bague",
+      "bandValue": "Cadre de visée de la reconnaissance",
+      "wrapperLabel": "La cape",
+      "wrapperValue": "Colorado maduro — 4ᵉ nuance sur 6",
+      "vitolaLabel": "La vitole",
+      "vitolaDimensions": "52 × 164 mm",
+      "vitolaName": "corona gorda",
+      "bandVitola": "Corona gorda · 52 × 164",
+      "alt": "Illustration : un cigare allumé vu de côté, la cendre et la braise à gauche, la bague au tiers droit."
+    },
+    "scale": {
+      "eyebrow": "Direction artistique",
+      "title": "La palette de l'interface est l'échelle des capes.",
+      "body": "Six nuances définies par le métier, qui servent ici de couleurs d'interface et de composant de visualisation. La couleur n'est jamais seule à porter le sens : l'étiquette est toujours écrite."
+    },
+    "placeholders": {
+      "brand": "[Marque]",
+      "product": "[Nom commercial]",
+      "venue": "[Nom du lieu]",
+      "city": "[Ville]",
+      "count": "[N]",
+      "threshold": "[seuil]",
+      "price": "[PRIX]",
+      "member": "[Nom du membre]",
+      "handle": "@[pseudonyme]",
+      "club": "[Nom du club]",
+      "date": "[JJ/MM]",
+      "productName": "[Nom du produit]"
+    },
+    "modules": {
+      "referentiel": {
+        "number": "01",
+        "name": "Le référentiel",
+        "kind": "Wiki",
+        "title": "Toutes les vitoles, sourcées et versionnées.",
+        "body": "Manufactures, marques, lignes, vitoles, cigares. Chaque fiche porte ses sources, son historique de révisions et le nom du relecteur qui l'a publiée. Une fiche n'est visible qu'une fois vérifiée : c'est la règle du référentiel, pas une limitation temporaire de l'affichage.",
+        "points": [
+          {
+            "title": "Recherche facettée.",
+            "body": "Marque, pays, cepo, longueur, force, cape, type de sortie — l'état des filtres vit dans l'URL, une recherche se partage telle quelle."
+          },
+          {
+            "title": "Comparateur.",
+            "body": "Deux à quatre fiches côte à côte, critère par critère."
+          },
+          {
+            "title": "Décodeur de codes de boîte.",
+            "body": "Code d'usine, mois, année : la date de production d'une boîte cubaine, lue depuis le cachet."
+          },
+          {
+            "title": "Contribution ouverte.",
+            "body": "Chacun propose une correction, un contributeur de confiance la relit. Le diff reste public, la paternité aussi."
+          }
+        ],
+        "figure": {
+          "cardBand": "Fiche vérifiée",
+          "vitola": "Corona gorda",
+          "strength": "Moyen-corsé",
+          "shade": "Colorado maduro",
+          "origin": "Cuba",
+          "year": "1969",
+          "revision": "Relue le 14/03",
+          "version": "v7",
+          "queueTitle": "File de relecture",
+          "queueCount": "3 propositions",
+          "row1": "Correction de la longueur",
+          "row1Value": "164 → 165 mm",
+          "row1State": "En attente",
+          "row2": "Ajout de la source",
+          "row2Value": "catalogue 1994",
+          "row2State": "Approuvée",
+          "row3": "Fusion de doublon",
+          "row3Value": "deux fiches, une vitole",
+          "row3State": "En attente"
+        }
+      },
+      "scan": {
+        "number": "02",
+        "name": "La reconnaissance de bague",
+        "kind": "Scan",
+        "title": "Photographiez la bague. Sachez ce que vous fumez.",
+        "body": "Le cadre de visée est une bague. Une photo suffit : le référentiel répond par trois candidats classés et leur indice de confiance. Vous confirmez, et la base apprend — trois confirmations indépendantes promeuvent une image au rang de référence.",
+        "points": [
+          {
+            "title": "Une bague déjà vue ne coûte rien.",
+            "body": "L'empreinte perceptuelle est calculée sur l'appareil ; si elle est connue, la réponse est immédiate et aucun modèle n'est appelé."
+          },
+          {
+            "title": "Recherche hybride.",
+            "body": "Similarité visuelle et recherche lexicale sur le texte lu, fusionnées par rang réciproque. L'OCR seul échoue sur les dorures et l'embossage."
+          },
+          {
+            "title": "Un chiffre publié, pas promis.",
+            "body": "Objectif de la v1 : top-3 ≥ 85 % sur les 200 références les plus courantes, mesuré sur un jeu de 200 photos annotées à la main."
+          },
+          {
+            "title": "Introuvable est une réponse utile.",
+            "body": "La contribution s'ouvre pré-remplie de ce que la photo a permis de lire."
+          }
+        ],
+        "figure": {
+          "aim": "Alignez la bague",
+          "fingerprint": "Empreinte calculée sur l'appareil",
+          "fingerprintValue": "pHash · 0 appel",
+          "candidates": "Trois candidats",
+          "fusion": "Fusion RRF · k=60",
+          "v1": "Corona gorda · Cuba",
+          "v2": "Robusto · Cuba",
+          "v3": "Petit corona · Nicaragua",
+          "confirm": "C'est celui-ci",
+          "other": "Autre",
+          "missing": "Introuvable"
+        }
+      },
+      "degustation": {
+        "number": "03",
+        "name": "La dégustation",
+        "kind": "Carnet",
+        "title": "Des notes comparables, pas des impressions.",
+        "body": "Six critères — construction, tirage, combustion, arômes, évolution, finale — relevés tiers par tiers. Une roue des arômes en onze familles. Un minuteur, un brouillon enregistré tout seul, et un mode à l'aveugle où la fiche n'est révélée qu'après la note.",
+        "points": [
+          {
+            "title": "Note sur 100, moyenne bayésienne.",
+            "body": "Un cigare noté une seule fois à 98 ne domine pas le classement. L'effectif est affiché avec la moyenne, toujours."
+          },
+          {
+            "title": "Onze familles d'arômes,",
+            "body": "en taxonomie arborescente : boisé, torréfié, épicé, terreux, animal, fruité, floral, sucré, végétal, minéral, et les défauts."
+          },
+          {
+            "title": "Le contexte est une donnée.",
+            "body": "Code de boîte, année de production, hygrométrie, durée de combustion, accord : ce qui rend deux dégustations comparables."
+          }
+        ],
+        "figure": {
+          "wheel": "Roue des arômes",
+          "draft": "Brouillon",
+          "thirds": "Relevé par tiers",
+          "third1": "1ᵉʳ tiers",
+          "third1Value": "cèdre · poivre blanc",
+          "third2": "2ᵉ tiers",
+          "third2Value": "cuir · cacao",
+          "third3": "3ᵉ tiers",
+          "third3Value": "terre · café",
+          "criteria": "Six critères",
+          "score": "88",
+          "scoreOutOf": "/ 100",
+          "construction": "Construction",
+          "draw": "Tirage",
+          "burn": "Combustion",
+          "evolution": "Évolution",
+          "average": "Moyenne sur",
+          "averageSuffix": "avis",
+          "deviation": "écart-type 4,2"
+        }
+      },
+      "cave": {
+        "number": "04",
+        "name": "La cave",
+        "kind": "Inventaire",
+        "title": "Savoir ce que l'on a, et depuis quand.",
+        "body": "Plusieurs caves, l'inventaire réel, la date d'entrée en vieillissement, les relevés d'hygrométrie et de température, la valorisation du stock et les rotations à prévoir. Chaque mouvement est daté : ajout, dégustation, don, perte, déplacement.",
+        "points": [
+          {
+            "title": "Un indicateur de maturité, pas un oracle.",
+            "body": "La courbe est paramétrable par famille, et la donnée brute — la date d'entrée — reste toujours lisible."
+          },
+          {
+            "title": "Relevés d'hygrométrie,",
+            "body": "saisis à la main ou importés. L'historique se lit comme une courbe, pas comme une alerte permanente."
+          },
+          {
+            "title": "Import et export CSV.",
+            "body": "Vos données restent les vôtres — comme l'export et la suppression complets du compte, disponibles dès la première version."
+          }
+        ],
+        "figure": {
+          "title": "Cave principale",
+          "unit": "vitoles",
+          "humidity": "RH 69 %",
+          "temperature": "18,4 °C",
+          "colEntry": "Entrée",
+          "colVitola": "Vitole",
+          "colQty": "Qté",
+          "colAge": "Âge",
+          "colMaturity": "Maturité",
+          "ready": "Prêt",
+          "ongoing": "En cours",
+          "resting": "Repos",
+          "rotation": "Rotation à prévoir — 2 lots",
+          "export": "Export CSV"
+        }
+      },
+      "reseau": {
+        "number": "05",
+        "name": "Le réseau et la communauté",
+        "kind": "Communauté",
+        "title": "Un réseau d'amateurs, pas un forum de 2004.",
+        "body": "Un fil d'abonnements et un fil de découverte, paginés pour de bon. Des publications, des sessions partagées, des clubs, des événements, une messagerie. La réaction ne s'appelle pas « j'aime » : elle s'appelle une braise.",
+        "points": [
+          {
+            "title": "Clubs et événements.",
+            "body": "Un club se crée, se modère et se rejoint. Un événement a une date, un lieu et une liste de présents — pas un fil de commentaires qui en tient lieu."
+          },
+          {
+            "title": "La confiance se gagne.",
+            "body": "Membre, contributeur, éditeur, modérateur : la réputation vient des relectures acceptées, pas du nombre de publications."
+          },
+          {
+            "title": "Des badges discrets, affichés en bague.",
+            "body": "Archiviste, Cave centenaire, Tour du monde. Une gamification sobre : ni confettis, ni classement de fumeurs."
+          },
+          {
+            "title": "Signalement et modération.",
+            "body": "Chaque contenu se signale, chaque action de modération est motivée et journalisée. Le blocage entre membres existe dès la première version."
+          }
+        ],
+        "figure": {
+          "badge": "Archiviste",
+          "ago": "il y a 2 h",
+          "post": "Deux heures sur une vitole de 2019, sortie de cave la veille. J'ai relevé du cèdre et du poivre blanc au premier tiers, du cuir ensuite. Combustion régulière, cendre tenue sur quatre centimètres.",
+          "embers": "braises",
+          "replies": "réponses",
+          "visibility": "Visible : abonnés",
+          "clubs": "Clubs et événements",
+          "thisMonth": "Ce mois-ci",
+          "club": "Club",
+          "members": "membres",
+          "meetup": "Rencontre",
+          "workshop": "Atelier — codes de boîte",
+          "reputation": "La réputation",
+          "member": "Membre",
+          "contributor": "Contributeur",
+          "editor": "Éditeur",
+          "moderator": "Modérateur",
+          "appointed": "nommé",
+          "reputationNote": "Le droit de valider une fiche s'ouvre à partir d'un seuil de réputation. Il ne s'achète pas.",
+          "badge1": "Habanophile",
+          "badge2": "Cave centenaire",
+          "badge3": "Tour du monde"
+        }
+      },
+      "lieux": {
+        "number": "06",
+        "name": "Les lieux",
+        "kind": "Carte",
+        "title": "Où fumer, où acheter, où se faire conseiller.",
+        "body": "Civettes, caves, lounges, hôtels, restaurants, clubs, événements. Un annuaire informatif : les avis portent sur l'accueil, le confort et le conseil — jamais sur l'incitation à consommer. Un professionnel peut revendiquer sa fiche et la tenir à jour.",
+        "points": [],
+        "figure": {
+          "pinCivette": "Civette",
+          "pinCave": "Cave",
+          "pinLounge": "Lounge",
+          "pinHotel": "Hôtel",
+          "pinClub": "Club",
+          "chipVentilated": "Salon ventilé",
+          "chipOpen": "Ouvert maintenant",
+          "chipNear": "Moins de 5 km",
+          "around": "Autour de",
+          "sheets": "fiches",
+          "row1": "Civette",
+          "row1Meta": "salon ventilé",
+          "row1Distance": "0,8 km",
+          "row2": "Cave",
+          "row2Meta": "conseil, humidification",
+          "row2Distance": "1,6 km",
+          "row3": "Lounge d'hôtel",
+          "row3Meta": "accès non-résidents",
+          "row3Distance": "3,4 km",
+          "claimed": "Fiche revendiquée par le professionnel",
+          "verified": "Vérifiée",
+          "reviewsNote": "Les avis portent sur l'accueil et le conseil"
+        }
+      },
+      "boutique": {
+        "number": "07",
+        "name": "La boutique",
+        "kind": "Accessoires",
+        "title": "Des accessoires, et rien d'autre.",
+        "body": "Coupes, briquets, cendriers, caves, hygromètres, étuis, solutions d'humidification, ouvrages, produits d'entretien. La vente à distance de tabac est interdite en France : le catalogue est fermé sur ces neuf catégories, une contrainte de base de données le garantit, et la compilation échoue si un produit du tabac y entre.",
+        "points": [],
+        "figure": {
+          "cat1": "Coupe",
+          "desc1": "Guillotine double lame, acier.",
+          "cat2": "Hygromètre",
+          "desc2": "Analogique, calibrable au sel.",
+          "cat3": "Étui",
+          "desc3": "Cuir pleine fleur, trois modules.",
+          "currency": "€",
+          "payment": "Paiement hébergé — aucune donnée de carte ne transite par le site.",
+          "enum": "9 catégories · énumération fermée"
+        }
+      },
+      "partenaires": {
+        "number": "08",
+        "name": "Les partenaires",
+        "kind": "Charte",
+        "title": "Qui peut être partenaire, et qui ne peut pas.",
+        "body": "La loi interdit la publicité, directe ou indirecte, en faveur du tabac. Cette contrainte n'est pas subie : elle définit ce que le site accepte, et le dire publiquement est la seule garantie qui vaille pour un lecteur.",
+        "points": [],
+        "figure": {
+          "acceptTitle": "Ce que nous accueillons",
+          "refuseTitle": "Ce que nous refusons",
+          "accept": [
+            {
+              "title": "Les professionnels des lieux.",
+              "body": "Une civette, une cave, un lounge revendique sa fiche, la tient à jour et répond aux avis. Gratuitement, sans mise en avant payante."
+            },
+            {
+              "title": "Les fabricants d'accessoires.",
+              "body": "Coupes, briquets, humidification, ouvrages : ce sont eux, et eux seuls, qui alimentent le catalogue."
+            },
+            {
+              "title": "Les auteurs et les photographes.",
+              "body": "Guides, entretiens, reportages, lexique — signés, datés et rémunérés."
+            },
+            {
+              "title": "Les clubs et les associations.",
+              "body": "Une page, un calendrier, une liste de présents."
+            },
+            {
+              "title": "La prévention.",
+              "body": "Le lien vers Tabac info service est permanent, jamais habillé, jamais relégué en pied de page."
+            }
+          ],
+          "refuse": [
+            {
+              "title": "Tout partenariat rémunéré",
+              "body": "avec un fabricant, un importateur ou un distributeur de produits du tabac."
+            },
+            {
+              "title": "L'article sponsorisé,",
+              "body": "le contenu offert, le voyage de presse."
+            },
+            {
+              "title": "Tout revenu publicitaire lié au tabac.",
+              "body": "Le modèle est un abonnement et la marge de la boutique d'accessoires."
+            },
+            {
+              "title": "La mise en avant payante",
+              "body": "d'une fiche, d'une marque ou d'un lieu. Le classement ne s'achète pas."
+            },
+            {
+              "title": "Le lien marchand sur une fiche cigare.",
+              "body": "Une fiche décrit un objet ; elle n'invite pas à l'acheter."
+            }
+          ],
+          "cta": "Proposer un partenariat",
+          "ctaHint": "Les demandes sont instruites au regard de cette charte, publiée et opposable."
+        }
+      },
+      "cercle": {
+        "number": "09",
+        "name": "Le Cercle",
+        "kind": "Abonnement",
+        "title": "Un abonnement, pas une régie publicitaire.",
+        "body": "Le site vit de deux choses : le Cercle et la marge de la boutique d'accessoires. Il n'y en a pas de troisième, et c'est ce qui rend la charte ci-dessus tenable — un référentiel dont le classement se vend n'est plus un référentiel.",
+        "points": [],
+        "figure": {
+          "freeName": "Compte libre",
+          "freePrice": "Gratuit",
+          "paidName": "Le Cercle",
+          "perMonth": "/ mois",
+          "currency": "€",
+          "free": [
+            {
+              "title": "Le référentiel et le vitolario,",
+              "body": "en entier. Aucune fiche derrière un péage."
+            },
+            {
+              "title": "La reconnaissance de bague,",
+              "body": "scans par jour."
+            },
+            {
+              "title": "Le carnet de dégustation,",
+              "body": "sans limite d'entrées."
+            },
+            {
+              "title": "Une cave,",
+              "body": "vitoles."
+            },
+            {
+              "title": "Le fil, les clubs, les événements,",
+              "body": "la messagerie."
+            },
+            {
+              "title": "L'export et la suppression de votre compte.",
+              "body": "Un droit, jamais une option payante."
+            }
+          ],
+          "paid": [
+            {
+              "title": "Tout ce que contient le compte libre.",
+              "body": ""
+            },
+            {
+              "title": "Caves illimitées,",
+              "body": "avec la valorisation du stock et les alertes de rotation."
+            },
+            {
+              "title": "Statistiques avancées",
+              "body": ": palmarès, pays goûtés, distribution des arômes, évolution des notes sur 90 jours."
+            },
+            {
+              "title": "Dégustation à l'aveugle",
+              "body": ": la fiche n'est révélée qu'une fois la note posée."
+            },
+            {
+              "title": "Export CSV",
+              "body": "de la cave et des dégustations."
+            },
+            {
+              "title": "Aucune publicité",
+              "body": "— et jamais pour un produit du tabac, abonné ou non."
+            }
+          ],
+          "note": "Sans engagement, résiliable depuis les paramètres. Le paiement est hébergé : aucune donnée de carte ne transite par le site."
+        }
+      }
+    },
+    "final": {
+      "eyebrow": "Accès réservé aux majeurs",
+      "title": "Ce site traite de produits du tabac. La loi en réserve l'accès aux personnes majeures.",
+      "body": "Votre date de naissance sert uniquement à vérifier cette condition. Elle n'est pas conservée tant que vous n'avez pas de compte : un cookie signé mémorise seulement que la vérification a eu lieu.",
+      "help": "Se faire aider : Tabac info service — 39 89, du lundi au samedi. Gratuit et confidentiel."
+    }
   }
 }
