@@ -130,14 +130,20 @@ create table public.humidor_items (
   constraint humidor_items_vendor_len check (vendor_name is null or length(vendor_name) <= 120),
   constraint humidor_items_box_len    check (box_code    is null or length(box_code)    between 1 and 40),
   constraint humidor_items_pos_len    check (position    is null or length(position)    <= 60),
-  constraint humidor_items_notes_len  check (notes       is null or length(notes)       <= 2000),
+  constraint humidor_items_notes_len  check (notes       is null or length(notes)       <= 2000)
 
-  -- Une date de mise en cave postérieure à aujourd'hui décrirait un vieillissement
-  -- qui n'a pas commencé. La règle des 18 ans a appris qu'un CHECK ne peut pas
-  -- appeler current_date ; celle-ci n'en a pas besoin — elle compare deux colonnes.
-  constraint humidor_items_aging_after_purchase check (
-    aging_start_date is null or purchase_date is null or aging_start_date >= purchase_date
-  )
+  -- Aucune contrainte ne lie `aging_start_date` à `purchase_date`, et
+  -- l'absence est délibérée : elle a été écrite, puis retirée le jour même,
+  -- parce qu'un parcours en navigateur a montré ce qu'elle interdisait.
+  --
+  -- Un module acheté vieilli **a commencé à se reposer avant qu'on l'achète**.
+  -- Exiger `aging_start_date >= purchase_date` obligeait alors à saisir la date
+  -- d'achat comme date de vieillissement, c'est-à-dire à rajeunir une boîte de
+  -- 2019 de six ans — précisément le chiffre que le §5.5 demande d'afficher.
+  --
+  -- Ce qui reste refusé, c'est une date future, et cela ne peut pas être un
+  -- CHECK : `current_date` n'y est pas admis, comme la règle des 18 ans l'a
+  -- appris à la 0001. La borne vit donc dans le schéma Zod de la Server Action.
 );
 
 comment on table public.humidor_items is
