@@ -27,8 +27,14 @@ n'est ouvert au public. Le code est prêt, la porte est fermée.
 **Irréversible.** Une région ne se change pas après création : il faut recréer le projet et migrer.
 Le §3 exige l'UE pour l'observabilité ; c'est *a fortiori* vrai pour une base contenant des données
 potentiellement relevant de l'article 9.
-**Défaut :** projet en `eu-central-1` (Francfort), DPA Supabase signé, registre des sous-traitants
-tenu dans `docs/legal/data-map.md`, deux projets distincts (production / développement).
+**Défaut, corrigé après vérification :** projet en **`eu-west-3` (Paris)** — le brief héberge
+l'application sur Vercel `cdg1`, qui est Paris : même ville, latence minimale entre l'application
+et la base. J'avais d'abord écrit Francfort ; Paris est meilleur et tout aussi conforme au RGPD.
+DPA Supabase signé, registre des sous-traitants dans `docs/legal/data-map.md`.
+**Un seul projet dans un premier temps** (10 $/mois sur le plan Pro de l'organisation ShiftX) ;
+le développement se fait en local et les branches Supabase, facturées à l'heure, serviront aux
+prévisualisations à l'approche de la mise en ligne.
+Procédure détaillée : [`docs/setup/supabase.md`](../setup/supabase.md).
 **Nécessaire avant :** la première migration appliquée sur un projet réel — donc avant P1.
 
 ### Q3 · Qui saisit le référentiel d'amorçage ?

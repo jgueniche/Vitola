@@ -94,7 +94,11 @@ métier.
 ## Questions ouvertes
 
 1. **Quelle région, et le DPA est-il signé ?** Le §3 impose l'UE pour l'observabilité ; c'est *a
-   fortiori* vrai pour la base. Le projet doit être créé en UE dès sa création — une région ne se
-   change pas après coup sans migration complète. Voir **Q2**.
-2. **La production et le développement partagent-ils un projet ?** Recommandation : deux projets
-   distincts, avec les branches Supabase pour les prévisualisations. Coût : une facture de plus.
+   fortiori* vrai pour la base. Une région ne se change pas après coup sans migration complète.
+   Recommandation vérifiée : **`eu-west-3` (Paris)**, même ville que Vercel `cdg1`. Voir **Q2**.
+2. **La production et le développement partagent-ils un projet ?** Recommandation révisée : **un
+   seul projet** tant qu'il n'y a ni utilisateur ni donnée réelle — développement en local, et
+   branches Supabase facturées à l'heure pour les prévisualisations à l'approche de P1.
+3. **Version de Postgres.** Le §3 dit Postgres 15 ; Supabase provisionne aujourd'hui **Postgres 17**.
+   La migration P1 n'utilise rien de spécifique à une version et a été validée sur 16 ; elle sera
+   revalidée sur 17 à la création du projet.
