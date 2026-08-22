@@ -2,20 +2,33 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { AGE_COOKIE_NAME, verifyAgeToken } from '@/lib/compliance/age-gate'
 import { isPublicPath, routes, safeSuite } from '@/lib/routes'
+import { carryCookies, refreshSession } from '@/lib/supabase/middleware'
 
 /**
- * Age gate and indexing control (§2 of the brief).
+ * Age gate, session refresh and indexing control (§2 of the brief).
  *
- * The gate is a routing boundary, not a condition scattered across pages: either
- * a path is in PUBLIC_PATHS, or it requires a valid signed cookie. That makes it
- * auditable at a glance and testable without rendering anything.
+ * Two separate things travel together here because both must happen on every
+ * request, and only the middleware can write cookies back:
+ *
+ *   - The age gate is a routing boundary, not a condition scattered across
+ *     pages: either a path is in PUBLIC_PATHS, or it requires a valid signed
+ *     cookie. Auditable at a glance, testable without rendering anything.
+ *   - The Supabase session is refreshed so a signed-in member is not quietly
+ *     signed out when their token expires.
+ *
+ * They are independent: being signed in does not clear the age gate, and
+ * clearing the age gate does not sign anyone in. A minor with an account is
+ * still a minor.
  *
  * Indexing: every gated route carries `X-Robots-Tag: noindex`. Tobacco content
- * must not be indexable before the gate is cleared, and per Q1 nothing at all is
- * indexable until the legal review is signed off — see app/robots.ts.
+ * must not be indexable before the gate is cleared, and per Q1 nothing at all
+ * is indexable until the legal review is signed off — see app/robots.ts.
  */
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
+
+  // First, so its refreshed cookies ride on whatever response we end up with.
+  const { response } = await refreshSession(request)
 
   if (isPublicPath(pathname)) {
     /*
@@ -32,14 +45,16 @@ export async function middleware(request: NextRequest) {
       const cleared = await verifyAgeToken(request.cookies.get(AGE_COOKIE_NAME)?.value)
       if (cleared) {
         const suite = safeSuite(request.nextUrl.searchParams.get('suite'))
-        return NextResponse.redirect(new URL(suite ?? routes.cigars(), request.nextUrl.origin))
+        return carryCookies(
+          response,
+          NextResponse.redirect(new URL(suite ?? routes.cigars(), request.nextUrl.origin)),
+        )
       }
     }
-    return NextResponse.next()
+    return response
   }
 
-  const token = request.cookies.get(AGE_COOKIE_NAME)?.value
-  const isAdult = await verifyAgeToken(token)
+  const isAdult = await verifyAgeToken(request.cookies.get(AGE_COOKIE_NAME)?.value)
 
   if (!isAdult) {
     const url = request.nextUrl.clone()
@@ -47,10 +62,9 @@ export async function middleware(request: NextRequest) {
     url.search = ''
     // Remember where they were going, so the gate is a detour and not a reset.
     url.searchParams.set('suite', `${pathname}${search}`)
-    return NextResponse.redirect(url)
+    return carryCookies(response, NextResponse.redirect(url))
   }
 
-  const response = NextResponse.next()
   response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   return response
 }

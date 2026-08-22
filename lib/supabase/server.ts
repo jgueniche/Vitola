@@ -1,28 +1,38 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 import type { Database } from './database.types'
 import { supabasePublishableKey, supabaseUrl } from './env'
 
 /**
- * The client every Server Component reads the referential through.
+ * The client every Server Component reads through.
  *
- * It carries the publishable key, so it is governed by RLS exactly like a
- * browser would be: drafts stay invisible, and no page can accidentally read
- * more than a visitor is allowed to. That is the point — the safety of the
- * referential must not depend on remembering to filter `status` in a query.
+ * It carries the publishable key and the caller's session cookies, so RLS
+ * governs it exactly as it governs the person at the other end: an anonymous
+ * visitor sees published entries, an editor also sees drafts. That is the point
+ * — the safety of the referential must never depend on remembering to filter
+ * `status` in a query.
  *
- * Session persistence is switched off explicitly. supabase-js defaults to
- * storing a session, which on a server is both useless and a cross-request
- * leak waiting to happen: one visitor's token must never be reachable from
- * another's render.
- *
- * A new client per call, not a module singleton. It costs nothing measurable,
- * and it is what lets authentication land later (P1, `connexion/`) by attaching
- * the caller's token here rather than reworking every page.
+ * Async because `cookies()` is. Every call site awaits it.
  */
-export function createSupabaseServerClient(): SupabaseClient<Database> {
-  return createClient<Database>(supabaseUrl(), supabasePublishableKey(), {
-    auth: { persistSession: false, autoRefreshToken: false },
+export async function createSupabaseServerClient() {
+  const store = await cookies()
+
+  return createServerClient<Database>(supabaseUrl(), supabasePublishableKey(), {
+    cookies: {
+      getAll() {
+        return store.getAll()
+      },
+      setAll(toSet) {
+        try {
+          for (const { name, value, options } of toSet) store.set(name, value, options)
+        } catch {
+          // Server Components cannot set cookies. The middleware refreshes the
+          // session on every request, so the write here is redundant rather
+          // than lost — swallowing it is correct, not a shortcut.
+        }
+      },
+    },
   })
 }
 
@@ -30,9 +40,16 @@ export function createSupabaseServerClient(): SupabaseClient<Database> {
  * The referential lives in the `ref` schema, not `public`.
  *
  * `ref` had to be added to PostgREST's exposed schemas for this to resolve at
- * all — it ships exposing only `public` and `graphql_public`. Every referential
- * query goes through this helper so that the schema name appears once.
+ * all — a project ships exposing only `public` and `graphql_public`. Every
+ * referential query goes through this helper so the schema name appears once.
  */
-export function referential() {
-  return createSupabaseServerClient().schema('ref')
+export async function referential() {
+  return (await createSupabaseServerClient()).schema('ref')
+}
+
+/** The signed-in user, or null. Never throws: a broken session is not a 500. */
+export async function currentUser() {
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase.auth.getUser()
+  return error ? null : data.user
 }

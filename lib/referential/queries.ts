@@ -50,7 +50,8 @@ export type CigarDetail = {
 }
 
 export async function getCigarBySlug(slug: string): Promise<CigarDetail | null> {
-  const { data, error } = await referential()
+  const db = await referential()
+  const { data, error } = await db
     .from('cigars')
     .select(
       `id, slug, commercial_name, origin_country, wrapper_origin, binder_origin,
@@ -80,7 +81,8 @@ export type BrandSummary = {
 }
 
 export async function listBrands(): Promise<BrandSummary[]> {
-  const { data, error } = await referential()
+  const db = await referential()
+  const { data, error } = await db
     .from('brands')
     .select('id, name, slug, country, is_cuban, founded_year, description, manufacturers(name, slug)')
     .order('name', { ascending: true })
@@ -90,7 +92,8 @@ export async function listBrands(): Promise<BrandSummary[]> {
 }
 
 export async function getBrandBySlug(slug: string): Promise<BrandSummary | null> {
-  const { data, error } = await referential()
+  const db = await referential()
+  const { data, error } = await db
     .from('brands')
     .select('id, name, slug, country, is_cuban, founded_year, description, manufacturers(name, slug)')
     .eq('slug', slug)
@@ -112,7 +115,8 @@ export type VitolaSummary = {
 }
 
 export async function listVitolas(): Promise<VitolaSummary[]> {
-  const { data, error } = await referential()
+  const db = await referential()
+  const { data, error } = await db
     .from('vitolas')
     .select('id, name_salida, name_galera, slug, length_mm, ring_gauge, shape, notes')
     .order('ring_gauge', { ascending: true })
@@ -123,7 +127,8 @@ export async function listVitolas(): Promise<VitolaSummary[]> {
 }
 
 export async function getVitolaBySlug(slug: string): Promise<VitolaSummary | null> {
-  const { data, error } = await referential()
+  const db = await referential()
+  const { data, error } = await db
     .from('vitolas')
     .select('id, name_salida, name_galera, slug, length_mm, ring_gauge, shape, notes')
     .eq('slug', slug)
@@ -141,7 +146,8 @@ export async function getVitolaBySlug(slug: string): Promise<VitolaSummary | nul
  * something that exists.
  */
 export async function publishedOriginCountries(): Promise<string[]> {
-  const { data, error } = await referential()
+  const db = await referential()
+  const { data, error } = await db
     .from('cigars')
     .select('origin_country')
     .eq('status', 'published')
