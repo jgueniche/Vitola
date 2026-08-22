@@ -84,3 +84,27 @@ export const PUBLIC_PATHS: readonly string[] = [
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.includes(pathname)
 }
+
+/**
+ * Validates the `suite` parameter the age gate carries — where the visitor was
+ * going before being interrupted.
+ *
+ * It arrives in the query string, so it is attacker controlled: an unchecked
+ * value turns the gate into an open redirect. Only a same-origin absolute path
+ * is honoured, and never one pointing back at a public page, which would bounce
+ * the visitor for nothing.
+ *
+ * Shared by the middleware and the gate's Server Action. It used to exist only
+ * in the action; the middleware needed the same rule, and two copies of an
+ * open-redirect guard is one too many.
+ */
+export function safeSuite(suite: string | null | undefined): string | null {
+  if (!suite) return null
+  if (!suite.startsWith('/') || suite.startsWith('//')) return null
+
+  // Compare the path alone: `/?x=1` is still the public landing page.
+  const [path] = suite.split('?')
+  if (!path || isPublicPath(path)) return null
+
+  return suite
+}

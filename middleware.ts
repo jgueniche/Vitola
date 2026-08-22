@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { AGE_COOKIE_NAME, verifyAgeToken } from '@/lib/compliance/age-gate'
-import { isPublicPath, routes } from '@/lib/routes'
+import { isPublicPath, routes, safeSuite } from '@/lib/routes'
 
 /**
  * Age gate and indexing control (§2 of the brief).
@@ -18,6 +18,23 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
   if (isPublicPath(pathname)) {
+    /*
+     * The gate is a door, not a turnstile. A visitor who has already cleared it
+     * and lands here again — through the landing page's "Entrer" button, a
+     * bookmark, or the back button — is sent on instead of being asked a second
+     * time for a date of birth they already gave.
+     *
+     * Reported from QA as "it keeps asking on every visit to the home page".
+     * The cookie was never at fault: it is signed for 180 days and was still
+     * valid. Nothing checked it before rendering the gate.
+     */
+    if (pathname === routes.ageGate()) {
+      const cleared = await verifyAgeToken(request.cookies.get(AGE_COOKIE_NAME)?.value)
+      if (cleared) {
+        const suite = safeSuite(request.nextUrl.searchParams.get('suite'))
+        return NextResponse.redirect(new URL(suite ?? routes.cigars(), request.nextUrl.origin))
+      }
+    }
     return NextResponse.next()
   }
 

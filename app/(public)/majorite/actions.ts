@@ -12,7 +12,7 @@ import {
   isPlausibleBirthDate,
 } from '@/lib/compliance/age-gate'
 import { m } from '@/lib/i18n'
-import { isPublicPath, routes } from '@/lib/routes'
+import { routes, safeSuite } from '@/lib/routes'
 
 export type AgeGateState = { error?: string }
 
@@ -52,14 +52,7 @@ export async function confirmAge(
     maxAge: AGE_COOKIE_MAX_AGE_SECONDS,
   })
 
-  /*
-   * Open-redirect guard: `suite` comes from the query string, so it is attacker
-   * controlled. Only a same-origin absolute path is honoured, and never one that
-   * points back at a public page (which would bounce the visitor pointlessly).
-   */
-  const suite = parsed.data.suite ?? ''
-  const isSafeInternalPath =
-    suite.startsWith('/') && !suite.startsWith('//') && !isPublicPath(suite)
-
-  redirect(isSafeInternalPath ? suite : routes.cigars())
+  // The open-redirect guard now lives in lib/routes.ts: the middleware needs
+  // the same rule, and two copies of it is one too many.
+  redirect(safeSuite(parsed.data.suite) ?? routes.cigars())
 }
