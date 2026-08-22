@@ -1,0 +1,719 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Marcellus&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+  <style>
+    /* ==================================================================
+       VITOLA — landing, 390 px. Mêmes tokens, même planche : le mobile
+       recadre le cigare (mise à l'échelle + décalage), il ne le redessine
+       pas. Cibles tactiles ≥ 44 px.
+       ================================================================== */
+    body { margin: 0; background: #161210; }
+    a { color: #d9bc72; text-decoration: none; }
+    a:hover { color: #c9a227; }
+
+    .page {
+      --oscuro: #161210; --maduro: #221b17; --maduro-raised: #2c231d;
+      --cedre: #7a5c43; --cedre-readable: #a47c5a; --colorado: #8c4f2e;
+      --parchemin: #ede6d8; --fumee: #9c948a;
+      --claro: var(--brass, #c9a227);
+      --claro-bright: color-mix(in oklab, var(--claro) 60%, #fff 40%);
+      --claro-deep: color-mix(in oklab, var(--claro) 62%, #000 38%);
+      --rule: rgb(237 230 216 / 0.07); --rule-strong: rgb(237 230 216 / 0.16);
+      --succes: #6d8d5f; --alerte: #b8863b; --erreur: #ca675b;
+      --sh1: #e0c48f; --sh2: #c9975a; --sh3: #ac6a3c;
+      --sh4: #8d4e2c; --sh5: #6f3a24; --sh6: #55291b;
+      --ember-hot: color-mix(in oklab, var(--ember, #ff5a2b) 45%, #ffe9a8 55%);
+      --ember-deep: color-mix(in oklab, var(--ember, #ff5a2b) 55%, #4a1109 45%);
+      --r: 3px; --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+      position: relative; width: 390px; overflow: hidden;
+      background: var(--oscuro); color: var(--parchemin);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 16px; line-height: 1.5;
+      font-feature-settings: 'tnum' 1; font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page *, .page *::before, .page *::after { box-sizing: border-box; }
+
+    .dsp { font-family: 'Bodoni Moda', 'Didot', 'Times New Roman', serif; font-weight: 400;
+           letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+    .eb { font-family: 'Marcellus', 'Optima', 'Palatino', serif; font-size: 11px; line-height: 1.2;
+          letter-spacing: 0.14em; text-transform: uppercase; color: var(--fumee); margin: 0; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .faint { color: var(--cedre-readable); }
+    p { margin: 0; text-wrap: pretty; }
+    h1, h2, h3 { margin: 0; font-weight: 400; }
+    ul, ol { margin: 0; padding: 0; list-style: none; }
+
+    .sec { padding: 0 20px; }
+    .block { border-top: 1px solid var(--rule); padding: 56px 0; }
+    .stack { display: flex; flex-direction: column; }
+
+    .brass { height: 1px; width: 100%;
+      background-image: linear-gradient(90deg, transparent 0%, rgb(122 92 67 / 0.35) 8%,
+        var(--claro) 34%, var(--claro-bright) 50%, var(--claro) 66%,
+        rgb(122 92 67 / 0.35) 92%, transparent 100%); }
+
+    /* cibles tactiles : jamais moins de 44 px */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+           height: 52px; padding: 0 26px; border-radius: var(--r); border: 0;
+           font-size: 16px; font-weight: 500;
+           background: var(--claro); color: var(--oscuro); }
+    a.btn, a.btn:hover { color: var(--oscuro); }
+    .btn-2 { background: transparent; color: var(--parchemin); border: 1px solid var(--rule-strong); }
+    a.btn-2, a.btn-2:hover { color: var(--parchemin); }
+    .btn-full { width: 100%; }
+    .tapbar { min-height: 48px; display: flex; align-items: center; }
+
+    .health { border-bottom: 1px solid var(--rule); background: var(--maduro); color: var(--fumee);
+              padding: 9px 20px; text-align: center; font-size: 11.5px; line-height: 1.5; }
+    .site { border-bottom: 1px solid var(--rule); }
+    .site-in { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .wordmark { font-size: 23px; line-height: 1; }
+    .burger { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+              margin-right: -12px; }
+    .ico { width: 20px; height: 20px; stroke: var(--claro); fill: none;
+           stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .h1 { font-size: 38px; line-height: 1.08; margin-top: 16px; }
+    .h2 { font-size: 28px; line-height: 1.14; }
+    .lede { margin-top: 18px; font-size: 16px; line-height: 1.62; color: var(--fumee); }
+    .lede em { color: var(--parchemin); font-style: normal; }
+    .body { font-size: 15.5px; line-height: 1.62; color: var(--fumee); }
+    .body strong { color: var(--parchemin); font-weight: 400; }
+    .hint { font-size: 12px; color: var(--fumee); }
+
+    /* la planche, recadrée : 1440 → 390 (facteur 0,42), calée sur la braise */
+    .plate-crop { position: relative; height: 172px; margin-top: 34px; overflow: hidden; }
+    .plate {
+      position: absolute; left: 0; top: 0; width: 1440px; height: 420px;
+      transform: scale(0.40) translateX(-190px);
+      transform-origin: 0 0;
+    }
+    .note { display: none; }
+
+    /* sommaire = liste des modules */
+    .mods li { border-top: 1px solid var(--rule); }
+    .mods a { display: grid; grid-template-columns: 30px 1fr 18px; gap: 12px; align-items: center;
+              padding: 15px 0; color: var(--parchemin); min-height: 52px; }
+    .mods .n { font-size: 11px; color: var(--cedre-readable); }
+    .mods .t { display: flex; flex-direction: column; gap: 3px; }
+    .mods .t b { font-weight: 400; font-size: 16px; }
+    .mods .t span { font-size: 13px; color: var(--fumee); line-height: 1.45; }
+
+    .panel { border: 1px solid var(--rule); background: var(--maduro); border-radius: var(--r); }
+    .panel-h { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+               padding: 13px 16px; border-bottom: 1px solid var(--rule); }
+    .rowline { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+               padding: 13px 16px; border-top: 1px solid var(--rule); font-size: 14px; }
+    .rowline:first-child { border-top: 0; }
+    .rowline .mono { white-space: nowrap; }
+    .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 2px;
+            font-size: 11px; background: var(--maduro-raised); color: var(--fumee); }
+    .shades { display: flex; align-items: center; gap: 4px; }
+    .shades i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--rule-strong); }
+    .notches { display: flex; align-items: flex-end; gap: 2px; }
+    .notches i { width: 6px; border-radius: 1px; background: var(--rule-strong); }
+    .notches i.on { background: var(--claro); }
+
+    .finder { position: relative; border-radius: var(--r); overflow: hidden;
+              background: linear-gradient(160deg, #241a14 0%, #150f0c 60%, #100b09 100%); }
+    .finder-in { position: relative; height: 196px; }
+    .finder-frame { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 236px; }
+    .finder-lock { display: flex; align-items: center; justify-content: center; padding: 9px 14px; }
+    .finder-corner { position: absolute; width: 16px; height: 16px; border: 1px solid var(--claro); opacity: 0.55; }
+    .scanline { position: absolute; left: 0; right: 0; height: 1px;
+                background: linear-gradient(90deg, transparent, var(--claro), transparent);
+                animation: scanY 3.4s ease-in-out infinite; }
+    @keyframes scanY { 0%, 100% { top: 14%; opacity: 0.25; } 50% { top: 86%; opacity: 0.9; } }
+    .conf-bar { width: 64px; height: 3px; background: var(--rule-strong); border-radius: 2px; overflow: hidden; }
+    .conf-bar i { display: block; height: 100%; background: var(--claro); }
+
+    .yes li, .no li { display: grid; grid-template-columns: 18px 1fr; gap: 11px; align-items: start;
+                      padding: 12px 0; border-top: 1px solid var(--rule);
+                      font-size: 14px; line-height: 1.5; color: var(--fumee); }
+    .yes li b, .no li b { color: var(--parchemin); font-weight: 500; }
+
+    .foot { border-top: 1px solid var(--rule); padding: 30px 0 40px; }
+    .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; }
+    .foot-nav a { color: var(--fumee); }
+
+    .motion-off *, .motion-off *::before, .motion-off *::after { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .page *, .page *::before, .page *::after {
+        animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+      }
+    }
+
+    .glow {
+      position: absolute; left: -255px; top: -200px; width: 1000px; height: 820px;
+      background: radial-gradient(circle at 50% 50%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 26%, transparent) 0%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 10%, transparent) 20%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 3%, transparent) 42%,
+        transparent 66%);
+      mix-blend-mode: screen; pointer-events: none;
+    }
+    .scene { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 46% 46%; }
+    .cigar {
+      position: absolute; left: -30px; top: 152px; width: 1330px; height: 116px;
+      transform-style: preserve-3d;
+      transform: rotateZ(-1.6deg) rotateX(6deg);
+      animation: drift 14s ease-in-out infinite;
+    }
+    .cigar {
+      position: absolute; left: -30px; top: 152px; width: 1330px; height: 116px;
+      transform-style: preserve-3d;
+      transform: rotateZ(-1.6deg) rotateX(6deg);
+      animation: drift 14s ease-in-out infinite;
+    }
+    .stick {
+      position: absolute; left: 150px; top: 0; width: 1180px; height: 116px;
+      border-radius: 2px 44px 44px 2px / 2px 58px 58px 2px;
+      background:
+        /* the light falls off away from the ember: one source (§4.5) */
+        linear-gradient(90deg,
+          rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0.14) 26%,
+          rgb(0 0 0 / 0.32) 58%, rgb(0 0 0 / 0.46) 100%),
+        /* cylindrical falloff — narrow highlight, deep shoulders */
+        linear-gradient(180deg,
+          rgb(0 0 0 / 0.92) 0%, rgb(0 0 0 / 0.64) 5%, rgb(0 0 0 / 0.30) 14%,
+          rgb(0 0 0 / 0.06) 26%,
+          rgb(255 233 194 / 0.07) 33%, rgb(255 233 194 / 0.12) 37.5%,
+          rgb(255 233 194 / 0.02) 45%,
+          rgb(0 0 0 / 0.16) 56%, rgb(0 0 0 / 0.46) 72%,
+          rgb(0 0 0 / 0.72) 87%, rgb(0 0 0 / 0.94) 100%),
+        /* the rolled seam, spiralling along the axis */
+        repeating-linear-gradient(72deg,
+          transparent 0 33px, rgb(0 0 0 / 0.15) 33px 34.4px,
+          rgb(255 226 180 / 0.04) 34.4px 35.6px, transparent 35.6px 68px),
+        /* leaf grain */
+        repeating-linear-gradient(88deg, transparent 0 4px, rgb(0 0 0 / 0.05) 4px 5px),
+        /* the leaf: colorado maduro, warmer where the ember lights it */
+        linear-gradient(90deg,
+          #77401f 0%, #6a381b 12%, #5a2f17 30%, #603419 48%,
+          #5c3117 66%, #4d2913 84%, #3d2010 100%);
+      box-shadow: 0 26px 64px -24px rgb(0 0 0 / 0.95);
+    }
+    .head {
+      position: absolute; right: -6px; top: 10px; width: 30px; height: 96px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at 42% 46%,
+        #432715 0%, #2c1910 44%, #190e08 76%, #0d0604 100%);
+      box-shadow: inset -3px 0 7px rgb(0 0 0 / 0.7), inset 4px 0 9px rgb(0 0 0 / 0.55),
+                  inset 0 0 0 1px rgb(203 166 120 / 0.10);
+    }
+    .head-rim {
+      position: absolute; right: -8px; top: 8px; width: 11px; height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, transparent, rgb(233 200 150 / 0.16) 36%, transparent 68%);
+    }
+    .ash {
+      position: absolute; left: 6px; top: 6px; width: 150px; height: 104px;
+      border-radius: 44% 6px 6px 44% / 50% 52px 52px 50%;
+      background:
+        linear-gradient(180deg,
+          rgb(0 0 0 / 0.86) 0%, rgb(0 0 0 / 0.52) 7%, rgb(0 0 0 / 0.16) 20%,
+          rgb(255 252 246 / 0.10) 33%, rgb(255 252 246 / 0.02) 44%,
+          rgb(0 0 0 / 0.20) 58%, rgb(0 0 0 / 0.58) 78%, rgb(0 0 0 / 0.88) 100%),
+        /* the flake rings, perpendicular to the axis, irregular */
+        repeating-linear-gradient(95deg,
+          transparent 0 6px, rgb(0 0 0 / 0.40) 6px 7.6px,
+          rgb(255 250 240 / 0.045) 7.6px 8.4px, transparent 8.4px 19px),
+        repeating-linear-gradient(93deg,
+          transparent 0 23px, rgb(0 0 0 / 0.26) 23px 25px),
+        /* dark at the tip, lit at the burn line */
+        linear-gradient(90deg,
+          #2a241d 0%, #363028 18%, #474038 42%, #5c554b 66%,
+          #746c61 86%, #8a8175 100%);
+    }
+    .ash-heat {
+      position: absolute; left: 84px; top: 8px; width: 86px; height: 100px;
+      border-radius: 44px;
+      background: radial-gradient(ellipse at 88% 50%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 88%, transparent) 0%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 34%, transparent) 36%,
+        transparent 72%);
+      mix-blend-mode: screen; filter: blur(8px);
+    }
+    .ember {
+      position: absolute; left: 143px; top: 9px; width: 13px; height: 98px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at 50% 50%,
+        #fff3ce 0%, var(--ember-hot) 24%, var(--ember, #ff5a2b) 54%,
+        var(--ember-deep) 86%, rgb(35 7 3 / 0) 100%);
+      filter: blur(1.2px);
+      animation: breathe 3.6s ease-in-out infinite;
+    }
+    .ember-glow {
+      position: absolute; left: 40px; top: -82px; width: 220px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 50%, transparent) 0%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 16%, transparent) 32%,
+        transparent 66%);
+      filter: blur(16px); mix-blend-mode: screen;
+      animation: breathe 3.6s ease-in-out infinite;
+    }
+    .rim {
+      position: absolute; left: 152px; top: 6px; width: 150px; height: 104px;
+      border-radius: 0 52px 52px 0 / 0 52px 52px 0;
+      background: linear-gradient(90deg,
+        color-mix(in oklab, var(--ember, #ff5a2b) 42%, transparent) 0%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 14%, transparent) 34%,
+        transparent 78%);
+      mix-blend-mode: screen; filter: blur(9px);
+    }
+    .char {
+      position: absolute; left: 150px; top: 0; width: 116px; height: 116px;
+      border-radius: 2px 58px 58px 2px / 2px 58px 58px 2px;
+      background: linear-gradient(90deg,
+        #170b05 0%, rgb(30 15 7 / 0.9) 16%, rgb(52 27 13 / 0.62) 44%,
+        rgb(70 38 18 / 0.22) 74%, transparent 100%);
+    }
+    .ring {
+      position: absolute; left: 796px; top: 0; width: 240px; height: 116px;
+      transform-style: preserve-3d;
+      animation: sway 11s ease-in-out infinite;
+    }
+    .slat {
+      position: absolute; left: 0; top: 50%; width: 240px; height: 26px; margin-top: -13px;
+      backface-visibility: hidden;
+      transform: rotateX(calc(var(--i) * 22.5deg)) translateZ(58px);
+      background:
+        /* the two rules that run around the circumference */
+        linear-gradient(90deg,
+          rgb(84 60 30 / 0.85) 0px, #8a6a35 2px, var(--claro-bright) 4px, var(--claro) 7px,
+          rgb(122 92 67 / 0.5) 10px, rgb(122 92 67 / 0.22) 15px,
+          transparent 24px, transparent 216px,
+          rgb(122 92 67 / 0.22) 225px, rgb(122 92 67 / 0.5) 230px,
+          var(--claro) 233px, var(--claro-bright) 236px, #8a6a35 238px, rgb(84 60 30 / 0.85) 240px),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 5px),
+        linear-gradient(180deg,
+          color-mix(in oklab, var(--claro) 90%, #fff 10%) 0%,
+          var(--claro) 55%,
+          color-mix(in oklab, var(--claro) 94%, #000 6%) 100%);
+    }
+    .slat-face {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      color: #33220a;
+    }
+    .lk-mark {
+      font-family: 'Marcellus', 'Optima', 'Palatino', serif;
+      font-size: 14px; letter-spacing: 0.22em; text-transform: uppercase;
+      text-shadow: 0 1px 0 rgb(255 245 210 / 0.55), 0 -1px 0 rgb(60 40 8 / 0.4);
+    }
+    .lk-fil { width: 34px; height: 1px; background: rgb(51 34 10 / 0.55); }
+    .lk-dot { width: 3px; height: 3px; border-radius: 50%; background: rgb(51 34 10 / 0.6); }
+    .slat-sub {
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Marcellus', 'Optima', serif; font-size: 8px;
+      letter-spacing: 0.26em; text-transform: uppercase; color: rgb(44 28 7 / 0.86);
+    }
+    .lk-dot { width: 3px; height: 3px; border-radius: 50%; background: rgb(51 34 10 / 0.6); }
+    .slat-sub {
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Marcellus', 'Optima', serif; font-size: 8px;
+      letter-spacing: 0.26em; text-transform: uppercase; color: rgb(44 28 7 / 0.86);
+    }
+    .slat-sub {
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Marcellus', 'Optima', serif; font-size: 8px;
+      letter-spacing: 0.26em; text-transform: uppercase; color: rgb(44 28 7 / 0.86);
+    }
+    .ring-light {
+      position: absolute; left: 796px; top: 0; width: 240px; height: 116px;
+      transform: translateZ(58.6px); pointer-events: none;
+      background: linear-gradient(180deg,
+        rgb(0 0 0 / 0.58) 0%, rgb(0 0 0 / 0.44) 9%, rgb(0 0 0 / 0.08) 23%,
+        rgb(255 250 226 / 0.26) 34%, rgb(255 250 226 / 0.05) 47%,
+        rgb(0 0 0 / 0.07) 58%, rgb(0 0 0 / 0.38) 80%, rgb(0 0 0 / 0.60) 100%);
+    }
+    .ring-spec {
+      position: absolute; left: 796px; top: 0; width: 240px; height: 116px;
+      transform: translateZ(58.9px); pointer-events: none; overflow: hidden;
+      mix-blend-mode: screen;
+      background: linear-gradient(104deg,
+        transparent 36%, rgb(255 252 236 / 0.30) 48%, rgb(255 252 236 / 0.09) 54%, transparent 64%);
+      background-size: 260% 100%;
+      animation: spec 7s ease-in-out infinite;
+    }
+    .ring-cast {
+      position: absolute; left: 782px; top: 2px; width: 268px; height: 112px;
+      background: linear-gradient(90deg,
+        transparent 0%, rgb(0 0 0 / 0.42) 5.5%, transparent 14%,
+        transparent 86%, rgb(0 0 0 / 0.42) 94.5%, transparent 100%);
+      border-radius: 46px;
+    }
+    .smoke {
+      position: absolute; left: 156px; top: 44px; width: 430px; height: 800px;
+      z-index: 4; pointer-events: none;
+      -webkit-mask-image: linear-gradient(to top, #000 0%, #000 24%, rgb(0 0 0 / 0.38) 56%, transparent 88%);
+      mask-image: linear-gradient(to top, #000 0%, #000 24%, rgb(0 0 0 / 0.38) 56%, transparent 88%);
+    }
+    .wisp {
+      position: absolute; bottom: 0; border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%,
+        rgb(237 230 216 / 0.60) 0%, rgb(237 230 216 / 0.24) 42%, transparent 72%);
+      filter: blur(12px); opacity: 0;
+      animation: rise 11s linear infinite;
+    }
+    .thread {
+      position: absolute; bottom: -6px; left: 84px; width: 13px; height: 215px;
+      background: linear-gradient(to top,
+        rgb(237 230 216 / 0.62), rgb(237 230 216 / 0.22) 55%, transparent 100%);
+      filter: blur(5px); border-radius: 40%;
+      animation: waver 6.5s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%, 100% { transform: rotateZ(-1.6deg) rotateX(6deg) rotateY(0deg) translateY(0); }
+      50%      { transform: rotateZ(-1.2deg) rotateX(9deg) rotateY(-3deg) translateY(-7px); }
+    }
+    @keyframes breathe { 0%, 100% { opacity: 0.86; } 45% { opacity: 1; } }
+    /* the char band just behind the burn line */
+    .rim {
+      position: absolute; left: 152px; top: 6px; width: 150px; height: 104px;
+      border-radius: 0 52px 52px 0 / 0 52px 52px 0;
+      background: linear-gradient(90deg,
+        color-mix(in oklab, var(--ember, #ff5a2b) 42%, transparent) 0%,
+        color-mix(in oklab, var(--ember, #ff5a2b) 14%, transparent) 34%,
+        transparent 78%);
+      mix-blend-mode: screen; filter: blur(9px);
+    }
+    @keyframes sway {
+      0%, 100% { transform: rotateX(-8deg); }
+      50%      { transform: rotateX(8deg); }
+    }
+    @keyframes spec {
+      0%, 100% { background-position: 128% 0; }
+      50%      { background-position: -32% 0; }
+    }
+    @keyframes rise {
+      0%   { opacity: 0; transform: translate3d(0, 0, 0) scale(0.42) rotate(0deg); }
+      9%   { opacity: 0.85; }
+      55%  { opacity: 0.5; }
+      100% { opacity: 0; transform: translate3d(var(--dx, 60px), -740px, 0) scale(2.6) rotate(24deg); }
+    }
+    @keyframes waver {
+      0%, 100% { transform: translateX(0) scaleX(1); }
+      50%      { transform: translateX(16px) scaleX(1.5); }
+    }
+
+    /* la fumée vit ici dans la planche (et non dans le héros) : elle suit
+       donc la mise à l'échelle du recadrage. */
+    .plate .smoke { left: 152px; top: -400px; width: 430px; height: 640px; }
+  </style>
+</helmet>
+
+<div class="page {{motionClass}}" style="--ember: {{ember}}; --brass: {{brass}}">
+
+  <aside class="health">Fumer nuit gravement à votre santé et à celle de votre entourage.</aside>
+
+  <header class="site">
+    <div class="site-in">
+      <span class="dsp wordmark">Vitola</span>
+      <span style="display:flex; align-items:center; gap:6px">
+        <a class="btn" href="#entrer" style="height:44px; padding:0 18px; font-size:15px">Entrer</a>
+        <span class="burger">
+          <svg class="ico" viewBox="0 0 24 24" style="stroke:var(--parchemin)"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </span>
+      </span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="sec" style="padding-top:44px">
+      <p class="eb">Comprendre ce que l'on fume</p>
+      <h1 class="dsp h1">Le référentiel du cigare, écrit par ceux qui le fument.</h1>
+      <p class="lede">Un référentiel encyclopédique, un carnet de dégustation structuré et une cave
+        numérique. Le réseau des amateurs francophones, les lieux où l'on fume, une boutique
+        d'accessoires. <em>Rien à vendre, rien à promouvoir.</em></p>
+      <div class="stack" style="gap:10px; margin-top:28px">
+        <a class="btn btn-full" href="#entrer">Entrer</a>
+        <span class="hint" style="text-align:center">L'accès est réservé aux personnes majeures.</span>
+      </div>
+    </div>
+
+    <div class="plate-crop">
+      <div class="plate">
+        <div class="glow"></div>
+      <div class="scene">
+        <div class="cigar" style="left:96px">
+
+          <!-- la cape -->
+          <div class="stick"></div>
+          <div class="head"></div>
+          <div class="head-rim"></div>
+          <div class="ring-cast"></div>
+
+          <!-- la cendre et la braise -->
+          <div class="ash"></div>
+          <div class="ash-heat"></div>
+          <div class="char"></div>
+          <div class="rim"></div>
+          <div class="ember"></div>
+          <div class="ember-glow"></div>
+
+          <!-- LA BAGUE — anneau 3D de 16 lattes sur un cylindre de rayon 58 -->
+          <div class="ring">
+            <div class="slat" style="--i:-8"></div>
+            <div class="slat" style="--i:-7"></div>
+            <div class="slat" style="--i:-6"></div>
+            <div class="slat" style="--i:-5"></div>
+            <div class="slat" style="--i:-4"></div>
+            <div class="slat" style="--i:-3"></div>
+            <div class="slat" style="--i:-2"></div>
+            <div class="slat slat-sub" style="--i:-1">Le référentiel du cigare</div>
+            <div class="slat slat-face" style="--i:0">
+              <span class="lk-fil"></span>
+              <span class="lk-mark">Vitola</span>
+              <span class="lk-fil"></span>
+            </div>
+            <div class="slat slat-sub" style="--i:1">Corona gorda · 52 × 164</div>
+            <div class="slat" style="--i:2"></div>
+            <div class="slat" style="--i:3"></div>
+            <div class="slat" style="--i:4"></div>
+            <div class="slat" style="--i:5"></div>
+            <div class="slat" style="--i:6"></div>
+            <div class="slat" style="--i:7"></div>
+          </div>
+          <div class="ring-light"></div>
+          <div class="ring-spec"></div>
+
+        </div>
+      </div>
+    <!-- la fumée : monte de la braise, se dissout avant le titre -->
+    <div class="smoke">
+      <div class="thread"></div>
+      <div class="thread" style="left:112px; height:168px; animation-duration:8.5s; animation-delay:-2.5s; opacity:.7"></div>
+      <div class="wisp" style="left:52px;  width:96px;  height:96px;  --dx:74px;  animation-duration:10s;   animation-delay:0s"></div>
+      <div class="wisp" style="left:96px;  width:130px; height:130px; --dx:-42px; animation-duration:13s;   animation-delay:-3.4s"></div>
+      <div class="wisp" style="left:18px;  width:76px;  height:76px;  --dx:112px; animation-duration:9s;    animation-delay:-6.1s"></div>
+      <div class="wisp" style="left:126px; width:108px; height:108px; --dx:36px;  animation-duration:14.5s; animation-delay:-8.8s"></div>
+      <div class="wisp" style="left:70px;  width:150px; height:150px; --dx:-70px; animation-duration:16s;   animation-delay:-11.5s"></div>
+      <div class="wisp" style="left:150px; width:88px;  height:88px;  --dx:96px;  animation-duration:11.5s; animation-delay:-2s"></div>
+      <div class="wisp" style="left:34px;  width:120px; height:120px; --dx:58px;  animation-duration:12.5s; animation-delay:-5s"></div>
+      <div class="wisp" style="left:110px; width:64px;  height:64px;  --dx:-26px; animation-duration:8.2s;  animation-delay:-7.4s"></div>
+    </div>
+      </div>
+    </div>
+
+    <div class="sec" style="margin-top:16px; display:flex; justify-content:space-between; gap:12px">
+      <span class="eb">La braise · la bague</span>
+      <span class="mono faint" style="font-size:11px">52 × 164 mm</span>
+    </div>
+  </section>
+
+  <!-- ce que contient le site -->
+  <section class="block">
+    <div class="sec">
+      <p class="eb">Ce que contient le site</p>
+      <ol class="mods" style="margin-top:18px">
+        <li><a href="#"><span class="n mono">01</span><span class="t"><b>Le référentiel</b><span>Marques, vitoles, cigares. Chaque fiche sourcée, versionnée, relue.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li><a href="#scan"><span class="n mono">02</span><span class="t"><b>La reconnaissance de bague</b><span>Une photo, trois candidats classés et leur indice de confiance.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li><a href="#"><span class="n mono">03</span><span class="t"><b>La dégustation</b><span>Six critères, trois tiers, onze familles d'arômes. Note sur 100.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li><a href="#"><span class="n mono">04</span><span class="t"><b>La cave</b><span>Inventaire, vieillissement, hygrométrie, rotations à prévoir.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li><a href="#"><span class="n mono">05</span><span class="t"><b>Le réseau et la communauté</b><span>Fil, clubs, événements, messagerie. La réaction est une braise.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li><a href="#"><span class="n mono">06</span><span class="t"><b>Les lieux</b><span>Civettes, caves, lounges. Annuaire informatif, avis sur l'accueil.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li><a href="#boutique"><span class="n mono">07</span><span class="t"><b>La boutique</b><span>Accessoires uniquement : coupes, briquets, caves, hygromètres.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li style="border-bottom:1px solid var(--rule)"><a href="#partenaires"><span class="n mono">08</span><span class="t"><b>Les partenaires</b><span>Qui peut l'être, qui ne peut pas. La charte est publique.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- la reconnaissance -->
+  <section class="block" id="scan">
+    <div class="sec">
+      <p class="eb"><span class="mono">02</span> &nbsp;· &nbsp;La reconnaissance</p>
+      <h2 class="dsp h2" style="margin-top:14px">Photographiez la bague. Sachez ce que vous fumez.</h2>
+      <p class="body" style="margin-top:16px">Le cadre de visée <strong>est</strong> une bague. Vous
+        confirmez le bon candidat, et la base apprend : trois confirmations indépendantes promeuvent une
+        image au rang de référence.</p>
+
+      <div class="finder" style="margin-top:26px">
+        <div class="finder-in">
+          <div class="finder-corner" style="left:14px;  top:14px;    border-right:0; border-bottom:0"></div>
+          <div class="finder-corner" style="right:14px; top:14px;    border-left:0;  border-bottom:0"></div>
+          <div class="finder-corner" style="left:14px;  bottom:14px; border-right:0; border-top:0"></div>
+          <div class="finder-corner" style="right:14px; bottom:14px; border-left:0;  border-top:0"></div>
+          <div class="scanline"></div>
+          <div class="finder-frame">
+            <div class="brass"></div>
+            <div class="finder-lock"><span class="eb" style="color:var(--parchemin)">Alignez la bague</span></div>
+            <div class="brass"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-h"><span class="eb">Trois candidats</span><span class="pill">RRF · k=60</span></div>
+        <div class="rowline">
+          <span class="stack" style="gap:2px"><span style="font-size:14px">[Marque] — [Nom]</span>
+            <span class="faint" style="font-size:12px">Corona gorda · Cuba</span></span>
+          <span style="display:flex; align-items:center; gap:8px">
+            <span class="mono" style="font-size:13px; color:var(--claro-bright)">0,94</span>
+            <span class="conf-bar"><i style="width:94%"></i></span></span>
+        </div>
+        <div class="rowline">
+          <span class="stack" style="gap:2px"><span style="font-size:14px; color:var(--fumee)">[Marque] — [Nom]</span>
+            <span class="faint" style="font-size:12px">Robusto · Cuba</span></span>
+          <span style="display:flex; align-items:center; gap:8px">
+            <span class="mono" style="font-size:13px; color:var(--fumee)">0,41</span>
+            <span class="conf-bar"><i style="width:41%; background:var(--cedre)"></i></span></span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:14px">
+        <span class="btn" style="flex:1 1 auto">C'est celui-ci</span>
+        <span class="btn btn-2" style="flex:0 0 auto">Autre</span>
+      </div>
+      <p class="hint" style="margin-top:12px">Objectif de la v1, publié et mesuré : top-3 ≥ 85 % sur les
+        200 références les plus courantes.</p>
+    </div>
+  </section>
+
+  <!-- le référentiel -->
+  <section class="block">
+    <div class="sec">
+      <p class="eb"><span class="mono">01</span> &nbsp;· &nbsp;Le référentiel</p>
+      <h2 class="dsp h2" style="margin-top:14px">Toutes les vitoles, sourcées et versionnées.</h2>
+      <p class="body" style="margin-top:16px">Chaque fiche porte ses sources, son historique de révisions
+        et le nom du relecteur qui l'a publiée. <strong>Une fiche n'est visible qu'une fois vérifiée.</strong></p>
+
+      <div class="panel" style="margin-top:26px; overflow:hidden">
+        <div class="brass"></div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding:11px 14px">
+          <span class="eb" style="color:var(--parchemin)">Vitola</span>
+          <span style="color:var(--claro); font-size:12px">·</span>
+          <span class="eb">Fiche vérifiée</span>
+        </div>
+        <div class="brass"></div>
+        <div class="stack" style="gap:14px; padding:18px">
+          <div class="stack" style="gap:4px">
+            <p class="eb">[Marque]</p>
+            <h3 class="dsp" style="font-size:20px; line-height:1.2">[Nom commercial]</h3>
+            <p style="font-size:14px; color:var(--fumee)">Corona gorda</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+            <span class="mono" style="font-size:14px">52 × 164 mm</span>
+            <span class="notches"><i class="on" style="height:6px"></i><i class="on" style="height:8px"></i><i class="on" style="height:10px"></i><i class="on" style="height:12px"></i><i style="height:14px"></i></span>
+            <span style="font-size:13px; color:var(--fumee)">Moyen-corsé</span>
+          </div>
+          <div class="shades">
+            <i style="background:var(--sh1)"></i><i style="background:var(--sh2)"></i>
+            <i style="background:var(--sh3)"></i><i style="background:var(--sh4)"></i><i></i><i></i>
+            <span style="margin-left:8px; font-size:13px; color:var(--fumee)">Colorado maduro</span>
+          </div>
+          <div style="display:flex; gap:14px; font-size:12px; color:var(--fumee)">
+            <span>Cuba</span><span>1969</span><span class="mono">Relue le 14/03 · <span class="faint">v7</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- la boutique -->
+  <section class="block" id="boutique">
+    <div class="sec">
+      <p class="eb"><span class="mono">07</span> &nbsp;· &nbsp;La boutique</p>
+      <h2 class="dsp h2" style="margin-top:14px">Des accessoires, et rien d'autre.</h2>
+      <p class="body" style="margin-top:16px">La vente à distance de tabac est interdite en France : le
+        catalogue est <strong>fermé sur neuf catégories</strong>, et la compilation échoue si un produit
+        du tabac y entre.</p>
+      <div class="panel" style="margin-top:22px">
+        <div class="rowline"><span>Coupes, perce-cigares</span><span class="mono faint">01–02</span></div>
+        <div class="rowline"><span>Briquets, cendriers</span><span class="mono faint">03–04</span></div>
+        <div class="rowline"><span>Caves, hygromètres, humidification</span><span class="mono faint">05–07</span></div>
+        <div class="rowline"><span>Étuis, ouvrages, entretien</span><span class="mono faint">08–09</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- les partenaires -->
+  <section class="block" id="partenaires">
+    <div class="sec">
+      <p class="eb"><span class="mono">08</span> &nbsp;· &nbsp;Les partenaires</p>
+      <h2 class="dsp h2" style="margin-top:14px">Qui peut être partenaire, et qui ne peut pas.</h2>
+
+      <div class="panel" style="margin-top:24px; padding:20px">
+        <p class="eb" style="color:var(--succes)">Ce que nous accueillons</p>
+        <ul class="yes" style="margin-top:8px">
+          <li><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--succes)"><path d="m4 12 5 5L20 6"/></svg>
+            <span><b>Les professionnels des lieux.</b> Revendication de fiche, gratuite, sans mise en avant payante.</span></li>
+          <li><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--succes)"><path d="m4 12 5 5L20 6"/></svg>
+            <span><b>Les fabricants d'accessoires.</b> Eux seuls alimentent le catalogue.</span></li>
+          <li><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--succes)"><path d="m4 12 5 5L20 6"/></svg>
+            <span><b>Les auteurs, les clubs, la prévention.</b> Signés, datés, rémunérés.</span></li>
+        </ul>
+      </div>
+
+      <div class="panel" style="margin-top:14px; padding:20px">
+        <p class="eb" style="color:var(--erreur)">Ce que nous refusons</p>
+        <ul class="no" style="margin-top:8px">
+          <li><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--erreur)"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            <span><b>Tout partenariat rémunéré</b> avec un fabricant, un importateur ou un distributeur de tabac.</span></li>
+          <li><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--erreur)"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            <span><b>L'article sponsorisé</b>, le contenu offert, le voyage de presse.</span></li>
+          <li><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--erreur)"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            <span><b>La mise en avant payante.</b> Le classement ne s'achète pas.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="entrer" style="padding:60px 0 64px">
+    <div class="sec" style="text-align:center; display:flex; flex-direction:column; align-items:center; gap:20px">
+      <div class="brass" style="max-width:200px"></div>
+      <p class="eb">Accès réservé aux majeurs</p>
+      <h2 class="dsp h2">Ce site traite de produits du tabac.</h2>
+      <p class="body">Une date de naissance est demandée une fois. Elle n'est pas conservée tant que vous
+        n'avez pas de compte.</p>
+      <a class="btn btn-full" href="#entrer">Entrer</a>
+      <div class="brass" style="max-width:200px"></div>
+      <p style="font-size:12.5px; line-height:1.6; color:var(--fumee)">Fumer nuit gravement à votre santé et
+        à celle de votre entourage. Se faire aider : <span class="mono">Tabac info service — 39 89</span>.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="sec stack" style="gap:14px">
+      <span class="dsp" style="font-size:20px">Vitola</span>
+      <div class="foot-nav">
+        <a href="#">Mentions légales</a><a href="#">Confidentialité</a><a href="#">Conditions</a>
+        <a href="#">Cookies</a><a href="#">Santé</a><a href="#">Charte éditoriale</a>
+      </div>
+      <p style="font-size:12px; color:var(--fumee)">Vitola est un site d'information. Aucun produit du
+        tabac n'y est vendu.</p>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":5320},"ember":{"editor":"color","default":"#ff5a2b","options":["#ff5a2b","#e2452a","#ff7a3d","#c9421f"],"section":"Braise"},"brass":{"editor":"color","default":"#c9a227","options":["#c9a227","#d9bc72","#b8863b","#a47c5a"],"section":"Bague"},"animate":{"editor":"boolean","default":true,"section":"Mouvement"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      ember: this.props.ember ?? '#ff5a2b',
+      brass: this.props.brass ?? '#c9a227',
+      motionClass: (this.props.animate ?? true) ? 'motion-on' : 'motion-off',
+    }
+  }
+}
+</script>
+</body>
+</html>
