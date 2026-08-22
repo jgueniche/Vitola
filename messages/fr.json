@@ -112,5 +112,23 @@
       "petit_corona": "Petit corona",
       "figurado_autre": "Figurado"
     }
+  },
+  "auth": {
+    "eyebrow": "Compte",
+    "title": "Se connecter",
+    "lede": "Un lien de connexion vous est envoyé par courriel. Pas de mot de passe à retenir, pas de mot de passe à se faire voler.",
+    "emailLabel": "Adresse électronique",
+    "submit": "Recevoir le lien",
+    "sent": "Lien envoyé",
+    "sentBody": "Ouvrez le courriel envoyé à {email} et suivez le lien. Il n'est valable qu'une fois, et pour une heure.",
+    "privacy": "Votre adresse sert à vous identifier et à rien d'autre. Aucune prospection, jamais.",
+    "signOut": "Se déconnecter",
+    "signedInAs": "Connecté",
+    "errors": {
+      "email": "Cette adresse ne semble pas valide.",
+      "link": "Ce lien n'est plus valable. Demandez-en un nouveau.",
+      "rate": "Trop de demandes. Patientez quelques minutes avant de réessayer.",
+      "unknown": "L'envoi a échoué. Réessayez dans un instant."
+    }
   }
 }

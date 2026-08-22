@@ -58,7 +58,8 @@ export async function searchCigars(facets: Facets): Promise<SearchResult> {
     ${brandJoin}(name, slug, is_cuban),
     ${vitolaJoin}(name_salida, name_galera, length_mm, ring_gauge, shape, slug)`
 
-  let query = referential()
+  const db = await referential()
+  let query = db
     .from('cigars')
     .select(select, { count: 'exact' })
     .eq('status', 'published')

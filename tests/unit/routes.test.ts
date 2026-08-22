@@ -26,6 +26,17 @@ describe('routes', () => {
         '/',
         '/majorite',
         '/connexion',
+        /*
+         * Where the magic link lands. Public by necessity: it has to exchange
+         * its one-time code for a session before anything else can happen, and
+         * a visitor who has not yet cleared the gate would otherwise be
+         * redirected away from it and never get a session at all.
+         *
+         * It renders nothing — it is a Route Handler that sets cookies and
+         * redirects — so it exposes no product content. The gate still stands
+         * between the session it creates and the referential.
+         */
+        '/auth/callback',
         '/mentions-legales',
         '/confidentialite',
         '/conditions',

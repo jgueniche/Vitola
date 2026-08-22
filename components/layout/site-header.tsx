@@ -1,7 +1,10 @@
 import Link from 'next/link'
 
+import { signOut } from '@/app/(public)/connexion/actions'
 import { BRAND } from '@/lib/brand'
+import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
+import { currentUser } from '@/lib/supabase/server'
 
 const NAV = [
   { label: 'Cigares', href: routes.cigars() },
@@ -12,7 +15,14 @@ const NAV = [
   { label: 'Boutique', href: routes.shop() },
 ] as const
 
-export function SiteHeader() {
+/**
+ * Rendered only inside app/(app)/, never on the public side — which is why
+ * reading the session here is free: those routes are already dynamic, and the
+ * landing page stays static and cacheable for the SEO target of Q13.
+ */
+export async function SiteHeader() {
+  const user = await currentUser()
+
   return (
     <header className="border-rule border-b">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4">
@@ -31,6 +41,27 @@ export function SiteHeader() {
                 </Link>
               </li>
             ))}
+            <li className="border-rule ml-1 border-l pl-5">
+              {user ? (
+                /* A POST, not a link: signing out changes state, and a GET that
+                   changes state gets fired by any link prefetcher that passes. */
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
+                  >
+                    {m.auth.signOut}
+                  </button>
+                </form>
+              ) : (
+                <Link
+                  href={routes.signIn()}
+                  className="text-accent hover:text-accent-bright transition-colors duration-(--duration-quick)"
+                >
+                  {m.auth.title}
+                </Link>
+              )}
+            </li>
           </ul>
         </nav>
       </div>
