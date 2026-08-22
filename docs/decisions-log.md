@@ -2,6 +2,40 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Phase 1 — identité
+
+**`@supabase/ssr`, la deuxième et dernière dépendance de P1.** Annoncée quand la consultation
+anonyme a été livrée : elle ne sert qu'à porter une session à travers les cookies, ce dont une
+lecture anonyme n'avait pas besoin. Elle est devenue nécessaire le jour où il a fallu un auteur.
+
+**Lien magique, pas de mot de passe.** Un mot de passe sur un site qui traite du tabac est un
+identifiant qui vaut d'être volé pour ce qu'il dit de son porteur, et en stocker un n'achète rien
+ici. Le lien est à usage unique et valable une heure. **Attention QA** : le SMTP intégré de Supabase
+est limité à quelques envois par heure — une connexion suffit, la session dure.
+
+**Le rafraîchissement de session vit dans le middleware, avec l'age gate.** Non par commodité :
+seul le middleware peut réécrire un cookie, un Server Component ne le peut pas. Sans cela un membre
+connecté est déconnecté en silence à l'expiration de son jeton — exactement la classe de bug du
+portail qui redemandait la date de naissance, évitée au même endroit.
+
+**`getUser()`, jamais `getSession()`.** `getSession()` fait confiance au cookie tel qu'il se
+présente, et un cookie se forge. `getUser()` interroge le serveur d'authentification. C'est toute la
+différence entre une session et une affirmation.
+
+**Le callback accepte `code` ET `token_hash`.** `code` vient d'un flux PKCE, ce que produit
+`signInWithOtp` côté serveur — le chemin normal. `token_hash` est ce qu'émettent les gabarits de
+courriel récents de Supabase et l'API d'administration. N'en gérer qu'un casse le flux le jour où
+quelqu'un modifie le gabarit, sans que rien dans le code ne suggère pourquoi.
+
+**`/auth/callback` est public, et c'est asserté.** `tests/unit/routes.test.ts` énumère
+exhaustivement `PUBLIC_PATHS` : ajouter une route publique est un acte délibéré, pas un oubli. Le
+callback doit être joignable avant le portail, sinon la session n'est jamais établie — il ne rend
+rien, il pose des cookies et redirige.
+
+**L'en-tête ne lit la session que derrière le portail.** `SiteHeader` n'est rendu que dans
+`app/(app)/`, dont les routes sont déjà dynamiques. La page d'accueil reste statique et cacheable,
+ce dont dépend le Lighthouse SEO ≥ 95 de Q13.
+
 ## Phase 1 — référentiel consultable
 
 **`@supabase/supabase-js`, et elle seule.** Le §3 demande une justification par dépendance.

@@ -3,8 +3,10 @@
 ## Server Components par défaut
 
 `'use client'` est l'exception et doit être justifié par un commentaire d'une ligne juste au-dessus.
-À ce jour, un seul composant client existe : `majorite/age-gate-form.tsx`, parce qu'il utilise
-`useActionState`.
+À ce jour, deux composants clients existent, tous deux pour `useActionState` — un formulaire qui doit
+réafficher l'erreur que son action a renvoyée : `majorite/age-gate-form.tsx` et
+`connexion/sign-in-form.tsx`. La recherche facettée, elle, n'en est pas un : ses facettes sont des
+liens et son champ un `<form method="get">`, donc zéro JavaScript.
 
 ## La frontière de l'age gate est une frontière de routage
 

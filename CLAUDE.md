@@ -16,9 +16,32 @@ Un `CLAUDE.md` par domaine complète celui-ci : `app/`, `lib/`, `supabase/`.
 ## Phases
 
 Une phase = une branche. Le brief prévoit `feat/pXX-nom` ; les sessions Claude Code distantes
-travaillent sur la branche qui leur est assignée. Jamais de commit direct sur `main`.
+travaillent sur la branche qui leur est assignée. Jamais de commit direct sur `master`.
+
+`master` est la branche de production, créée le 22 août 2026. Jusque-là la règle ci-dessus
+ne protégeait rien : le dépôt n'avait pas de `main`, et sa branche par défaut était une
+branche de session. Tout ce qui entre dans `master` y entre par une pull request, CI verte.
 
 Chaque phase se termine sur son critère de sortie (§9 du brief), mesuré et non supposé.
+
+## Idée retenue — le carnet du fumeur
+
+Demandée le 22 août 2026, à construire, pas encore tranchée dans le schéma.
+
+Un **carnet personnel** : ce qu'on a fumé, quand, la note, et un commentaire libre sur le cigare.
+Chaque entrée choisit sa portée — **privée**, **partagée à une personne**, **partagée à plusieurs**,
+ou **publique**.
+
+Ce que cela change par rapport au brief : le §5.4 donne à `reviews` une visibilité
+`enum(public|followers|private)`. Un enum ne sait pas dire « à Marc et à Julie ». Partager à des
+personnes nommées demande une table d'autorisations par entrée, et une policy RLS qui la lit — pas
+une colonne de plus. C'est une vraie décision d'architecture : elle mérite une ADR avant la première
+ligne de SQL, parce qu'elle décide aussi de ce que voit le fil social de P3 et de ce que comptent
+les statistiques de P11.
+
+À ne pas confondre avec la dégustation structurée du §5.4 (trois tiers, roue des arômes, moyenne
+bayésienne) : le carnet est le geste quotidien, la dégustation est l'exercice. Ils partagent
+probablement la même table, et c'est précisément ce qu'il faut vérifier avant de l'écrire.
 
 ## Commandes
 

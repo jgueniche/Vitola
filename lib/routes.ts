@@ -38,6 +38,9 @@ export const routes = {
   home: () => '/',
   ageGate: () => `/${SEGMENTS.ageGate}`,
   signIn: () => `/${SEGMENTS.signIn}`,
+  /* Not a French segment: nobody types it and no localisation rewrites it.
+     Supabase redirects here with the one-time code from the magic link. */
+  authCallback: () => '/auth/callback',
 
   cigars: () => `/${SEGMENTS.cigars}`,
   cigar: (slug: string) => `/${SEGMENTS.cigars}/${slug}`,
@@ -74,6 +77,7 @@ export const PUBLIC_PATHS: readonly string[] = [
   '/',
   routes.ageGate(),
   routes.signIn(),
+  routes.authCallback(),
   routes.legalNotice(),
   routes.privacy(),
   routes.terms(),
