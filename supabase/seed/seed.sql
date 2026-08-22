@@ -198,6 +198,76 @@ on conflict (kind, upper(code)) do update
        notes        = excluded.notes,
        updated_at   = now();
 
+-- --- 6. Roue des arômes ---------------------------------------------------------------
+-- La seule section qui écrit dans `public` et non dans `ref` : ce n'est pas le
+-- référentiel des cigares, c'est la nomenclature avec laquelle on les décrit
+-- (§5.4). Elle vit ici plutôt que dans une migration parce que c'est du contenu
+-- éditorial — il se relit, se corrige et se rejoue comme les CSV voisins, sans
+-- migration à chaque libellé. Provenance : PROVENANCE.md, source D.
+--
+-- L'arbre tient en deux passes parce que `id` est `generated always as
+-- identity` : on ne peut pas écrire de clé étrangère en dur dans un CSV, et on
+-- ne veut pas. Les racines d'abord, les feuilles ensuite, rapprochées par slug.
+--
+-- `coalesce(parent_slug, '')` et non `parent_slug = ''` : en mode CSV, un champ
+-- vide non quoté est lu comme NULL, pas comme une chaîne vide. Écrit à
+-- l'identique, le filtre ne remontait aucune ligne — et les deux passes
+-- inséraient zéro arôme sans rien signaler d'autre qu'un `INSERT 0 0`.
+create temporary table _aromas (
+  family text, slug text, label_fr text, label_en text, parent_slug text
+) on commit drop;
+
+\copy _aromas from '06_aroma_taxonomy.csv' with (format csv, header true)
+
+-- Passe 1 : les onze familles. `parent_slug` vide = racine.
+insert into public.aroma_taxonomy (family, slug, label_fr, label_en, parent_id)
+select a.family::public.aroma_family, a.slug, a.label_fr, nullif(a.label_en, ''), null
+  from _aromas a
+ where coalesce(a.parent_slug, '') = ''
+on conflict (slug) do update
+   set family   = excluded.family,
+       label_fr = excluded.label_fr,
+       label_en = excluded.label_en;
+
+-- Passe 2 : les descripteurs, rattachés à leur famille.
+insert into public.aroma_taxonomy (family, slug, label_fr, label_en, parent_id)
+select a.family::public.aroma_family, a.slug, a.label_fr, nullif(a.label_en, ''), p.id
+  from _aromas a
+  join public.aroma_taxonomy p on p.slug = a.parent_slug
+ where coalesce(a.parent_slug, '') <> ''
+on conflict (slug) do update
+   set family    = excluded.family,
+       label_fr  = excluded.label_fr,
+       label_en  = excluded.label_en,
+       parent_id = excluded.parent_id;
+
+-- Un descripteur orphelin est une faute de frappe dans le CSV, pas une donnée.
+-- Même garde-fou que pour une marque sans manufacture : on refuse plutôt que de
+-- charger une roue à laquelle il manque une branche, en silence.
+do $$
+declare orphans int;
+begin
+  select count(*) into orphans
+    from _aromas a
+    left join public.aroma_taxonomy p on p.slug = a.parent_slug
+   where coalesce(a.parent_slug, '') <> '' and p.id is null;
+  if orphans > 0 then
+    raise exception 'VITOLA_SEED: % arôme(s) référencent une famille inconnue', orphans;
+  end if;
+
+  -- Une feuille doit porter la famille de sa racine. Un descripteur rangé sous
+  -- « Boisé » mais marqué `epice` fausserait tout regroupement par famille, et
+  -- rien dans le schéma ne l'interdit : la contrainte est ici.
+  select count(*) into orphans
+    from public.aroma_taxonomy child
+    join public.aroma_taxonomy parent on parent.id = child.parent_id
+   where child.family <> parent.family;
+  if orphans > 0 then
+    raise exception 'VITOLA_SEED: % arôme(s) rangés sous une famille qui n''est pas la leur', orphans;
+  end if;
+end;
+$$;
+
 commit;
 
 -- --- Récapitulatif -------------------------------------------------------------------
@@ -212,4 +282,6 @@ union all select 'cigares',       count(*) from ref.cigars
 union all select '  en brouillon', count(*) from ref.cigars where status = 'draft'
 union all select '  sans vitole',  count(*) from ref.cigars where vitola_id is null
 union all select '  avec prix officiel', count(*) from ref.cigars where msrp_eur is not null
-union all select 'codes de boîte', count(*) from ref.box_codes;
+union all select 'codes de boîte', count(*) from ref.box_codes
+union all select 'arômes',         count(*) from public.aroma_taxonomy
+union all select '  dont familles', count(*) from public.aroma_taxonomy where parent_id is null;

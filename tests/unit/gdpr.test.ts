@@ -4,6 +4,9 @@ import {
   collectPersonalData,
   PERSONAL_DATA_SOURCES,
   READABLE_SOURCES,
+  RPC_SOURCES,
+  collectModerationRecords,
+  type ModerationReader,
   type PersonalDataReader,
 } from '@/lib/compliance/gdpr'
 
@@ -93,23 +96,75 @@ describe('collectPersonalData', () => {
   })
 
   /*
-   * The dangerous shape is a source that quietly stops being read. Dropping out
-   * of the export is allowed — the mod schema is not reachable through
-   * PostgREST — but only against a written reason, which the type demands and
-   * this asserts is not an empty string standing in for one.
+   * The dangerous shape is a source that quietly stops being read. A source may
+   * leave the table path — the mod schema is not reachable through PostgREST —
+   * but only towards a named function or against a written reason. Neither is
+   * allowed to be an empty string standing in for one.
    */
-  it('omits a source only when it carries a reason', () => {
+  it('leaves the table path only towards a function or a written reason', () => {
     const readable = new Set<string>(READABLE_SOURCES.map((s) => s.key))
     for (const source of PERSONAL_DATA_SOURCES) {
       if (readable.has(source.key)) continue
-      expect('unreachable' in source).toBe(true)
-      if ('unreachable' in source) {
+      const routed = 'rpc' in source || 'unreachable' in source
+      expect(routed).toBe(true)
+      /* `typeof` and not just `in`: no entry carries `unreachable` today, so
+         the union has no member declaring it and the property narrows to
+         `unknown`. Keeping the branch is deliberate — the shape must survive
+         its own emptiness, or the next omission has nowhere to be argued. */
+      if ('unreachable' in source && typeof source.unreachable === 'string') {
         expect(source.unreachable.length).toBeGreaterThan(30)
+      }
+      if ('rpc' in source && typeof source.rpc === 'string') {
+        expect(source.rpc.length).toBeGreaterThan(0)
       }
     }
   })
 
-  it('still declares more than it reads, and knows the difference', () => {
+  it('still declares more than it reads from a table, and knows the difference', () => {
     expect(PERSONAL_DATA_SOURCES.length).toBeGreaterThan(READABLE_SOURCES.length)
+    expect(RPC_SOURCES.length).toBeGreaterThan(0)
+  })
+
+  /*
+   * The moderation records are three keys of one object. The failure worth
+   * catching is not "the call errored" but "the call answered, and the keys
+   * were not there" — the export would then carry three empty arrays and look
+   * complete. Hence a stub that answers with the wrong shape.
+   */
+  it('reads the three moderation links through one call', async () => {
+    const calls: unknown[] = []
+    const reader: ModerationReader = {
+      rpc: (name, args) => {
+        calls.push({ name, args })
+        return Promise.resolve({
+          data: { reportsFiled: [{ id: 'r1' }], reportsDecided: [], moderationActions: [] },
+          error: null,
+        })
+      },
+    }
+
+    const bundle = await collectModerationRecords(reader, SUBJECT)
+    expect(calls).toEqual([
+      { name: 'moderation_records_for_subject', args: { p_subject: SUBJECT } },
+    ])
+    expect(Object.keys(bundle).sort()).toEqual(RPC_SOURCES.map((s) => s.key).sort())
+    expect(bundle.reportsFiled).toEqual([{ id: 'r1' }])
+  })
+
+  it('turns a missing key into an empty array, never into undefined', async () => {
+    const reader: ModerationReader = {
+      rpc: () => Promise.resolve({ data: {}, error: null }),
+    }
+
+    const bundle = await collectModerationRecords(reader, SUBJECT)
+    for (const source of RPC_SOURCES) expect(bundle[source.key]).toEqual([])
+  })
+
+  it('fails the export when the moderation call fails', async () => {
+    const reader: ModerationReader = {
+      rpc: () => Promise.resolve({ data: null, error: { message: 'permission denied' } }),
+    }
+
+    await expect(collectModerationRecords(reader, SUBJECT)).rejects.toThrow(/permission denied/)
   })
 })

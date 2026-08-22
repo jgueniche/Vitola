@@ -38,7 +38,12 @@
     "privacyTitle": "Politique de confidentialité",
     "termsTitle": "Conditions générales d'utilisation",
     "cookiesTitle": "Cookies et traceurs",
-    "placeholder": "Ce document est en cours de rédaction et sera validé par un conseil juridique avant l'ouverture publique du site."
+    "placeholder": "Ce document est en cours de rédaction et sera validé par un conseil juridique avant l'ouverture publique du site.",
+    "dsaTitle": "Signalement et modération",
+    "dsaMechanism": "Chaque fiche et chaque commentaire porte un bouton « Signaler ». Il ouvre un dossier dans notre file de traitement, avec le motif que vous choisissez et les précisions que vous ajoutez.",
+    "dsaDeadline": "Nous examinons chaque signalement sous {hours} heures et communiquons la décision à son auteur. Une décision de retrait est motivée et peut être contestée.",
+    "dsaContactPending": "Le point de contact unique prévu par les articles 11 et 12 du règlement sur les services numériques sera publié ici avant l'ouverture du site au public. En attendant, le formulaire de signalement ci-dessus est le mécanisme prévu par l'article 16.",
+    "dsaContactLabel": "Point de contact"
   },
   "referential": {
     "eyebrow": "Référentiel",
@@ -582,5 +587,68 @@
       "body": "Votre date de naissance sert uniquement à vérifier cette condition. Elle n'est pas conservée tant que vous n'avez pas de compte : un cookie signé mémorise seulement que la vérification a eu lieu.",
       "help": "Se faire aider : Tabac info service — 39 89, du lundi au samedi. Gratuit et confidentiel."
     }
+  },
+  "comments": {
+    "title": "Commentaires",
+    "countOne": "1 commentaire",
+    "countMany": "{count} commentaires",
+    "rule": "Un commentaire informe ; il ne vante pas. Ce qui incite à consommer est retiré.",
+    "emptyTitle": "Personne n'a encore écrit ici",
+    "emptyBody": "Dites ce que vous savez de ce cigare : sa construction, sa fumée, ou ce que cette fiche indique et qui ne correspond pas.",
+    "formLabel": "Votre commentaire",
+    "formHint": "2 000 caractères au plus. Ce que vous écrivez est visible de tous.",
+    "submit": "Publier",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer définitivement ce commentaire ?",
+    "editedSuffix": "modifié",
+    "signInTitle": "Connectez-vous pour prendre la parole",
+    "signInBody": "La lecture est ouverte à tous ; écrire demande un compte.",
+    "signInAction": "Se connecter",
+    "authorHidden": "Membre",
+    "errors": {
+      "empty": "Un commentaire ne peut pas être vide.",
+      "tooLong": "2 000 caractères au plus.",
+      "notAllowed": "Votre compte ne permet pas encore de commenter.",
+      "unknown": "Le commentaire n'a pas pu être enregistré."
+    }
+  },
+  "moderation": {
+    "report": {
+      "trigger": "Signaler",
+      "triggerCigar": "Signaler cette fiche",
+      "title": "Signaler ce contenu",
+      "lede": "Dites ce qui pose problème. Un modérateur examine chaque signalement sous {hours} heures.",
+      "reasonLabel": "Motif",
+      "detailLabel": "Précisions",
+      "detailHint": "Facultatif, 2 000 caractères au plus.",
+      "submit": "Envoyer le signalement",
+      "cancel": "Annuler",
+      "sentTitle": "Signalement transmis",
+      "sentBody": "Un modérateur l'examine sous {hours} heures. La décision vous sera communiquée.",
+      "duplicate": "Vous avez déjà signalé ce contenu ; le dossier est ouvert.",
+      "throttled": "Trop de signalements en peu de temps. Réessayez dans une heure.",
+      "signIn": "Connectez-vous pour signaler un contenu.",
+      "gone": "Ce contenu n'est plus visible.",
+      "error": "Le signalement n'a pas pu être transmis. Réessayez.",
+      "reasons": {
+        "tobacco_promotion": "Incite à consommer du tabac",
+        "illegal_content": "Contenu illicite",
+        "harassment": "Harcèlement ou propos haineux",
+        "spam": "Indésirable ou publicité",
+        "inaccurate": "Information inexacte",
+        "other": "Autre"
+      }
+    }
+  },
+  "aromas": {
+    "eyebrow": "Nomenclature",
+    "title": "Roue des arômes",
+    "lede": "Le vocabulaire commun de la dégustation : onze familles, et sous chacune les descripteurs qu'un carnet peut employer. Cette liste ne juge pas — elle sert autant à nommer un défaut qu'un plaisir.",
+    "count": "{families} familles, {descriptors} descripteurs",
+    "emptyTitle": "La roue n'est pas encore chargée",
+    "emptyBody": "La nomenclature des arômes arrive avec l'amorçage du référentiel."
   }
 }

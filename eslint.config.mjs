@@ -53,9 +53,14 @@ export default [
    * The service_role Supabase client bypasses RLS entirely (§8). It may only be
    * imported by route handlers and edge functions — never by a component, a page
    * or anything that could end up in a client bundle.
+   *
+   * `app/**\/*.ts` was added when the first Server Action outside app/api was
+   * written: the list covered `.tsx` under app/, so an `actions.ts` file sat in
+   * the one gap the rule exists to close. It was never exploited; a guard is
+   * not judged on that.
    */
   {
-    files: ['app/**/*.tsx', 'components/**/*.tsx', 'lib/**/*.ts'],
+    files: ['app/**/*.ts', 'app/**/*.tsx', 'components/**/*.tsx', 'lib/**/*.ts'],
     ignores: ['app/api/**'],
     rules: {
       'no-restricted-imports': [

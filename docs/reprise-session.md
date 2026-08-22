@@ -1,15 +1,27 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Écrit le 22 août 2026, après la PR #4.
+> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 22 août 2026, après la livraison
+> du signalement DSA, des commentaires et de la roue des arômes.
 
 ---
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
-`docs/decisions-log.md` (les quatre sections), `docs/adr/` (0004 et 0005 sont **Acceptées**),
-`supabase/seed/PROVENANCE.md` et `docs/phase-0/05-questions-ouvertes.md`.
+`docs/decisions-log.md` (les sept sections — les deux premières sont de la session précédente),
+`docs/adr/` (0004 et 0005 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
+`docs/phase-0/05-questions-ouvertes.md`.
 
-**Branche de travail** : `claude/vitola-pXX-<nom>` — à créer depuis `master`.
+**Branche de travail** : `claude/vitola-pXX-<nom>` — à créer depuis `master`, qui contient tout le
+travail décrit ici (PR #6 fusionnée le 22 août 2026). Le code du dépôt et l'état de la base
+concordent : les sept migrations sont dans `supabase/migrations/` **et** appliquées sur le projet.
+Vérifie-le d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3` doit
+montrer la fusion de #6, et `/api/health` sert le commit réellement déployé.
+
+Une chose à savoir sur l'ordre des choses, apprise pendant cette PR : **une migration additive peut
+précéder son écran, l'inverse est un 500.** Les 0006 et 0007 ont vécu quelques heures appliquées en
+base pendant que `master` n'avait pas encore leurs fichiers, sans conséquence — elles n'ajoutaient
+que des fonctions, des droits et du contenu que le code d'alors ne lisait pas. Livrer l'écran
+d'abord n'aurait pas pardonné.
 
 ## OBJECTIF DE CETTE SESSION ET DES SUIVANTES
 
@@ -25,26 +37,38 @@ suivante.
   QA à l'appui. C'est le livrable qui remplace la relecture de base.
 - Un état vide est un écran, pas une erreur : le §4.6 en fait une invitation.
 - Ne me demande pas de vérifier la base. Je vérifie par le site.
+- **Un droit ou une obligation légale se parcourt une fois avec un vrai compte avant d'être
+  déclaré livré.** Compiler ne prouve rien : `/api/gdpr/export` a répondu 500 à tout membre connecté
+  pendant toute sa durée de vie, et c'est en l'ouvrant qu'on l'a vu, pas en le relisant.
 
-## ÉTAT AU 22 AOÛT 2026
+## ÉTAT AU 22 AOÛT 2026, FIN DE SESSION
 
-`master` est la branche de production et **Vercel déploie bien depuis `master`** : la dette de
-configuration de la session précédente est soldée, la branche par défaut `claude/vitola-phase-0-plan-y3y5mk`
-n'existe plus. Il n'y a plus d'écart silencieux à surveiller. `/api/health` sert le commit déployé
-(`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le moyen le plus rapide de savoir ce qui tourne.
+`master` est la branche de production et **Vercel déploie bien depuis `master`**. `/api/health` sert
+le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le moyen le plus rapide de
+savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
+l'authentification Vercel.
 
-PR #1, #2, #3 et #4 fusionnées. Dernier commit de `master` : `1382ef2`.
+PR #1 à #6 fusionnées. `master` était à `e032021` au début de la session précédente ; la #6 y a
+porté le signalement DSA, les commentaires, la roue des arômes et le correctif de l'export RGPD.
 
-### Ce qui marche, vérifié en HTTP réel
+### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
 - **940 fiches en base, toutes publiées**, visibles d'un visiteur anonyme derrière l'age gate.
 - `/cigares` recherche facettée (force, cape, origine, plein texte, pagination 24/page),
   `/cigares/[slug]`, `/marques` + `[slug]`, `/vitoles` + `[slug]`.
-- Page d'accueil publique construite (PR #3), age gate, `/connexion` par lien magique **et** mot de
-  passe, session rafraîchie dans le middleware.
-- `/api/gdpr/export` et `/api/gdpr/delete` (§2, art. 15/17/20 RGPD). Testés en HTTP : 403 sans age
-  gate, 401 sans session, `Cache-Control: no-store`. **Le chemin authentifié complet n'a jamais été
-  exercé contre le vrai projet** — à faire une fois avec un compte de QA.
+- Page d'accueil publique, age gate, `/connexion` par lien magique **et** mot de passe, session
+  rafraîchie dans le middleware.
+- **Commentaires de fiche** (ADR 0005) : liste, formulaire, édition et suppression par l'auteur,
+  état vide en invitation, pseudo de l'auteur, mention « modifié ». **Parcouru en navigateur contre
+  la vraie base, 22 assertions vertes**, avec deux comptes distincts.
+- **Signalement DSA** : `POST /api/signalements` (Zod, session obligatoire, visibilité vérifiée sous
+  RLS), bouton « Signaler » sur chaque fiche et chaque commentaire — jamais sur le sien —,
+  déduplication d'un dossier ouvert, frein à 20/heure, délai de 72 h publié dans les mentions
+  légales et **lu depuis `feature_flags` à chaque rendu**.
+- **`/aromes`** : la roue des arômes, 11 familles et 76 descripteurs, en page de référence.
+- `/api/gdpr/export` et `/api/gdpr/delete`. **L'export a été exercé avec `test_un` contre le projet
+  réel** : `200`, `Cache-Control: no-store, private`, 22 sources rendues dont les trois liens vers
+  `mod`. Il répondait `500` avant la migration 0007.
 - Critère de sortie P1 mesuré : 0,14 à 0,97 ms sur données réelles, 27,5 ms sur 50 000 lignes
   synthétiques. Le §9 demandait « < 300 ms sur 5 000 cigares » : tenu.
 
@@ -60,8 +84,8 @@ PR #1, #2, #3 et #4 fusionnées. Dernier commit de `master` : `1382ef2`.
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). Cinq migrations appliquées
-et enregistrées dans `supabase_migrations.schema_migrations` :
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Sept migrations**
+appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
 |---|---|---|
@@ -70,29 +94,39 @@ et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0003` | `carnet` | `supabase/migrations/0003_carnet.sql` |
 | `0004` | `commentaires_moderation` | `supabase/migrations/0004_commentaires_moderation.sql` |
 | `0005` | `ref_function_grants` | `supabase/migrations/0005_ref_function_grants.sql` |
+| `0006` | `signalement_et_statistiques` | `supabase/migrations/0006_signalement_et_statistiques.sql` |
+| `0007` | `ref_service_role_grants` | `supabase/migrations/0007_ref_service_role_grants.sql` |
 
 Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref`.
 `mod` en est délibérément **absent**.
+
+Extension ajoutée : **`pg_cron`**, pour une seule tâche — `vitola-refresh-cigar-stats`, toutes les
+cinq minutes, `select public.refresh_cigar_stats()`.
 
 ### Volumes réels
 
 ```
 ref.manufacturers          30      public.profiles             3
-ref.brands                114      public.reviews              0
+ref.brands                114      public.reviews              0  ←
 ref.lines                   0  ←   public.review_shares        0
 ref.vitolas                51      public.review_thirds        0
 ref.cigars                940      public.comments             0
-  dont published          940      public.aroma_taxonomy       0  ←
-  avec vitole              78      public.consents             0
-  avec prix               900      public.audit_log            1
-  avec force / cape       123      public.feature_flags        5
-  verified_by non nul       0  ←   mod.reports                 0
-ref.box_codes              18      mod.moderation_actions      0
-ref.cigar_images            0      public.cigar_stats     0 ligne (vue matérialisée)
-ref.cigar_revisions         0
+  dont published          940      public.aroma_taxonomy      87
+  avec vitole              78        dont familles            11
+  avec prix               900      public.consents             0
+  avec force / cape       123      public.audit_log            4
+  verified_by non nul       0  ←   public.feature_flags        5
+ref.box_codes              18      mod.reports                 0
+ref.cigar_images            0      mod.moderation_actions      0
+ref.cigar_revisions         0      public.cigar_stats     0 ligne (vue matérialisée)
 ```
 
-Les trois `←` sont des manques à combler, pas des états normaux : voir « Ce qu'il faut construire ».
+`reviews` à zéro est le manque de la prochaine session, pas un état normal. `ref.lines` à zéro est
+une **décision de v1**, écrite dans `CLAUDE.md` avec son déclencheur — ne la rouvre pas sans la
+lire. `verified_by` à zéro est une dette de relecture, voir « À me signaler ».
+
+`audit_log` contient quatre lignes, dont trois écrites en vérifiant les endpoints (`dsa.report`
+×2, `gdpr.export`). Le journal est en ajout seul, personne n'a de `DELETE` dessus : c'est voulu.
 
 ### Colonnes, table par table
 
@@ -100,6 +134,9 @@ Les trois `←` sont des manques à combler, pas des états normaux : voir « Ce
 `avatar_path`, `bio`, `country(2)`, `city`, `reputation!`, `role!(app_role)`, `is_discoverable!`,
 `created_at!`, `updated_at!`.
 `handle` : `^[a-z0-9][a-z0-9_]{1,28}[a-z0-9]$` — underscore oui, tiret non.
+`is_discoverable` vaut `true` par défaut ; un profil qui le passe à `false` **disparaît des
+lectures de tiers**, y compris de la signature d'un commentaire. C'est un choix qu'on honore, pas un
+trou à combler avec l'identifiant.
 
 **`public.profile_settings`** — propriétaire seul. `id!(→profiles)`, `birth_date`,
 `adult_confirmed_at`, `locale!`, `preferences!` jsonb, `privacy!` jsonb, `created_at!`, `updated_at!`.
@@ -117,47 +154,51 @@ UPDATE : aucun grant UPDATE/DELETE n'existe.
 **`public.feature_flags`** — `key!`, `enabled!`, `description!`, `payload!` jsonb, `updated_at!`.
 
 **`public.reviews`** — le carnet ET la dégustation, une seule table (ADR 0004).
-`id!`, `user_id!(→auth.users, cascade)`, `cigar_id!(→ref.cigars, cascade)`,
-`kind!(review_kind)`, `visibility!(review_visibility, défaut private)`,
-`score_total numeric(4,1)`, `scores! jsonb`, `aroma_tags! int[]`,
-`strength_perceived(ref.strength)`, `smoke_duration_min`, `pairing_text`, `pairing_tags! text[]`,
-`box_code`, `production_year`, `purchase_year`, `humidity_pct`, `is_blind!`, `body`,
-`smoked_on! date` (défaut `current_date`), `created_at!`, `updated_at!`.
+`id!`, `user_id!(→auth.users, cascade)`, `cigar_id!(→ref.cigars, cascade)`, `kind!(review_kind)`,
+`visibility!(review_visibility, défaut private)`, `score_total numeric(4,1)`, `scores!` jsonb,
+`aroma_tags!` int[], `strength_perceived(ref.strength)`, `smoke_duration_min`, `pairing_text`,
+`pairing_tags!` text[], `box_code`, `production_year`, `purchase_year`, `humidity_pct`, `is_blind!`,
+`body`, `smoked_on!` date (défaut `current_date`), `created_at!`, `updated_at!`.
 
-Contraintes qui refuseront tes insertions si tu les ignores :
+**Contraintes qui refuseront tes insertions si tu les ignores :**
+
 - `score_total` entre 0 et 100 ; `scores` doit être un objet
-- `scores` n'accepte **que** les clés `construction, draw, burn, aroma, evolution, finish`
+- `scores` n'accepte que les clés `construction`, `draw`, `burn`, `aroma`, `evolution`, `finish`
 - `kind='tasting'` ⇒ `scores <> '{}'`
 - `kind='log'` ⇒ au moins un `score_total` **ou** un `body` non vide
 - `body` ≤ 4000, `pairing_text` ≤ 500, `smoke_duration_min` 1–600, `humidity_pct` 0–100
 - `aroma_tags` ≤ 30 éléments, `pairing_tags` ≤ 12
-- **`user_id` et `cigar_id` ne sont dans aucun grant d'UPDATE** : une entrée ne change ni d'auteur ni
-  de cigare. Se tromper de fiche, c'est supprimer et ressaisir.
+- `user_id` et `cigar_id` ne sont dans **aucun grant d'UPDATE** : une entrée ne change ni d'auteur
+  ni de cigare. Se tromper de fiche, c'est supprimer et ressaisir.
 
 **`public.review_shares`** — qui a accès à une entrée `shared`. `review_id!`, `grantee_id!`,
 `granted_by!`, `granted_at!`. Clé primaire `(review_id, grantee_id)`. `grantee_id <> granted_by`.
 Aucun UPDATE : on accorde ou on retire. **Un destinataire ne peut pas repartager** — seule la policy
 INSERT de l'auteur passe.
 
-**`public.review_thirds`** — `review_id!`, `third! (1..3)`, `notes` (≤2000). PK `(review_id, third)`.
+**`public.review_thirds`** — `review_id!`, `third!` (1..3), `notes` (≤2000). PK `(review_id, third)`.
 
-**`public.cigar_stats`** — **vue matérialisée**, donc **sans RLS**. Colonnes : `cigar_id`,
+**`public.cigar_stats`** — vue matérialisée, donc **sans RLS**. Colonnes : `cigar_id`,
 `review_count`, `mean_score`, `bayesian_score`, `review_count_90d`, `mean_score_90d`,
 `distribution` jsonb (`lt60`, `b60_69`, `b70_79`, `b80_89`, `b90_100`), `last_review_at`.
-Elle ne lit **que** `visibility='public'` : ce prédicat est la frontière de sécurité entière, et
-l'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est. A priori bayésien : 10
-avis, moyenne globale, 80 par défaut. Rafraîchir par `select public.refresh_cigar_stats()` —
-clé de service uniquement. **Rien ne la rafraîchit automatiquement : c'est à faire.**
+Elle ne lit que `visibility='public'` : **ce prédicat est la frontière de sécurité entière**, et
+l'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est. A priori bayésien :
+10 avis, moyenne globale, 80 par défaut.
+**Rafraîchie toutes les cinq minutes par `pg_cron`** depuis la 0006 — c'est le filet. Le
+rafraîchissement à l'écriture, lui, reste à écrire : c'est le chemin qui sert la personne qui vient
+de publier, et il appartient au carnet.
 
 **`public.comments`** — commentaires de fiche (ADR 0005). `id!`, `cigar_id!(→ref.cigars, cascade)`,
 `author_id!(→auth.users, cascade)`, `body!` (1–2000), `hidden_at`, `hidden_by`, `hidden_reason`,
-`created_at!`, `updated_at!`.
-Pas de `visibility` : un commentaire de fiche est public par construction. Pas de note non plus.
-`hidden_*` : les trois ensemble ou aucun, et **hors de tout grant** — masquer passe par la clé de
-service, y compris pour un modérateur connecté.
+`created_at!`, `updated_at!`. Pas de `visibility` : un commentaire de fiche est public par
+construction. Pas de note non plus. `hidden_*` : les trois ensemble ou aucun, et **hors de tout
+grant** — masquer passe par la clé de service, y compris pour un modérateur connecté.
 
-**`public.aroma_taxonomy`** — roue des arômes, **vide**. `id!` (integer identity), `parent_id`,
+**`public.aroma_taxonomy`** — roue des arômes, **87 lignes**. `id!` (integer identity), `parent_id`,
 `family!(aroma_family)`, `slug!`, `label_fr!` (1–60), `label_en`, `created_at!`.
+**L'arbre est plat par construction** : une famille, ses descripteurs, rien en dessous.
+`supabase/tests/01_seed_integrity.sql` échoue si un troisième niveau apparaît, si une famille est
+vide, ou si le nombre de familles cesse d'égaler le nombre de valeurs de l'enum.
 
 **`mod.reports`** — file DSA. `id!`, `reporter_id`, `entity_schema!`, `entity_table!`, `entity_id!`,
 `reason!(report_reason)`, `detail` (≤2000), `status!(report_status)`, `created_at!`,
@@ -166,12 +207,11 @@ service, y compris pour un modérateur connecté.
 Une décision (`upheld`/`dismissed`) exige `decided_at` **et** `decided_by`.
 
 **`mod.moderation_actions`** — `id!`, `report_id`, `moderator_id`, `verb!(moderation_verb)`,
-`entity_schema!`, `entity_table!`, `entity_id!`, `reason!`, `created_at!`.
-Aucune policy d'écriture, aucun grant : ajout seul par la clé de service.
+`entity_schema!`, `entity_table!`, `entity_id!`, `reason!`, `created_at!`. Aucune policy d'écriture,
+aucun grant : ajout seul par la clé de service.
 
 **Schéma `ref`** — inchangé depuis 0001 : `manufacturers`, `brands`, `lines`, `vitolas`, `cigars`,
-`cigar_revisions`, `cigar_images`, `box_codes`. Voir `docs/phase-0/03-schema-p1.sql`, qui reste la
-migration 0001.
+`cigar_revisions`, `cigar_images`, `box_codes`. Voir `docs/phase-0/03-schema-p1.sql`.
 
 ### Enums
 
@@ -224,19 +264,41 @@ anonyme, qui n'a aucun grant dessus : `permission denied for table review_shares
 
 ### Fonctions appelables
 
-| Fonction | DEFINER | anon | authenticated |
-|---|---|---|---|
-| `public.has_min_role(app_role)` | non | ✓ | ✓ |
-| `public.current_app_role()` | **oui** | ✓ | ✓ |
-| `public.owns_review(uuid)` | **oui** | ✗ | ✓ |
-| `public.comment_min_role()` | non | ✓ | ✓ |
-| `public.immutable_unaccent(text)`, `public.slugify(text)` | non | ✓ | ✓ |
-| `public.refresh_cigar_stats()` | **oui** | ✗ | ✗ |
-| `public.is_privileged_context()` | non | ✗ | ✗ |
+| Fonction | DEFINER | anon | authenticated | service_role |
+|---|---|---|---|---|
+| `public.has_min_role(app_role)` | non | ✓ | ✓ | ✓ |
+| `public.current_app_role()` | **oui** | ✓ | ✓ | ✓ |
+| `public.owns_review(uuid)` | **oui** | ✗ | ✓ | ✓ |
+| `public.comment_min_role()` | non | ✓ | ✓ | ✓ |
+| `public.immutable_unaccent(text)`, `public.slugify(text)` | non | ✓ | ✓ | ✓ |
+| `public.refresh_cigar_stats()` | **oui** | ✗ | ✗ | ✓ |
+| `public.file_report(uuid,text,text,text,text,text)` | **oui** | ✗ | ✗ | **✓** |
+| `public.moderation_records_for_subject(uuid)` | **oui** | ✗ | ✗ | **✓** |
+| `public.is_privileged_context()` | non | ✗ | ✗ | ✗ |
 
 `owns_review()` existe pour **casser une récursion** : `reviews` et `review_shares` se lisent
 mutuellement dans leurs policies, et PostgreSQL détecte le cycle sur le graphe des policies, pas sur
 le chemin d'exécution. Ne la remplace pas par un `EXISTS`.
+
+**`file_report()` et `moderation_records_for_subject()` sont les deux seules portes sur `mod`.**
+Elles existent parce que la clé de service **ne peut pas** écrire dans ce schéma : `mod` n'est pas
+exposé à PostgREST, et `service_role` n'y a aucun droit de table — seul `postgres` en a. Elles sont
+accordées à `service_role` et à personne d'autre, et `supabase/tests/05_signalement.sql` le vérifie
+en 11 assertions. `file_report()` prend son motif en `text` et le cast en `mod.report_reason` à
+l'intérieur : un type d'un schéma non exposé dans la signature d'une fonction exposée est
+irrésoluble pour PostgREST.
+
+### Droits de table de la clé de service
+
+| Schéma | `service_role` |
+|---|---|
+| `public` | tout (amorçage Supabase) + `SELECT` explicite depuis la 0007 |
+| `ref` | **`SELECT` seulement**, depuis la 0007. Aucune écriture, et c'est asserté |
+| `mod` | **rien.** Les deux fonctions ci-dessus sont l'unique passage |
+
+`supabase/tests/06_service_role_reads.sql` garde les trois invariants et **n'accorde rien** : c'est
+le seul endroit d'où une régression se voit, l'auto-contrôle d'une migration ne pouvant jamais
+échouer sur ce qu'elle vient d'accorder.
 
 ### Drapeaux de fonctionnalité
 
@@ -246,7 +308,7 @@ le chemin d'exécution. Ne la remplace pas par un `EXISTS`.
 | `show_indicative_prices` | **non** | | Affiche `msrp_eur`. Voir Q19. |
 | `wiki_contributions_open` | oui | | Ouvre la file de révisions. |
 | `comments_min_role` | oui | `{"min_role":"member"}` | **À resserrer en `contributor` le jour où l'inscription s'ouvre.** |
-| `dsa_report_sla_hours` | oui | `{"hours":72}` | Délai annoncé. **À publier dans les mentions légales.** |
+| `dsa_report_sla_hours` | oui | `{"hours":72}` | Publié dans les mentions légales, **lu à chaque rendu**. Le changer change ce qu'on promet, sans déploiement. Épinglé par `tests/compliance/dsa.test.ts`, qui relit la migration 0004. |
 
 ### Buckets de stockage
 
@@ -254,7 +316,7 @@ le chemin d'exécution. Ne la remplace pas par un `EXISTS`.
 objets** : le jour où un téléversement existe, il ship avec son `storage.remove()` dans
 `app/api/gdpr/delete/route.ts`, même commit. C'est écrit dans le fichier.
 
-### Avertissements de sécurité Supabase — 5 restants, tous connus
+### Avertissements de sécurité Supabase — 5, tous connus, inchangés
 
 1. `materialized_view_in_api` — `cigar_stats`. Assumé : son contenu est public par construction.
 2. + 3. `current_app_role()` appelable par anon et authenticated. **Pré-existant.** La retirer casse
@@ -265,6 +327,11 @@ objets** : le jour où un téléversement existe, il ship avec son `storage.remo
 5. `auth_leaked_password_protection` désactivé — **un interrupteur dans la console Supabase**, et il
    compte maintenant que les mots de passe existent.
 
+**Les deux fonctions de la 0006 ne figurent pas dans cette liste**, alors qu'elles sont
+`SECURITY DEFINER` dans un schéma exposé : les advisors ne relèvent que celles qu'un rôle client
+peut appeler. C'est la confirmation que le grant est correct — et le contrôle à refaire si tu en
+ajoutes une.
+
 ---
 
 ## TROIS RÉGLAGES SUPABASE QUI NE VIVENT DANS AUCUN FICHIER
@@ -272,62 +339,59 @@ objets** : le jour où un téléversement existe, il ship avec son `storage.remo
 Documentés dans `docs/setup/supabase.md`, non exécutables. Si le projet est recréé, rien ne les
 reconstruit.
 
-1. **`db_schema` doit valoir `public,graphql_public,ref`** — et surtout **jamais `mod`**. Par défaut un projet
-   n'expose que `public, graphql_public` : sans ce réglage aucune requête client ne résout, quel que
-   soit le code. C'est le blocage qui a fait perdre le plus de temps.
+1. **`db_schema` doit valoir `public,graphql_public,ref`** — et surtout **jamais `mod`**. Par défaut
+   un projet n'expose que `public, graphql_public` : sans ce réglage aucune requête client ne
+   résout, quel que soit le code. C'est le blocage qui a fait perdre le plus de temps.
 2. **`site_url` + `uri_allow_list`** doivent couvrir localhost, la production et les préversions
    Vercel, sinon un lien magique est rejeté.
 3. **Le SMTP intégré plafonne à ~2 envois/heure.** C'est pour ça que le mot de passe existe.
+
+Un quatrième réglage a cessé d'en être un : les droits de la clé de service sur `ref` étaient hérités
+de rien du tout, et la 0007 les écrit. Voir « Droits de table de la clé de service ».
 
 ---
 
 ## CE QU'IL FAUT CONSTRUIRE, PAR ORDRE
 
-### 0. Les trois manques de la base, avant tout écran qui les suppose
+Les items 0, 1 et 2 de la liste précédente sont livrés. La numérotation reprend là où elle s'est
+arrêtée.
 
-- **`aroma_taxonomy` est vide.** La roue des arômes du §5.4 n'a aucun contenu. C'est une nomenclature
-  éditoriale, arborescente, onze familles. Sans elle, le formulaire de dégustation n'a rien à
-  afficher. À écrire en seed versionné, avec sa provenance dans `PROVENANCE.md` — mêmes règles :
-  aucune extraction de base tierce.
-- **`ref.lines` est vide.** Les gammes (Cohíba > Línea 1492) existent au schéma et nulle part
-  ailleurs. La fiche cigare et les pages marque s'en passent aujourd'hui ; décide si v1 les veut.
-- **Rien ne rafraîchit `cigar_stats`.** Un `refresh_cigar_stats()` après écriture d'une entrée
-  publique, ou une tâche planifiée. Sans cela la moyenne d'une fiche restera vide pour toujours.
+### 3. Le carnet à l'écran — P2. **C'est cette session.**
 
-### 1. Le signalement DSA — bloquant pour ouvrir les commentaires
+Le cœur du produit, entièrement débloqué côté base : la table, ses policies, la roue des arômes et
+`cigar_stats` existent et sont peuplées ou prêtes. Rien de tout cela ne se voit encore.
 
-La file existe (`mod.reports`), le délai est déclaré, **le mécanisme d'écriture n'existe pas**.
-L'ADR 0005 exige les trois. À livrer : un endpoint sous `app/api/` avec Zod et la clé de service
-(le schéma `mod` n'est pas joignable autrement), un bouton « Signaler » sur la fiche et sur chaque
-commentaire, le point de contact DSA dans les mentions légales, et le délai de 72 h publié.
-Sans cela, publier les commentaires crée le trou de conformité que l'ADR décrit.
+À livrer :
 
-### 2. Les commentaires à l'écran
-
-Table, RLS et garde-fous sont faits. Manquent : la liste sous la fiche, le formulaire, l'édition et
-la suppression par l'auteur, l'état vide. **Le garde-fou tabac de la boutique ne se réutilise pas
-ici** — mesuré : sur six commentaires ordinaires, `isShopTextAllowed()` en refuse quatre (`cigare`,
-`havane`, `boite de 25`, `vitole`). Le critère d'un commentaire est **l'incitation, pas le
-vocabulaire** : c'est le test en une question de `docs/editorial-guidelines.md`, qui doit gagner une
-section sur le contenu versé par des tiers.
-
-### 3. Le carnet à l'écran — P2
-
-Le cœur du produit, entièrement débloqué côté base. À livrer :
-- Créer une entrée depuis une fiche : quoi, quand (`smoked_on`), la note, un commentaire libre.
+- **Créer une entrée depuis une fiche** : quoi, quand (`smoked_on`), la note, un commentaire libre.
+  C'est `kind='log'` — le geste quotidien, qui exige seulement une note **ou** un texte.
 - **Le sélecteur de portée** : privée / à des personnes nommées / à mes abonnés / publique. Défaut
-  **privée**. L'ADR 0004 en fait une obligation d'interface : quand on choisit `followers`, il faut
-  écrire que l'audience est vivante — douze abonnés aujourd'hui, trois cents dans six mois.
-- Le partage nommé : chercher un membre, l'ajouter, le retirer.
-- La dégustation structurée : trois tiers, roue des arômes, `is_blind`, minuteur, brouillon auto.
-- Mon carnet : liste, filtres, l'affichage /100 ou /20 selon `preferences.score_scale`.
-- La fiche cigare affiche `cigar_stats` — et **seulement** ce que la vue contient.
+  **privée**. L'ADR 0004 en fait une **obligation d'interface** : quand on choisit `followers`, il
+  faut écrire que l'audience est vivante — douze abonnés aujourd'hui, trois cents dans six mois.
+  Attention : `public.follows` n'existe qu'en P3, donc la branche `followers` de la policy SELECT
+  n'existe pas encore. Une entrée `followers` est donc aujourd'hui visible de son seul auteur.
+  **Dis-le dans l'interface plutôt que de laisser croire à une audience qui ne lit rien.**
+- **Le partage nommé** : chercher un membre, l'ajouter, le retirer. Rappel des policies —
+  seul l'auteur accorde, un destinataire ne repartage pas, et retirer ne défait pas ce qui a été lu.
+- **La dégustation structurée** (`kind='tasting'`) : trois tiers, roue des arômes, `is_blind`,
+  minuteur, brouillon auto. `/aromes` et `lib/aromas/queries.ts` donnent déjà l'arbre ; la **forme
+  circulaire** du §5.4 appartient à ce contrôle de saisie, pas à la page de référence.
+- **Mon carnet** : liste, filtres, l'affichage /100 ou /20 selon `preferences.score_scale`.
+  `formatScore()` existe déjà dans `lib/format/`.
+- **La fiche cigare affiche `cigar_stats`** — et **seulement** ce que la vue contient. Aucune
+  moyenne recalculée en TypeScript : ce serait dupliquer la frontière de sécurité de la vue.
+- **Le rafraîchissement à l'écriture** : appeler `public.refresh_cigar_stats()` avec la clé de
+  service après toute écriture qui touche une entrée **publique**, pour que l'auteur voie sa note
+  compter tout de suite. La tâche `pg_cron` reste le filet ; elle ne la remplace pas.
+
+Deux règles héritées de l'ADR 0004, à ne pas contourner : **aucun filtre `visibility` en
+TypeScript** — la RLS l'applique et rien d'autre — et la portée est **par entrée**, jamais globale.
 
 ### 4. Le reste de P1
 
 Contribution wiki (proposer, historique, nouveau, file de validation — `cigar_revisions` est prête
 et vide), comparateur 2–4 cigares, décodeur de codes de boîte, images OG, `sitemap.ts`,
-`types-drift.yml`.
+`types-drift.yml`. **La file wiki est aussi ce qui rouvre `ref.lines`** — voir `CLAUDE.md`.
 
 ### 5. Puis les phases, dans l'ordre du §9
 
@@ -339,15 +403,22 @@ et non supposé**.
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
+- **Qui modère ?** La Q12 posait deux questions ; le délai est répondu (72 h, publié), celle-là non.
+  Pas de back-office avant P8, aucun destinataire nommé, personne pour relever `mod.reports`.
+  Tenable tant que rien n'est ouvert au public. **À trancher avant l'ouverture.**
+- **Le point de contact DSA des art. 11 et 12 n'est pas publié.** `DSA_CONTACT_EMAIL` est
+  délibérément à `null` dans `lib/compliance/dsa.ts` : publier une adresse à un domaine que personne
+  ne possède, c'est s'engager à relever une boîte qui n'existe pas. La page l'annonce en toutes
+  lettres. **Une ligne à écrire dès que la Q7 aura tranché un domaine.**
 - **862 fiches sur 940 n'ont jamais été relues et sont publiques.** Dérogation assumée à
-  `PROVENANCE.md` §2, sur ma demande, pour la QA. Tenable parce que tout est en `noindex` derrière
-  l'age gate et que `supabase/scripts/unpublish.sql` remet tout en brouillon en une commande.
-  **Les commentaires les rendent commentables** : à rouvrir avant toute mise en ligne réelle.
+  `PROVENANCE.md` §2, pour la QA. Tenable parce que tout est en `noindex` derrière l'age gate et que
+  `supabase/scripts/unpublish.sql` remet tout en brouillon en une commande. **Elles sont désormais
+  commentables et signalables** : à rouvrir avant toute mise en ligne réelle.
 - **`verified_by` est NULL sur les 940 fiches** : elles ont été publiées avant que les comptes
   n'existent. La traçabilité est dans `public.audit_log`.
 - **La page confidentialité n'a pas été relue depuis que les comptes existent**, et elle doit
-  maintenant décrire aussi les droits d'export et d'effacement, et comment les exercer. Voir
-  `docs/legal/`.
+  maintenant décrire les droits d'export et d'effacement, comment les exercer, **et ce que le carnet
+  enregistre** — le §2 range possiblement ces données à l'art. 9. Voir `docs/legal/`.
 - **Les prix** : arrêté du 5 août 2026, applicable au 1er septembre, 900 fiches de 4,00 € à
   750,00 €. Ils périment au prochain arrêté, à peu près mensuel.
 - **14 vitoles portent « Dimensions à vérifier »** — 4 fiches en dépendent, 10 de ces vitoles ne
@@ -359,9 +430,9 @@ et non supposé**.
 
 Les 23 questions de `docs/phase-0/05-questions-ouvertes.md` ont chacune une réponse par défaut.
 **Applique le défaut et signale-le**, ou pose la question si le défaut ne tient plus — c'est arrivé
-pour la Q12, qui est annotée. Les quatre règles non négociables sont en tête de `CLAUDE.md`.
-Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 à 0003 attendent toujours
-validation ; 0004 et 0005 sont acceptées.
+pour la Q12, qui est annotée deux fois. Les quatre règles non négociables sont en tête de
+`CLAUDE.md`. Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 à 0003 attendent
+toujours validation ; 0004 et 0005 sont acceptées.
 
 ## PIÈGES DE CET ENVIRONNEMENT, APPRIS À NOS DÉPENS
 
@@ -369,20 +440,35 @@ validation ; 0004 et 0005 sont acceptées.
   `/cigares`, `/marques` et `/vitoles` y lèvent une exception. Conséquence non évidente : quand une
   Server Action redirige vers une page dont le fetch RSC échoue, la navigation côté client avorte et
   l'URL ne bouge pas — l'échec ressemble exactement à « le portail ne m'a pas laissé passer ». Tout
-  test e2e doit atterrir sur `/primitives`, protégé, statique et sans base. **Rejoue toujours les
+  test e2e doit atterrir sur `/primitives` ou sur une page publique sans base. **Rejoue toujours les
   e2e avec identifiants bidon et `CI=1` avant de pousser** : le vert local ne prouve rien ici.
+- **Chromium ne joint aucun hôte externe depuis ce conteneur.** Toute tentative finit en
+  `ERR_CONNECTION_RESET`, y compris en lui passant le proxy — vérifié sur trois configurations de
+  drapeaux. Pour parcourir le site en navigateur, il faut donc **le lancer en local** :
+  écrire un `.env.local` avec les vraies clés du projet, `pnpm build`, `pnpm start --port 3100`,
+  puis pointer Playwright sur `127.0.0.1`. `curl` sort normalement, lui, via le proxy.
+- **Les formulaires sont câblés par l'hydratation.** Cliquer « Confirmer » ou « Publier » avant que
+  React n'ait attaché l'action ne soumet **rien**, en silence : la page reste là et l'assertion
+  suivante échoue ailleurs. Attends `networkidle`, jamais `load`.
 - **Playwright** : le `@playwright/test` épinglé veut `chromium_headless_shell-1234`, l'image
   fournit `1194`. Lance avec `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium`.
+- **Nettoie derrière une vérification.** Les commentaires et signalements écrits en parcourant le
+  site vivent dans la vraie base. Efface-les avant de rendre la main, sinon la QA humaine commence
+  sur un fil qui n'est pas le sien. `audit_log`, lui, ne s'efface pas : c'est un journal.
 - **Pour les gros payloads SQL**, passe par l'API de gestion en `curl` plutôt que par le MCP :
   `POST /v1/projects/$SUPABASE_PROJECT_REF/database/query`. Cela évite de faire transiter 380 Ko par
   le contexte. Attention : **un appel = une transaction**, donc retire le `begin;`/`commit;` du
   fichier, et `set_config(..., true)` fuit d'une assertion à la suivante.
 - **`pnpm check` et le commit doivent être dans la MÊME commande** (`&&`). Sur deux lignes, un check
   rouge n'empêche pas le commit.
+- **Prettier n'est pas dans la CI** et 52 fichiers ne passent pas `pnpm format:check`, dont beaucoup
+  d'avant cette session. Ne lance pas `pnpm format` : tu enterrerais ton diff sous un reformatage.
 - **Le classificateur bloque parfois les heredocs `cat >`** ; utilise l'outil Write, ou un script
   Python qui écrit le fichier.
 - **`tg_handle_new_user()` dérive le pseudo des 12 premiers caractères hexadécimaux de l'UUID.**
   Deux comptes de test dont les UUID partagent ce préfixe se heurtent sur `profiles_handle_key`.
+- **`pkill -f "next"` tue le shell.** Le motif attrape le processus englobant. Ferme le serveur par
+  son port : `ss -lptn 'sport = :3100'`.
 
 ### Pièges SQL propres à ce dépôt — lis `supabase/CLAUDE.md` en entier
 
@@ -390,10 +476,18 @@ validation ; 0004 et 0005 sont acceptées.
   et passe pour rien. Chaque assertion vit dans un bloc `do $$ … $$`.
 - Une assertion dont la donnée de test n'existe pas réussit sans rien tester. Prouve d'abord que la
   ligne existe, en contexte privilégié.
+- **Un UPDATE qu'une policy refuse n'échoue pas** : il ne trouve aucune ligne et rapporte zéro.
+  Traiter zéro comme un succès affiche une confirmation sur un enregistrement qui n'a pas eu lieu.
 - Une policy qui interroge une table interroge aussi **ses droits** : découpe par rôle.
 - Deux policies qui se lisent l'une l'autre, c'est une récursion — **même sans boucle de données**.
-- `alter default privileges` est **par schéma**. Un contrôle qui ne regarde qu'un schéma ne protège
-  qu'un schéma : c'est ce qui a laissé deux fonctions de `ref` ouvertes depuis le premier jour.
+- `alter default privileges` est **par schéma**, et **l'amorçage de Supabase aussi**. Il accorde tout
+  sur `public` et ignore les schémas qu'on crée : `ref` n'a jamais rien accordé à `service_role`, et
+  l'export RGPD répondait 500. **`BYPASSRLS` ne dit rien des droits de table.**
+- **L'auto-contrôle d'une migration ne peut pas attraper ce qu'elle vient de corriger.** Elle accorde
+  puis vérifie. La garde qui mord vit dans `supabase/tests/`, et n'accorde rien.
+- **PostgreSQL analyse une condition d'un seul tenant**, court-circuit compris. `if pg_cron existe
+  and cron.job est vide` échoue sur « relation cron.job does not exist » là où la garde devait
+  l'éviter. Un `if` imbriqué, ou un `execute`, diffère l'analyse.
 - Une vue matérialisée n'accepte pas de RLS.
 
 ## UTILE
@@ -411,9 +505,19 @@ psql -f supabase/migrations/0004_commentaires_moderation.sql
 psql -f supabase/tests/03_carnet_rls.sql           # 15 assertions
 psql -f supabase/tests/04_comments_moderation.sql  # 14 assertions
 psql -f supabase/migrations/0005_ref_function_grants.sql
+psql -f supabase/migrations/0006_signalement_et_statistiques.sql
+psql -f supabase/tests/05_signalement.sql          # 11 assertions
+psql -f supabase/migrations/0007_ref_service_role_grants.sql
+psql -f supabase/tests/06_service_role_reads.sql   # 3 assertions
 psql -f supabase/tests/02_function_grants.sql
 psql -f supabase/tests/00_rls_coverage.sql
 ```
+
+Le §3 de la 0006 se déclare absent par un `NOTICE` sur une base nue : `pg_cron` n'existe ni en local
+ni sur l'image de la CI. C'est attendu, ce n'est pas un échec.
+
+Le seed écrit maintenant aussi dans `public` (la roue des arômes, section 6) : sur une base nue,
+appliquer **0003 avant `seed.sql`**, faute de quoi la table est absente.
 
 Commandes du projet : `pnpm dev`, `pnpm check` (le portail avant commit), `pnpm test:e2e`
 (exige un `pnpm build` préalable), `pnpm storybook`.

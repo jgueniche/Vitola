@@ -172,6 +172,18 @@ Le back-office reste en P8. Le point de contact DSA est publié dans les mention
 > de traitement sont à livrer **dans la même phase que les commentaires**, pas après. Reste à
 > chiffrer le délai de traitement annoncé, que cette question n'a jamais posé.
 
+> **Livré le 22 août 2026.** Le délai que cette question n'avait jamais chiffré est **72 heures**,
+> porté par `feature_flags.dsa_report_sla_hours` — dans un drapeau et non dans un gabarit, parce
+> qu'il engage et doit pouvoir changer sans déploiement. Il est publié dans les mentions légales,
+> qui le lisent à chaque rendu.
+>
+> Le mécanisme existe : `POST /api/signalements`, un bouton « Signaler » sur chaque fiche et chaque
+> commentaire, six motifs, la file `mod.reports`. **Ce qui reste : qui modère.** La question posait
+> deux choses et une seule est répondue — il n'y a pas de back-office (P8), pas de destinataire
+> nommé, et personne n'est encore désigné pour relever la file. Tenable aujourd'hui parce que rien
+> n'est ouvert au public et qu'il existe trois comptes. **À trancher avant l'ouverture**, en même
+> temps que le point de contact de l'art. 11, qui attend un domaine (Q7).
+
 **Nécessaire avant :** ~~P3~~ **P1**, en même temps que les commentaires.
 
 ### Q13 · L'age gate et le SEO sont-ils réellement conciliables ?

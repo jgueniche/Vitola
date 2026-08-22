@@ -12,6 +12,7 @@ export const SEGMENTS = {
   brands: 'marques',
   vitolas: 'vitoles',
   boxCodes: 'codes-de-boite',
+  aromas: 'aromes',
   contributions: 'contributions',
   tastings: 'degustations',
   humidor: 'cave',
@@ -52,6 +53,7 @@ export const routes = {
   vitolas: () => `/${SEGMENTS.vitolas}`,
   vitola: (slug: string) => `/${SEGMENTS.vitolas}/${slug}`,
   boxCodes: () => `/${SEGMENTS.boxCodes}`,
+  aromas: () => `/${SEGMENTS.aromas}`,
 
   scanner: () => `/${SEGMENTS.scanner}`,
   humidor: () => `/${SEGMENTS.humidor}`,

@@ -10,6 +10,8 @@ enregistré dans `supabase_migrations.schema_migrations` :
 | `0003` | `carnet` | `0003_carnet.sql` |
 | `0004` | `commentaires_moderation` | `0004_commentaires_moderation.sql` |
 | `0005` | `ref_function_grants` | `0005_ref_function_grants.sql` |
+| `0006` | `signalement_et_statistiques` | `0006_signalement_et_statistiques.sql` |
+| `0007` | `ref_service_role_grants` | `0007_ref_service_role_grants.sql` |
 
 ## Pourquoi ce dossier commence à 0002
 
@@ -42,8 +44,21 @@ psql -f supabase/migrations/0002_function_grants.sql
 psql -f supabase/migrations/0003_carnet.sql
 psql -f supabase/migrations/0004_commentaires_moderation.sql
 psql -f supabase/migrations/0005_ref_function_grants.sql
+psql -f supabase/migrations/0006_signalement_et_statistiques.sql
+psql -f supabase/migrations/0007_ref_service_role_grants.sql
 cd supabase/seed && psql -f seed.sql
 ```
 
 Sur un vrai projet Supabase, sauter la première ligne : `auth.users`, `storage.*`
 et les rôles `anon` / `authenticated` / `service_role` y existent déjà.
+
+Deux différences attendues entre une base nue et Supabase, et il faut les
+connaître avant de conclure qu'une migration a échoué :
+
+- **0006 §3 ne fait rien sans `pg_cron`.** L'extension n'existe ni en local ni
+  sur l'image `postgres:17` de la CI. La section le dit à voix haute par un
+  `NOTICE` plutôt que d'échouer, et son auto-contrôle vérifie la planification
+  **partout où l'extension est présente** — donc sur Supabase, et seulement là.
+- **Le seed écrit maintenant dans `public`.** Sa section 6 charge la roue des
+  arômes, qui n'existe qu'à partir de 0003 : sur une base nue, appliquer 0003
+  avant `seed.sql`, faute de quoi la table est absente.

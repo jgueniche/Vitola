@@ -42,8 +42,20 @@ e-commerce) doit confirmer, et ce que nous avons déjà mis en place pour y rép
 - [ ] Politique de confidentialité réelle, mentionnant explicitement l'art. 9 si L2 est confirmé
 - [ ] CGU, avec interdiction expresse de la vente et de l'échange entre membres
 - [ ] Registre des traitements (`docs/legal/data-map.md`)
-- [ ] Point de contact DSA publié, et procédure de signalement documentée
-- [ ] Endpoints RGPD export et suppression opérationnels (schéma prêt, endpoints en P1)
+- [ ] **Point de contact DSA (art. 11 et 12) : une adresse à un domaine que nous possédons.**
+      C'est le seul élément manquant du dispositif de signalement — le mécanisme de l'art. 16 est
+      livré (bouton « Signaler » sur les fiches et les commentaires, file `mod.reports`), et le
+      délai de 72 h est publié dans les mentions légales. `DSA_CONTACT_EMAIL` est délibérément à
+      `null` dans `lib/compliance/dsa.ts` : publier une adresse à un domaine que personne ne
+      possède, c'est s'engager à relever une boîte qui n'existe pas. La page dit alors que le point
+      de contact sera publié avant l'ouverture. **Une ligne à écrire, dès que la Q7 aura tranché un
+      domaine.**
+- [x] Endpoints RGPD export et suppression opérationnels — livrés en P1. L'export couvre désormais
+      aussi les trois liens vers `mod` (signalements déposés, décisions rendues, actes de
+      modération), par la fonction `public.moderation_records_for_subject()` de la migration 0006.
+      Chemin authentifié exercé contre le projet réel avec `test_un` le 22 août 2026 : `200`,
+      `Cache-Control: no-store, private`, 22 sources rendues. Il répondait `500` avant la
+      migration 0007 — voir `docs/decisions-log.md`.
 - [ ] DPA signés : Supabase, Vercel, Resend, Sentry, PostHog, Upstash, Stripe
 - [ ] Vérification de disponibilité de la marque avant dépôt du nom retenu (Q7)
 - [ ] CGV et droit de rétractation de 14 jours, avant toute ouverture de la boutique

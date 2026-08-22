@@ -78,6 +78,28 @@ L'[ADR 0005](docs/adr/0005-cible-des-commentaires.md) tranche la cible des comme
 cigare**. Conséquence à ne pas perdre de vue — elle avance les obligations DSA de P3 à P1, et le
 défaut de la Q12 ne tient plus.
 
+**Les trois obligations de l'ADR 0005 sont livrées** depuis le 22 août 2026 : le mécanisme
+(`POST /api/signalements`, bouton « Signaler » sur chaque fiche et chaque commentaire), la file
+(`mod.reports`, écrite par `public.file_report()`) et le délai (72 h, publié dans les mentions
+légales, lu depuis `feature_flags`). Il manque **qui modère** — pas de back-office avant P8, et
+personne n'est encore désigné pour relever la file.
+
+## `ref.lines` : décision de v1
+
+**La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent
+au schéma depuis 0001. Les remplir demande deux choses distinctes : écrire une liste de gammes, ce
+qu'un modèle de langage fait mal, et **rattacher 940 fiches à ces gammes une par une**, ce qu'il
+fait plus mal encore. Or `ref.lines` n'a pas de colonne `status` : contrairement aux fiches, une
+gamme est publique dès son insertion. Une erreur d'appartenance serait donc une erreur factuelle
+visible, sur la promesse même du référentiel.
+
+Ce que cela coûte : rien à l'écran. La fiche cigare affiche déjà `lines.name` quand il existe et
+s'en passe sinon ; la page marque n'en dépend pas.
+
+**Ce qui rouvre :** la file de contribution wiki (F3, fin de P1). Une gamme est exactement le genre
+de fait qu'un contributeur connaît et qu'un relecteur vérifie — c'est le bon chemin, et il existera
+bientôt. Y verser une liste devinée maintenant, c'est se priver du seul contrôle qu'on a.
+
 ## Commandes
 
 ```bash
@@ -112,6 +134,18 @@ pnpm storybook      # galerie des primitives
 - **Les commentaires ne sont pas du code.** Les scans de conformité masquent les commentaires avant
   d'analyser : sans cela, une phrase expliquant pourquoi une chose est absente déclenche
   l'alerte que cette chose est présente.
+- **Un droit légal ne se vérifie qu'en l'exerçant.** `/api/gdpr/export` répondait 500 à tout membre
+  connecté depuis sa mise en service : `service_role` n'avait aucun droit de table sur `ref`, et
+  rien dans le dépôt ne pouvait le dire. Corrigé par la 0007. Tout endpoint qui met en œuvre une
+  obligation du §2 doit être **parcouru une fois avec un compte réel**, pas seulement compilé.
+- **La clé de service ne passe pas partout.** `service_role` contourne la RLS, donc on le croit
+  capable de tout ; il n'a **aucun droit de table dans `mod`**, et ce schéma n'est de toute façon
+  pas exposé à PostgREST. Une écriture dans la file DSA passe par `public.file_report()`, une
+  fonction `SECURITY DEFINER` accordée à `service_role` seul. Voir `supabase/CLAUDE.md`.
+- **Le garde-fou tabac de la boutique ne s'applique pas aux commentaires.** Mesuré : sur six
+  commentaires ordinaires, `isShopTextAllowed()` en refuse quatre. Le critère d'un commentaire est
+  l'incitation, pas le vocabulaire — voir `docs/editorial-guidelines.md`, § « Contenu versé par des
+  tiers ».
 
 ## Style
 

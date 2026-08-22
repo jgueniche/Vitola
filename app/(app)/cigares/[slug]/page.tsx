@@ -11,6 +11,8 @@ import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 
+import { CommentThread } from './comment-thread'
+
 type Params = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -113,6 +115,8 @@ export default async function CigarPage({ params }: Params) {
           </Row>
         ) : null}
       </dl>
+
+      <CommentThread cigarId={cigar.id} slug={cigar.slug} />
     </main>
   )
 }
