@@ -13,6 +13,22 @@ Un `CLAUDE.md` par domaine complète celui-ci : `app/`, `lib/`, `supabase/`.
 3. **`pnpm check` passe avant chaque commit.** `typecheck` + `lint` + `tokens:check` + `test`.
 4. **Une ambiguïté d'architecture → une ADR + une question.** On ne devine pas. `docs/adr/`.
 
+## À trancher avant commercialisation
+
+Les quatre règles ci-dessus bloquent un commit. Celles-ci ne bloquent rien aujourd'hui : ce sont
+des décisions prises en connaissance de cause, reportées, et qui doivent être rouvertes **avant
+l'ouverture commerciale** — pas avant le prochain déploiement. Elles vivent ici pour qu'on ne les
+retrouve pas par surprise le jour où le site s'ouvre au public.
+
+La règle de tenue de cette liste : on n'y écrit rien qu'on ne sache déjà. Un point qu'on n'a pas
+identifié n'y est pas ; un point qui y est doit avoir un déclencheur, pas une bonne intention.
+
+| Point                                                                                                                                                                                                                                                                                                                                                                               | Déclencheur                                                   | État                 |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------- |
+| **Cigare allumé en page publique.** L'accueil montre une illustration de cigare allumé, visible avant le portail 18+. Le §2 et la loi Évin interdisent la publicité en faveur du tabac ; l'illustration est dessinée pour rester du bon côté — planche annotée, légendes en mesures et non en adjectifs, aucune marque — mais son emplacement devant le portail n'a pas été validé. | Avis d'un conseil juridique **avant l'ouverture commerciale** | Assumé, non bloquant |
+
+Tant que le site n'est pas commercialisé, on avance sans y revenir.
+
 ## Phases
 
 Une phase = une branche. Le brief prévoit `feat/pXX-nom` ; les sessions Claude Code distantes

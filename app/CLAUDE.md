@@ -14,9 +14,10 @@ liens et son champ un `<form method="get">`, donc zéro JavaScript.
   aucun prix de tabac : c'est vérifié par un test e2e, qui échoue si une marque réelle apparaît.
 
   La page d'accueil montre en revanche une **illustration de cigare allumé**, décidée par le
-  porteur du produit et à confirmer par un conseil juridique avant l'ouverture publique. Elle est
-  dessinée pour rester du bon côté du §2 : planche annotée, légendes en mesures et non en
-  adjectifs, aucune marque. Voir le commentaire en tête de `app/(public)/page.tsx`.
+  porteur du produit. Elle est dessinée pour rester du bon côté du §2 : planche annotée, légendes
+  en mesures et non en adjectifs, aucune marque. Son emplacement devant le portail est assumé et
+  non bloquant — il est inscrit dans « À trancher avant commercialisation » du `CLAUDE.md` racine,
+  pour avis juridique avant l'ouverture commerciale.
 
 - `app/(app)/` — derrière le portail. Le middleware garantit un cookie signé valide et pose
   `X-Robots-Tag: noindex`.

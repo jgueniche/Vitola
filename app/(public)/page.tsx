@@ -47,14 +47,16 @@ import { routes } from '@/lib/routes'
  * was behind, which left a visitor no reason to hand over a date of birth. It
  * now describes the nine modules, and shows the object the site is about.
  *
- * That last part is a decision taken by the product owner, and it is worth
- * writing down where the next reader will find it: §2 of the brief and the
- * Évin law forbid promoting tobacco, and an illustration of a LIT cigar in
+ * That last part is a decision taken by the product owner. §2 of the brief and
+ * the Évin law forbid promoting tobacco, and an illustration of a LIT cigar in
  * front of the age gate sits close to that line. The illustration is built to
  * stay on the right side of it — annotated like a plate in a reference work,
- * captioned with measurements rather than adjectives, no brand name anywhere —
- * but the placement itself should be confirmed by counsel before the site
- * opens to the public. See docs/adr/.
+ * captioned with measurements rather than adjectives, no brand name anywhere.
+ *
+ * The placement itself is accepted and does not block anything today; it is
+ * listed under « À trancher avant commercialisation » in the root CLAUDE.md,
+ * for legal review before the site opens commercially. Do not quietly reopen
+ * it here — move the entry, or leave it alone.
  */
 
 const SHADE_SWATCH = [
