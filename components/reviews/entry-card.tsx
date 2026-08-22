@@ -70,7 +70,10 @@ export function EntryCard({
             </span>
             {entry.updated_at !== entry.created_at ? <span>{copy.edited}</span> : null}
             {entry.is_blind ? <span>{copy.blind}</span> : null}
-            {showAuthor ? (
+            {/* One label, not two. On a cigar page an author would otherwise
+                read "Par Test Un" and "Votre entrée" side by side about the
+                same row; "Votre entrée" is the one that tells them something. */}
+            {showAuthor && !isMine ? (
               <span>{copy.byAuthor.replace('{author}', authorLabel)}</span>
             ) : null}
             {isMine && !showScope ? (

@@ -350,12 +350,14 @@ export async function editEntry(_previous: EntryState, formData: FormData): Prom
 
   const { data, error } = await supabase
     .from('reviews')
+    /* `updated_at` is absent on purpose: `reviews_set_updated_at` stamps it,
+       and writing it by hand would let a clock skew between the web server and
+       the database decide whether an entry reads as "modifié". */
     .update({
       score_total: parsed.data.scoreTotal,
       body: parsed.data.body,
       smoked_on: parsed.data.smokedOn,
       visibility: parsed.data.visibility,
-      updated_at: new Date().toISOString(),
     })
     .eq('id', parsed.data.id)
     .select('id, cigar_id')
@@ -490,6 +492,18 @@ const scaleSchema = z.object({ scale: z.enum(['100', '20']) })
  * The row always exists — `tg_handle_new_user()` creates it with the profile —
  * so this is an UPDATE and a missing row means the trigger did not run, which
  * is worth surfacing rather than papering over with an upsert.
+ *
+ * **This function throws, and the ones above return an error instead.** The
+ * difference is who the failure belongs to. A refused review write is something
+ * a member did — too long, out of range, not yours — and it deserves a sentence
+ * in French. A refused preference write is something *we* did, and there is no
+ * sentence to write: the member asked for /20 and we owe them /20.
+ *
+ * It is written this way because the first version swallowed the error and was
+ * wrong for it. `updated_at` is not in the UPDATE grant of `profile_settings` —
+ * the grant is `(birth_date, locale, preferences, privacy)`, and a trigger
+ * stamps the rest — so setting it raised `42501`, the result went unchecked, and
+ * the button did nothing at all, quietly, forever. Found by clicking it.
  */
 export async function setScoreScale(formData: FormData): Promise<void> {
   const parsed = scaleSchema.safeParse({ scale: formData.get('scale') })
@@ -510,15 +524,20 @@ export async function setScoreScale(formData: FormData): Promise<void> {
       ? (current.preferences as Record<string, unknown>)
       : {}
 
-  await supabase
+  const { data, error } = await supabase
     .from('profile_settings')
     .update({
       // The CHECK reads `preferences ->> 'score_scale'`, which is text either
       // way; a number is written because that is what the column default holds.
       preferences: { ...preferences, score_scale: Number(parsed.data.scale) },
-      updated_at: new Date().toISOString(),
     })
     .eq('id', session.user.id)
+    .select('id')
+
+  if (error) throw new Error(`Could not store the score scale: ${error.message}`)
+  // Zero rows is the quiet failure this whole comment is about: a policy that
+  // declines an UPDATE does not raise, it matches nothing and reports nothing.
+  if (!data || data.length === 0) throw new Error('The score scale was not stored.')
 
   revalidatePath(routes.notebook())
 }

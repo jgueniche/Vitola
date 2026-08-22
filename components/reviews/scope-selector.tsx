@@ -63,6 +63,29 @@ export function ScopeSelector({
   onChange?: (next: ReviewVisibility) => void
 }) {
   const [selected, setSelected] = useState<ReviewVisibility>(value ?? 'private')
+  const [seen, setSeen] = useState(value)
+
+  /*
+   * Re-reads the prop when the server sends a new one, and this is not
+   * defensive tidying — without it the control lies about who can read an entry.
+   *
+   * Measured, in a browser, against the real database. Set a public entry to
+   * "moi seul" and save: the entry is stored private, the editor re-renders
+   * from the revalidated page, and this component comes back initialised from
+   * the *stale* prop — showing "Tout le monde" over an entry that is now
+   * private. Save once more, for a typo, and the form posts `public` and
+   * republishes it. Nobody asked for that, and nothing on screen said it
+   * happened.
+   *
+   * `useState` only reads its initial value on mount, so copying a prop into
+   * state and never reconciling is half the bug. Adjusted during render rather
+   * than in an effect — React documents this pattern for exactly this case, and
+   * `react-hooks/set-state-in-effect` rules the alternative out anyway.
+   */
+  if (value !== undefined && value !== seen) {
+    setSeen(value)
+    setSelected(value)
+  }
 
   function choose(next: ReviewVisibility) {
     setSelected(next)
@@ -73,7 +96,22 @@ export function ScopeSelector({
     <fieldset className="flex flex-col gap-3">
       <legend className="eyebrow mb-2">{copy.legend}</legend>
 
-      <div className="flex flex-col gap-2">
+      {/*
+        Keyed on the server's value, which is the other half of the bug above and
+        the half that took a browser to find. React 19 resets a form after its
+        Server Action returns, and a reset restores every input to the
+        `defaultChecked` it was given **at mount** — React syncs that once and
+        never again. So after saving "moi seul", state said private, the badge
+        two blocks up said private, and the radio silently snapped back to the
+        public it had been mounted with. Instrumented before it was believed:
+        `{"prop":"private","selected":"private"}` over a DOM reading `public`.
+
+        Re-keying remounts the group whenever the stored scope changes, which is
+        what re-establishes `defaultChecked`. It is not cosmetic: the reverted
+        radio is what the *next* submit posts, so a second save — fixing a typo —
+        republished an entry its author had just made private.
+      */}
+      <div key={value ?? 'new'} className="flex flex-col gap-2">
         {REVIEW_SCOPES.map((scope) => {
           const { label, hint } = LABELS[scope]
           const active = selected === scope
