@@ -573,7 +573,13 @@ create table ref.cigars (
   -- Indicative price only. Display is gated by feature flag
   -- `show_indicative_prices`. There is deliberately NO affiliate_url,
   -- no vendor link, no availability and no "deal" column on this table (§2).
+  --
+  -- DELTA vs brief §5.1: a price with no date and no source is misinformation
+  -- within weeks. French retail prices are homologated by decree and revised
+  -- roughly monthly, so the three columns travel together — enforced below.
   msrp_eur          numeric(10,2),
+  msrp_source       text,
+  msrp_effective_on date,
   status            ref.entry_status not null default 'draft',
   -- DELTA vs brief: `status = 'merged'` needs a target for duplicate merging (F3).
   merged_into_id    uuid references ref.cigars(id) on delete set null,
@@ -588,6 +594,14 @@ create table ref.cigars (
   constraint cigars_slug_format         check (slug = public.slugify(slug) and length(slug) between 1 and 180),
   constraint cigars_origin_country_format check (origin_country is null or origin_country ~ '^[A-Z]{2}$'),
   constraint cigars_msrp_positive       check (msrp_eur is null or msrp_eur >= 0),
+  -- A price is only meaningful with its source and its date of effect.
+  constraint cigars_msrp_sourced check (
+    (msrp_eur is null and msrp_source is null and msrp_effective_on is null)
+    or (msrp_eur is not null and msrp_source is not null and msrp_effective_on is not null)
+  ),
+  constraint cigars_msrp_source_allowed check (
+    msrp_source is null or msrp_source in ('douane-fr', 'manufacturer', 'community')
+  ),
   constraint cigars_release_year        check (release_year is null or release_year between 1800 and 2100),
   constraint cigars_discontinued_after_release
     check (discontinued_year is null or release_year is null or discontinued_year >= release_year),
@@ -599,6 +613,10 @@ create table ref.cigars (
   constraint cigars_no_self_merge
     check (merged_into_id is null or merged_into_id <> id)
 );
+
+comment on column ref.cigars.msrp_source is
+  'Where the price came from. `douane-fr` = the French homologated retail price '
+  '(arrêté published in the JO), which is official public data, not a scrape.';
 
 comment on table ref.cigars is
   'Referential entry. Wiki-versioned through ref.cigar_revisions. '
@@ -936,7 +954,8 @@ grant insert on ref.cigars to authenticated;
 grant update (
   brand_id, line_id, vitola_id, commercial_name, slug, origin_country,
   wrapper_origin, binder_origin, filler_origins, wrapper_shade, strength,
-  release_type, release_year, discontinued_year, packaging, msrp_eur,
+  release_type, release_year, discontinued_year, packaging,
+  msrp_eur, msrp_source, msrp_effective_on,
   status, merged_into_id, verified_at, verified_by, updated_at
 ) on ref.cigars to authenticated;
 -- `search_vector` and `created_by` are absent: trigger- and insert-owned.

@@ -104,7 +104,8 @@ create temporary table _cigars (
   brand_slug text, vitola_slug text, commercial_name text, slug text,
   origin_country text, wrapper_origin text, binder_origin text, filler_origins text,
   wrapper_shade text, strength text, release_type text, release_year text,
-  status text, notes text
+  status text, notes text,
+  msrp_eur text, msrp_source text, msrp_effective_on text
 ) on commit drop;
 
 \copy _cigars from '04_cigars.csv' with (format csv, header true)
@@ -133,7 +134,8 @@ $$;
 insert into ref.cigars (
   brand_id, vitola_id, commercial_name, slug, origin_country,
   wrapper_origin, binder_origin, filler_origins, wrapper_shade, strength,
-  release_type, release_year, status, packaging
+  release_type, release_year, status, packaging,
+  msrp_eur, msrp_source, msrp_effective_on
 )
 select b.id,
        v.id,
@@ -149,7 +151,10 @@ select b.id,
        nullif(c.release_year, '')::smallint,
        c.status::ref.entry_status,
        case when c.notes = '' then '{}'::jsonb
-            else jsonb_build_object('seed_note', c.notes) end
+            else jsonb_build_object('seed_note', c.notes) end,
+       nullif(c.msrp_eur, '')::numeric(10,2),
+       nullif(c.msrp_source, ''),
+       nullif(c.msrp_effective_on, '')::date
   from _cigars c
   join ref.brands b on b.slug = c.brand_slug
   left join ref.vitolas v on v.slug = nullif(c.vitola_slug, '')
@@ -166,7 +171,10 @@ on conflict (slug) do update
        release_type    = excluded.release_type,
        release_year    = excluded.release_year,
        packaging       = excluded.packaging,
-       updated_at      = now();
+       msrp_eur          = excluded.msrp_eur,
+       msrp_source       = excluded.msrp_source,
+       msrp_effective_on = excluded.msrp_effective_on,
+       updated_at        = now();
 
 -- --- 5. Codes de boîte ---------------------------------------------------------------
 create temporary table _box_codes (
@@ -203,4 +211,5 @@ union all select '  à vérifier',  count(*) from ref.vitolas where notes like '
 union all select 'cigares',       count(*) from ref.cigars
 union all select '  en brouillon', count(*) from ref.cigars where status = 'draft'
 union all select '  sans vitole',  count(*) from ref.cigars where vitola_id is null
+union all select '  avec prix officiel', count(*) from ref.cigars where msrp_eur is not null
 union all select 'codes de boîte', count(*) from ref.box_codes;

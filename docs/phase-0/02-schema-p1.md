@@ -95,6 +95,7 @@ Aucun n'a été appliqué en silence. Chacun est commenté dans le SQL à l'endr
 | **E6** | `cigar_images` : `license` passe en `NOT NULL` ; ajout de `created_by`, `width`, `height`, `blurhash` | Une image de licence inconnue est un passif. `created_by` est requis par la RLS (qui peut modifier ?). Le LQIP est exigé par le §3 du brief. | `license` nullable = dette juridique à l'échelle du référentiel. |
 | **E7** | `profiles.is_discoverable` sorti du jsonb `privacy` | Une policy RLS doit le lire sans jointure. Le reste de `privacy` demeure en jsonb. | Une jointure `profile_settings` dans la policy de `profiles` : lecture croisée et récursion. |
 | **E8** | `manufacturers.notes`, `vitolas.notes`, contraintes de longueur partout | Bornes de saisie sur un modèle wiki ouvert à la contribution. | Champs texte non bornés en écriture publique. |
+| **E9** | `cigars.msrp_source` et `cigars.msrp_effective_on` ajoutés, liés à `msrp_eur` par contrainte | Les prix français sont homologués par arrêté et révisés tous les mois environ. Un prix sans date est une désinformation en quelques semaines ; sans source, il est invérifiable. Les trois colonnes voyagent ensemble ou aucune n'est renseignée. | Un prix figé, dont personne ne saura s'il date de 2026 ou de 2029. |
 
 ---
 

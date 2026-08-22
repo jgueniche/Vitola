@@ -7,9 +7,16 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 
 ---
 
-## 1. Comment ces données ont été produites
+## 1. Deux sources, deux régimes
 
-**Elles ont été saisies par Claude (assistant IA), à partir de ses connaissances propres du domaine.**
+| Source | Ce qu'elle fournit | Régime |
+|---|---|---|
+| **A — Saisie de mémoire** | Manufactures, marques, vitoles, 123 fiches curées, codes de boîte | À relire (§2) |
+| **B — Arrêté d'homologation des prix (Douane)** | 900 prix de vente au détail, 817 fiches supplémentaires | Donnée publique officielle, exacte à sa date |
+
+### Source A — saisie de mémoire
+
+**Saisie par Claude (assistant IA), à partir de ses connaissances propres du domaine.**
 
 Formulé sans détour, parce que la formulation compte ici :
 
@@ -24,6 +31,38 @@ Formulé sans détour, parce que la formulation compte ici :
 - La **sélection et l'organisation** (quelles marques retenir, quels champs, quels regroupements)
   sont propres à ce projet et découlent du modèle de données du §5.1 du brief.
 
+### Source B — l'arrêté d'homologation des prix
+
+**Arrêté du 5 août 2026 portant homologation des prix de vente au détail des tabacs manufacturés
+en France, applicable au 1er septembre 2026.** Publié au Journal officiel et diffusé en *open data*
+par la Direction générale des douanes et droits indirects.
+
+C'est une **publication officielle de l'État français**, pas une base tierce : le droit *sui generis*
+de l'article L341-1 CPI ne s'y applique pas, et les textes officiels sont librement réutilisables.
+Le fichier a été téléchargé directement depuis `douane.gouv.fr`, converti en texte et analysé par un
+script ; aucun site du secteur n'a été sollicité.
+
+- Fichier : `Maquette JORF 1er septembre 2026.pdf`
+- Colonne retenue : **prix de vente au détail à l'unité** (jamais le prix au conditionnement)
+- Reporté dans `msrp_eur`, avec `msrp_source = 'douane-fr'` et `msrp_effective_on = 2026-09-01`
+
+**Ces prix expirent.** L'homologation est révisée à peu près tous les mois. Un prix sans date est
+une désinformation en quelques semaines : c'est pourquoi le schéma refuse un `msrp_eur` sans source
+ni date d'effet, par contrainte de table. **Rafraîchir à chaque nouvel arrêté.**
+
+Trois pièges rencontrés en analysant ce PDF, consignés pour la prochaine fois :
+
+1. **Les milliers n'ont pas de séparateur** (`2112,50`). Un motif attendant des groupes de trois
+   écartait en silence toute boîte au-dessus de 1 000 € — soit la plupart des boîtes de 25.
+2. **Un motif de nombre tolérant les espaces est pire.** Sur `… en 32 46,00 1472,00`, il avalait la
+   quantité et lisait `3246,00` comme prix unitaire. Un chiffre faux, parfaitement plausible.
+3. **Les chiffres romains piègent l'appariement flou.** `Siglo VI` ressemble à `Siglo I` à 0,97 et
+   `Medaille d'Or n°2` à `n°4` à 0,97. L'appariement impose désormais l'égalité **exacte** des
+   chiffres et nombres, quel que soit le score de similarité.
+
+Les fiches issues de cette source portent le nom homologué, minoré de son conditionnement. Elles
+n'ont ni vitole, ni force, ni cape : l'arrêté ne les donne pas, et je ne les invente pas.
+
 ## 2. Ce que cela ne garantit pas
 
 **Cette origine ne vaut pas exactitude.** Un modèle de langage restitue des faits mémorisés : il en
@@ -35,6 +74,8 @@ C'est pour cette raison que le chargement est conçu ainsi :
 | Garde-fou | Effet |
 |---|---|
 | **Toutes les fiches cigares sont chargées en `draft`** | Aucune n'est visible d'un visiteur anonyme. La RLS l'impose, ce n'est pas une convention. |
+| **Un prix ne peut exister sans sa source et sa date** | Contrainte de table, pas convention. Un prix orphelin est refusé à l'insertion. |
+| **Un prix unitaire au-dessus de 1 500 € échoue en CI** | Garde-fou contre un prix de boîte lu comme un prix unitaire. Le cigare le plus cher de l'arrêté est à 750 € l'unité. |
 | **15 vitoles portent `Dimensions à vérifier`** | Cotes de confiance moyenne, signalées plutôt qu'omises : le relecteur n'a qu'à confirmer. |
 | **45 fiches non cubaines n'ont aucune vitole** | Les cotes exactes varient d'une manufacture à l'autre et ne sont pas connues avec certitude. Les rattacher au format cubain le plus proche aurait introduit une donnée fausse. Le format annoncé figure en note. |
 | **Les sigles d'usine cubains sont signalés** | Voir §4. |
@@ -47,7 +88,9 @@ C'est pour cette raison que le chargement est conçu ainsi :
 | `01_manufacturers.csv` | 30 | **Élevée** sur les noms, pays et groupes | Raisons sociales exactes, villes |
 | `02_brands.csv` | 114 | **Élevée** sur les noms, pays, `is_cuban` | Les années de fondation, quand elles sont renseignées. Les rattachements marque → manufacture pour les marques non cubaines, qui changent de main. |
 | `03_vitolas.csv` | 50 | **Élevée** pour 35, **moyenne** pour 15 | Les 15 marquées `Dimensions à vérifier` |
-| `04_cigars.csv` | 123 | **Élevée** sur le couple marque + nom commercial. **Moyenne** sur la force et la cape, qui sont des appréciations conventionnelles. | Toutes les forces et capes. Les années de sortie. Les 45 fiches sans vitole. |
+| `04_cigars.csv` — 123 curées | 123 | **Élevée** sur le couple marque + nom commercial. **Moyenne** sur la force et la cape, qui sont des appréciations conventionnelles. | Toutes les forces et capes. Les années de sortie. Les 45 fiches sans vitole. |
+| `04_cigars.csv` — 817 issues de l'arrêté | 817 | **Élevée** sur le nom et le prix (source officielle). **Nulle** sur le reste : ces colonnes sont vides. | Libellés à normaliser, vitoles / forces / capes à renseigner. |
+| Prix (900 fiches) | 900 | **Élevée à la date du 1ᵉʳ septembre 2026** | Rien à vérifier, mais **à rafraîchir à chaque arrêté** |
 | `05_box_codes.csv` | 18 | **Élevée** pour les 12 codes de mois. **Faible** pour les 6 sigles d'usine. | Voir §4 |
 
 ## 4. Le cas particulier des codes d'usine cubains
@@ -81,8 +124,10 @@ Ordre de relecture recommandé, du plus rentable au moins :
    référencent. C'est le poste le plus rentable.
 2. **Les 78 fiches cubaines**, dont le rattachement marque → vitole est standard et se contrôle vite.
 3. **Les forces et les capes**, qui sont conventionnelles et se corrigent au fil de l'eau.
-4. **Les 45 fiches non cubaines**, à compléter par leurs cotes réelles.
-5. **Les sigles d'usine**, une fois une source d'observation directe constituée.
+4. **Les 45 fiches non cubaines curées**, à compléter par leurs cotes réelles.
+5. **Les 817 fiches issues de l'arrêté**, dont le libellé est à normaliser et les caractéristiques à
+   renseigner. Le prix, lui, n'est pas à vérifier : il est officiel.
+6. **Les sigles d'usine**, une fois une source d'observation directe constituée.
 
 ## 6. Contributions futures
 

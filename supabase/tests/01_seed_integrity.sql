@@ -35,6 +35,24 @@ begin
   raise notice 'Amorçage : % manufactures, % marques, % vitoles (dont % à vérifier), % fiches en brouillon.',
     n_manuf, n_brands, n_vitolas, n_unverified, n_cigars;
 
+  -- Un prix sans source ni date d'effet est une désinformation en quelques
+  -- semaines : la contrainte de table l'interdit, ce test le confirme sur les
+  -- données réelles.
+  if exists (
+    select 1 from ref.cigars
+     where msrp_eur is not null
+       and (msrp_source is null or msrp_effective_on is null)
+  ) then
+    raise exception 'VITOLA_SEED: un prix est enregistré sans source ni date d''effet';
+  end if;
+
+  -- Un prix unitaire à quatre chiffres trahit presque toujours un prix de boîte
+  -- lu comme un prix unitaire. Le seuil est large : le cigare le plus cher de
+  -- l'arrêté est à 750 EUR l'unité.
+  if exists (select 1 from ref.cigars where msrp_eur > 1500) then
+    raise exception 'VITOLA_SEED: prix unitaire invraisemblable, probable prix de boîte';
+  end if;
+
   -- La recherche doit fonctionner sur les données réelles, pas seulement en théorie.
   if not exists (
     select 1 from ref.cigars c, to_tsquery('pg_catalog.simple','cohiba') q

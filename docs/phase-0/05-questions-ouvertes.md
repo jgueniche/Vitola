@@ -204,12 +204,22 @@ doivent rester tels quels dans tous les cas.
 **Défaut :** inchangé. Le renommer maintenant coûte une ligne ; après P2, une migration de type avec
 réécriture de données.
 
-### Q19 · Les prix indicatifs seront-ils un jour affichés ?
-`msrp_eur` existe, le flag `show_indicative_prices` est à `false`. La question est de savoir si ce
-flag est destiné à passer à `true` un jour, ou s'il ne s'agit que d'une donnée d'analyse interne
-(valorisation de cave en P2, qui n'exige aucun affichage sur la fiche).
-**Défaut :** jamais affiché sur une fiche cigare. Employé uniquement pour valoriser une cave
-personnelle, où l'information est patrimoniale et non promotionnelle.
+### Q19 · Les prix indicatifs seront-ils un jour affichés ? *(la question a mûri)*
+900 fiches portent désormais un prix, repris de l'**arrêté d'homologation des prix de vente au
+détail des tabacs manufacturés** — donnée publique officielle, pas une cote de marché. Le flag
+`show_indicative_prices` reste à `false`.
+
+Un argument nouveau mérite d'être versé au dossier avant de trancher : **le prix homologué est la
+forme la moins promotionnelle qu'un prix puisse prendre.** Il est fixé par arrêté, identique chez
+tous les buralistes de France, et ne permet aucune comparaison, aucune bonne affaire, aucune
+incitation — précisément ce que la loi Évin vise. L'afficher tiendrait de l'information
+réglementaire plus que de l'argument commercial.
+
+Je ne tranche pas : c'est un arbitrage juridique (Q1), pas technique. Mais la question n'est plus
+« peut-on afficher un prix », elle est « un prix fixé par l'État est-il un prix au sens de la loi
+Évin ». À poser telle quelle à l'avocat.
+**Défaut inchangé :** jamais affiché sur une fiche. Employé pour valoriser une cave personnelle,
+où l'information est patrimoniale.
 
 ### Q20 · PostHog : nuage UE ou auto-hébergé ?
 **Défaut :** nuage UE. L'auto-hébergement ajoute une astreinte pour une exigence que le nuage UE
