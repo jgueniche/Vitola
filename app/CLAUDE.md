@@ -13,8 +13,15 @@ La recherche facettée n'en est pas un : ses facettes sont des liens et son cham
 | `cigares/[slug]/comment-form.tsx` | idem, plus vider le champ **uniquement** en cas de succès |
 | `cigares/[slug]/comment-item.tsx` | un commentaire bascule entre lecture et édition |
 | `components/moderation/report-dialog.tsx` | un `POST` vers une route API, avec son état d'envoi |
+| `cigares/[slug]/log-form.tsx` | `useActionState` — vider le champ **uniquement** en cas de succès |
+| `cigares/[slug]/degustation/tasting-form.tsx` | total calculé, minuteur, roue, brouillon local |
+| `carnet/[id]/entry-editor.tsx` | `useActionState` — le refus se relit sur place |
+| `carnet/[id]/share-add-button.tsx` | nommer quelqu'un peut être refusé, et doit le dire |
+| `carnet/[id]/delete-entry-form.tsx` | `window.confirm` avant une suppression en cascade |
+| `components/reviews/scope-selector.tsx` | l'avertissement « abonnés » s'affiche au choix, pas au submit |
+| `components/reviews/aroma-wheel.tsx` | une roue est un contrôle, et un contrôle retient ce qu'on a pris |
 
-Deux règles apprises en les écrivant :
+Quatre règles apprises en les écrivant :
 
 - **Un formulaire qui doit se refermer tout seul n'utilise pas `useActionState`.** La règle
   `react-hooks/set-state-in-effect` refuse `setState` dans un `useEffect`, et surveiller l'état
@@ -23,6 +30,20 @@ Deux règles apprises en les écrivant :
 - **Le dialogue de signalement est un composant client parce que le mécanisme est une route API.**
   L'article 16 du DSA veut un mécanisme joignable, y compris par une machine ; une route
   `app/api/` répond à cela, et une route ne peut pas être un `<form action>`.
+- **React 19 réinitialise un formulaire après le retour de sa Server Action**, et une
+  réinitialisation rend à chaque champ le `defaultChecked` / `defaultValue` qu'il avait **au
+  montage** — React le synchronise une fois et jamais ensuite. Un groupe de radios *contrôlé* revient
+  donc silencieusement à sa valeur de départ pendant que l'état React, lui, est juste : le DOM ment,
+  et c'est le DOM que le submit suivant poste. Vu sur le sélecteur de portée, où l'entrée qu'on
+  venait de rendre privée se republiait au deuxième enregistrement. Un groupe de radios dont la
+  valeur vient du serveur doit être **keyé sur cette valeur**, en plus de la réconcilier.
+- **Un état dérivé d'une prop se réconcilie pendant le rendu**, jamais dans un effet — la règle
+  `set-state-in-effect` interdit le second, et React documente le premier. `useState(prop)` ne relit
+  rien après le montage.
+- **Lire `localStorage` demande `useSyncExternalStore`.** Pendant le rendu, serveur et client
+  divergent ; dans un effet, `set-state-in-effect` refuse. Le hook rend l'instantané serveur
+  (`null`) pendant l'hydratation puis relit côté client, sans écart. C'est le brouillon de
+  dégustation.
 
 ## La frontière de l'age gate est une frontière de routage
 

@@ -22,6 +22,8 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `compliance/dsa.ts` | Les motifs de signalement, les surfaces signalables, le délai annoncé. |
 | `i18n/index.ts` | Le point d'entrée de toute copie visible. |
 | `release.ts` | La phase de la roadmap et le commit déployé, servis par `/api/health`. |
+| `reviews/model.ts` | Les quatre portées, ce que chacune fait *aujourd'hui*, les bornes de `reviews`, et l'échelle des six critères. |
+| `reviews/draft.ts` | Ce qu'est un brouillon de dégustation valide, et ce qui le rend invalide. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 
@@ -45,3 +47,21 @@ retirés **avant** le test. La vraie barrière reste l'enum fermé `shop.product
 
 `supabase/admin.ts` (clé secrète, contourne la RLS) n'est importable que depuis `app/api/**` et
 `supabase/functions/**`. Une règle ESLint le refuse partout ailleurs.
+
+Une Server Action qui a besoin de la clé — le rafraîchissement de `cigar_stats` après une écriture
+publique est le seul cas à ce jour — n'élargit pas la règle : elle appelle un module posé **dans**
+la frontière déjà permise, `app/api/_stats/refresh.ts`. Un dossier Next préfixé par `_` est exclu du
+routage, donc c'est un module et jamais un endpoint. Percer le garde-fou pour éviter un import un peu
+long serait le mauvais échange : la règle a justement été élargie à `app/**/*.ts` pour fermer le
+trou qu'un `actions.ts` laissait.
+
+## Les portées ne se filtrent pas ici
+
+`reviews/queries.ts` ne contient aucun `.eq('visibility', …)`, et c'est la règle centrale de
+l'ADR 0004 : quatre policies SELECT décident, donc la même fonction renvoie des lignes différentes
+selon qui appelle. Une requête qui doublerait une policy serait un bug même juste, parce qu'elle
+survivrait à la policy qu'elle double.
+
+Ce qui **est** dupliqué, ce sont les bornes — longueurs, intervalles, les six clés de `scores` —
+parce qu'un `CHECK` refuse en `23514`, ce qui n'est une phrase pour personne.
+`tests/unit/reviews-model.test.ts` relit la migration 0003 et échoue si l'une d'elles dérive.

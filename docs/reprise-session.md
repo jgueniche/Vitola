@@ -1,8 +1,8 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 22 août 2026, après la livraison
-> du signalement DSA, des commentaires et de la roue des arômes.
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 22 août 2026, après la mise à
+> l'écran du carnet (P2).
 
 ---
 
@@ -11,11 +11,11 @@ Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BR
 `docs/adr/` (0004 et 0005 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`.
 
-**Branche de travail** : `claude/vitola-pXX-<nom>` — à créer depuis `master`, qui contient tout le
-travail décrit ici (PR #6 fusionnée le 22 août 2026). Le code du dépôt et l'état de la base
-concordent : les sept migrations sont dans `supabase/migrations/` **et** appliquées sur le projet.
-Vérifie-le d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3` doit
-montrer la fusion de #6, et `/api/health` sert le commit réellement déployé.
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. Le code du dépôt et
+l'état de la base concordent : les sept migrations sont dans `supabase/migrations/` **et** appliquées
+sur le projet. **Le carnet n'a demandé aucune migration** — 0003 avait tout prévu, et c'est la
+preuve que l'ADR 0004 avait raison de passer avant le SQL. Vérifie plutôt que de supposer :
+`/api/health` sert le commit réellement déployé.
 
 Une chose à savoir sur l'ordre des choses, apprise pendant cette PR : **une migration additive peut
 précéder son écran, l'inverse est un 500.** Les 0006 et 0007 ont vécu quelques heures appliquées en
@@ -48,8 +48,8 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #6 fusionnées. `master` était à `e032021` au début de la session précédente ; la #6 y a
-porté le signalement DSA, les commentaires, la roue des arômes et le correctif de l'export RGPD.
+PR #1 à #6 fusionnées ; la branche du carnet vient après. La #6 avait porté le signalement DSA,
+les commentaires, la roue des arômes et le correctif de l'export RGPD.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
@@ -66,6 +66,14 @@ porté le signalement DSA, les commentaires, la roue des arômes et le correctif
   déduplication d'un dossier ouvert, frein à 20/heure, délai de 72 h publié dans les mentions
   légales et **lu depuis `feature_flags` à chaque rendu**.
 - **`/aromes`** : la roue des arômes, 11 familles et 76 descripteurs, en page de référence.
+- **Le carnet (P2), parcouru en navigateur avec deux comptes contre la vraie base — 112 assertions,
+  0 échec.** Note de carnet depuis la fiche, dégustation structurée à
+  `/cigares/[slug]/degustation` (six critères → note globale calculée, trois tiers, roue des arômes
+  **circulaire et cliquable**, minuteur, à l'aveugle, brouillon local), `/carnet` (liste, filtres
+  par nature et par portée, bascule /100 ↔ /20, section « Partagé avec moi »), `/carnet/[id]`
+  (relecture, modification, portée, destinataires nommés, suppression), `cigar_stats` sur la fiche.
+  Le sélecteur de portée avertit que l'audience « abonnés » est vivante **et** qu'elle est vide
+  jusqu'à P3. Une entrée de carnet est signalable (le DSA suit la surface).
 - `/api/gdpr/export` et `/api/gdpr/delete`. **L'export a été exercé avec `test_un` contre le projet
   réel** : `200`, `Cache-Control: no-store, private`, 22 sources rendues dont les trois liens vers
   `mod`. Il répondait `500` avant la migration 0007.
@@ -107,10 +115,10 @@ cinq minutes, `select public.refresh_cigar_stats()`.
 
 ```
 ref.manufacturers          30      public.profiles             3
-ref.brands                114      public.reviews              0  ←
+ref.brands                114      public.reviews              0
 ref.lines                   0  ←   public.review_shares        0
 ref.vitolas                51      public.review_thirds        0
-ref.cigars                940      public.comments             0
+ref.cigars                940      public.comments             1
   dont published          940      public.aroma_taxonomy      87
   avec vitole              78        dont familles            11
   avec prix               900      public.consents             0
@@ -121,9 +129,14 @@ ref.cigar_images            0      mod.moderation_actions      0
 ref.cigar_revisions         0      public.cigar_stats     0 ligne (vue matérialisée)
 ```
 
-`reviews` à zéro est le manque de la prochaine session, pas un état normal. `ref.lines` à zéro est
-une **décision de v1**, écrite dans `CLAUDE.md` avec son déclencheur — ne la rouvre pas sans la
-lire. `verified_by` à zéro est une dette de relecture, voir « À me signaler ».
+`reviews` est de nouveau à zéro, et c'est **normal cette fois** : les entrées écrites en
+parcourant le carnet ont été effacées derrière la vérification, comme le demande la section
+« Nettoie derrière une vérification » plus bas. La table a des écrans, elle attend des membres.
+`ref.lines` à zéro est une **décision de v1**, écrite dans `CLAUDE.md` avec son déclencheur — ne la
+rouvre pas sans la lire. `verified_by` à zéro est une dette de relecture, voir « À me signaler ».
+
+`public.comments` contient **une ligne** qui n'a pas été écrite par une session Claude : elle est
+antérieure et a été laissée en place. Ne l'efface pas sans demander.
 
 `audit_log` contient quatre lignes, dont trois écrites en vérifiant les endpoints (`dsa.report`
 ×2, `gdpr.export`). Le journal est en ajout seul, personne n'a de `DELETE` dessus : c'est voulu.
@@ -356,12 +369,12 @@ de rien du tout, et la 0007 les écrit. Voir « Droits de table de la clé de se
 Les items 0, 1 et 2 de la liste précédente sont livrés. La numérotation reprend là où elle s'est
 arrêtée.
 
-### 3. Le carnet à l'écran — P2. **C'est cette session.**
+### 3. Le carnet à l'écran — P2. **LIVRÉ le 22 août 2026.**
 
-Le cœur du produit, entièrement débloqué côté base : la table, ses policies, la roue des arômes et
-`cigar_stats` existent et sont peuplées ou prêtes. Rien de tout cela ne se voit encore.
+Tout ce qui suit est à l'écran et parcouru. Conservé pour ce qu'il dit des règles, qui elles
+tiennent toujours — la liste des URL à ouvrir est en fin de fichier.
 
-À livrer :
+Ce qui a été livré :
 
 - **Créer une entrée depuis une fiche** : quoi, quand (`smoked_on`), la note, un commentaire libre.
   C'est `kind='log'` — le geste quotidien, qui exige seulement une note **ou** un texte.
@@ -387,7 +400,14 @@ Le cœur du produit, entièrement débloqué côté base : la table, ses policie
 Deux règles héritées de l'ADR 0004, à ne pas contourner : **aucun filtre `visibility` en
 TypeScript** — la RLS l'applique et rien d'autre — et la portée est **par entrée**, jamais globale.
 
-### 4. Le reste de P1
+**Ce qui reste sur ce chantier**, et qui n'a pas pu l'être ici : le rafraîchissement de
+`cigar_stats` à l'écriture est **écrit et gaté correctement** — mesuré, une tentative d'appel par
+écriture susceptible de bouger une moyenne publique, aucune pour les autres — mais **jamais exercé
+de bout en bout**, faute de clé de service : `api.supabase.com` est refusé par la politique de
+sortie des sessions distantes. À faire au premier déploiement : publier une entrée sur une fiche et
+vérifier que la moyenne bouge sans attendre les cinq minutes de `pg_cron`.
+
+### 4. Le reste de P1 — **c'est la prochaine session.**
 
 Contribution wiki (proposer, historique, nouveau, file de validation — `cigar_revisions` est prête
 et vide), comparateur 2–4 cigares, décodeur de codes de boîte, images OG, `sitemap.ts`,
@@ -402,6 +422,14 @@ et non supposé**.
 ---
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
+
+- **Le rafraîchissement de `cigar_stats` à l'écriture n'a jamais tourné pour de vrai.** Voir le
+  point 3 ci-dessus. Il échoue proprement — l'entrée est enregistrée, seule la fraîcheur de la
+  moyenne est perdue, et `pg_cron` rattrape en cinq minutes — mais c'est le seul chemin de P2 qui
+  n'a pas été parcouru en entier.
+- **Les sous-notes d'une dégustation sont sur 10, et la note globale en est la moyenne**, non
+  saisissable. Le §5.4 ne le disait pas ; c'est une décision, argumentée dans
+  `docs/decisions-log.md`, et elle se défait tant que `reviews` est vide.
 
 - **Qui modère ?** La Q12 posait deux questions ; le délai est répondu (72 h, publié), celle-là non.
   Pas de back-office avant P8, aucun destinataire nommé, personne pour relever `mod.reports`.
@@ -449,7 +477,16 @@ toujours validation ; 0004 et 0005 sont acceptées.
   puis pointer Playwright sur `127.0.0.1`. `curl` sort normalement, lui, via le proxy.
 - **Les formulaires sont câblés par l'hydratation.** Cliquer « Confirmer » ou « Publier » avant que
   React n'ait attaché l'action ne soumet **rien**, en silence : la page reste là et l'assertion
-  suivante échoue ailleurs. Attends `networkidle`, jamais `load`.
+  suivante échoue ailleurs. `networkidle` **ne suffit pas** — il a fallu y ajouter une attente fixe
+  d'environ 800 ms avant chaque interaction pour que les parcours du carnet soient stables.
+- **`.eyebrow` met le texte en capitales par CSS.** Un `innerText` renvoie donc
+  « AUCUNE NOTE PUBLIQUE » pour un message écrit en prose : compare sans tenir compte de la casse,
+  sinon tu passeras une heure à chercher un bug qui n'existe pas.
+- **React 19 réinitialise un formulaire après le retour de sa Server Action**, et rend à chaque champ
+  le `defaultChecked` qu'il avait **au montage**. Un groupe de radios contrôlé revient donc à sa
+  valeur de départ pendant que l'état React reste juste : le DOM ment, et c'est le DOM que le submit
+  suivant poste. Voir `app/CLAUDE.md` — c'est ce qui republiait une entrée qu'on venait de rendre
+  privée.
 - **Playwright** : le `@playwright/test` épinglé veut `chromium_headless_shell-1234`, l'image
   fournit `1194`. Lance avec `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium`.
 - **Nettoie derrière une vérification.** Les commentaires et signalements écrits en parcourant le
@@ -461,6 +498,17 @@ toujours validation ; 0004 et 0005 sont acceptées.
   fichier, et `set_config(..., true)` fuit d'une assertion à la suivante.
 - **`pnpm check` et le commit doivent être dans la MÊME commande** (`&&`). Sur deux lignes, un check
   rouge n'empêche pas le commit.
+- **Vérifie qu'une modification de fichier a bien été appliquée.** Un remplacement de texte dont le
+  motif ne correspond pas ne dit rien et ne change rien : la branche `review` de
+  `isVisibleToCaller` a été « écrite » deux fois avant de l'être vraiment, et entre les deux tout
+  signalement d'une entrée répondait 404. Relis le fichier, ou `grep` ce que tu viens d'y mettre.
+- **`api.supabase.com` est refusé par la politique de sortie** de cette session : impossible de
+  récupérer une clé de service (`SUPABASE_SECRET_KEY`). Conséquence pratique : en local, tout ce qui
+  passe par la clé de service échoue — le rafraîchissement de `cigar_stats`, l'écriture d'un
+  signalement, l'export RGPD. Le MCP Supabase, lui, fonctionne : il sert à vérifier l'état de la base
+  et à jouer une fonction privilégiée à la main. `/api/signalements` répond alors **500 là où la
+  production répond 201** ; un **404** au même endroit veut dire tout autre chose — que la RLS a
+  refusé de montrer la cible — et les deux ne doivent pas être confondus.
 - **Prettier n'est pas dans la CI** et 52 fichiers ne passent pas `pnpm format:check`, dont beaucoup
   d'avant cette session. Ne lance pas `pnpm format` : tu enterrerais ton diff sous un reformatage.
 - **Le classificateur bloque parfois les heredocs `cat >`** ; utilise l'outil Write, ou un script
@@ -489,6 +537,32 @@ toujours validation ; 0004 et 0005 sont acceptées.
   and cron.job est vide` échoue sur « relation cron.job does not exist » là où la garde devait
   l'éviter. Un `if` imbriqué, ou un `execute`, diffère l'analyse.
 - Une vue matérialisée n'accepte pas de RLS.
+
+## LES URL À OUVRIR POUR RECETTER LE CARNET
+
+Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un second onglet avec `test_deux`.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/cigares/undercrown-10-robusto` | « Notes des membres » en état vide (invitation, pas un tiret), « Entrées de carnet », puis le formulaire « Noter ce cigare » avec les quatre portées et **« Moi seul » présélectionné**. |
+| ⟶ choisir « Mes abonnés » | Deux phrases apparaissent : l'audience est vivante, et l'abonnement n'existe pas encore — donc personne ne lit. |
+| ⟶ choisir « Tout le monde » | « Seules les entrées publiques entrent dans la moyenne d'un cigare. » |
+| ⟶ enregistrer une note privée | « Entrée enregistrée », l'entrée apparaît en dessous marquée « Votre entrée », et la moyenne **reste vide**. |
+| ⟶ enregistrer sans note ni texte | « Une entrée de carnet demande au moins une note ou un commentaire. » |
+| `/carnet` | L'entrée, sa fiche, son badge « MOI SEUL ». Filtres par nature et par portée (des liens : rechargeables, partageables). |
+| ⟶ « Sur 20 » | 88/100 devient **17,6/20** partout. « Sur 100 » revient. |
+| `/cigares/undercrown-10-toro/degustation` | Six critères, et « Notez les six critères pour obtenir la note globale » tant qu'il en manque un. Les six remplis à 8 → **80/100**, calculé, non saisissable. |
+| ⟶ la roue | Onze familles autour, les descripteurs de la famille choisie à l'intérieur. Cliquer en ajoute, un jeton apparaît dessous, le compteur suit. Changer de famille **garde** les choix précédents. |
+| ⟶ le minuteur | Démarrer, puis « Durée » : le champ se remplit (jamais 0, que la base refuserait). |
+| ⟶ recharger la page à mi-saisie | « Un brouillon a été retrouvé sur cet appareil et rechargé. » Tout revient, y compris les arômes. |
+| ⟶ enregistrer en « Tout le monde » | On arrive **sur l'entrée**, avec ses six critères sur 10, ses trois tiers, ses arômes, son contexte. |
+| `/cigares/undercrown-10-toro` | Note pondérée en tête, moyenne simple à côté, répartition, « Ne comptent ici que les entrées publiques ». (Si la moyenne ne bouge pas tout de suite, c'est le point ouvert du §3 : `pg_cron` la rattrape en cinq minutes.) |
+| `/carnet/<id>` d'une entrée à soi | Éditeur, panneau « Personnes nommées », bouton Supprimer. Passer la portée à « Des personnes que je nomme », chercher `test_deux`, « Nommer ». |
+| **En `test_deux`** : le même `/carnet/<id>` | L'entrée s'ouvre, **sans** éditeur, **sans** panneau de partage (un destinataire ne repartage pas), **avec** « Signaler cette entrée ». |
+| **En `test_deux`** : `/carnet` | L'entrée sous « Partagé avec moi ». |
+| ⟶ `test_un` retire le partage | En `test_deux`, l'entrée disparaît et son URL redevient une 404. |
+| Une entrée privée d'autrui, par son URL | 404 — jamais « accès refusé », qui confirmerait qu'elle existe. |
+| `/carnet` en navigation privée | Renvoie vers `/connexion`. |
 
 ## UTILE
 

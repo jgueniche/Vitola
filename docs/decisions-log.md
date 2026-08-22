@@ -2,6 +2,135 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Le carnet à l'écran, et trois bugs qu'aucun build ne pouvait voir
+
+P2 commencée le 22 août 2026. L'ADR 0004 était acceptée depuis le matin et rien ne l'appliquait :
+`reviews`, `review_shares`, `review_thirds`, `aroma_taxonomy` et `cigar_stats` existaient, avec
+leurs policies et leurs index, et zéro ligne — parce qu'aucun écran ne permettait d'en écrire une.
+
+### Ce qui est livré
+
+Le geste quotidien sur la fiche cigare (`kind='log'` : une note **ou** un mot), l'exercice à
+`/cigares/[slug]/degustation` (`kind='tasting'` : six critères, trois tiers, roue des arômes,
+minuteur, à l'aveugle), `/carnet` et `/carnet/[id]` pour relire, filtrer, modifier, repartager et
+supprimer, la bascule /100 ↔ /20 du §5.4, et `cigar_stats` sur la fiche.
+
+### Trois décisions qui ne méritaient pas d'ADR
+
+**Les six sous-notes sont sur 10, et la note globale en est la moyenne — elle ne se saisit pas.**
+Le §5.4 donne les deux colonnes sans dire comment elles s'articulent. Une note globale surchargeable
+ferait des six critères une décoration ; c'est exactement la différence que l'ADR 0004 trace entre le
+carnet et la dégustation, rendue visible. Sur 10 plutôt que sur 100 parce que six champs demandant
+chacun un nombre entre 0 et 100, ce sont six occasions d'inventer une précision qu'on n'a pas : un
+tirage n'est pas un 84/100, c'est un 7 ou un 8.
+
+**L'URL est `/carnet`, pas `degustations/`.** L'arborescence de P0 nommait la section avant que
+l'ADR 0004 ne fusionne le geste et l'exercice dans une seule table. `carnet` est le mot du produit ;
+`degustation` reste le segment de l'exercice sur un cigare, et `degustations` le pluriel dont le
+profil public de P3 aura besoin. Les trois vivent dans `lib/routes.ts`.
+
+**Le brouillon d'une dégustation vit dans `localStorage`, pas dans une ligne.** `reviews` n'a pas de
+colonne `status` et `reviews_tasting_has_structure` refuse un `scores` vide : une dégustation à
+moitié tapée n'a nulle part où exister en base. Lui ajouter un statut mettrait du texte inachevé sur
+la consommation de tabac de quelqu'un dans une table que l'export RGPD parcourt et que la file de
+modération peut viser — pour rien, puisque personne d'autre que l'auteur ne lirait ce brouillon.
+L'interface le dit en toutes lettres : « elle ne quitte pas votre navigateur ». C'est une promesse
+honnête et bon marché à tenir, et sa limite — un brouillon ne suit pas d'un téléphone à un portable —
+est écrite plutôt que cachée.
+
+Deux conséquences techniques valent d'être notées, parce qu'elles se représenteront. Le brouillon
+est restauré par `useSyncExternalStore` : lire `localStorage` pendant le rendu fait diverger le
+serveur et le client, et le lire dans un effet est ce que `react-hooks/set-state-in-effect` interdit
+— le hook est fait pour exactement cette forme. Et le formulaire est **keyé sur l'instant
+d'ouverture** du brouillon, pas sur sa dernière sauvegarde, faute de quoi chaque frappe remonterait
+le formulaire en emportant le curseur.
+
+**Le rafraîchissement de `cigar_stats` à l'écriture vit sous `app/api/`, sans y répondre à rien.**
+`refresh_cigar_stats()` n'est accordée qu'à `service_role`, donc l'appeler veut dire importer la clé
+de service, et ESLint ne l'autorise que depuis `app/api/**`. Cette règle a précisément été élargie à
+`app/**/*.ts` pour empêcher une Server Action d'aller chercher cette clé : la façon honnête de
+satisfaire les deux est de mettre l'appel là où la clé est déjà permise, dans un dossier privé Next
+(`app/api/_stats/`) que le routage ignore, plutôt que de percer un trou de plus dans le garde-fou.
+L'alternative — accorder la fonction à `authenticated` — évitait le détour et valait bien pire :
+`REFRESH MATERIALIZED VIEW` travaille sur la vue entière, et un membre qui peut l'appeler à volonté
+peut occuper la base à volonté.
+
+`reviews` rejoint enfin la carte des surfaces signalables. Le commentaire de `lib/compliance/dsa.ts`
+disait déjà pourquoi elle en était absente — « an entry in this map without a Signaler button is a
+promise nobody can keep » — et la condition a changé : une entrée publique est un texte de membre sur
+le tabac, lisible de tout visiteur passé le portail, ce que l'ADR 0005 range exactement dans ce qui
+nous oblige.
+
+### Les trois bugs, et ce qu'ils ont en commun
+
+`pnpm check` était vert, 165 tests unitaires passaient, `pnpm build` compilait, 56 e2e passaient.
+Les trois bugs ci-dessous étaient tous présents dans ce vert. Ils ont été trouvés en ouvrant le site
+avec deux vrais comptes contre la vraie base — 112 assertions de parcours, dont ces trois-là.
+
+**1. Le sélecteur de portée revenait en arrière après enregistrement, et l'enregistrement suivant
+republiait l'entrée.** Passez une entrée publique à « moi seul », enregistrez, corrigez une faute,
+enregistrez de nouveau : elle est publique. Rien à l'écran ne le disait. Deux causes empilées, et
+c'est la seconde qui a demandé un navigateur :
+
+- `ScopeSelector` copiait une prop dans un `useState` sans jamais la réconcilier. `useState` ne lit
+  sa valeur initiale qu'au montage — le bug classique de l'état dérivé.
+- **React 19 réinitialise un formulaire après le retour de sa Server Action**, et une
+  réinitialisation rend à chaque champ le `defaultChecked` qu'il avait **au montage**. React
+  synchronise cette valeur une fois et jamais ensuite. L'état React disait donc `private`, le badge
+  deux blocs plus haut disait `private`, et seul le bouton radio du DOM mentait — or c'est lui que
+  le submit suivant poste.
+
+Instrumenté avant d'être cru : `{"prop":"private","selected":"private"}` au-dessus d'un DOM qui
+lisait `public`. Corrigé en réconciliant pendant le rendu **et** en re-keyant le groupe sur la portée
+enregistrée, ce qui rétablit `defaultChecked`. Sur une donnée que le §2 range possiblement à l'art.
+9, une portée qui se rouvre toute seule est le pire bug que cette fonctionnalité pouvait avoir.
+
+**2. Tout signalement d'une entrée de carnet répondait 404.** `review` avait été ajoutée à
+`REPORTABLE` sans sa branche dans `isVisibleToCaller`, et la chaîne de `if` retombait sur
+`ref.cigars` — qui cherchait l'identifiant d'une entrée parmi les cigares et ne trouvait rien. Un
+lecteur regardant une entrée publique s'entendait dire qu'elle n'existe pas. La chaîne est devenue un
+`switch` exhaustif sur l'union, avec un `never` en défaut : la prochaine surface ajoutée à la carte
+ne compilera pas au lieu d'échouer en silence.
+
+**3. La bascule /100 ↔ /20 ne faisait rien du tout.** `setScoreScale` écrivait `updated_at`, qui
+n'est pas dans le `GRANT UPDATE` de `profile_settings` — il porte `(birth_date, locale, preferences,
+privacy)`, et un trigger horodate le reste. L'écriture levait `42501`, le résultat n'était pas lu, et
+le bouton était décoratif. C'est la famille de pièges que `supabase/CLAUDE.md` documente déjà, prise
+par un troisième bout : après « une policy qui refuse ne lève pas » et « BYPASSRLS ne dit rien des
+droits de table », voici **« un grant de colonne refuse une colonne qu'on n'avait pas l'intention de
+changer »**.
+
+La correction va plus loin que la colonne : l'action **lève** désormais au lieu de renvoyer une
+erreur. Un refus d'écriture sur une entrée est quelque chose qu'un membre a fait — trop long, hors
+bornes, pas à vous — et mérite une phrase en français. Un refus d'écriture sur une préférence est
+quelque chose que **nous** avons fait, et il n'y a pas de phrase à écrire : le membre a demandé /20,
+on lui doit /20.
+
+**Ce qu'ils ont en commun** : aucun n'était visible d'un compilateur, d'un test unitaire ou d'un
+parcours e2e sans base. Deux d'entre eux ne se voient même pas d'un code review attentif — le
+comportement de réinitialisation de React 19 et le grant de colonne sont des faits d'exécution. C'est
+la démonstration de la règle héritée de la 0007, élargie : **un écran qui écrit se parcourt une fois
+avec un vrai compte avant d'être déclaré livré**, et pas seulement les endpoints qui mettent en œuvre
+une obligation du §2.
+
+### Ce qui n'a pas pu être vérifié ici
+
+**Le rafraîchissement de `cigar_stats` à l'écriture n'a pas été exercé de bout en bout.**
+`api.supabase.com` est refusé par la politique de sortie de cette session, donc aucune clé de service
+n'a pu être récupérée et `createSupabaseAdminClient()` lève. Ce qui **a** été mesuré, et qui est la
+moitié qui pouvait se tromper : le journal du serveur porte exactement une tentative d'appel par
+écriture susceptible de bouger une moyenne publique, et aucune pour les autres — écriture privée,
+partagée, abonnés : zéro ; écriture publique : une ; retour au privé : une ; suppression d'une entrée
+publique : une ; modification privée → privée : zéro. `affectsPublicAverage()` est donc juste des
+deux côtés, dépublier comptant autant que publier. Le rendu a été vérifié séparément, en déclenchant
+`refresh_cigar_stats()` directement sur le projet : moyenne 80,8, bayésienne 80,8 — les deux se
+rejoignent tant qu'il n'y a qu'une note, l'a priori étant calculé sur l'ensemble publié —, une note
+publique, répartition `b80_89: 1`.
+
+**À faire au premier déploiement** : ouvrir une fiche notée, publier une entrée et vérifier que la
+moyenne bouge sans attendre les cinq minutes de `pg_cron`. C'est le seul chemin de cette livraison
+qui n'a pas été parcouru en entier.
+
 ## L'export RGPD répondait 500, et personne ne pouvait le savoir
 
 Migration 0007, appliquée le 22 août 2026, trouvée en exerçant le chemin authentifié complet contre
