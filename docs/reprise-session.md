@@ -11,26 +11,17 @@ Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BR
 `docs/adr/` (0004 et 0005 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`.
 
-## LA PREMIÈRE CHOSE À VÉRIFIER, AVANT DE CRÉER TA BRANCHE
+**Branche de travail** : `claude/vitola-pXX-<nom>` — à créer depuis `master`, qui contient tout le
+travail décrit ici (PR #6 fusionnée le 22 août 2026). Le code du dépôt et l'état de la base
+concordent : les sept migrations sont dans `supabase/migrations/` **et** appliquées sur le projet.
+Vérifie-le d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3` doit
+montrer la fusion de #6, et `/api/health` sert le commit réellement déployé.
 
-**Le travail de la session précédente vit sur `claude/vitola-phase-2-kickoff-kjgfcc` et n'est pas
-fusionné dans `master`.** Trois commits : `05b1c24`, `ccab66b`, `c071c14`. CI verte sur les deux
-workflows.
-
-Regarde d'abord si `master` les contient (`git log --oneline origin/master -5`) :
-
-- **Si oui** — une PR a été fusionnée entre-temps : branche depuis `master`, normalement.
-- **Si non** — branche depuis `claude/vitola-phase-2-kickoff-kjgfcc`, **pas depuis `master`**.
-  Repartir de `master` te ferait réécrire les commentaires, le signalement et la roue des arômes,
-  et tu ne t'en apercevrais qu'en trouvant les migrations déjà appliquées en base.
-
-**Un écart connu, et il est sans danger : les migrations `0006` et `0007` sont déjà appliquées sur
-la base de production, alors que `master` ne contient pas encore leurs fichiers.** Elles n'ajoutent
-que des fonctions, des droits et le contenu de `aroma_taxonomy` — rien que le code de `master` ne
-lise. La production tourne normalement. C'est le sens de l'ordre « base d'abord, écran ensuite » :
-une migration additive peut précéder son écran, l'inverse est un 500.
-
-**Branche de travail** : `claude/vitola-pXX-<nom>`, créée selon la règle ci-dessus.
+Une chose à savoir sur l'ordre des choses, apprise pendant cette PR : **une migration additive peut
+précéder son écran, l'inverse est un 500.** Les 0006 et 0007 ont vécu quelques heures appliquées en
+base pendant que `master` n'avait pas encore leurs fichiers, sans conséquence — elles n'ajoutaient
+que des fonctions, des droits et du contenu que le code d'alors ne lisait pas. Livrer l'écran
+d'abord n'aurait pas pardonné.
 
 ## OBJECTIF DE CETTE SESSION ET DES SUIVANTES
 
@@ -57,7 +48,8 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #5 fusionnées ; `master` était à `e032021` en début de session.
+PR #1 à #6 fusionnées. `master` était à `e032021` au début de la session précédente ; la #6 y a
+porté le signalement DSA, les commentaires, la roue des arômes et le correctif de l'export RGPD.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
