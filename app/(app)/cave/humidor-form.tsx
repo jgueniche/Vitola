@@ -5,7 +5,7 @@
 import { useActionState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { FieldError, Input, Label } from '@/components/ui/field'
+import { FieldError, FieldStatus, Input, Label } from '@/components/ui/field'
 import { HUMIDOR_LIMITS } from '@/lib/humidor/model'
 import { m } from '@/lib/i18n'
 
@@ -122,7 +122,7 @@ export function HumidorForm({
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}
       {state.done ? (
-        <p className="text-ink-muted text-sm">{mode === 'create' ? copy.created : copy.saved}</p>
+        <FieldStatus>{mode === 'create' ? copy.created : copy.saved}</FieldStatus>
       ) : null}
 
       <div>

@@ -60,6 +60,29 @@ export function Select({ className, ...props }: ComponentProps<'select'>) {
   )
 }
 
+/**
+ * A confirmation, announced.
+ *
+ * `role="status"` is a polite live region: a screen reader says "Enregistré."
+ * when the action returns, which is the only way that information reaches
+ * someone who cannot see the sentence appear. It is the counterpart of
+ * `FieldError`'s `role="alert"`, one notch quieter because a success does not
+ * interrupt.
+ *
+ * It also gives the browser walkthroughs something unambiguous to wait for. That
+ * is a side effect and not the reason, but it is the side effect that found the
+ * bug: an assertion looking for the word "enregistré" in the page matched the
+ * page's own prose — "ne change ce qui est enregistré." — and passed over three
+ * writes that were being refused.
+ */
+export function FieldStatus({ children }: { children: string }) {
+  return (
+    <p role="status" className="text-ink-muted text-sm">
+      {children}
+    </p>
+  )
+}
+
 /** Error text uses the readable variant of the error pigment — see Q11. */
 export function FieldError({ children, id }: { children: string; id?: string }) {
   return (

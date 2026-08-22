@@ -13,7 +13,6 @@ import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 
-import { ScaleToggle } from './scale-toggle'
 
 export const metadata: Metadata = { title: m.notebook.title }
 
@@ -153,7 +152,16 @@ export default async function NotebookPage({ searchParams }: Search) {
           </div>
         </div>
 
-        <ScaleToggle current={scale} />
+        {/* The control moved to /parametres, with the other display
+            preferences. What stays is the fact — which scale is in force — and
+            the way to change it, so the move costs no discoverability. */}
+        <p className="text-ink-muted flex flex-wrap items-center gap-x-2 text-sm">
+          <span className="eyebrow">{m.notebook.scale.legend}</span>
+          <span>{scale === 100 ? m.notebook.scale.hundred : m.notebook.scale.twenty}</span>
+          <Link href={routes.settings()} className="text-accent underline">
+            {m.settings.scaleChange}
+          </Link>
+        </p>
       </div>
 
       <section aria-labelledby="mes-entrees" className="flex flex-col gap-4">

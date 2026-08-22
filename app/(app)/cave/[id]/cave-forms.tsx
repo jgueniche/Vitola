@@ -6,7 +6,7 @@
 import { useActionState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { FieldError, Input, Label, Textarea } from '@/components/ui/field'
+import { FieldError, FieldStatus, Input, Label, Textarea } from '@/components/ui/field'
 import { HUMIDOR_LIMITS } from '@/lib/humidor/model'
 import { m } from '@/lib/i18n'
 
@@ -104,7 +104,7 @@ export function AddLotForm({
       </div>
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <p className="text-ink-muted text-sm">{copy.added}</p> : null}
+      {state.done ? <FieldStatus>{copy.added}</FieldStatus> : null}
 
       <div>
         <Button type="submit" disabled={pending}>
@@ -159,7 +159,7 @@ export function ReadingForm({ humidorId }: { humidorId: string }) {
       </Button>
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <p className="text-ink-muted text-sm">{copy.readingAdded}</p> : null}
+      {state.done ? <FieldStatus>{copy.readingAdded}</FieldStatus> : null}
     </form>
   )
 }
@@ -167,10 +167,10 @@ export function ReadingForm({ humidorId }: { humidorId: string }) {
 /**
  * Reads an inventory file.
  *
- * A `<textarea>` beside the file input, because the case this feature is really
- * for is a spreadsheet somebody already keeps: copying four columns out of one
- * is faster than exporting it, and a member who cannot find their file can
- * still paste it.
+ * A file input and nothing else. The action accepts a pasted string too — it
+ * reads `formData.get('file')` as either — but offering a textarea beside the
+ * picker would be two controls for one gesture, and the one people actually
+ * perform is choosing the export their spreadsheet just produced.
  */
 export function ImportForm({ humidorId }: { humidorId: string }) {
   const [state, action, pending] = useActionState<HumidorState, FormData>(importCsv, {})
@@ -186,7 +186,7 @@ export function ImportForm({ humidorId }: { humidorId: string }) {
       </div>
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <p className="text-ink-muted text-sm">{copy.csvImported}</p> : null}
+      {state.done ? <FieldStatus>{copy.csvImported}</FieldStatus> : null}
 
       <div>
         <Button type="submit" variant="secondary" disabled={pending}>

@@ -8,7 +8,7 @@ import { useActionState } from 'react'
 
 import { ScopeSelector } from '@/components/reviews/scope-selector'
 import { Button } from '@/components/ui/button'
-import { FieldError, Input, Label, Select, Textarea } from '@/components/ui/field'
+import { FieldError, FieldStatus, Input, Label, Select, Textarea } from '@/components/ui/field'
 import { HUMIDOR_LIMITS } from '@/lib/humidor/model'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -170,7 +170,7 @@ export function EventForm({
       <p className="text-ink-muted text-xs">{copy.eventAdjustHint}</p>
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <p className="text-ink-muted text-sm">{copy.eventRecorded}</p> : null}
+      {state.done ? <FieldStatus>{copy.eventRecorded}</FieldStatus> : null}
 
       <div>
         <Button type="submit" variant="secondary" size="sm" disabled={pending}>
@@ -212,7 +212,7 @@ export function MoveForm({
         {copy.move}
       </Button>
       {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <p className="text-ink-muted text-sm">{copy.moved}</p> : null}
+      {state.done ? <FieldStatus>{copy.moved}</FieldStatus> : null}
     </form>
   )
 }

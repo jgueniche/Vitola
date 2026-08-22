@@ -97,9 +97,6 @@ jobs:
       - name: Apply 0005 — droits d'appel sur ref et mod
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0005_ref_function_grants.sql
 
-      - name: Function grants, sur les trois schémas
-        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
-
       # 0006 ouvre la seule porte d'écriture vers `mod` — une fonction SECURITY
       # DEFINER dans `public`, accordée à la clé de service et à personne
       # d'autre. Son §3 (pg_cron) se déclare absent sur une base nue : c'est
@@ -146,6 +143,26 @@ jobs:
             echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
             exit 1
           fi
+
+      # 0009 répare un garde-fou qui se gardait lui-même : le trigger de
+      # `profiles` appelait, en droits d'appelant, une fonction fermée aux
+      # clients. Aucun membre ne pouvait modifier son profil depuis P1.
+      - name: Apply 0009 — le garde-fou du profil
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0009_profile_guard.sql
+
+      # Le test des droits (02) vérifiait un droit ; celui-ci vérifie le
+      # comportement, et c'est ce que l'ancien ne pouvait pas voir.
+      - name: Profil — modifiable par son membre, role et reputation toujours fermés
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/08_profile_guard.sql 2>&1 | tee "$RUNNER_TEMP/profil.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/profil.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      - name: Function grants, sur les trois schémas
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.

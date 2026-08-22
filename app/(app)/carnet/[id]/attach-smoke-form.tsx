@@ -5,7 +5,7 @@
 import { useActionState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { FieldError, Label, Select } from '@/components/ui/field'
+import { FieldError, FieldStatus, Label, Select } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 
 import { attachSmokeToEntry, type HumidorState } from '../../cave/actions'
@@ -52,7 +52,7 @@ export function AttachSmokeForm({
       </Button>
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <p className="text-ink-muted text-sm">{copy.smokeDone}</p> : null}
+      {state.done ? <FieldStatus>{copy.smokeDone}</FieldStatus> : null}
     </form>
   )
 }

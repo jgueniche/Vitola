@@ -29,6 +29,7 @@ const MEMBER_NAV = [
   { label: m.notebook.title, href: routes.notebook() },
   { label: m.humidor.title, href: routes.humidor() },
   { label: m.statistics.title, href: routes.statistics() },
+  { label: m.settings.title, href: routes.settings() },
 ] as const
 
 /**
