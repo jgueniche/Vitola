@@ -24,7 +24,7 @@ export default function CigarsPage() {
 
       <EmptyState
         title="Le référentiel n’est pas encore ouvert"
-        description="La recherche facettée, les fiches et le vitolario arrivent avec la phase suivante. Rien n’est encore en base."
+        description="La recherche facettée, les fiches et le vitolario arrivent avec la phase suivante. Le référentiel est en base depuis le 22 août 2026, mais aucune fiche n’a encore été relue : rien n’est publié, donc rien n’est visible."
       />
     </main>
   )
