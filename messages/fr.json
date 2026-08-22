@@ -1,0 +1,43 @@
+{
+  "common": {
+    "skipToContent": "Aller au contenu",
+    "back": "Retour",
+    "search": "Rechercher"
+  },
+  "home": {
+    "eyebrow": "Comprendre ce que l'on fume",
+    "title": "Le référentiel du cigare, écrit par ceux qui le fument.",
+    "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré et une cave numérique. Rien à vendre, rien à promouvoir.",
+    "enter": "Entrer",
+    "enterHint": "L'accès est réservé aux personnes majeures."
+  },
+  "ageGate": {
+    "eyebrow": "Accès réservé aux majeurs",
+    "title": "Quel est votre date de naissance ?",
+    "lede": "Ce site traite de produits du tabac. La loi en réserve l'accès aux personnes majeures. Votre date de naissance sert uniquement à vérifier cette condition.",
+    "label": "Date de naissance",
+    "submit": "Confirmer",
+    "leave": "Quitter le site",
+    "errors": {
+      "required": "Renseignez votre date de naissance.",
+      "invalid": "Cette date n'est pas valide.",
+      "underage": "L'accès à ce site est réservé aux personnes majeures.",
+      "implausible": "Cette date de naissance n'est pas plausible."
+    },
+    "privacy": "Cette date n'est pas conservée tant que vous n'avez pas de compte. Un cookie signé mémorise seulement que la vérification a eu lieu."
+  },
+  "health": {
+    "notice": "Fumer nuit gravement à votre santé et à celle de votre entourage.",
+    "title": "Tabac et santé",
+    "lede": "Le tabac est la première cause de mortalité évitable en France. Ce site est un site d'information et de documentation : il ne promeut aucune consommation.",
+    "helpTitle": "Se faire aider",
+    "helpBody": "Tabac info service — 39 89, du lundi au samedi. Un accompagnement gratuit et confidentiel."
+  },
+  "legal": {
+    "noticeTitle": "Mentions légales",
+    "privacyTitle": "Politique de confidentialité",
+    "termsTitle": "Conditions générales d'utilisation",
+    "cookiesTitle": "Cookies et traceurs",
+    "placeholder": "Ce document est en cours de rédaction et sera validé par un conseil juridique avant l'ouverture publique du site."
+  }
+}

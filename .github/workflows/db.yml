@@ -1,0 +1,50 @@
+name: Database
+
+on:
+  pull_request:
+    paths: ['supabase/**', 'docs/phase-0/*.sql', '.github/workflows/db.yml']
+  push:
+    branches: ['**']
+    paths: ['supabase/**', 'docs/phase-0/*.sql', '.github/workflows/db.yml']
+
+jobs:
+  migrations:
+    name: apply migrations · RLS coverage
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vitola
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports: ['5432:5432']
+
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: vitola
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # The Phase 0 verification file creates its own Supabase stand-ins
+      # (auth.users, auth.uid(), storage.*, the anon/authenticated roles),
+      # applies the P1 migration and runs 23 behavioural assertions.
+      - name: Apply schema and run assertions
+        working-directory: docs/phase-0
+        run: psql -v ON_ERROR_STOP=1 -f 03b-verification.sql
+
+      # §0.5: a table without RLS breaks the build. Belt and braces — the
+      # migration asserts this too, but a future migration might not.
+      - name: RLS coverage
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/00_rls_coverage.sql

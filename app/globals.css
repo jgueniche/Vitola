@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   VITOLA — design tokens
+   --------------------------------------------------------------------------
+   Two layers, and the distinction matters:
+
+   1. RAW PALETTE (`@theme`)      — the pigments of §4.2 of the brief. Named
+                                    after wrapper shades because the palette IS
+                                    the trade scale, it does not merely evoke it.
+                                    Components must NOT use these directly.
+   2. SEMANTIC TOKENS (`@theme inline`) — what components consume. They point at
+                                    CSS variables that flip between dark (the
+                                    brand default) and light.
+
+   tooling/scripts/check-tokens.ts fails the build on any raw hex outside this
+   file, and on any use of a raw palette utility inside components/ or app/.
+   ========================================================================== */
+
+@theme {
+  /* --- Raw palette, §4.2 ------------------------------------------------ */
+  --color-oscuro: #161210;
+  --color-maduro: #221b17;
+  --color-maduro-raised: #2c231d;
+  --color-cedre: #7a5c43;
+  --color-colorado: #8c4f2e;
+  --color-claro: #c9a227;
+  --color-claro-bright: #d9bc72;
+  --color-parchemin: #ede6d8;
+  --color-fumee: #9c948a;
+  --color-papier: #f3eee4;
+  --color-encre: #181513;
+
+  /* Semantic pigments, §4.2. The `-readable` variants are an addition —
+     see Q11: the brief's error colour reaches only 2.51:1 on maduro, below
+     the 3:1 floor required even for a non-text UI element. Same hue, same
+     saturation, raised luminance until it clears 4.5:1. */
+  --color-succes: #5e7a52;
+  --color-succes-readable: #6d8d5f;
+  --color-alerte: #b8863b;
+  --color-erreur: #9b3d32;
+  --color-erreur-readable: #ca675b;
+  --color-colorado-readable: #c16e41;
+  --color-cedre-readable: #a47c5a;
+
+  /* --- Wrapper shade scale ---------------------------------------------
+     The six values of ref.wrapper_shade, as a data-visualisation ramp.
+     Never the sole carrier of meaning: <WrapperScale /> always renders the
+     label alongside the dots. */
+  /* Luminance-lifted at the dark end. A literal reproduction of a maduro leaf
+     (#4a261a) is indistinguishable from the maduro surface it sits on, which
+     would make the last two steps of the scale invisible. This is a symbolic
+     ramp, so it is tuned for perceptibility, not for pigment accuracy — and it
+     is never the only signal: <WrapperScale /> always renders the label. */
+  --color-shade-claro: #e0c48f;
+  --color-shade-colorado-claro: #c9975a;
+  --color-shade-colorado: #ac6a3c;
+  --color-shade-colorado-maduro: #8d4e2c;
+  --color-shade-maduro: #6f3a24;
+  --color-shade-oscuro: #55291b;
+
+  /* --- Type, §4.3 ------------------------------------------------------- */
+  --font-display: var(--font-bodoni), 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+  --font-eyebrow: var(--font-marcellus), 'Marcellus', 'Optima', 'Palatino', serif;
+  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* --- Geometry, §4.5 ---------------------------------------------------
+     3px. Never 0 (generic broadsheet), never >= 12px (generic SaaS). */
+  --radius-band: 3px;
+  --radius-none: 0px;
+
+  /* Editorial measure and 12-column gutter. */
+  --spacing-gutter: 1.5rem;
+  --container-reading: 68ch;
+
+  /* --- Motion, §4.5: 160-240ms, ease-out, one orchestrated sequence ------ */
+  --ease-vitola: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-quick: 160ms;
+  --duration-considered: 240ms;
+}
+
+@theme inline {
+  /* --- Semantic tokens: what components are allowed to use -------------- */
+  --color-ground: var(--vt-ground);
+  --color-surface: var(--vt-surface);
+  --color-surface-raised: var(--vt-surface-raised);
+
+  --color-ink: var(--vt-ink);
+  --color-ink-muted: var(--vt-ink-muted);
+  --color-ink-faint: var(--vt-ink-faint);
+
+  --color-accent: var(--vt-accent);
+  --color-accent-bright: var(--vt-accent-bright);
+  --color-on-accent: var(--vt-on-accent);
+
+  --color-rule: var(--vt-rule);
+  --color-rule-strong: var(--vt-rule-strong);
+
+  --color-positive: var(--vt-positive);
+  --color-caution: var(--vt-caution);
+  --color-negative: var(--vt-negative);
+}
+
+/* Dark is the default, UNCONDITIONALLY — it is not tied to prefers-color-scheme.
+   §4.1 makes the warm brown-black ground the thing that "distingue immédiatement
+   l'interface d'un dark mode générique": it is the identity, not a preference.
+   Following the OS setting would mean most visitors never see it, since light is
+   the common default. Light remains available as an explicit opt-in below
+   (§4.2 papier/encre). See Q23 — reverting is one @media block. */
+:root {
+  color-scheme: dark;
+
+  --vt-ground: var(--color-oscuro);
+  --vt-surface: var(--color-maduro);
+  --vt-surface-raised: var(--color-maduro-raised);
+
+  --vt-ink: var(--color-parchemin);
+  --vt-ink-muted: var(--color-fumee);
+  --vt-ink-faint: var(--color-cedre-readable);
+
+  --vt-accent: var(--color-claro);
+  --vt-accent-bright: var(--color-claro-bright);
+  /* Text sitting ON the brass accent. Semantic, so no component needs to reach
+     for a raw pigment — which tooling/scripts/check-tokens.ts forbids. */
+  --vt-on-accent: var(--color-oscuro);
+
+  /* Separation is a hairline, not a shadow (§4.5). */
+  --vt-rule: rgb(237 230 216 / 0.07);
+  --vt-rule-strong: rgb(237 230 216 / 0.16);
+
+  --vt-positive: var(--color-succes-readable);
+  --vt-caution: var(--color-alerte);
+  --vt-negative: var(--color-erreur-readable);
+
+  /* The brass hairline of <Band />. Defined once, here. */
+  --vt-brass: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(122 92 67 / 0.35) 8%,
+    var(--color-claro) 34%,
+    var(--color-claro-bright) 50%,
+    var(--color-claro) 66%,
+    rgb(122 92 67 / 0.35) 92%,
+    transparent 100%
+  );
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --vt-ground: var(--color-papier);
+  --vt-surface: #ffffff;
+  --vt-surface-raised: #fbf8f2;
+
+  --vt-ink: var(--color-encre);
+  --vt-ink-muted: #5a5149;
+  --vt-ink-faint: var(--color-cedre);
+
+  --vt-accent: #8a6f14;
+  --vt-accent-bright: var(--color-claro);
+  --vt-on-accent: var(--color-papier);
+
+  --vt-rule: rgb(24 21 19 / 0.1);
+  --vt-rule-strong: rgb(24 21 19 / 0.22);
+
+  --vt-positive: #46603c;
+  --vt-caution: #8a6228;
+  --vt-negative: var(--color-erreur);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-rule);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    /* Tabular figures by default: columns of scores must not dance (§4.3). */
+    font-feature-settings: 'tnum' 1, 'cv05' 1;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Display is a high-contrast didone: below 32px it loses its hairlines and
+     becomes unreadable. The floor is enforced here, not left to discipline. */
+  .font-display {
+    font-family: var(--font-display);
+    font-size: max(2rem, 1em);
+    letter-spacing: -0.02em;
+  }
+
+  .eyebrow {
+    font-family: var(--font-eyebrow);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  /* Keyboard focus must always be visible (§4.5, non-negotiable floor). */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-band);
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  /* §4.5: respect prefers-reduced-motion. The scan reveal is the only
+     orchestrated sequence and it degrades to an instant state change. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility brass-rule {
+  background-image: var(--vt-brass);
+}
+
+@utility measure {
+  max-width: var(--container-reading);
+}

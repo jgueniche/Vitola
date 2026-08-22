@@ -1,0 +1,10 @@
+# Ces chemins portent des contraintes légales ou de sécurité.
+# Une relecture explicite y est requise, même pour un changement d'apparence anodine.
+
+/supabase/                    @jgueniche
+/docs/legal/                  @jgueniche
+/docs/adr/                    @jgueniche
+/lib/compliance/              @jgueniche
+/tests/compliance/            @jgueniche
+/middleware.ts                @jgueniche
+/app/robots.ts                @jgueniche

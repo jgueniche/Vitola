@@ -51,7 +51,7 @@ cherchable et contribuable.
 
 ## Ce que j'attends de vous
 
-Le livrable 5 contient 22 questions, chacune assortie d'une **réponse par défaut**. Vous n'avez à
+Le livrable 5 contient 23 questions, chacune assortie d'une **réponse par défaut**. Vous n'avez à
 répondre qu'à celles où mon défaut vous déplaît. Les huit premières sont bloquantes ; les quatre qui
 conditionnent le démarrage de P0 et P1 sont **Q2** (région Supabase, irréversible), **Q3** (qui
 saisit le référentiel), **Q8** (bucket privé ou public) et **Q11** (les quatre tokens de contraste).

@@ -210,6 +210,15 @@ satisfait déjà.
 **Défaut :** non. L'infrastructure est prête dès P0 (`messages/fr.json`, `lib/routes.ts`,
 `lib/i18n/`) ; la traduction effective attend P8, et n'y entre que si le contenu éditorial suit.
 
+### Q23 · Le mode sombre doit-il ignorer la préférence système ?
+Découvert en capturant les pages réelles : le navigateur annonçant
+`prefers-color-scheme: light`, l'accueil s'affichait en papier — donc la plupart des visiteurs
+n'auraient jamais vu le fond brun-noir dont le §4.1 fait *l'élément qui distingue immédiatement
+l'interface*. Sur ce projet, le fond n'est pas un confort de lecture, c'est l'identité.
+**Défaut appliqué :** le sombre est inconditionnel ; le mode papier reste disponible en choix
+explicite (`data-theme="light"`). Revenir en arrière, c'est réintroduire un bloc `@media`.
+**Nécessaire avant :** rien ne bloque, mais c'est un choix visible dès la première visite.
+
 ### Q22 · Note sur 100 ou sur 20 par défaut ?
 **Défaut :** 100, conformément au §5.4, avec bascule en préférence utilisateur — déjà présente dans
 `profile_settings.preferences.score_scale`.
