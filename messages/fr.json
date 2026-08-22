@@ -39,5 +39,78 @@
     "termsTitle": "Conditions générales d'utilisation",
     "cookiesTitle": "Cookies et traceurs",
     "placeholder": "Ce document est en cours de rédaction et sera validé par un conseil juridique avant l'ouverture publique du site."
+  },
+  "referential": {
+    "eyebrow": "Référentiel",
+    "cigarsTitle": "Cigares",
+    "brandsTitle": "Marques",
+    "vitolasTitle": "Vitolario",
+    "search": {
+      "label": "Rechercher une fiche",
+      "placeholder": "Marque, nom commercial, vitole…",
+      "submit": "Rechercher"
+    },
+    "facets": {
+      "title": "Affiner",
+      "strength": "Force",
+      "shade": "Cape",
+      "country": "Origine",
+      "clearAll": "Tout effacer",
+      "active": "Filtres actifs"
+    },
+    "results": {
+      "one": "1 fiche",
+      "many": "{count} fiches",
+      "none": "Aucune fiche ne correspond",
+      "noneHint": "Élargissez les critères, ou effacez les filtres.",
+      "emptyTitle": "Le référentiel n'est pas encore ouvert au public",
+      "emptyBody": "Les fiches sont en base mais aucune n'a encore été relue. Une fiche n'est visible qu'une fois vérifiée par un relecteur : c'est la règle du référentiel, pas une limitation temporaire de l'affichage."
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "position": "Page {page} sur {pageCount}"
+    },
+    "cigar": {
+      "dimensions": "Dimensions",
+      "strength": "Force",
+      "wrapper": "Cape",
+      "origin": "Origine",
+      "brand": "Marque",
+      "vitola": "Vitole",
+      "releaseYear": "Année de sortie",
+      "price": "Prix homologué",
+      "priceNote": "Prix de vente au détail homologué, applicable au {date}. Source : arrêté publié au Journal officiel. À titre informatif.",
+      "unknown": "Non renseigné",
+      "noVitola": "Vitole non renseignée",
+      "notFound": "Cette fiche n'existe pas, ou n'est pas encore publiée."
+    },
+    "brand": {
+      "cuban": "Marque cubaine",
+      "founded": "Fondée en {year}",
+      "manufacturer": "Manufacture",
+      "cigarCount": "Fiches publiées",
+      "notFound": "Cette marque n'existe pas.",
+      "noCigars": "Aucune fiche publiée pour cette marque."
+    },
+    "vitola": {
+      "galera": "Nom de galera",
+      "salida": "Nom de salida",
+      "shape": "Forme",
+      "toVerify": "Dimensions à vérifier",
+      "notFound": "Cette vitole n'existe pas.",
+      "noCigars": "Aucune fiche publiée pour cette vitole."
+    },
+    "shapes": {
+      "parejo": "Parejo",
+      "torpedo": "Torpedo",
+      "piramide": "Pirámide",
+      "perfecto": "Perfecto",
+      "belicoso": "Belicoso",
+      "culebra": "Culebra",
+      "diadema": "Diadema",
+      "petit_corona": "Petit corona",
+      "figurado_autre": "Figurado"
+    }
   }
 }

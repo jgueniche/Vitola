@@ -2,6 +2,43 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Phase 1 — référentiel consultable
+
+**`@supabase/supabase-js`, et elle seule.** Le §3 demande une justification par dépendance.
+Celle-ci porte tout l'accès aux données ; l'écrire à la main voudrait dire réimplémenter PostgREST,
+ses filtres et son encodage des jointures. `@supabase/ssr` n'est **pas** installée : elle ne sert
+qu'à porter une session d'authentification à travers les cookies, et la consultation du référentiel
+est anonyme. Elle viendra avec `connexion/`, avec sa propre justification. `nuqs` était déjà là mais
+n'est pas utilisée : les facettes sont des liens lus côté serveur, sans état client.
+
+**Le schéma `ref` a dû être exposé à PostgREST.** Un projet Supabase n'expose que `public` et
+`graphql_public` ; `ref` en était absent, donc aucune requête client n'aurait résolu, quel que soit
+le code. Changement de configuration du projet, pas du schéma. La RLS gouverne exactement comme
+avant — vérifié par requête HTTP anonyme réelle : 114 marques lisibles, 0 fiche sur 940 (toutes en
+brouillon), écriture refusée en 42501.
+
+**Les facettes sont des liens, pas des cases à cocher.** Aucun JavaScript client sur la recherche :
+chaque option est un `<a>` vers l'URL que la page aurait avec la facette basculée. La recherche est
+donc partageable, fonctionne avant hydratation, et l'état vit dans l'URL comme le veut
+`app/CLAUDE.md`. Le champ texte est un `<form method="get">` pour la même raison.
+
+**Le repliement des accents est dupliqué en TypeScript, à contrecœur.** `search_vector` est bâti sur
+`immutable_unaccent()`, donc une requête non repliée ne remonte rien — en silence. L'alternative
+propre (un RPC qui replie côté serveur) mettait un aller-retour devant chaque recherche. La
+duplication est donc assumée et bornée par un test : les 15 caractères non-ASCII du référentiel ont
+été relevés dans la vraie base. Onze se replient à l'identique ; quatre divergent (`« » “ ”`, que
+`unaccent()` transforme en `<< >> " "`) sans conséquence, la tokenisation les écartant de toute
+façon — vérifié, pas supposé.
+
+**Deux états vides, pas un.** « Aucune fiche ne correspond » et « le référentiel n'est pas encore
+ouvert » ne disent pas la même chose. Confondre les deux ferait passer une règle de publication
+délibérée pour une recherche ratée.
+
+**Le garde-fou du nom commercial heurte le vocabulaire du métier.** `check-tokens` interdit le
+littéral `Vitola` hors de `lib/brand.ts` ; c'est aussi le terme de métier pour un format. Seule la
+sensibilité à la casse du motif rend les deux compatibles : le format reste en minuscule, la marque
+garde sa majuscule. Les messages d'erreur de `lib/referential/` sont formulés en conséquence.
+
 ## Phase 0 — réalisation
 
 **Next 16 plutôt que Next 15.** Le §3 du brief dit « Next.js 15 », écrit avant la sortie de la 16.

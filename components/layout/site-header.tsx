@@ -5,6 +5,7 @@ import { routes } from '@/lib/routes'
 
 const NAV = [
   { label: 'Cigares', href: routes.cigars() },
+  { label: 'Marques', href: routes.brands() },
   { label: 'Vitoles', href: routes.vitolas() },
   { label: 'Lieux', href: routes.venues() },
   { label: 'Journal', href: routes.journal() },

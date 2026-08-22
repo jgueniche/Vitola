@@ -10,29 +10,60 @@ import type { NextConfig } from 'next'
  *
  * Learned the hard way: the first real visit to the preview deployment hit
  * exactly this, on /majorite, at the moment of submitting a date of birth.
+ *
+ * The same reasoning now covers the referential. Every page under /cigares,
+ * /marques and /vitoles reads Supabase; without its URL and publishable key
+ * they do not degrade, they throw. All missing variables are reported at once,
+ * because discovering them one deploy at a time is its own small punishment.
  */
 function assertProductionEnvironment(): void {
   if (process.env.NODE_ENV !== 'production') return
 
+  const problems: string[] = []
+
   const secret = process.env.AGE_GATE_SECRET
-  if (secret && secret.length >= 32) return
+  if (!secret || secret.length < 32) {
+    problems.push(
+      [
+        '  AGE_GATE_SECRET — missing, or shorter than 32 characters.',
+        '    The age gate signs its cookie with it. Any random string of 40+ characters will do.',
+      ].join('\n'),
+    )
+  }
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    problems.push(
+      [
+        '  NEXT_PUBLIC_SUPABASE_URL — missing.',
+        '    The https://<ref>.supabase.co address of the project. Not a secret.',
+      ].join('\n'),
+    )
+  }
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    problems.push(
+      [
+        '  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY — missing.',
+        '    The sb_publishable_… key. Safe in the browser: RLS governs what it can read.',
+      ].join('\n'),
+    )
+  }
+
+  if (problems.length === 0) return
 
   throw new Error(
     [
       '',
-      'AGE_GATE_SECRET is missing, or shorter than 32 characters.',
+      `${problems.length} environment variable(s) missing — the build stops here rather`,
+      'than deploying a site that fails on its own pages.',
       '',
-      'The age gate signs its cookie with it. Without it the gate cannot be',
-      'enforced, so the build stops here rather than deploying a site that',
-      'fails on /majorite.',
+      ...problems,
       '',
-      'Set it wherever this is being built:',
+      'Set them wherever this is being built:',
       '  - Vercel   Project > Settings > Environment Variables',
       '             (tick Production, Preview and Development)',
-      '  - CI       a repository secret',
+      '  - CI       repository secrets',
       '  - locally  .env.local, see .env.example',
-      '',
-      'Any random string of 40 characters or more will do.',
       '',
     ].join('\n'),
   )
