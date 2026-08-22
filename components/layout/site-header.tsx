@@ -22,6 +22,11 @@ const NAV = [
   { label: 'Arômes', href: routes.aromas() },
 ] as const
 
+/* Shown only to a signed-in member, because that is the only person it is a
+   destination for: /carnet redirects a visitor to the sign-in page, and a nav
+   entry whose one behaviour is to bounce you is a promise it cannot keep. */
+const MEMBER_NAV = [{ label: m.notebook.title, href: routes.notebook() }] as const
+
 /**
  * Rendered only inside app/(app)/, never on the public side — which is why
  * reading the session here is free: those routes are already dynamic, and the
@@ -38,7 +43,7 @@ export async function SiteHeader() {
         </Link>
         <nav aria-label="Navigation principale">
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-            {NAV.map((item) => (
+            {[...NAV, ...(user ? MEMBER_NAV : [])].map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}

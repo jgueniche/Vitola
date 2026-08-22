@@ -22,6 +22,16 @@ export const BRAND = {
   disclaimer: "Vitola est un site d'information. Aucun produit du tabac n'y est vendu.",
   locale: 'fr-FR',
   defaultLanguage: 'fr',
+  /**
+   * The zone the site's "today" is in.
+   *
+   * A server renders in UTC, so between midnight and 2 a.m. Paris time it would
+   * offer yesterday's date as the default for "quand l'avez-vous fumé" — which
+   * is exactly when someone finishes a cigar and writes it down. One zone
+   * because there is one audience (§0.10); it moves with the locale when P8
+   * adds others, and moves from here.
+   */
+  timeZone: 'Europe/Paris',
 } as const
 
 export type Brand = typeof BRAND

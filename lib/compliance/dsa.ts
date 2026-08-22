@@ -45,13 +45,21 @@ export type ReportReason = (typeof REPORT_REASONS)[number]
  * endpoint takes table names as input. It takes a word from a closed list
  * instead, and the mapping happens here.
  *
- * `reviews` and `profiles` are the two the CHECK also allows. They are absent
- * because neither has a screen yet: an entry in this map without a Signaler
- * button is a promise nobody can keep.
+ * `reviews` joined the map when the notebook shipped, on the rule this comment
+ * already stated: an entry here without a Signaler button is a promise nobody
+ * can keep, and the converse holds too — a public notebook entry is a member's
+ * text about tobacco, readable by any visitor past the age gate, which is the
+ * exact situation ADR 0005 says obliges us. `profiles` stays out until P3 gives
+ * a profile a page.
+ *
+ * What is reportable is decided per *surface*, not per row: RLS decides whether
+ * the reporter may see the entry at all, and the route asks it that question
+ * before filing anything.
  */
 export const REPORTABLE = {
   comment: { schema: 'public', table: 'comments' },
   cigar: { schema: 'ref', table: 'cigars' },
+  review: { schema: 'public', table: 'reviews' },
 } as const
 
 export type ReportableKind = keyof typeof REPORTABLE

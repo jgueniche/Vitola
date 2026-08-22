@@ -14,6 +14,15 @@ export const SEGMENTS = {
   boxCodes: 'codes-de-boite',
   aromas: 'aromes',
   contributions: 'contributions',
+  /* The notebook of ADR 0004 — one table, one section, two gestures. The P0
+     arborescence called this section `degustations/`, which was written before
+     that ADR merged the daily note and the structured exercise into a single
+     `reviews` row; `carnet` is what the product calls it, and the URL follows
+     the product rather than the older plan. `tasting` below is the exercise
+     performed on one cigar; `tastings` stays the plural listing that the P3
+     public profile will need. */
+  notebook: 'carnet',
+  tasting: 'degustation',
   tastings: 'degustations',
   humidor: 'cave',
   statistics: 'statistiques',
@@ -47,6 +56,13 @@ export const routes = {
   cigar: (slug: string) => `/${SEGMENTS.cigars}/${slug}`,
   cigarHistory: (slug: string) => `/${SEGMENTS.cigars}/${slug}/${SEGMENTS.history}`,
   cigarCompare: () => `/${SEGMENTS.cigars}/${SEGMENTS.compare}`,
+  /* The structured tasting hangs off the cigar it is about, because that is
+     where one starts it: the entry is already open, and the form needs nothing
+     the page has not already read. The notebook below is where it is reread. */
+  cigarTasting: (slug: string) => `/${SEGMENTS.cigars}/${slug}/${SEGMENTS.tasting}`,
+
+  notebook: () => `/${SEGMENTS.notebook}`,
+  notebookEntry: (id: string) => `/${SEGMENTS.notebook}/${id}`,
 
   brands: () => `/${SEGMENTS.brands}`,
   brand: (slug: string) => `/${SEGMENTS.brands}/${slug}`,

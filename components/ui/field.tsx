@@ -1,4 +1,4 @@
-import type { ComponentProps, InputHTMLAttributes, LabelHTMLAttributes } from 'react'
+import type { ComponentProps, LabelHTMLAttributes } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -6,7 +6,10 @@ export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElem
   return <label className={cn('eyebrow block', className)} {...props} />
 }
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+/* ComponentProps rather than InputHTMLAttributes, which is what Textarea and
+   Select already use: only the former carries `ref`, and the tasting form's
+   stopwatch needs one to stamp the measured duration into the field. */
+export function Input({ className, ...props }: ComponentProps<'input'>) {
   return (
     <input
       className={cn(
