@@ -1,129 +1,124 @@
-# Procédure — ouvrir Supabase pour Vitola
+# Procédure — donner à Claude accès au projet Supabase
 
-> Lisible sur téléphone. Trois décisions, puis six actions. Environ **10 minutes**.
-> Tout ce que je peux faire seul est marqué « je m'en occupe ».
-
----
-
-## En une phrase
-
-**L'accès est déjà ouvert.** Je vois votre organisation Supabase et vos projets. Il manque
-une seule chose : **un projet dédié à Vitola**, que je ne crée pas moi-même parce qu'il
-coûte **10 $/mois** sur votre compte.
+> Lisible sur téléphone. Une action, environ 5 minutes.
+> État au moment d'écrire : **le projet `vitola` existe**, dans l'organisation `jgueniche`.
+> Ce qui manque est l'accès, pas le projet.
 
 ---
 
-## 1. Ce que je vois déjà (rien à faire)
+## Le problème, en trois lignes
 
-| | |
-|---|---|
-| Organisation | **ShiftX** — plan **Pro** |
-| Projets existants | `Alpha Report` (Paris, `eu-west-3`) · `ShiftX` (Stockholm, `eu-north-1`) |
-| Projet Vitola | **aucun** |
+L'autorisation OAuth de Supabase est **par organisation**. Le connecteur géré de claude.ai ne
+détient qu'un seul jeton : l'autoriser sur `jgueniche` fait perdre `ShiftX`, et inversement. Avec
+des projets actifs dans les deux, cela imposerait de basculer à chaque changement de contexte.
 
-Le connecteur Supabase est actif et me permet déjà de lister l'organisation et les projets.
-Je n'ai touché à aucun de vos deux projets existants et je n'y toucherai pas.
+Il existe une sortie qui ne coûte ni basculement ni argent.
 
 ---
 
-## 2. Les trois décisions
+## Les trois options, et pourquoi une seule tient
 
-### Décision A — le coût. **10 $/mois.**
-Votre organisation est en plan Pro. Un troisième projet est facturé **10 $ par mois**, de
-façon récurrente, à partir de sa création. C'est la seule dépense engagée par cette procédure.
-Rien d'autre dans Vitola n'engage de frais pour l'instant.
-
-> Si vous préférez ne pas payer maintenant : dites-le, je continue tout P0 sans base de
-> données. Le développement ne se bloque qu'à **P1**, quand il faut une vraie base pour le
-> référentiel. Vous avez donc plusieurs semaines de marge.
-
-### Décision B — la région. **Je recommande `eu-west-3` (Paris).**
-Je corrige ici ma recommandation du livrable de Phase 0, où j'avais écrit Francfort. Paris est
-meilleur pour deux raisons vérifiées : le brief héberge l'application sur Vercel en région
-`cdg1`, qui est **Paris** — même ville signifie la latence la plus basse entre l'application et
-la base ; et votre projet `Alpha Report` y est déjà, donc c'est une région que vous utilisez.
-Le RGPD est satisfait dans les deux cas.
-
-**Cette décision est irréversible** : changer de région impose de recréer le projet et de
-migrer les données.
-
-### Décision C — un projet ou deux ? **Je recommande un seul, pour l'instant.**
-L'idéal serait un projet production et un projet développement (20 $/mois). Tant qu'il n'y a
-ni utilisateur ni donnée réelle, c'est payer double pour rien. Je développe en local
-(`supabase start`, gratuit) et je n'applique les migrations sur le projet distant qu'une fois
-testées.
-
-Quand P1 approchera de la mise en ligne, on ajoutera soit un second projet, soit des branches
-Supabase — facturées **0,013 $/heure**, soit environ 0,30 $ pour une journée de test, et
-détruites après usage. C'est le bon compromis, mais plus tard.
-
----
-
-## 3. Les six actions
-
-Sur **https://supabase.com/dashboard** :
-
-1. **New project**, dans l'organisation **ShiftX**.
-2. **Name** : `vitola`
-3. **Database Password** : générez-la avec le bouton, puis **enregistrez-la dans votre
-   gestionnaire de mots de passe**. Ne me l'envoyez pas — je n'en ai pas besoin, je passe par
-   le connecteur.
-4. **Region** : `West EU (Paris)` — `eu-west-3`
-5. **Postgres version** : laissez le défaut. Supabase provisionne aujourd'hui **Postgres 17**,
-   alors que le brief mentionne Postgres 15. Ce n'est pas un problème : ma migration P1 a été
-   testée sur PostgreSQL 16 et n'utilise rien de spécifique à une version. Je la revaliderai
-   sur 17.
-6. **Create new project**, puis attendez le passage au vert (2 à 3 minutes).
-
-**Puis dites-moi simplement : « le projet vitola est créé ».** C'est tout.
-
----
-
-## 4. Ce que je fais dès que vous me le dites
-
-Je m'en occupe, sans rien vous demander de plus :
-
-1. Je récupère l'identifiant du projet, son URL et sa **clé publiable** via le connecteur.
-2. Je vérifie que j'ai bien le droit d'écrire, avec une migration à vide.
-3. J'applique la migration P1 déjà écrite et testée (`docs/phase-0/03-schema-p1.sql`).
-4. Je rejoue les 25 assertions de vérification contre le projet réel.
-5. Je génère les types TypeScript et je les commite.
-6. Je remplis `.env.example` avec les bons noms de variables.
-
----
-
-## 5. Les secrets : ce qu'il ne faut jamais me coller ici
-
-Supabase distingue aujourd'hui deux familles de clés. Les nouvelles remplacent les anciennes :
-
-| Clé | Ancien nom | Où elle va | Me la donner ? |
-|---|---|---|---|
-| `sb_publishable_…` | `anon` | Navigateur, publique par nature | **Inutile** — je la récupère seul |
-| `sb_secret_…` | `service_role` | **Serveur uniquement**. Contourne la RLS. | **Jamais dans une conversation** |
-| Mot de passe base | — | Votre gestionnaire de mots de passe | **Jamais** |
-
-La clé secrète donne un accès total à la base **en ignorant toutes les policies de sécurité**.
-Elle ne doit exister qu'à deux endroits : les variables d'environnement Vercel, et les secrets
-GitHub Actions. Collée dans une conversation, elle se retrouve dans un historique — il faudrait
-alors la révoquer.
-
-**Quand le moment viendra** (P1, pour le déploiement), je vous donnerai la liste exacte des
-variables à créer dans Vercel, et vous y collerez les valeurs vous-même. Le développement de
-P0 n'a besoin d'aucune de ces clés.
-
----
-
-## 6. Si quelque chose ne va pas
-
-| Symptôme | Cause probable | Quoi faire |
+| | Coût | Verdict |
 |---|---|---|
-| Je dis ne pas voir le projet | Créé dans une autre organisation que ShiftX | Vérifiez l'organisation en haut à gauche du tableau de bord |
-| Je dis ne pas pouvoir écrire | Le connecteur est en lecture seule | Reconnectez Supabase depuis claude.ai → Paramètres → Connecteurs, en autorisant l'écriture |
-| Le projet reste en pause | Inactivité | Bouton *Restore* dans le tableau de bord |
+| **A. Basculer le connecteur** à chaque changement de projet | Gratuit, mais deux clics à chaque fois — et on oublie | Pénible |
+| **B. Transférer `vitola` dans ShiftX** | **10 $/mois** par projet supplémentaire sur le plan Pro, soit ~120 $/an | Payer pour éviter deux clics |
+| **C. Un serveur MCP propre au dépôt, en plus du connecteur** | Gratuit, à configurer une fois | **Recommandé** |
+
+L'option C existe parce que le serveur MCP de Supabase est un point d'entrée HTTP qui accepte un
+**jeton d'accès personnel** en en-tête, et qui peut être **restreint à un seul projet**. Déclaré
+dans le `.mcp.json` du dépôt, il ne vaut que pour Vitola. Votre connecteur géré reste branché sur
+ShiftX, intact, pour vos autres projets. Les deux coexistent.
 
 ---
 
-## 7. Rappel de périmètre
+## Option C — ce que vous avez à faire, une fois
 
-Je ne crée aucun projet, ne modifie aucun réglage de facturation, et ne touche ni à
-`Alpha Report` ni à `ShiftX`. Toute action ayant un coût passe par vous.
+Le fichier `.mcp.json` est déjà committé à la racine du dépôt :
+
+```json
+{
+  "mcpServers": {
+    "supabase-vitola": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=${SUPABASE_PROJECT_REF}",
+      "headers": { "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}" }
+    }
+  }
+}
+```
+
+Il ne contient aucun secret : seulement deux références de variables, que Claude Code résout depuis
+l'environnement.
+
+### 1. Créer le jeton
+
+Tableau de bord Supabase → votre compte → **Access Tokens** → *Generate new token*.
+Nommez-le `claude-code-vitola`. **Copiez-le tout de suite** : il ne s'affiche qu'une fois.
+
+### 2. Le déposer dans l'environnement — jamais dans une conversation
+
+Sur claude.ai/code, réglages de l'environnement → variables d'environnement :
+
+| Variable | Valeur |
+|---|---|
+| `SUPABASE_ACCESS_TOKEN` | le jeton créé à l'étape 1 |
+| `SUPABASE_PROJECT_REF` | la référence du projet `vitola` — la partie `xxxxx` de `https://xxxxx.supabase.co`, dans les réglages du projet. Ce n'est pas un secret. |
+
+### 3. Me le dire
+
+Je vérifie en une commande et j'enchaîne.
+
+---
+
+## Ce que ce montage donne, et ce qu'il coûte
+
+**Il est plus étroit que l'alternative.** Le paramètre `project_ref` **désactive les outils de
+compte** : ce serveur ne peut ni lister vos organisations, ni créer un projet, ni approcher la
+facturation, ni voir ShiftX. Il ne connaît que `vitola`. C'est moins d'accès que ce que le
+connecteur OAuth m'accorde aujourd'hui sur ShiftX.
+
+**Le point de vigilance, dit franchement.** Le jeton lui-même est de portée compte : quiconque le
+détient peut agir en dehors de ce cadrage. Il vit donc dans une variable d'environnement, jamais
+dans un message, et se révoque en un clic depuis le tableau de bord. Pour le neutraliser
+temporairement, ajouter `&read_only=true` à l'URL — je ne pourrai alors plus appliquer de migration.
+
+**Contrôle après coup.** `list_tables` doit répondre pour `vitola`, et `list_organizations` doit
+échouer. C'est la preuve que le cadrage projet fonctionne.
+
+---
+
+## Ce que je fais dès que l'accès est en place
+
+1. Je vérifie le droit d'écriture par une migration à vide.
+2. J'applique la migration P1 (`docs/phase-0/03-schema-p1.sql`), déjà relue et testée.
+3. Je charge les 940 fiches (`supabase/seed/seed.sql`).
+4. Je rejoue les 25 assertions de vérification contre le projet réel.
+5. Je lance les *security advisors* de Supabase sur la RLS réelle.
+6. Je génère les types TypeScript et je les commite.
+7. Je remplis `.env.example` avec les bons noms de variables.
+
+---
+
+## Si vous ne voulez rien configurer du tout
+
+Il reste la voie manuelle, sans aucun accès. Dans le tableau de bord Supabase → **SQL Editor**,
+deux exécutions dans cet ordre :
+
+1. `docs/phase-0/03-schema-p1.sql` — la migration, déjà du SQL pur (~45 Ko)
+2. `supabase/seed/seed_standalone.sql` — les 940 fiches, données inlinées (371 Ko, l'éditeur le
+   prend mais sera lent)
+
+Cela met les données en base une fois. Cela ne me permet pas de générer les types, de lancer les
+advisors, ni d'appliquer les migrations suivantes : chaque étape de P1 repasserait par vous.
+
+---
+
+## Notes sur le projet
+
+- **Région** : `eu-west-3` (Paris) recommandé — Vercel tourne en `cdg1`, qui est Paris.
+- **Postgres 17** est provisionné par Supabase, là où le brief mentionne 15. Sans conséquence : la
+  migration P1 n'utilise rien de spécifique à une version et a été validée sur 16.
+- **Les clés** : `sb_publishable_…` est publique par nature (la RLS la gouverne) et je la récupère
+  seul. `sb_secret_…` contourne toute la RLS : elle ne va que dans Vercel et les secrets GitHub,
+  jamais dans une conversation.
+- Je ne touche à aucun de vos autres projets, et toute action ayant un coût passe par vous.
