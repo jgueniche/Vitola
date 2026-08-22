@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { AGE_COOKIE_NAME, verifyAgeToken } from '@/lib/compliance/age-gate'
-import { isPublicPath, routes, safeSuite } from '@/lib/routes'
+import { isApiPath, isPublicPath, routes, safeSuite } from '@/lib/routes'
 import { carryCookies, refreshSession } from '@/lib/supabase/middleware'
 
 /**
@@ -57,6 +57,20 @@ export async function middleware(request: NextRequest) {
   const isAdult = await verifyAgeToken(request.cookies.get(AGE_COOKIE_NAME)?.value)
 
   if (!isAdult) {
+    /*
+     * Same refusal, legible dialect. The gate still stands: this branch denies
+     * the request, it does not let it through. See isApiPath().
+     */
+    if (isApiPath(pathname)) {
+      return carryCookies(
+        response,
+        NextResponse.json(
+          { error: 'age_gate_required', ageGate: routes.ageGate() },
+          { status: 403 },
+        ),
+      )
+    }
+
     const url = request.nextUrl.clone()
     url.pathname = routes.ageGate()
     url.search = ''

@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      aroma_taxonomy: {
+        Row: {
+          created_at: string
+          family: Database["public"]["Enums"]["aroma_family"]
+          id: number
+          label_en: string | null
+          label_fr: string
+          parent_id: number | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          family: Database["public"]["Enums"]["aroma_family"]
+          id?: never
+          label_en?: string | null
+          label_fr: string
+          parent_id?: number | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          family?: Database["public"]["Enums"]["aroma_family"]
+          id?: never
+          label_en?: string | null
+          label_fr?: string
+          parent_id?: number | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aroma_taxonomy_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "aroma_taxonomy"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -50,6 +88,42 @@ export type Database = {
           entity_table?: string | null
           id?: never
           ip_hash?: string | null
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          author_id: string
+          body: string
+          cigar_id: string
+          created_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          cigar_id: string
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          cigar_id?: string
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -196,11 +270,154 @@ export type Database = {
         }
         Relationships: []
       }
+      review_shares: {
+        Row: {
+          granted_at: string
+          granted_by: string
+          grantee_id: string
+          review_id: string
+        }
+        Insert: {
+          granted_at?: string
+          granted_by: string
+          grantee_id: string
+          review_id: string
+        }
+        Update: {
+          granted_at?: string
+          granted_by?: string
+          grantee_id?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_shares_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_thirds: {
+        Row: {
+          notes: string | null
+          review_id: string
+          third: number
+        }
+        Insert: {
+          notes?: string | null
+          review_id: string
+          third: number
+        }
+        Update: {
+          notes?: string | null
+          review_id?: string
+          third?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_thirds_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          aroma_tags: number[]
+          body: string | null
+          box_code: string | null
+          cigar_id: string
+          created_at: string
+          humidity_pct: number | null
+          id: string
+          is_blind: boolean
+          kind: Database["public"]["Enums"]["review_kind"]
+          pairing_tags: string[]
+          pairing_text: string | null
+          production_year: number | null
+          purchase_year: number | null
+          score_total: number | null
+          scores: Json
+          smoke_duration_min: number | null
+          smoked_on: string
+          strength_perceived: Database["ref"]["Enums"]["strength"] | null
+          updated_at: string
+          user_id: string
+          visibility: Database["public"]["Enums"]["review_visibility"]
+        }
+        Insert: {
+          aroma_tags?: number[]
+          body?: string | null
+          box_code?: string | null
+          cigar_id: string
+          created_at?: string
+          humidity_pct?: number | null
+          id?: string
+          is_blind?: boolean
+          kind?: Database["public"]["Enums"]["review_kind"]
+          pairing_tags?: string[]
+          pairing_text?: string | null
+          production_year?: number | null
+          purchase_year?: number | null
+          score_total?: number | null
+          scores?: Json
+          smoke_duration_min?: number | null
+          smoked_on?: string
+          strength_perceived?: Database["ref"]["Enums"]["strength"] | null
+          updated_at?: string
+          user_id: string
+          visibility?: Database["public"]["Enums"]["review_visibility"]
+        }
+        Update: {
+          aroma_tags?: number[]
+          body?: string | null
+          box_code?: string | null
+          cigar_id?: string
+          created_at?: string
+          humidity_pct?: number | null
+          id?: string
+          is_blind?: boolean
+          kind?: Database["public"]["Enums"]["review_kind"]
+          pairing_tags?: string[]
+          pairing_text?: string | null
+          production_year?: number | null
+          purchase_year?: number | null
+          score_total?: number | null
+          scores?: Json
+          smoke_duration_min?: number | null
+          smoked_on?: string
+          strength_perceived?: Database["ref"]["Enums"]["strength"] | null
+          updated_at?: string
+          user_id?: string
+          visibility?: Database["public"]["Enums"]["review_visibility"]
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      cigar_stats: {
+        Row: {
+          bayesian_score: number | null
+          cigar_id: string | null
+          distribution: Json | null
+          last_review_at: string | null
+          mean_score: number | null
+          mean_score_90d: number | null
+          review_count: number | null
+          review_count_90d: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      comment_min_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -211,10 +428,24 @@ export type Database = {
       }
       immutable_unaccent: { Args: { value: string }; Returns: string }
       is_privileged_context: { Args: never; Returns: boolean }
+      owns_review: { Args: { target: string }; Returns: boolean }
+      refresh_cigar_stats: { Args: never; Returns: undefined }
       slugify: { Args: { value: string }; Returns: string }
     }
     Enums: {
       app_role: "member" | "contributor" | "editor" | "moderator" | "admin"
+      aroma_family:
+        | "boise"
+        | "torrefie"
+        | "epice"
+        | "terreux"
+        | "animal"
+        | "fruite"
+        | "floral"
+        | "sucre"
+        | "vegetal"
+        | "mineral"
+        | "defaut"
       consent_kind:
         | "terms"
         | "privacy"
@@ -222,6 +453,8 @@ export type Database = {
         | "analytics"
         | "marketing_email"
         | "health_related_processing"
+      review_kind: "log" | "tasting"
+      review_visibility: "private" | "shared" | "followers" | "public"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -825,6 +1058,19 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["member", "contributor", "editor", "moderator", "admin"],
+      aroma_family: [
+        "boise",
+        "torrefie",
+        "epice",
+        "terreux",
+        "animal",
+        "fruite",
+        "floral",
+        "sucre",
+        "vegetal",
+        "mineral",
+        "defaut",
+      ],
       consent_kind: [
         "terms",
         "privacy",
@@ -833,6 +1079,8 @@ export const Constants = {
         "marketing_email",
         "health_related_processing",
       ],
+      review_kind: ["log", "tasting"],
+      review_visibility: ["private", "shared", "followers", "public"],
     },
   },
   ref: {

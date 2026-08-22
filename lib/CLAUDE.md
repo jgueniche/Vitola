@@ -20,6 +20,7 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `compliance/age-gate.ts` | La signature du cookie 18+ et le calcul de majorité. |
 | `compliance/tobacco-terms.ts` | Le lexique interdit en boutique. Repris par un trigger en P7. |
 | `i18n/index.ts` | Le point d'entrée de toute copie visible. |
+| `release.ts` | La phase de la roadmap et le commit déployé, servis par `/api/health`. |
 
 ## Le garde-fou tabac a une subtilité
 

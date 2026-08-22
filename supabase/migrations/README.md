@@ -7,6 +7,9 @@ enregistré dans `supabase_migrations.schema_migrations` :
 |---|---|---|
 | `0001` | `p1_referential` | **`../../docs/phase-0/03-schema-p1.sql`** |
 | `0002` | `function_grants` | `0002_function_grants.sql` |
+| `0003` | `carnet` | `0003_carnet.sql` |
+| `0004` | `commentaires_moderation` | `0004_commentaires_moderation.sql` |
+| `0005` | `ref_function_grants` | `0005_ref_function_grants.sql` |
 
 ## Pourquoi ce dossier commence à 0002
 
@@ -36,6 +39,9 @@ que `docs/phase-0/` conserve — le fichier, ou un lien vers lui.
 psql -f supabase/tests/00_supabase_stubs.sql      # hors Supabase uniquement
 psql -f docs/phase-0/03-schema-p1.sql             # 0001
 psql -f supabase/migrations/0002_function_grants.sql
+psql -f supabase/migrations/0003_carnet.sql
+psql -f supabase/migrations/0004_commentaires_moderation.sql
+psql -f supabase/migrations/0005_ref_function_grants.sql
 cd supabase/seed && psql -f seed.sql
 ```
 

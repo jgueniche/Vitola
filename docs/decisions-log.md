@@ -2,6 +2,118 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Schéma du carnet, des commentaires et de la modération
+
+Migrations 0003 à 0005, appliquées sur le projet réel le 22 août 2026. Elles exécutent les ADR 0004
+et 0005, acceptées le même jour. Le carnet relève de P2, les commentaires de P1 — c'est l'ADR 0005
+qui avance leur échéance ; les deux arrivent ensemble parce que `cigar_stats` et `comments` lisent
+la même fiche.
+
+**Une policy qui interroge une table interroge aussi ses droits.** La branche `shared` de `reviews`
+lit `review_shares`, sur laquelle `anon` n'a aucun `GRANT`. Écrite en une seule policy
+`to anon, authenticated`, elle faisait échouer un simple `select from reviews` en tant qu'anonyme :
+« permission denied for table review_shares ». C'est-à-dire la lecture publique cassée, exactement
+comme `current_app_role()` l'avait cassée en 0002 — et par le même mécanisme, un an de leçons plus
+tard. Les policies sont donc découpées **par rôle** : `to anon` ne contient que la branche
+`visibility = 'public'`. Elles sont OR-ées, le résultat est identique, et une branche qu'un
+anonyme ne peut pas évaluer n'est jamais planifiée pour lui. Trouvé par l'assertion C4, pas en
+relisant.
+
+**Deux policies qui se lisent l'une l'autre, c'est une récursion — même sans boucle de données.**
+L'ADR 0004 affirmait le contraire, en raisonnant sur le chemin d'exécution : `review_shares` lit
+`reviews` pour l'auteur, `reviews` lit `review_shares` pour les destinataires, mais aucun aller-
+retour réel ne semblait possible. PostgreSQL ne raisonne pas ainsi : il détecte le cycle sur le
+**graphe des policies**, et refuse avec `infinite recursion detected in policy for relation
+"review_shares"`. Le cycle est coupé du côté froid — partager est rare, lire est constant — par
+`public.owns_review()`, en `SECURITY DEFINER`, qui ne répond que sur son appelant. Le chemin chaud
+reste un `EXISTS` ordinaire servi par `review_shares_grantee_idx`. La correction est consignée dans
+l'ADR, qui n'est pas réécrite pour autant : la décision tenait, c'est son mécanisme qui manquait
+d'une pièce.
+
+**`cigar_stats` est une vue matérialisée : elle n'accepte aucune RLS.** Son
+`where visibility = 'public'` n'est donc pas une optimisation, c'est la frontière de sécurité
+entière — même forme que le filtre par sujet de l'export RGPD. L'auto-contrôle de 0003 relit
+`pg_get_viewdef()` et casse la migration si le prédicat disparaît. L'assertion C10 le vérifie par le
+comportement, avec des notes choisies pour que les deux cas soient impossibles à confondre : quatre
+entrées à 91, 50, 60 et 70, dont une seule publique. Tout compter donnerait 67,75 sur quatre ; on
+mesure 70,0 sur une.
+
+**Le seuil de prise de parole vit dans un drapeau, pas dans une policy.** L'ADR 0005 laissait la
+question ouverte et je recommandais `contributor`. Appliqué tel quel, cela livrait une
+fonctionnalité que personne ne peut utiliser : `contributor` vaut 50 points de réputation, soit
+cinq révisions approuvées, et la réputation démarre à zéro. Le défaut retenu est donc `member`, dans
+`feature_flags.comments_min_role`, lu par `public.comment_min_role()`. Le risque couvert — le spam —
+est par ailleurs nul tant que `public_signup_open` est à `false` et qu'il existe trois comptes.
+Resserrer est un `UPDATE` d'une ligne ; desserrer après que des gens se sont exprimés ne l'est pas.
+**À rouvrir le jour où l'inscription s'ouvre.** L'assertion M14 vérifie que le drapeau agit dans les
+deux sens, pas seulement qu'il refuse.
+
+**Le schéma `mod` n'est pas exposé à PostgREST, et l'export RGPD le déclare.** Qui a signalé qui, et
+ce qu'un modérateur en a fait, est la donnée la plus sensible du produit : la RLS est la première
+barrière, l'injoignabilité la seconde. Conséquence assumée : la clé de service passe par PostgREST
+comme tout le monde, donc l'export ne peut pas lire ces trois liens. Ils sont **déclarés** dans
+`PERSONAL_DATA_SOURCES` avec le motif de leur absence, que le type rend obligatoire et qu'un test
+vérifie non vide. Une omission d'une demande d'accès se motive, elle ne se découvre pas. À refermer
+par un RPC `SECURITY DEFINER` le jour où l'endpoint de signalement existe — il n'y a aujourd'hui
+aucun signalement.
+
+**Un contrôle qui ne regarde qu'un schéma ne protège qu'un schéma.** Les advisors Supabase, relancés
+après 0004, ont relevé neuf avertissements dont quatre inattendus :
+`ref.tg_cigars_search_vector()` et `ref.tg_touch_dependent_cigars()`, toutes deux `SECURITY
+DEFINER`, appelables par `anon` et `authenticated` via `/rest/v1/rpc/…` **depuis le premier jour**.
+Ce n'est pas une régression de 0003 ni 0004 : la migration 0002 avait fermé ce trou, mais son
+auto-contrôle et `supabase/tests/02_function_grants.sql` filtraient tous deux sur
+`pronamespace = 'public'`. Le fichier qui existait pour voir ce trou ne pouvait pas le voir. La
+0005 ferme les deux fonctions **et** élargit le contrôle à `ref` et `mod` — l'élargissement compte
+plus que la correction, sans lui elle se reperdrait à la prochaine fonction. Neuf avertissements
+tombent à cinq ; lecture publique vérifiée intacte après coup, en HTTP anonyme réel : 940 fiches,
+114 marques, écriture refusée en 42501.
+
+## Phase 1 — conformité RGPD
+
+**Les endpoints RGPD lisent avec la clé de service, et c'est la RLS qui l'impose.** Contre-intuitif
+sur un dépôt où tout passe par la RLS : `audit_log` n'a **aucune** policy `SELECT` pour un membre,
+seulement `audit_log_select_admin`. Un export bâti sur la session du demandeur serait donc
+silencieusement incomplet — il rendrait un fichier d'apparence entière, amputé de la seule table qui
+trace ce qu'on a fait de ses données. La clé de service est le seul moyen d'être complet, et le
+filtre `.eq(colonne, id)` devient alors toute la frontière de sécurité : il est écrit à **un seul
+endroit**, `collectPersonalData`, et un test vérifie que les 14 sources y passent.
+
+**L'inventaire des données personnelles est vérifié par le compilateur, puis par le schéma.** Deux
+garde-fous superposés, parce qu'aucun des deux ne suffit. Le type mappé de `lib/compliance/gdpr.ts`
+refuse une table ou une colonne qui n'existe pas dans `database.types.ts` — vérifié en cassant
+volontairement les deux cas. Et `tests/compliance/gdpr-inventory.test.ts` relit le SQL : les
+13 colonnes qui référencent `auth.users` doivent toutes être déclarées, **et** la portée annoncée
+(`erased` / `anonymised`) doit correspondre au `ON DELETE` réel. Une source documentée « anonymisée »
+qui casserait en cascade est pire qu'une source non documentée : c'est une promesse que la base ne
+tient pas. Confronté à la base déployée, pas seulement au fichier : les 13 correspondent.
+
+**Effacer un contributeur détruit ses propositions de révision.** `ref.cigar_revisions.author_id`
+est `NOT NULL` : la clé étrangère ne peut que cascader, là où tous les autres liens vers un membre
+sont `on delete set null`. Un partant emporte donc ses révisions, y compris celles qu'un tiers a
+relues. C'est un trou réel dans l'historique du wiki. Il n'est pas corrigé ici — cela demande une
+migration et une décision sur ce qu'est une révision sans son auteur — mais l'effacement en
+enregistre le **nombre** dans `audit_log`, pour que la perte soit mesurée et non découverte.
+
+**La trace précède l'effacement, et son échec l'annule.** `audit_log.actor_id` sera mis à NULL par la
+cascade quelques millisecondes plus tard : c'est `entity_id`, simple texte sans clé étrangère, qui
+survit. Il ne contient que l'identifiant — ni pseudo, ni adresse. Une fois `auth.users` parti,
+il ne désigne plus personne, et c'est précisément l'intention.
+
+**`ip_hash` n'est jamais écrit.** La colonne existe pour le jour où un haché poivré servira à
+quelque chose. En écrire un aujourd'hui ajouterait une donnée personnelle **et** un secret
+obligatoire de plus — pour rien. Le §2 demande de tracer qui a fait quoi, pas d'où.
+
+**L'effacement se confirme en retapant son pseudo.** Pas une case à cocher : le geste est immédiat
+et irréversible. Accessoirement, une valeur que seul le titulaire connaît est une valeur qu'une
+requête d'une autre origine ne peut pas porter.
+
+**`/api/health` sert désormais le commit déployé.** La branche par défaut du dépôt et `master` sont
+deux réglages distincts, et Vercel déploie la première : une fusion dans `master` seule ne change
+rien en production, et rien sur le site ne le dit. Le commit rend l'écart visible d'une requête HTTP.
+La phase, elle, a répondu `P0` pendant tout P1 — un littéral enfoui dans un handler dérive parce que
+rien ne le relit. Elle vit maintenant dans `lib/release.ts`, épinglée par un test.
+
 ## Phase 1 — identité
 
 **`@supabase/ssr`, la deuxième et dernière dépendance de P1.** Annoncée quand la consultation
