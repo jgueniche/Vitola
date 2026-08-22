@@ -1,28 +1,28 @@
 name_galera,name_salida,slug,length_mm,ring_gauge,shape,notes
-Laguito No. 1,Lancero,laguito-no-1,192,38,parejo,
+Laguito No. 1,Lancero,laguito-no-1,192,38,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
 Laguito No. 2,Lancero corto,laguito-no-2,152,38,parejo,
-Laguito No. 3,Panetela,laguito-no-3,115,26,parejo,
-Julieta No. 2,Churchill,julieta-no-2,178,47,parejo,
-Prominentes,Double Corona,prominentes,194,49,parejo,
+Laguito No. 3,Panetela,laguito-no-3,115,26,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
+Julieta No. 2,Churchill,julieta-no-2,178,47,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
+Prominentes,Double Corona,prominentes,194,49,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
 Cervantes,Lonsdale,cervantes,165,42,parejo,
 Dalias,Corona Grande,dalias,170,43,parejo,
-Corona,Corona,corona,142,42,parejo,
+Corona,Corona,corona,142,42,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
 Coronas Grandes,Corona Grande,coronas-grandes,155,42,parejo,
-Mareva,Petit Corona,mareva,129,42,parejo,
+Mareva,Petit Corona,mareva,129,42,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
 Hermosos No. 4,Corona Gorda,hermosos-no-4,143,48,parejo,
-Robustos,Robusto,robustos,124,50,parejo,
+Robustos,Robusto,robustos,124,50,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
 Petit Robustos,Petit Robusto,petit-robustos,102,50,parejo,
-Cañonazo,Robusto Extra,canonazo,150,52,parejo,
+Cañonazo,Robusto Extra,canonazo,150,52,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »). Habanos y désigne la vitole de salida « Siglo VI » ; « Robusto Extra » est l'usage courant. À arbitrer.
 Genios,Genios,genios,140,52,parejo,
 Duke,Duke,duke,140,54,parejo,
 Sublimes,Sublime,sublimes,164,54,parejo,
 Gordito,Gordito,gordito,141,50,parejo,
 Magicos,Magico,magicos,115,52,parejo,
-Edmundo,Edmundo,edmundo,135,52,parejo,
-Petit Edmundo,Petit Edmundo,petit-edmundo,110,52,parejo,
-Pirámides,Torpedo,piramides,156,52,piramide,
+Edmundo,Edmundo,edmundo,135,52,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
+Petit Edmundo,Petit Edmundo,petit-edmundo,110,52,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
+Pirámides,Torpedo,piramides,156,52,piramide,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »).
 Campanas,Belicoso,campanas,140,52,belicoso,
-Perlas,Perla,perlas,102,40,parejo,
+Perlas,Perla,perlas,102,40,parejo,Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »). Habanos donne « Tres Petit Corona » comme vitole de salida.
 Franciscano,Franciscano,franciscano,116,40,parejo,
 Carolinas,Carolina,carolinas,121,26,parejo,
 Seoane,Seoane,seoane,125,36,parejo,
@@ -37,9 +37,10 @@ Conservas,Conserva,conservas,145,43,parejo,Dimensions à vérifier avant publica
 Britanicas,Britanica,britanicas,137,48,parejo,Dimensions à vérifier avant publication.
 Eminentes,Eminente,eminentes,132,44,parejo,Dimensions à vérifier avant publication.
 Pirámides Extra,Torpedo Extra,piramides-extra,160,54,piramide,Dimensions à vérifier avant publication.
-Trabucos,Trabuco,trabucos,110,38,parejo,Dimensions à vérifier avant publication.
+Trabucos,Trabuco,trabucos,110,38,parejo,Dimensions confirmées par recoupement documentaire.
 Deliciosos,Delicioso,deliciosos,159,33,parejo,Dimensions à vérifier avant publication.
 Cazadores,Cazadore,cazadores,162,43,parejo,Dimensions à vérifier avant publication.
+Exquisitos,Double Figurado,exquisitos,145,46,perfecto,"Dimensions confirmées sur le site officiel Habanos S.A. (« Principal shapes and sizes »). À ne pas confondre avec « Cohíba Exquisitos », nom commercial d'une panetela fine (galera Seoane)."
 Coronas Gordas,Corona Gorda,coronas-gordas,143,46,parejo,
 Laguito No. 5,BHK 52,laguito-no-5,119,52,parejo,Dimensions à vérifier avant publication. Vitole propre à la gamme Behike.
 Laguito No. 6,BHK 54,laguito-no-6,144,54,parejo,Dimensions à vérifier avant publication. Vitole propre à la gamme Behike.

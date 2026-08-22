@@ -13,6 +13,7 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 |---|---|---|
 | **A — Saisie de mémoire** | Manufactures, marques, vitoles, 123 fiches curées, codes de boîte | À relire (§2) |
 | **B — Arrêté d'homologation des prix (Douane)** | 900 prix de vente au détail, 817 fiches supplémentaires | Donnée publique officielle, exacte à sa date |
+| **C — Site officiel Habanos S.A.** | Confirmation de 13 vitoles, ajout d'une vitole manquante | Spécifications publiées par le fabricant |
 
 ### Source A — saisie de mémoire
 
@@ -63,6 +64,26 @@ Trois pièges rencontrés en analysant ce PDF, consignés pour la prochaine fois
 Les fiches issues de cette source portent le nom homologué, minoré de son conditionnement. Elles
 n'ont ni vitole, ni force, ni cape : l'arrêté ne les donne pas, et je ne les invente pas.
 
+### Source C — le site officiel de Habanos S.A.
+
+La page « Principal shapes and sizes » de `habanos.com` publie les cotes officielles des principaux
+formats. Treize de mes vitoles y ont été confrontées **une par une** : toutes correspondent au
+millimètre. Elles portent désormais la mention de cette confirmation, et sortent du régime « à
+relire ». Cela n'atteste pas des 37 autres, mais treize sur treize sans écart est un signal
+raisonnable sur la qualité du jeu de haute confiance.
+
+Deux enseignements en sont sortis :
+
+- La vitole de galera **Exquisitos** (double figurado, 46 × 145) manquait à la base. Elle est
+  ajoutée — et à ne pas confondre avec « Cohíba Exquisitos », nom **commercial** d'une panetela
+  fine dont la galera est Seoane. Le même mot désigne deux objets différents.
+- Habanos donne « Siglo VI » comme vitole de salida du **Cañonazo**, et « Tres Petit Corona » pour
+  la **Perla**, là où j'avais retenu l'usage courant. L'écart est consigné dans le CSV plutôt que
+  tranché seul : la nomenclature de salida est réellement ambiguë.
+
+Il s'agit des spécifications publiées par le fabricant lui-même sur son site public, consultées
+manuellement — pas d'une base concurrente, et pas d'une extraction automatisée.
+
 ## 2. Ce que cela ne garantit pas
 
 **Cette origine ne vaut pas exactitude.** Un modèle de langage restitue des faits mémorisés : il en
@@ -87,7 +108,7 @@ C'est pour cette raison que le chargement est conçu ainsi :
 |---|---:|---|---|
 | `01_manufacturers.csv` | 30 | **Élevée** sur les noms, pays et groupes | Raisons sociales exactes, villes |
 | `02_brands.csv` | 114 | **Élevée** sur les noms, pays, `is_cuban` | Les années de fondation, quand elles sont renseignées. Les rattachements marque → manufacture pour les marques non cubaines, qui changent de main. |
-| `03_vitolas.csv` | 50 | **Élevée** pour 35, **moyenne** pour 15 | Les 15 marquées `Dimensions à vérifier` |
+| `03_vitolas.csv` | 51 | **Confirmée par source officielle** pour 13, **élevée** pour 24, **moyenne** pour 14 | Les 14 marquées `Dimensions à vérifier` |
 | `04_cigars.csv` — 123 curées | 123 | **Élevée** sur le couple marque + nom commercial. **Moyenne** sur la force et la cape, qui sont des appréciations conventionnelles. | Toutes les forces et capes. Les années de sortie. Les 45 fiches sans vitole. |
 | `04_cigars.csv` — 817 issues de l'arrêté | 817 | **Élevée** sur le nom et le prix (source officielle). **Nulle** sur le reste : ces colonnes sont vides. | Libellés à normaliser, vitoles / forces / capes à renseigner. |
 | Prix (900 fiches) | 900 | **Élevée à la date du 1ᵉʳ septembre 2026** | Rien à vérifier, mais **à rafraîchir à chaque arrêté** |
@@ -120,7 +141,7 @@ c'est vérifié par le test T8 de `docs/phase-0/03b-verification.sql`.
 
 Ordre de relecture recommandé, du plus rentable au moins :
 
-1. **Les 15 vitoles marquées à vérifier.** Une dimension fausse contamine toutes les fiches qui la
+1. **Les 14 vitoles marquées à vérifier.** Une dimension fausse contamine toutes les fiches qui la
    référencent. C'est le poste le plus rentable.
 2. **Les 78 fiches cubaines**, dont le rattachement marque → vitole est standard et se contrôle vite.
 3. **Les forces et les capes**, qui sont conventionnelles et se corrigent au fil de l'eau.
