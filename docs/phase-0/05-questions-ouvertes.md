@@ -157,13 +157,22 @@ même saturation : `--erreur-lisible #CA675B`, `--colorado-lisible #C16E41`,
 **Défaut :** je les ajoute, les hex du §4.2 restant intacts pour les aplats.
 **Nécessaire avant :** la fin de P0.
 
-### Q12 · Qui modère, et sous quel délai ?
+### Q12 · Qui modère, et sous quel délai ? *(le défaut ne tient plus)*
 Le DSA impose un point de contact, un mécanisme de signalement et des délais de traitement. Le
 back-office arrive en P8, mais l'obligation naît dès qu'un contenu utilisateur est public — donc dès
 P3.
 **Défaut :** P3 livre le signalement et une file de traitement par e-mail vers une adresse unique.
 Le back-office reste en P8. Le point de contact DSA est publié dans les mentions légales dès P0.
-**Nécessaire avant :** P3.
+
+> **Corrigé le 22 août 2026.** Ce défaut reposait tout entier sur « le premier contenu utilisateur
+> public arrive avec le fil, en P3 ». L'[ADR 0005](../adr/0005-cible-des-commentaires.md) accroche
+> les commentaires à la fiche cigare, qui est lisible d'un visiteur anonyme derrière le portail :
+> **le premier contenu public arrive donc en P1**, avec les commentaires. Rien de l'outillage
+> n'existe — ni schéma `mod`, ni table `reports`, vérifié sur la base déployée. Signalement et file
+> de traitement sont à livrer **dans la même phase que les commentaires**, pas après. Reste à
+> chiffrer le délai de traitement annoncé, que cette question n'a jamais posé.
+
+**Nécessaire avant :** ~~P3~~ **P1**, en même temps que les commentaires.
 
 ### Q13 · L'age gate et le SEO sont-ils réellement conciliables ?
 Le §2 exige `noindex` sur le contenu tabac tant que le portail n'est pas franchi. Le §9 fixe comme

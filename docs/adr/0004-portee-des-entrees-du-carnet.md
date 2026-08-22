@@ -215,3 +215,19 @@ Je penche pour la seconde, et c'est ce que le calendrier fait de toute façon �
 n'existe pas avant P3. Mais le choix est le vôtre, parce qu'il porte sur ce que nous promettons,
 pas sur ce que nous savons construire. Il rejoint **Q1** : c'est un des points à soumettre à
 l'avocat avec la qualification des données de dégustation.
+
+### Arbitrage rendu — 22 août 2026
+
+**`followers` est gardée pleinement**, conformément au §5.4. Ma réserve est enregistrée ci-dessus et
+n'a pas été retenue ; elle n'a pas à l'être deux fois. Ce que la décision engage :
+
+- La branche `followers` de la policy `SELECT` arrive avec `public.follows`, en P3 — non par
+  prudence mais par dépendance : la table n'existe pas avant, et une policy ne peut pas lire une
+  table absente. Jusque-là la valeur est déclarée et inutilisable, ce qui est sans conséquence
+  puisque la portée par défaut est `private`.
+- L'audience vivante devient une **obligation d'interface**, pas une note d'ADR : au moment de
+  choisir cette portée, l'auteur doit lire que le nombre d'abonnés change et que ce qu'il publie
+  aujourd'hui pour douze personnes sera lisible demain par trois cents. Sans cet avertissement, la
+  portée est un piège.
+- Le point reste versé au dossier de la **Q1**. Il ne bloque rien, mais c'est celui sur lequel un
+  avis contraire de l'avocat coûterait le plus cher à défaire — d'où la trace ici.
