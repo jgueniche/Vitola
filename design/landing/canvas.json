@@ -1,0 +1,31 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",   "x": 0,    "y": 0,    "w": 1440, "h": 10780, "title": "Landing — 1440", "expand": "fill", "print": "flow" },
+    { "file": "Mobile.dc.html", "x": 1560, "y": 0,    "w": 390,  "h": 6760, "title": "Landing — 390",  "expand": "fill", "print": "flow" },
+    { "file": "Bague.dc.html",  "x": 1560, "y": 6900, "w": 900,  "h": 880,  "title": "La bague — élément signature", "print": "fixed" }
+  ],
+  "annotations": [
+    {
+      "id": "cadrage",
+      "x": -400,
+      "y": 0,
+      "w": 320,
+      "text": "Cadrage — à trancher\n\nCette page est dessinée comme l'accueil éditorial situé DERRIÈRE le portail 18+. Sous la loi Évin (§2 du brief), une illustration de cigare allumé n'a pas sa place avant la vérification d'âge : la porte publique actuelle, app/(public)/page.tsx, ne montre volontairement ni cigare ni marque.\n\nDeux options : garder cette page derrière /majorite, ou l'assumer en amont après avis d'un avocat."
+    },
+    {
+      "id": "placeholders",
+      "x": -400,
+      "y": 420,
+      "w": 320,
+      "text": "Données à remplir\n\nTout ce qui est entre crochets attend une donnée réelle : [Marque], [Nom commercial], [Nom du lieu], [Ville], [N], [seuil], [PRIX].\n\nRien n'a été inventé — un nom de marque ou un prix faux serait, ici, un problème juridique et pas seulement une erreur de contenu."
+    },
+    {
+      "id": "tokens",
+      "x": -400,
+      "y": 900,
+      "w": 320,
+      "text": "Système\n\nCouleurs, fontes, rayon de 3 px, filets et durées repris à l'identique de app/globals.css. Les composants remontés en maquette (Band, CigarCard, WrapperScale, StrengthMeter, RingGauge, HealthNotice) suivent le code existant.\n\nDeux réglages en haut de l'artboard : la braise et le laiton de la bague."
+    }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

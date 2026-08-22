@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Marcellus&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap">
+  <style>
+    body { margin: 0; background: #161210; }
+    a { color: #d9bc72; } a:hover { color: #c9a227; }
+
+    .sheet {
+      --oscuro: #161210; --maduro: #221b17; --cedre: #7a5c43; --cedre-readable: #a47c5a;
+      --parchemin: #ede6d8; --fumee: #9c948a;
+      --claro: var(--brass, #c9a227);
+      --claro-bright: color-mix(in oklab, var(--claro) 60%, #fff 40%);
+      --claro-deep: color-mix(in oklab, var(--claro) 62%, #000 38%);
+      --rule: rgb(237 230 216 / 0.07); --rule-strong: rgb(237 230 216 / 0.16);
+      position: relative; width: 900px; height: 860px; overflow: hidden;
+      background: radial-gradient(ellipse at 50% 36%, #221a15 0%, #191310 52%, #120e0c 100%);
+      color: var(--parchemin);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .sheet *, .sheet *::before, .sheet *::after { box-sizing: border-box; }
+    .eb { font-family: 'Marcellus', 'Optima', 'Palatino', serif; font-size: 12px;
+          letter-spacing: 0.14em; text-transform: uppercase; color: var(--fumee); margin: 0; }
+    .dsp { font-family: 'Bodoni Moda', 'Didot', serif; font-weight: 400; letter-spacing: -0.02em; margin: 0; }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+    /* ---------------- la bague, en volume ---------------- */
+    .stage { position: absolute; left: 0; top: 66px; width: 900px; height: 372px;
+             perspective: 1250px; perspective-origin: 50% 46%; }
+    /* the tilt shows the band's circular edge as an ellipse — that is what
+       makes a cylinder read as a cylinder rather than as a flat panel */
+    .tilt {
+      position: absolute; left: 274px; top: 36px; width: 340px; height: 300px;
+      transform-style: preserve-3d;
+      transform: rotateY(-27deg) rotateZ(-3deg);
+    }
+    .ring {
+      position: absolute; inset: 0;
+      transform-style: preserve-3d;
+      animation: turn 22s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+    }
+    /* it turns, then holds facing front long enough to read and to export */
+    @keyframes turn {
+      0%, 16%   { transform: rotateX(0deg); }
+      74%, 100% { transform: rotateX(360deg); }
+    }
+
+    .slat {
+      position: absolute; left: 0; top: 50%; width: 340px; height: 32px; margin-top: -16px;
+      backface-visibility: hidden;
+      transform: rotateX(calc(var(--i) * 11.25deg)) translateZ(150px);
+      background:
+        linear-gradient(90deg,
+          rgb(84 60 30 / 0.9) 0px, #8a6a35 3px, var(--claro-bright) 6px, var(--claro) 10px,
+          rgb(122 92 67 / 0.5) 14px, rgb(122 92 67 / 0.2) 21px,
+          transparent 34px, transparent 306px,
+          rgb(122 92 67 / 0.2) 319px, rgb(122 92 67 / 0.5) 326px,
+          var(--claro) 330px, var(--claro-bright) 334px, #8a6a35 337px, rgb(84 60 30 / 0.9) 340px),
+        repeating-linear-gradient(90deg, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 6px),
+        linear-gradient(180deg,
+          color-mix(in oklab, var(--claro) 90%, #fff 10%) 0%,
+          var(--claro) 55%,
+          color-mix(in oklab, var(--claro) 94%, #000 6%) 100%);
+    }
+    .face { display: flex; align-items: center; justify-content: center; gap: 16px; color: #33220a; }
+    .mark {
+      font-family: 'Marcellus', 'Optima', 'Palatino', serif;
+      font-size: 22px; letter-spacing: 0.24em; text-transform: uppercase; line-height: 1;
+      text-shadow: 0 1px 0 rgb(255 245 210 / 0.6), 0 -1px 0 rgb(60 40 8 / 0.42);
+    }
+    .fil { width: 58px; height: 1px; background: rgb(51 34 10 / 0.55); }
+    .sub { display: flex; align-items: center; justify-content: center;
+           font-family: 'Marcellus', 'Optima', serif; font-size: 11px; letter-spacing: 0.3em;
+           text-transform: uppercase; color: rgb(44 28 7 / 0.82); }
+
+    /* lumière fixe : le cylindre tourne, la source ne bouge pas */
+    .light {
+      position: absolute; left: 0; top: 0; width: 340px; height: 300px;
+      transform: translateZ(151px); pointer-events: none;
+      background: linear-gradient(180deg,
+        rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.44) 9%, rgb(0 0 0 / 0.08) 24%,
+        rgb(255 250 226 / 0.26) 34%, rgb(255 250 226 / 0.05) 47%,
+        rgb(0 0 0 / 0.07) 58%, rgb(0 0 0 / 0.40) 80%, rgb(0 0 0 / 0.64) 100%);
+    }
+    .spec {
+      position: absolute; left: 0; top: 0; width: 340px; height: 300px;
+      transform: translateZ(152px); pointer-events: none; mix-blend-mode: screen;
+      background: linear-gradient(104deg,
+        transparent 34%, rgb(255 252 236 / 0.32) 47%, rgb(255 252 236 / 0.08) 54%, transparent 66%);
+      background-size: 250% 100%;
+      animation: spec 9s ease-in-out infinite;
+    }
+    @keyframes spec { 0%, 100% { background-position: 124% 0; } 50% { background-position: -28% 0; } }
+
+    .floor {
+      position: absolute; left: 244px; top: 366px; width: 400px; height: 46px;
+      background: radial-gradient(ellipse at 50% 50%,
+        rgb(201 162 39 / 0.14) 0%, rgb(201 162 39 / 0.04) 40%, transparent 72%);
+      filter: blur(12px);
+    }
+
+    /* ---------------- les variantes plates ---------------- */
+    .brass { height: 1px; width: 100%;
+      background-image: linear-gradient(90deg,
+        transparent 0%, rgb(122 92 67 / 0.35) 8%, var(--claro) 34%, var(--claro-bright) 50%,
+        var(--claro) 66%, rgb(122 92 67 / 0.35) 92%, transparent 100%); }
+    .variants { position: absolute; left: 0; bottom: 0; width: 900px;
+                border-top: 1px solid var(--rule); padding: 30px 48px 34px;
+                display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+    .v-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+    .v-n { font-size: 10px; color: var(--cedre-readable); letter-spacing: 0.08em; }
+    .lock { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 16px; }
+    .lock-sm { padding: 7px 12px; gap: 8px; }
+    .lk { font-family: 'Marcellus', 'Optima', serif; font-size: 12px; letter-spacing: 0.14em;
+          text-transform: uppercase; }
+    .lk-b { font-size: 10px; }
+    .dot { color: var(--claro); font-size: 12px; }
+    .badge { display: inline-block; min-width: 150px; }
+  </style>
+</helmet>
+
+<div class="sheet" style="--brass: {{brass}}">
+
+  <div style="position:absolute; left:48px; top:34px">
+    <p class="eb">L'élément signature</p>
+  </div>
+  <div style="position:absolute; right:48px; top:32px; text-align:right">
+    <p class="mono" style="margin:0; font-size:11px; color:var(--cedre-readable)">32 lattes · r 150 · rotation 22 s</p>
+  </div>
+
+  <div class="stage">
+   <div class="tilt">
+    <div class="ring">
+      <div class="slat" style="--i:-16"></div><div class="slat" style="--i:-15"></div>
+      <div class="slat" style="--i:-14"></div><div class="slat" style="--i:-13"></div>
+      <div class="slat" style="--i:-12"></div><div class="slat" style="--i:-11"></div>
+      <div class="slat" style="--i:-10"></div><div class="slat" style="--i:-9"></div>
+      <div class="slat" style="--i:-8"></div><div class="slat" style="--i:-7"></div>
+      <div class="slat" style="--i:-6"></div><div class="slat" style="--i:-5"></div>
+      <div class="slat" style="--i:-4"></div><div class="slat" style="--i:-3"></div>
+      <div class="slat sub" style="--i:-2">Habanophile</div>
+      <div class="slat sub" style="--i:-1">Le référentiel du cigare</div>
+      <div class="slat face" style="--i:0">
+        <span class="fil"></span><span class="mark">Vitola</span><span class="fil"></span>
+      </div>
+      <div class="slat sub" style="--i:1">Corona gorda · 52 × 164</div>
+      <div class="slat sub" style="--i:2">Cuba · 1969</div>
+      <div class="slat" style="--i:3"></div><div class="slat" style="--i:4"></div>
+      <div class="slat" style="--i:5"></div><div class="slat" style="--i:6"></div>
+      <div class="slat" style="--i:7"></div><div class="slat" style="--i:8"></div>
+      <div class="slat" style="--i:9"></div><div class="slat" style="--i:10"></div>
+      <div class="slat" style="--i:11"></div><div class="slat" style="--i:12"></div>
+      <div class="slat" style="--i:13"></div><div class="slat" style="--i:14"></div>
+      <div class="slat" style="--i:15"></div>
+    </div>
+    <div class="light"></div>
+    <div class="spec"></div>
+   </div>
+  </div>
+  <div class="floor"></div>
+
+  <div style="position:absolute; left:48px; top:478px; width:804px">
+    <h1 class="dsp" style="font-size:34px; line-height:1.15">Un seul élément mémorable.</h1>
+    <p style="margin-top:12px; font-size:15px; line-height:1.62; color:var(--fumee); max-width:70ch">
+      La bague est le seul objet que tout fumeur retire, retourne et garde avant d'avoir goûté quoi que
+      ce soit. En faire le composant signature laisse le produit fournir sa propre grammaire visuelle au
+      lieu d'en emprunter une au logiciel. Tout le reste se tait : filets, rayon de 3 px, aucune ombre.</p>
+  </div>
+
+  <div class="variants">
+    <div>
+      <div class="v-h"><span class="eb">En-tête de fiche</span><span class="v-n mono">header</span></div>
+      <div class="brass"></div>
+      <div class="lock"><span class="lk">Vitola</span><span class="dot">·</span><span class="lk" style="color:var(--fumee)">Corona gorda</span></div>
+      <div class="brass"></div>
+    </div>
+    <div>
+      <div class="v-h"><span class="eb">Séparateur</span><span class="v-n mono">divider</span></div>
+      <div class="brass"></div>
+      <div class="lock" style="padding:8px 16px"><span class="lk" style="color:var(--fumee)">Journal</span></div>
+      <div class="brass"></div>
+    </div>
+    <div>
+      <div class="v-h"><span class="eb">Badge de profil</span><span class="v-n mono">badge</span></div>
+      <span class="badge">
+        <span class="brass" style="display:block"></span>
+        <span class="lock lock-sm"><span class="lk lk-b">Archiviste</span></span>
+        <span class="brass" style="display:block"></span>
+      </span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":900,"height":860},"brass":{"editor":"color","default":"#c9a227","options":["#c9a227","#d9bc72","#b8863b","#a47c5a"],"section":"Bague"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { brass: this.props.brass ?? '#c9a227' }
+  }
+}
+</script>
+</body>
+</html>
