@@ -10,8 +10,15 @@ liens et son champ un `<form method="get">`, donc zéro JavaScript.
 
 ## La frontière de l'age gate est une frontière de routage
 
-- `app/(public)/` — accessible **sans** franchir le portail. Aucun contenu produit : ni nom de
-  marque, ni photo, ni fiche. C'est vérifié par un test e2e.
+- `app/(public)/` — accessible **sans** franchir le portail. Aucun **nom de marque**, aucune fiche,
+  aucun prix de tabac : c'est vérifié par un test e2e, qui échoue si une marque réelle apparaît.
+
+  La page d'accueil montre en revanche une **illustration de cigare allumé**, décidée par le
+  porteur du produit. Elle est dessinée pour rester du bon côté du §2 : planche annotée, légendes
+  en mesures et non en adjectifs, aucune marque. Son emplacement devant le portail est assumé et
+  non bloquant — il est inscrit sous « À trancher avant commercialisation » dans le `CLAUDE.md` racine,
+  pour avis juridique avant l'ouverture commerciale.
+
 - `app/(app)/` — derrière le portail. Le middleware garantit un cookie signé valide et pose
   `X-Robots-Tag: noindex`.
 
