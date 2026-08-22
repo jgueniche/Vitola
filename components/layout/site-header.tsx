@@ -20,6 +20,7 @@ const NAV = [
   { label: 'Marques', href: routes.brands() },
   { label: 'Vitoles', href: routes.vitolas() },
   { label: 'Arômes', href: routes.aromas() },
+  { label: 'Codes de boîte', href: routes.boxCodes() },
 ] as const
 
 /* Shown only to a signed-in member, because that is the only person it is a

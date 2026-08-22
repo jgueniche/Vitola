@@ -5,6 +5,7 @@ import { CigarCard } from '@/components/cigar/cigar-card'
 import { FacetPanel } from '@/components/cigar/facet-panel'
 import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
+import { Button } from '@/components/ui/button'
 import { m } from '@/lib/i18n'
 import { publishedOriginCountries } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
@@ -47,9 +48,18 @@ export default async function CigarsPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-3">
-        <p className="eyebrow">{m.referential.eyebrow}</p>
-        <h1 className="font-display text-4xl">{m.referential.cigarsTitle}</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow">{m.referential.eyebrow}</p>
+          <h1 className="font-display text-4xl">{m.referential.cigarsTitle}</h1>
+        </div>
+        {/* The comparator is reached from here because here is where one has
+            just seen two sheets worth putting side by side. */}
+        <Link href={routes.cigarCompare()}>
+          <Button variant="secondary" size="sm">
+            {m.compare.title}
+          </Button>
+        </Link>
       </div>
 
       <Band variant="divider" />
