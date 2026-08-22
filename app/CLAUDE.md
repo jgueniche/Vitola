@@ -16,7 +16,7 @@ liens et son champ un `<form method="get">`, donc zéro JavaScript.
   La page d'accueil montre en revanche une **illustration de cigare allumé**, décidée par le
   porteur du produit. Elle est dessinée pour rester du bon côté du §2 : planche annotée, légendes
   en mesures et non en adjectifs, aucune marque. Son emplacement devant le portail est assumé et
-  non bloquant — il est inscrit dans « À trancher avant commercialisation » du `CLAUDE.md` racine,
+  non bloquant — il est inscrit sous « À trancher avant commercialisation » dans le `CLAUDE.md` racine,
   pour avis juridique avant l'ouverture commerciale.
 
 - `app/(app)/` — derrière le portail. Le middleware garantit un cookie signé valide et pose
