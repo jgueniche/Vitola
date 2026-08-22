@@ -3,10 +3,26 @@
 ## Server Components par défaut
 
 `'use client'` est l'exception et doit être justifié par un commentaire d'une ligne juste au-dessus.
-À ce jour, deux composants clients existent, tous deux pour `useActionState` — un formulaire qui doit
-réafficher l'erreur que son action a renvoyée : `majorite/age-gate-form.tsx` et
-`connexion/sign-in-form.tsx`. La recherche facettée, elle, n'en est pas un : ses facettes sont des
-liens et son champ un `<form method="get">`, donc zéro JavaScript.
+La recherche facettée n'en est pas un : ses facettes sont des liens et son champ un
+`<form method="get">`, donc zéro JavaScript. Cinq existent :
+
+| Fichier | Pourquoi |
+|---|---|
+| `majorite/age-gate-form.tsx` | `useActionState` — réafficher l'erreur renvoyée par l'action |
+| `connexion/sign-in-form.tsx` | idem |
+| `cigares/[slug]/comment-form.tsx` | idem, plus vider le champ **uniquement** en cas de succès |
+| `cigares/[slug]/comment-item.tsx` | un commentaire bascule entre lecture et édition |
+| `components/moderation/report-dialog.tsx` | un `POST` vers une route API, avec son état d'envoi |
+
+Deux règles apprises en les écrivant :
+
+- **Un formulaire qui doit se refermer tout seul n'utilise pas `useActionState`.** La règle
+  `react-hooks/set-state-in-effect` refuse `setState` dans un `useEffect`, et surveiller l'état
+  renvoyé pour fermer un éditeur est exactement cela. On appelle alors la Server Action depuis un
+  `useTransition` : elle apprend le succès et referme au même endroit. C'est `comment-item.tsx`.
+- **Le dialogue de signalement est un composant client parce que le mécanisme est une route API.**
+  L'article 16 du DSA veut un mécanisme joignable, y compris par une machine ; une route
+  `app/api/` répond à cela, et une route ne peut pas être un `<form action>`.
 
 ## La frontière de l'age gate est une frontière de routage
 

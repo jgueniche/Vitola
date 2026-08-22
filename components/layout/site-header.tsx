@@ -19,6 +19,7 @@ const NAV = [
   { label: 'Cigares', href: routes.cigars() },
   { label: 'Marques', href: routes.brands() },
   { label: 'Vitoles', href: routes.vitolas() },
+  { label: 'Arômes', href: routes.aromas() },
 ] as const
 
 /**

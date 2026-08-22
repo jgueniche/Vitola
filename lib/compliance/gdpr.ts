@@ -46,18 +46,41 @@ type SourceIn<S extends 'public' | 'ref'> = {
 type Erasure = 'erased' | 'anonymised'
 
 /**
- * A link that exists in the schema but that the export cannot reach.
+ * A link the export reaches through a function rather than through a table.
  *
- * Only `mod` is in this shape today. That schema is deliberately absent from
- * PostgREST's exposed list (migration 0004): who reported whom, and what a
- * moderator did about it, is the most sensitive data in the product, and
- * unreachability is a second barrier behind RLS. The service-role client goes
- * through PostgREST like any other, so it cannot read those tables either.
+ * `mod` is deliberately absent from PostgREST's exposed list (migration 0004):
+ * who reported whom, and what a moderator did about it, is the most sensitive
+ * data in the product, and unreachability is a second barrier behind RLS. The
+ * service-role client goes through PostgREST like any other and holds no
+ * privilege in that schema — checked on the project, not assumed.
+ *
+ * Until August 2026 that made these three links `UnreachableSource`s, declared
+ * and not exported, on the argument that no report existed. Migration 0006
+ * ended that argument in the same file that created the first report: it opens
+ * one SECURITY DEFINER function in `public`, callable by the service role
+ * alone, which returns a subject their own records. The schema stays closed;
+ * what crosses is a door the size of one gesture.
  *
  * Not validated against `Database`, because the generated types do not contain
- * an unexposed schema — which is precisely why these entries are hand-written
- * and made to carry their own justification. `unreachable` is required: an
- * omission from a subject access request has to be argued, not discovered.
+ * an unexposed schema. That is why these entries are hand-written and made to
+ * carry the name of the function that reads them.
+ */
+type RpcSource = {
+  key: string
+  schema: 'mod'
+  table: string
+  column: string
+  erasure: Erasure
+  /** The function in `public` that reads it, and the key it answers under. */
+  rpc: 'moderation_records_for_subject'
+}
+
+/**
+ * A link that exists in the schema and that nothing can currently read.
+ *
+ * Empty today, and that is the point of keeping the shape: `unreachable` is
+ * required text, so the next omission has to be argued rather than discovered.
+ * An omission from a subject access request is a decision, not an accident.
  */
 type UnreachableSource = {
   key: string
@@ -68,7 +91,11 @@ type UnreachableSource = {
   unreachable: string
 }
 
-export type PersonalDataSource = SourceIn<'public'> | SourceIn<'ref'> | UnreachableSource
+export type PersonalDataSource =
+  | SourceIn<'public'>
+  | SourceIn<'ref'>
+  | RpcSource
+  | UnreachableSource
 
 export const PERSONAL_DATA_SOURCES = [
   { key: 'profile', schema: 'public', table: 'profiles', column: 'id', erasure: 'erased' },
@@ -194,17 +221,16 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'anonymised',
   },
 
-  /* Moderation. Declared, not exported — see UnreachableSource above. */
+  /* Moderation. Read through migration 0006's function — see RpcSource above.
+     The keys are the ones that function answers under, and they are the same
+     strings: a rename on one side has to be a rename on both. */
   {
     key: 'reportsFiled',
     schema: 'mod',
     table: 'reports',
     column: 'reporter_id',
     erasure: 'anonymised',
-    unreachable:
-      'The mod schema is not exposed to PostgREST, so no client can read it — ' +
-      'service-role included. Closing this needs a SECURITY DEFINER RPC in ' +
-      'public, and it ships with the reporting endpoint. No report exists yet.',
+    rpc: 'moderation_records_for_subject',
   },
   {
     key: 'reportsDecided',
@@ -212,7 +238,7 @@ export const PERSONAL_DATA_SOURCES = [
     table: 'reports',
     column: 'decided_by',
     erasure: 'anonymised',
-    unreachable: 'Same as reportsFiled: the mod schema is unreachable by design.',
+    rpc: 'moderation_records_for_subject',
   },
   {
     key: 'moderationActions',
@@ -220,7 +246,7 @@ export const PERSONAL_DATA_SOURCES = [
     table: 'moderation_actions',
     column: 'moderator_id',
     erasure: 'anonymised',
-    unreachable: 'Same as reportsFiled: the mod schema is unreachable by design.',
+    rpc: 'moderation_records_for_subject',
   },
 ] as const satisfies readonly PersonalDataSource[]
 
@@ -236,10 +262,16 @@ export type PersonalDataKey = (typeof PERSONAL_DATA_SOURCES)[number]['key']
  * silent omission, which is why the type demands one.
  */
 type DeclaredSource = (typeof PERSONAL_DATA_SOURCES)[number]
-type ReachableSource = Exclude<DeclaredSource, { unreachable: string }>
+type ReachableSource = Exclude<DeclaredSource, { unreachable: string } | { rpc: string }>
+type RpcReachableSource = Extract<DeclaredSource, { rpc: string }>
 
 export const READABLE_SOURCES: readonly ReachableSource[] = PERSONAL_DATA_SOURCES.filter(
-  (source): source is ReachableSource => !('unreachable' in source),
+  (source): source is ReachableSource => !('unreachable' in source) && !('rpc' in source),
+)
+
+/** The sources read through a function rather than through a table. */
+export const RPC_SOURCES: readonly RpcReachableSource[] = PERSONAL_DATA_SOURCES.filter(
+  (source): source is RpcReachableSource => 'rpc' in source,
 )
 
 export type PersonalDataBundle = Record<string, unknown[]>
@@ -298,4 +330,53 @@ export async function collectPersonalData(
   )
 
   return Object.fromEntries(entries) as PersonalDataBundle
+}
+
+/**
+ * The slice of the client that calls the moderation function.
+ *
+ * Separate from `PersonalDataReader` because it is a different kind of read —
+ * one call, one object, no table names — and because keeping it separate makes
+ * the asymmetry visible: everything else in this file reads tables, these three
+ * links cannot.
+ */
+export type ModerationReader = {
+  rpc(
+    name: 'moderation_records_for_subject',
+    args: { p_subject: string },
+  ): PromiseLike<{ data: unknown; error: { message: string } | null }>
+}
+
+/**
+ * Reads the three `mod` links for one subject, through migration 0006.
+ *
+ * Fails the export if the call fails, exactly like a table source: a subject
+ * access request that silently drops the moderation records would be the
+ * omission this file exists to prevent, only harder to notice than before —
+ * the keys would be there, holding nothing.
+ *
+ * A key the function does not answer under comes back as an empty array rather
+ * than as `undefined`, so the shape of the export does not depend on whether
+ * the person has ever reported anything.
+ */
+export async function collectModerationRecords(
+  reader: ModerationReader,
+  subjectId: string,
+): Promise<PersonalDataBundle> {
+  const { data, error } = await reader.rpc('moderation_records_for_subject', {
+    p_subject: subjectId,
+  })
+
+  if (error) {
+    throw new Error(`moderation_records_for_subject: ${error.message}`)
+  }
+
+  const records = (data ?? {}) as Record<string, unknown>
+
+  return Object.fromEntries(
+    RPC_SOURCES.map((source) => {
+      const value = records[source.key]
+      return [source.key, Array.isArray(value) ? value : []]
+    }),
+  )
 }

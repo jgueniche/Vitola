@@ -3,8 +3,10 @@ import { NextResponse } from 'next/server'
 import { BRAND } from '@/lib/brand'
 import { recordAudit } from '@/lib/compliance/audit'
 import {
+  collectModerationRecords,
   collectPersonalData,
   PERSONAL_DATA_SOURCES,
+  type ModerationReader,
   type PersonalDataReader,
 } from '@/lib/compliance/gdpr'
 import { routes } from '@/lib/routes'
@@ -43,9 +45,21 @@ export async function GET() {
   const user = session.user
   const admin = createSupabaseAdminClient()
 
+  /*
+   * Two reads, one answer. The tables come through PostgREST like everything
+   * else; the three `mod` links come through the SECURITY DEFINER function of
+   * migration 0006, because that schema is not exposed and the service role
+   * holds no privilege in it. They are awaited together and either both land or
+   * the export fails — an access request answered with the moderation records
+   * quietly missing is answered badly, and looks answered well.
+   */
   let data
   try {
-    data = await collectPersonalData(admin as unknown as PersonalDataReader, user.id)
+    const [tables, moderation] = await Promise.all([
+      collectPersonalData(admin as unknown as PersonalDataReader, user.id),
+      collectModerationRecords(admin as unknown as ModerationReader, user.id),
+    ])
+    data = { ...tables, ...moderation }
   } catch (cause) {
     console.error('[gdpr/export] collection failed', cause)
     return NextResponse.json(

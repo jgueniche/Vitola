@@ -422,12 +422,34 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      /*
+       * The two doors of migration 0006 onto the `mod` schema. They are typed
+       * here like any other function even though only the service-role client
+       * may call them: the type says what the signature is, the GRANT says who
+       * may use it, and conflating the two is how a guard gets relaxed by
+       * accident.
+       *
+       * `p_reason` is text rather than the enum because `mod.report_reason`
+       * lives in a schema PostgREST does not see — see the migration's §1.
+       */
+      file_report: {
+        Args: {
+          p_reporter_id: string | null
+          p_entity_schema: string
+          p_entity_table: string
+          p_entity_id: string
+          p_reason: string
+          p_detail?: string | null
+        }
+        Returns: Json
+      }
       has_min_role: {
         Args: { minimum: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
       immutable_unaccent: { Args: { value: string }; Returns: string }
       is_privileged_context: { Args: never; Returns: boolean }
+      moderation_records_for_subject: { Args: { p_subject: string }; Returns: Json }
       owns_review: { Args: { target: string }; Returns: boolean }
       refresh_cigar_stats: { Args: never; Returns: undefined }
       slugify: { Args: { value: string }; Returns: string }

@@ -2,6 +2,82 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Signalement DSA, commentaires à l'écran, roue des arômes
+
+Migration 0006 et seed section 6, appliqués sur le projet réel le 22 août 2026. Ce qui manquait
+pour que l'ADR 0005 soit tenue : la file existait, le délai était déclaré, **le moyen d'écrire dans
+la file n'existait pas**.
+
+**La clé de service ne suffisait pas, et c'est le point le plus contre-intuitif de la session.**
+`service_role` contourne la RLS — il porte `BYPASSRLS` — donc on le croit capable de tout. Vérifié
+sur le projet plutôt que supposé : il n'a **aucun droit de table dans `mod`**, seul `postgres` en a,
+et `mod` n'est de toute façon pas exposé à PostgREST. Un `insert` depuis `app/api/**` n'aurait
+jamais abouti, quel que soit le code écrit au-dessus. Le passage est celui que
+`lib/compliance/gdpr.ts` annonçait déjà en toutes lettres — « Closing this needs a SECURITY DEFINER
+RPC in public, and it ships with the reporting endpoint » : `public.file_report()`, propriété de
+`postgres`, accordée à `service_role` et à personne d'autre. Le schéma reste fermé ; ce qui traverse
+est une porte de la taille d'un geste.
+
+**L'export RGPD se referme dans la même migration que celle qui ouvre le trou.** Trois liens vers
+`mod` étaient déclarés `unreachable` avec, pour motif, « aucun signalement n'existe aujourd'hui ».
+Cet argument meurt à la ligne où le premier signalement devient possible.
+`public.moderation_records_for_subject()` les rend à leur sujet, et `PERSONAL_DATA_SOURCES` gagne
+une troisième forme :
+`RpcSource`. La forme `UnreachableSource` reste déclarée bien qu'elle n'ait plus d'occurrence —
+c'est là que la prochaine omission devra s'argumenter.
+
+**Le seuil de la déduplication porte sur un dossier ouvert, pas sur une cible.** Deux signalements
+du même membre sur le même contenu tant que rien n'est tranché : un doublon, renvoyé tel quel. Après
+décision : un nouveau dossier. L'inverse — dédupliquer sur la cible seule — fermerait la porte pour
+toujours, y compris quand le contenu change après coup. Assertion S8.
+
+**Le frein horaire vit dans la fonction SQL, faute de mieux.** Le §8 prévoit Upstash pour le rate
+limiting ; il arrive en P4. En attendant, compter les lignes est le garde-fou disponible, et il ne
+peut pas vivre dans la route, qui ne sait pas lire `mod`. Vingt par heure et par signalant : le
+seuil vise le script, pas la personne qui signale plusieurs commentaires d'un même fil.
+
+**`/mentions-legales` est devenue dynamique, et c'est le bon compromis.** Elle lit
+`feature_flags.dsa_report_sla_hours` à chaque rendu. La page pourrait rester statique avec un client
+sans cookies et une revalidation ; ce serait un délai publié potentiellement périmé, sur un engagement.
+Toujours frais vaut mieux que toujours caché. La page d'accueil, elle, reste statique — c'est elle
+qui porte le Lighthouse de la Q13, pas celle-ci. Le repli, lui, ne tombe jamais : `reportSlaHours()`
+avale l'erreur et rend la constante épinglée, parce qu'une page juridique qui refuse de s'afficher
+est une page qui a cessé en silence de prendre son engagement. Un test e2e le prouve **sans base de
+données** — c'est exactement la classe de panne d'`AGE_GATE_SECRET` chez Vercel.
+
+**Aucun filtre lexical sur les commentaires, et c'est écrit dans la charte.** L'ADR 0005 l'avait
+mesuré ; `docs/editorial-guidelines.md` gagne la section « Contenu versé par des tiers » qui en tire
+la règle : le critère est **l'incitation, pas le vocabulaire**. Le tableau des quatre commentaires
+ordinaires refusés par `isShopTextAllowed()` y figure, avec le détail qui fait mal — le seul des six
+à passer le filtre est celui qui ne dit rien de vérifiable.
+
+**Le rafraîchissement de `cigar_stats` est planifié, pas déclenché.** `refresh_cigar_stats()`
+existait depuis 0003 et rien ne l'appelait : la moyenne d'une fiche serait restée vide pour
+toujours. Une tâche `pg_cron` toutes les cinq minutes est le filet — elle ne dépend d'aucun code
+futur qui se souviendrait d'appeler, et elle rattrape la fenêtre de 90 jours de `review_count_90d`,
+qui se périme **sans qu'aucune écriture n'ait lieu**. Le rafraîchissement à l'écriture, lui, arrive
+avec le carnet : c'est le chemin qui sert la personne, et il n'a rien à servir tant que rien
+n'écrit. `pg_cron` n'existe ni en local ni sur l'image de la CI ; la section se déclare absente par
+un `NOTICE` et son auto-contrôle exige la planification partout où l'extension est là.
+
+**La roue des arômes est un seed, pas une migration.** C'est du contenu éditorial : il se relit, se
+corrige et se rejoue comme les CSV voisins. Conséquence non évidente — `seed.sql` écrit désormais
+dans `public` et plus seulement dans `ref`, donc la base de seed de la CI doit appliquer 0003 avant
+de charger. Une famille `Défaut` aussi fournie que les autres, et aucun descripteur ne nomme le
+tabac : une nomenclature qui ne saurait nommer que l'agréable serait un outil promotionnel au sens
+du §2.
+
+**`/aromes` existe parce qu'un schéma sans écran ne compte pas.** Une nomenclature que personne ne
+peut lire est une table, pas un vocabulaire — et les oublis d'une roue ne se voient qu'à plat,
+jamais dans un CSV. Dessinée en listes et non en cercle : la forme circulaire du §5.4 appartient au
+**contrôle de saisie** de la dégustation, où la géométrie travaille. Ici il n'y a rien à
+sélectionner, et un cercle serait de la décoration.
+
+**Une règle ESLint avait un trou de la taille exacte de ce qu'on écrivait.** L'interdiction
+d'importer le client `service_role` couvrait `app/**/*.tsx` — pas `app/**/*.ts`. Le premier
+`actions.ts` hors de `app/api` tombait précisément dedans. Jamais exploité ; un garde-fou ne se juge
+pas là-dessus.
+
 ## Schéma du carnet, des commentaires et de la modération
 
 Migrations 0003 à 0005, appliquées sur le projet réel le 22 août 2026. Elles exécutent les ADR 0004
