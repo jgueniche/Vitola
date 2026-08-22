@@ -22,10 +22,34 @@ suivent leur implémentation : `components/band/band.tsx`, `components/cigar/cig
 Une seule liberté prise sur le code existant : la carte cigare est coiffée d'une bague. Le §4.4
 du brief le prévoit (« en-tête des cartes cigare ») mais `CigarCard` ne l'implémente pas encore.
 
-Le cigare de la planche est construit en CSS pur : la cape est un cylindre ombré, la bague est un
-véritable anneau 3D de seize lattes posées sur un cylindre de rayon 58 px, éclairé par une nappe
-fixe en espace écran — c'est ce qui fait lire le raccourci des lattes comme du métal. `Mobile`
-recadre exactement la même planche (échelle 0,40) au lieu de la redessiner.
+## La planche
+
+Le cigare est construit en CSS et SVG, en calques séparés — c'est ce qui permet de régler la
+matière sans toucher à l'éclairage :
+
+1. **La base** : la feuille, ses taches, et la couture de roulage en deux périodes qui battent
+   l'une contre l'autre pour que la spirale cesse d'être régulière.
+2. **La lumière** : le drapé du cylindre et la chute d'intensité en s'éloignant de la braise.
+   Elle se pose *avant* la texture, sinon elle l'efface.
+3. **La matière** : marbrure, nervures et grain, trois tuiles `feTurbulence` en `overlay`.
+4. **Les accents** : le gras de la cape, le liseré sur l'arête haute, le rebond de la braise
+   sous le cigare.
+
+L'ensemble passe dans un `feDisplacementMap` (`#leafRough`, amplitude 3) : la couture ondule et
+la silhouette cesse d'être parfaite au pixel. La cendre a le sien (`#ashRough`, amplitude 6), qui
+casse son bord — une cendre régulière se lit immédiatement comme un dessin. Elle part exactement
+au diamètre du cigare et s'émousse vers la pointe : c'est la continuité de la silhouette qui la
+rend soudée, pas un raccord.
+
+La bague est un véritable anneau 3D de seize lattes posées sur un cylindre de rayon 58 px,
+éclairé par une nappe **fixe en espace écran** — c'est ce qui fait lire le raccourci des lattes
+comme du métal. La fumée naît sur la braise (colonne étroite et dense) et se disloque en montant.
+
+`Mobile` recadre exactement la même planche (échelle 0,37) au lieu de la redessiner.
+
+Le réglage « Mouvement » met les animations **en pause** au lieu de les supprimer : `animation:
+none` renverrait la fumée à son état initial, c'est-à-dire invisible, et un export PNG sortirait
+sans fumée.
 
 ## Régénérer le canevas
 
