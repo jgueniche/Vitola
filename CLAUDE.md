@@ -16,7 +16,11 @@ Un `CLAUDE.md` par domaine complète celui-ci : `app/`, `lib/`, `supabase/`.
 ## Phases
 
 Une phase = une branche. Le brief prévoit `feat/pXX-nom` ; les sessions Claude Code distantes
-travaillent sur la branche qui leur est assignée. Jamais de commit direct sur `main`.
+travaillent sur la branche qui leur est assignée. Jamais de commit direct sur `master`.
+
+`master` est la branche de production, créée le 22 août 2026. Jusque-là la règle ci-dessus
+ne protégeait rien : le dépôt n'avait pas de `main`, et sa branche par défaut était une
+branche de session. Tout ce qui entre dans `master` y entre par une pull request, CI verte.
 
 Chaque phase se termine sur son critère de sortie (§9 du brief), mesuré et non supposé.
 
