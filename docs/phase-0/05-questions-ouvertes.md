@@ -39,17 +39,25 @@ Procédure détaillée : [`docs/setup/supabase.md`](../setup/supabase.md).
 
 ### Q3 · Qui **relit** le référentiel d'amorçage ? *(partiellement traitée)*
 La question posée en Phase 0 était « qui saisit ». Elle a changé de nature : **la saisie est faite**.
-30 manufactures, 114 marques, 50 vitoles, 123 fiches et 18 codes de boîte sont dans
-`supabase/seed/`, chargés par un script idempotent et vérifiés en CI.
+30 manufactures, 114 marques, 51 vitoles, **940 fiches** et 18 codes de boîte sont dans
+`supabase/seed/`, chargés par un script idempotent, vérifiés en CI, et **en base sur le projet
+réel depuis le 22 août 2026** — toujours en brouillon.
+
+> Les chiffres de cette question ont été corrigés le 22 août 2026. Ils dataient d'avant l'import
+> de l'arrêté d'homologation (+817 fiches) et d'avant la confrontation aux cotes officielles
+> Habanos (+1 vitole, une de moins à vérifier). L'estimation de relecture ci-dessous, elle,
+> **n'a pas été refaite** : elle porte sur les 123 fiches curées et les vitoles, pas sur les
+> 817 fiches issues de l'arrêté, dont le prix est officiel et le reste à renseigner.
 
 **Ce qui reste n'est plus de la saisie, c'est de la relecture** — et elle ne peut pas être faite
 par moi. Ces données ont été produites à partir de mes connaissances propres, sans consulter
 aucune base tierce (le §2 l'interdit ; voir `supabase/seed/PROVENANCE.md`). Un modèle de langage
 approxime et invente parfois : ces fichiers sont un point de départ, pas un référentiel vérifié.
 
-Le chargement en tient compte : **rien n'est publié**. Les 123 fiches arrivent en `draft`, donc
-invisibles d'un visiteur anonyme — la RLS l'impose, la CI le vérifie. 15 vitoles portent la mention
-`Dimensions à vérifier`. 45 fiches non cubaines n'ont volontairement aucune vitole, parce que je ne
+Le chargement en tient compte : **rien n'est publié**. Les 940 fiches arrivent en `draft`, donc
+invisibles d'un visiteur anonyme — la RLS l'impose, la CI le vérifie, et c'est constaté sur le
+projet réel : un visiteur anonyme y voit 0 fiche, 114 marques, 51 vitoles. 14 vitoles portent la
+mention `Dimensions à vérifier`. 45 fiches non cubaines n'ont volontairement aucune vitole, parce que je ne
 connais pas leurs cotes exactes et que les rattacher au format cubain le plus proche aurait
 introduit une donnée fausse dans un référentiel dont la promesse est d'être vérifié.
 
@@ -57,6 +65,15 @@ introduit une donnée fausse dans un référentiel dont la promesse est d'être 
 saisie initialement prévues. L'ordre de relecture le plus rentable est dans `PROVENANCE.md` §5 —
 les 15 vitoles d'abord, une dimension fausse contaminant toutes les fiches qui la référencent.
 **Nécessaire avant :** la publication de la première fiche, pas avant.
+
+**Conséquence mesurée sur P1.** Tous les index de facettes sont partiels (`where status =
+'published'`). Tant que rien n'est publié, la requête de recherche facettée ne peut retourner
+aucune ligne et son plan est dégénéré : le critère « recherche facettée sous 300 ms » du §9 n'a
+rien à mesurer. Ce n'est pas un problème de volume — mesuré sur des lignes publiées synthétiques,
+1 000 fiches donnent 0,4 ms, 10 000 fiches 2,9 ms et 50 000 fiches 27,5 ms, index de facette
+engagé. **Le critère n'est pas menacé ; il est simplement inobservable avant une première
+publication.** Élargir les index partiels pour faire tomber le chiffre serait le mauvais geste :
+ils sont partiels parce qu'un brouillon n'est pas public.
 
 ### Q4 · Peut-on héberger les logos de marques (`brands.logo_path`) ?
 Reproduire une marque figurative dans un contexte encyclopédique se défend, mais c'est un
