@@ -146,20 +146,48 @@ export async function POST(request: NextRequest) {
  * author can still act on their own hidden comment. For an entry it means
  * `status = 'published'`, stated because the partial indexes only apply when
  * the predicate is.
+ *
+ * For a notebook entry it means the four SELECT policies of `reviews`, and no
+ * `visibility` filter is written here — ADR 0004 forbids exactly that, and the
+ * policies give the right answer anyway: an entry belonging to somebody else
+ * and not shared with the reporter returns nothing, so the notice comes back
+ * 404 and nothing is filed about a row the reporter could not have read.
+ *
+ * The `switch` is deliberate rather than a chain of `if`s falling through to
+ * the referential. It was a chain, and adding `review` to `REPORTABLE` without
+ * adding a branch here sent every entry notice to `ref.cigars` with a review's
+ * id: 404 on a public entry the reporter was looking at. Exhaustive over the
+ * union, so the next surface added to the map fails to compile instead.
  */
 async function isVisibleToCaller(kind: ReportableKind, id: string): Promise<boolean> {
-  if (kind === 'comment') {
-    const supabase = await createSupabaseServerClient()
-    const { data } = await supabase.from('comments').select('id').eq('id', id).maybeSingle()
-    return data !== null
-  }
+  switch (kind) {
+    case 'comment': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('comments').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
 
-  const db = await referential()
-  const { data } = await db
-    .from('cigars')
-    .select('id')
-    .eq('id', id)
-    .eq('status', 'published')
-    .maybeSingle()
-  return data !== null
+    case 'review': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('reviews').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    case 'cigar': {
+      const db = await referential()
+      const { data } = await db
+        .from('cigars')
+        .select('id')
+        .eq('id', id)
+        .eq('status', 'published')
+        .maybeSingle()
+      return data !== null
+    }
+
+    default: {
+      // Adding a surface to REPORTABLE without a branch here stops compiling.
+      const unhandled: never = kind
+      throw new Error(`Unreportable kind reached the visibility check: ${String(unhandled)}`)
+    }
+  }
 }

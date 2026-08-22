@@ -29,3 +29,19 @@ export function formatDate(date: Date): string {
 export function formatCount(value: number): string {
   return new Intl.NumberFormat(BRAND.locale).format(value)
 }
+
+/**
+ * Today, in the zone the audience lives in, as `YYYY-MM-DD`.
+ *
+ * The value a `<input type="date">` wants, and the default for the notebook's
+ * "quand l'avez-vous fumé". Formatted through `en-CA`, whose short date format
+ * *is* ISO 8601 — the alternative is reading three parts out of a
+ * `formatToParts` and reassembling them, which is the same thing written longer.
+ *
+ * The zone matters here and nowhere else so far: a server renders in UTC, so
+ * between midnight and 2 a.m. in Paris it would propose yesterday — precisely
+ * when someone puts a cigar down and writes it up.
+ */
+export function todayInBrandZone(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: BRAND.timeZone }).format(now)
+}

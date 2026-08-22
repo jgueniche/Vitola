@@ -12,6 +12,7 @@ import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 
 import { CommentThread } from './comment-thread'
+import { NotebookSection } from './notebook-section'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -115,6 +116,8 @@ export default async function CigarPage({ params }: Params) {
           </Row>
         ) : null}
       </dl>
+
+      <NotebookSection cigarId={cigar.id} slug={cigar.slug} />
 
       <CommentThread cigarId={cigar.id} slug={cigar.slug} />
     </main>

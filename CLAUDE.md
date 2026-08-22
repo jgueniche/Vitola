@@ -48,9 +48,9 @@ branche de session. Tout ce qui entre dans `master` y entre par une pull request
 
 Chaque phase se termine sur son critère de sortie (§9 du brief), mesuré et non supposé.
 
-## Idée retenue — le carnet du fumeur
+## Le carnet du fumeur — livré
 
-Demandée le 22 août 2026, à construire, pas encore tranchée dans le schéma.
+Demandé le 22 août 2026, tranché par l'ADR 0004 le même jour, **à l'écran depuis le 22 août 2026**.
 
 Un **carnet personnel** : ce qu'on a fumé, quand, la note, et un commentaire libre sur le cigare.
 Chaque entrée choisit sa portée — **privée**, **partagée à une personne**, **partagée à plusieurs**,
@@ -67,12 +67,27 @@ les statistiques de P11.
 bayésienne) : le carnet est le geste quotidien, la dégustation est l'exercice. Ils partagent
 probablement la même table, et c'est précisément ce qu'il faut vérifier avant de l'écrire.
 
-**L'ADR est écrite** depuis le 22 août 2026 : [`docs/adr/0004-portee-des-entrees-du-carnet.md`](docs/adr/0004-portee-des-entrees-du-carnet.md),
-statut *Proposée*. Elle tranche les trois points — une seule table `reviews` avec un discriminant
+**L'ADR est écrite et acceptée** : [`docs/adr/0004-portee-des-entrees-du-carnet.md`](docs/adr/0004-portee-des-entrees-du-carnet.md).
+Elle tranche les trois points — une seule table `reviews` avec un discriminant
 `kind`, l'enum pour la classe d'audience et `review_shares` pour nommer les personnes, une moyenne
 publique qui ne compte que le public. Sa question ouverte est tranchée : `followers` est gardée
 pleinement, ce qui fait de l'avertissement « votre nombre d'abonnés changera » une obligation
-d'interface. Aucune ligne de SQL avant validation de l'ADR elle-même.
+d'interface.
+
+**Ce qui est à l'écran** : le geste quotidien sur la fiche cigare (`kind='log'`), l'exercice à
+`/cigares/[slug]/degustation` (`kind='tasting'` — six critères, trois tiers, roue des arômes,
+minuteur, à l'aveugle), `/carnet` et `/carnet/[id]` pour relire, filtrer, modifier, nommer des
+destinataires et supprimer, la bascule /100 ↔ /20 du §5.4, et `cigar_stats` sur la fiche.
+
+**Trois règles héritées de l'ADR, qui ne se contournent pas** : aucun filtre `visibility` en
+TypeScript — la RLS l'applique et rien d'autre ; la portée est **par entrée**, jamais globale ; et
+seules les entrées publiques alimentent une moyenne publique. La quatrième est d'interface :
+choisir « mes abonnés » doit **dire** que l'audience est vivante, et qu'elle est vide jusqu'à P3.
+
+**Deux décisions prises en construisant**, consignées dans `docs/decisions-log.md` : les six
+sous-notes sont sur 10 et la note globale en est la moyenne — elle ne se saisit pas, faute de quoi
+les six critères deviendraient décoratifs ; et le brouillon d'une dégustation vit dans
+`localStorage`, parce qu'une dégustation à moitié tapée n'a nulle part où exister dans `reviews`.
 
 L'[ADR 0005](docs/adr/0005-cible-des-commentaires.md) tranche la cible des commentaires : **la fiche
 cigare**. Conséquence à ne pas perdre de vue — elle avance les obligations DSA de P3 à P1, et le
@@ -142,6 +157,18 @@ pnpm storybook      # galerie des primitives
   capable de tout ; il n'a **aucun droit de table dans `mod`**, et ce schéma n'est de toute façon
   pas exposé à PostgREST. Une écriture dans la file DSA passe par `public.file_report()`, une
   fonction `SECURITY DEFINER` accordée à `service_role` seul. Voir `supabase/CLAUDE.md`.
+- **Un `GRANT` de colonne refuse aussi les colonnes qu'on ne voulait pas changer.** La bascule
+  /100 ↔ /20 n'a rien fait pendant toute sa première journée : l'action écrivait `updated_at`, qui
+  n'est pas dans le `GRANT UPDATE` de `profile_settings` — il porte `(birth_date, locale,
+  preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, le résultat n'était
+  pas lu, et le bouton était décoratif. Troisième membre de la même famille, après « une policy qui
+  refuse ne lève pas » et « BYPASSRLS ne dit rien des droits de table ». **Lire le résultat d'une
+  écriture, toujours** — et ne jamais écrire à la main une colonne qu'un trigger tient.
+- **React 19 réinitialise un formulaire après le retour de sa Server Action.** Une réinitialisation
+  rend à chaque champ le `defaultChecked` qu'il avait **au montage**, que React ne resynchronise
+  jamais : un groupe de radios contrôlé revient donc à sa valeur de départ pendant que l'état React
+  reste juste. Le sélecteur de portée republiait ainsi, au deuxième enregistrement, une entrée qu'on
+  venait de rendre privée. Voir `app/CLAUDE.md`.
 - **Le garde-fou tabac de la boutique ne s'applique pas aux commentaires.** Mesuré : sur six
   commentaires ordinaires, `isShopTextAllowed()` en refuse quatre. Le critère d'un commentaire est
   l'incitation, pas le vocabulaire — voir `docs/editorial-guidelines.md`, § « Contenu versé par des
