@@ -42,9 +42,15 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The referential pages are force-dynamic, so nothing here reaches the
+      # database: these values only have to exist, because next.config.ts now
+      # refuses to build without them. Same reasoning as the age gate secret
+      # above — a guard that only fires in production fires at the visitor.
       - run: pnpm build
         env:
           AGE_GATE_SECRET: ${{ secrets.AGE_GATE_SECRET || 'ci-only-secret-at-least-32-characters' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci-placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_placeholder' }}
       # Storybook is the exit criterion of P0 (§9): if it stops building, the
       # design system has drifted from the code.
       #
@@ -55,6 +61,8 @@ jobs:
       - run: pnpm build-storybook
         env:
           AGE_GATE_SECRET: ${{ secrets.AGE_GATE_SECRET || 'ci-only-secret-at-least-32-characters' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci-placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_placeholder' }}
 
   e2e:
     name: e2e · age gate and health notice
@@ -71,9 +79,13 @@ jobs:
       - run: pnpm build
         env:
           AGE_GATE_SECRET: ci-only-secret-at-least-32-characters
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
       - run: pnpm test:e2e
         env:
           AGE_GATE_SECRET: ci-only-secret-at-least-32-characters
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

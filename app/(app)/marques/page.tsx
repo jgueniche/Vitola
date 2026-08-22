@@ -8,15 +8,19 @@ import { listBrands } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 
 /**
- * Revalidated hourly rather than frozen at build time.
+ * Rendered per request, not prerendered at build time.
  *
- * Without this Next prerenders the list once and serves it until the next
- * deploy: a brand added by a contributor would be invisible until someone
- * happened to redeploy. An hour is chosen because the referential is a wiki
- * that changes in minutes, not in seconds, and every visitor should not pay for
- * a fresh query.
+ * The obvious alternative — ISR with `revalidate` — makes the build itself
+ * query the database, which couples every deploy to Supabase being reachable at
+ * that minute and forces CI to hold credentials to compile a page. Neither is a
+ * price worth paying for a list of 114 brands.
+ *
+ * It also happens to be the honest model for a wiki: the referential changes
+ * when a contributor changes it, not when someone redeploys. If the query cost
+ * ever shows up in a measurement, the fix is a cache around the read, not a
+ * build step that can go stale.
  */
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { title: m.referential.brandsTitle }
 
