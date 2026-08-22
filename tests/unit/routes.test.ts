@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { PUBLIC_PATHS, isPublicPath, routes, SEGMENTS } from '@/lib/routes'
+import { PUBLIC_PATHS, isApiPath, isPublicPath, routes, SEGMENTS } from '@/lib/routes'
 
 describe('routes', () => {
   it('builds French URL segments from English identifiers', () => {
@@ -57,6 +57,39 @@ describe('routes', () => {
       routes.journal(),
     ]) {
       expect(isPublicPath(path)).toBe(false)
+    }
+  })
+})
+
+/*
+ * The API refusal dialect. The age gate treats these paths exactly as it treats
+ * a page — this predicate only decides whether the refusal is a 403 in JSON or
+ * a redirect to the gate. It must therefore never claim a path the gate would
+ * otherwise let through, and never miss one the GDPR endpoints depend on.
+ */
+describe('isApiPath', () => {
+  it('claims the routes that must refuse in JSON', () => {
+    expect(isApiPath('/api/gdpr/export')).toBe(true)
+    expect(isApiPath('/api/gdpr/delete')).toBe(true)
+  })
+
+  it('claims nothing that renders a page', () => {
+    for (const path of [routes.home(), routes.cigars(), routes.ageGate(), routes.primitives()]) {
+      expect(isApiPath(path)).toBe(false)
+    }
+    // Not a prefix match on "/api": a page could legitimately be named so.
+    expect(isApiPath('/apiculture')).toBe(false)
+  })
+
+  /*
+   * The boundary itself, restated: nothing under /api/ is public, so answering
+   * in JSON is a change of wording and not of access. If a future /api/ route
+   * ever needs to be public it goes through PUBLIC_PATHS, deliberately, and
+   * this assertion is what forces that conversation.
+   */
+  it('leaves the age-gate boundary where it was', () => {
+    for (const path of PUBLIC_PATHS) {
+      expect(isApiPath(path)).toBe(false)
     }
   })
 })

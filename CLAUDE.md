@@ -43,6 +43,12 @@ les statistiques de P11.
 bayésienne) : le carnet est le geste quotidien, la dégustation est l'exercice. Ils partagent
 probablement la même table, et c'est précisément ce qu'il faut vérifier avant de l'écrire.
 
+**L'ADR est écrite** depuis le 22 août 2026 : [`docs/adr/0004-portee-des-entrees-du-carnet.md`](docs/adr/0004-portee-des-entrees-du-carnet.md),
+statut *Proposée*. Elle tranche les trois points — une seule table `reviews` avec un discriminant
+`kind`, l'enum pour la classe d'audience et `review_shares` pour nommer les personnes, une moyenne
+publique qui ne compte que le public — et laisse une question ouverte : `followers` en v1 ?
+Aucune ligne de SQL avant sa validation.
+
 ## Commandes
 
 ```bash

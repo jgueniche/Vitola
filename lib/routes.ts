@@ -90,6 +90,19 @@ export function isPublicPath(pathname: string): boolean {
 }
 
 /**
+ * Routes that answer in JSON, including when they refuse.
+ *
+ * These are gated exactly like a page — the age-gate boundary does not move for
+ * them, and nothing here makes anything reachable that was not. What changes is
+ * the dialect of the refusal: a caller of `/api/` cannot read a 307 to an HTML
+ * date-of-birth form, and the GDPR endpoints of §2 are the case that makes it
+ * matter. A legal right answered with a redirect is a right not answered.
+ */
+export function isApiPath(pathname: string): boolean {
+  return pathname.startsWith('/api/')
+}
+
+/**
  * Validates the `suite` parameter the age gate carries — where the visitor was
  * going before being interrupted.
  *

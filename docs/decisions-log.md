@@ -2,6 +2,51 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Phase 1 — conformité RGPD
+
+**Les endpoints RGPD lisent avec la clé de service, et c'est la RLS qui l'impose.** Contre-intuitif
+sur un dépôt où tout passe par la RLS : `audit_log` n'a **aucune** policy `SELECT` pour un membre,
+seulement `audit_log_select_admin`. Un export bâti sur la session du demandeur serait donc
+silencieusement incomplet — il rendrait un fichier d'apparence entière, amputé de la seule table qui
+trace ce qu'on a fait de ses données. La clé de service est le seul moyen d'être complet, et le
+filtre `.eq(colonne, id)` devient alors toute la frontière de sécurité : il est écrit à **un seul
+endroit**, `collectPersonalData`, et un test vérifie que les 14 sources y passent.
+
+**L'inventaire des données personnelles est vérifié par le compilateur, puis par le schéma.** Deux
+garde-fous superposés, parce qu'aucun des deux ne suffit. Le type mappé de `lib/compliance/gdpr.ts`
+refuse une table ou une colonne qui n'existe pas dans `database.types.ts` — vérifié en cassant
+volontairement les deux cas. Et `tests/compliance/gdpr-inventory.test.ts` relit le SQL : les
+13 colonnes qui référencent `auth.users` doivent toutes être déclarées, **et** la portée annoncée
+(`erased` / `anonymised`) doit correspondre au `ON DELETE` réel. Une source documentée « anonymisée »
+qui casserait en cascade est pire qu'une source non documentée : c'est une promesse que la base ne
+tient pas. Confronté à la base déployée, pas seulement au fichier : les 13 correspondent.
+
+**Effacer un contributeur détruit ses propositions de révision.** `ref.cigar_revisions.author_id`
+est `NOT NULL` : la clé étrangère ne peut que cascader, là où tous les autres liens vers un membre
+sont `on delete set null`. Un partant emporte donc ses révisions, y compris celles qu'un tiers a
+relues. C'est un trou réel dans l'historique du wiki. Il n'est pas corrigé ici — cela demande une
+migration et une décision sur ce qu'est une révision sans son auteur — mais l'effacement en
+enregistre le **nombre** dans `audit_log`, pour que la perte soit mesurée et non découverte.
+
+**La trace précède l'effacement, et son échec l'annule.** `audit_log.actor_id` sera mis à NULL par la
+cascade quelques millisecondes plus tard : c'est `entity_id`, simple texte sans clé étrangère, qui
+survit. Il ne contient que l'identifiant — ni pseudo, ni adresse. Une fois `auth.users` parti,
+il ne désigne plus personne, et c'est précisément l'intention.
+
+**`ip_hash` n'est jamais écrit.** La colonne existe pour le jour où un haché poivré servira à
+quelque chose. En écrire un aujourd'hui ajouterait une donnée personnelle **et** un secret
+obligatoire de plus — pour rien. Le §2 demande de tracer qui a fait quoi, pas d'où.
+
+**L'effacement se confirme en retapant son pseudo.** Pas une case à cocher : le geste est immédiat
+et irréversible. Accessoirement, une valeur que seul le titulaire connaît est une valeur qu'une
+requête d'une autre origine ne peut pas porter.
+
+**`/api/health` sert désormais le commit déployé.** La branche par défaut du dépôt et `master` sont
+deux réglages distincts, et Vercel déploie la première : une fusion dans `master` seule ne change
+rien en production, et rien sur le site ne le dit. Le commit rend l'écart visible d'une requête HTTP.
+La phase, elle, a répondu `P0` pendant tout P1 — un littéral enfoui dans un handler dérive parce que
+rien ne le relit. Elle vit maintenant dans `lib/release.ts`, épinglée par un test.
+
 ## Phase 1 — identité
 
 **`@supabase/ssr`, la deuxième et dernière dépendance de P1.** Annoncée quand la consultation
