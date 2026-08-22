@@ -62,3 +62,48 @@ begin
   end if;
 end;
 $$;
+
+-- ---------- La roue des arômes ------------------------------------------------
+-- Séparée du bloc ci-dessus parce qu'elle porte sur `public` et non sur `ref` :
+-- c'est la nomenclature avec laquelle on décrit les fiches, pas les fiches.
+do $$
+declare
+  n_families integer;
+  n_leaves   integer;
+  offender   text;
+begin
+  select count(*) filter (where parent_id is null),
+         count(*) filter (where parent_id is not null)
+    into n_families, n_leaves
+    from public.aroma_taxonomy;
+
+  -- Onze familles, exactement : ce sont les valeurs de l'enum `aroma_family`,
+  -- et une famille sans racine est une branche que le formulaire de dégustation
+  -- ne saura pas dessiner.
+  if n_families <> (select count(*) from unnest(enum_range(null::public.aroma_family))) then
+    raise exception 'VITOLA_SEED: % familles d''arômes chargées pour % valeurs d''enum',
+      n_families, (select count(*) from unnest(enum_range(null::public.aroma_family)));
+  end if;
+
+  -- Une famille vide n'est pas une roue : c'est une case à cocher sans contenu.
+  select string_agg(f.label_fr, ', ' order by f.label_fr) into offender
+    from public.aroma_taxonomy f
+   where f.parent_id is null
+     and not exists (select 1 from public.aroma_taxonomy c where c.parent_id = f.id);
+  if offender is not null then
+    raise exception 'VITOLA_SEED: famille(s) d''arômes sans aucun descripteur : %', offender;
+  end if;
+
+  -- L'arbre est plat par construction : une famille, ses descripteurs, et rien
+  -- en dessous. Un troisième niveau serait une roue que rien ne sait afficher.
+  select string_agg(c.slug, ', ' order by c.slug) into offender
+    from public.aroma_taxonomy c
+    join public.aroma_taxonomy p on p.id = c.parent_id
+   where p.parent_id is not null;
+  if offender is not null then
+    raise exception 'VITOLA_SEED: arôme(s) à trois niveaux de profondeur : %', offender;
+  end if;
+
+  raise notice 'Roue des arômes : % familles, % descripteurs.', n_families, n_leaves;
+end;
+$$;

@@ -1373,6 +1373,163 @@ on conflict (kind, upper(code)) do update
        notes        = excluded.notes,
        updated_at   = now();
 
+-- --- 6. Roue des arômes ---------------------------------------------------------------
+-- La seule section qui écrit dans `public` et non dans `ref` : ce n'est pas le
+-- référentiel des cigares, c'est la nomenclature avec laquelle on les décrit
+-- (§5.4). Elle vit ici plutôt que dans une migration parce que c'est du contenu
+-- éditorial — il se relit, se corrige et se rejoue comme les CSV voisins, sans
+-- migration à chaque libellé. Provenance : PROVENANCE.md, source D.
+--
+-- L'arbre tient en deux passes parce que `id` est `generated always as
+-- identity` : on ne peut pas écrire de clé étrangère en dur dans un CSV, et on
+-- ne veut pas. Les racines d'abord, les feuilles ensuite, rapprochées par slug.
+--
+-- `coalesce(parent_slug, '')` et non `parent_slug = ''` : en mode CSV, un champ
+-- vide non quoté est lu comme NULL, pas comme une chaîne vide. Écrit à
+-- l'identique, le filtre ne remontait aucune ligne — et les deux passes
+-- inséraient zéro arôme sans rien signaler d'autre qu'un `INSERT 0 0`.
+create temporary table _aromas (
+  family text, slug text, label_fr text, label_en text, parent_slug text
+) on commit drop;
+
+insert into _aromas values
+  ('boise', 'boise', 'Boisé', 'Woody', ''),
+  ('boise', 'cedre', 'Cèdre', 'Cedar', 'boise'),
+  ('boise', 'chene', 'Chêne', 'Oak', 'boise'),
+  ('boise', 'pin', 'Pin', 'Pine', 'boise'),
+  ('boise', 'bois-de-santal', 'Bois de santal', 'Sandalwood', 'boise'),
+  ('boise', 'crayon-de-papier', 'Crayon de papier', 'Pencil shavings', 'boise'),
+  ('boise', 'ecorce', 'Écorce', 'Bark', 'boise'),
+  ('boise', 'bois-vert', 'Bois vert', 'Green wood', 'boise'),
+  ('torrefie', 'torrefie', 'Torréfié', 'Roasted', ''),
+  ('torrefie', 'cafe', 'Café', 'Coffee', 'torrefie'),
+  ('torrefie', 'expresso', 'Expresso', 'Espresso', 'torrefie'),
+  ('torrefie', 'cacao', 'Cacao', 'Cocoa', 'torrefie'),
+  ('torrefie', 'chocolat-noir', 'Chocolat noir', 'Dark chocolate', 'torrefie'),
+  ('torrefie', 'pain-grille', 'Pain grillé', 'Toast', 'torrefie'),
+  ('torrefie', 'noisette-grillee', 'Noisette grillée', 'Roasted hazelnut', 'torrefie'),
+  ('torrefie', 'malt', 'Malt', 'Malt', 'torrefie'),
+  ('epice', 'epice', 'Épicé', 'Spicy', ''),
+  ('epice', 'poivre-noir', 'Poivre noir', 'Black pepper', 'epice'),
+  ('epice', 'poivre-blanc', 'Poivre blanc', 'White pepper', 'epice'),
+  ('epice', 'cannelle', 'Cannelle', 'Cinnamon', 'epice'),
+  ('epice', 'muscade', 'Muscade', 'Nutmeg', 'epice'),
+  ('epice', 'clou-de-girofle', 'Clou de girofle', 'Clove', 'epice'),
+  ('epice', 'gingembre', 'Gingembre', 'Ginger', 'epice'),
+  ('epice', 'cumin', 'Cumin', 'Cumin', 'epice'),
+  ('epice', 'piment', 'Piment', 'Chilli', 'epice'),
+  ('terreux', 'terreux', 'Terreux', 'Earthy', ''),
+  ('terreux', 'terre-humide', 'Terre humide', 'Wet earth', 'terreux'),
+  ('terreux', 'humus', 'Humus', 'Humus', 'terreux'),
+  ('terreux', 'champignon', 'Champignon', 'Mushroom', 'terreux'),
+  ('terreux', 'sous-bois', 'Sous-bois', 'Forest floor', 'terreux'),
+  ('terreux', 'tourbe', 'Tourbe', 'Peat', 'terreux'),
+  ('terreux', 'poussiere', 'Poussière', 'Dust', 'terreux'),
+  ('animal', 'animal', 'Animal', 'Animal', ''),
+  ('animal', 'cuir', 'Cuir', 'Leather', 'animal'),
+  ('animal', 'cuir-patine', 'Cuir patiné', 'Worn leather', 'animal'),
+  ('animal', 'musc', 'Musc', 'Musk', 'animal'),
+  ('animal', 'fourrure', 'Fourrure', 'Fur', 'animal'),
+  ('animal', 'cire-d-abeille', 'Cire d''abeille', 'Beeswax', 'animal'),
+  ('animal', 'ecurie', 'Écurie', 'Stable', 'animal'),
+  ('fruite', 'fruite', 'Fruité', 'Fruity', ''),
+  ('fruite', 'agrume', 'Agrume', 'Citrus', 'fruite'),
+  ('fruite', 'zeste-d-orange', 'Zeste d''orange', 'Orange zest', 'fruite'),
+  ('fruite', 'raisin-sec', 'Raisin sec', 'Raisin', 'fruite'),
+  ('fruite', 'figue', 'Figue', 'Fig', 'fruite'),
+  ('fruite', 'datte', 'Datte', 'Date', 'fruite'),
+  ('fruite', 'pruneau', 'Pruneau', 'Prune', 'fruite'),
+  ('fruite', 'pomme-verte', 'Pomme verte', 'Green apple', 'fruite'),
+  ('fruite', 'fruits-rouges', 'Fruits rouges', 'Red berries', 'fruite'),
+  ('floral', 'floral', 'Floral', 'Floral', ''),
+  ('floral', 'rose', 'Rose', 'Rose', 'floral'),
+  ('floral', 'violette', 'Violette', 'Violet', 'floral'),
+  ('floral', 'jasmin', 'Jasmin', 'Jasmine', 'floral'),
+  ('floral', 'fleur-d-oranger', 'Fleur d''oranger', 'Orange blossom', 'floral'),
+  ('floral', 'lavande', 'Lavande', 'Lavender', 'floral'),
+  ('floral', 'camomille', 'Camomille', 'Chamomile', 'floral'),
+  ('sucre', 'sucre', 'Sucré', 'Sweet', ''),
+  ('sucre', 'miel', 'Miel', 'Honey', 'sucre'),
+  ('sucre', 'caramel', 'Caramel', 'Caramel', 'sucre'),
+  ('sucre', 'vanille', 'Vanille', 'Vanilla', 'sucre'),
+  ('sucre', 'sirop-d-erable', 'Sirop d''érable', 'Maple syrup', 'sucre'),
+  ('sucre', 'sucre-brun', 'Sucre brun', 'Brown sugar', 'sucre'),
+  ('sucre', 'reglisse', 'Réglisse', 'Liquorice', 'sucre'),
+  ('sucre', 'melasse', 'Mélasse', 'Molasses', 'sucre'),
+  ('vegetal', 'vegetal', 'Végétal', 'Vegetal', ''),
+  ('vegetal', 'foin', 'Foin', 'Hay', 'vegetal'),
+  ('vegetal', 'herbe-coupee', 'Herbe coupée', 'Cut grass', 'vegetal'),
+  ('vegetal', 'the-vert', 'Thé vert', 'Green tea', 'vegetal'),
+  ('vegetal', 'menthe', 'Menthe', 'Mint', 'vegetal'),
+  ('vegetal', 'eucalyptus', 'Eucalyptus', 'Eucalyptus', 'vegetal'),
+  ('vegetal', 'poivron-vert', 'Poivron vert', 'Green bell pepper', 'vegetal'),
+  ('vegetal', 'paille', 'Paille', 'Straw', 'vegetal'),
+  ('mineral', 'mineral', 'Minéral', 'Mineral', ''),
+  ('mineral', 'craie', 'Craie', 'Chalk', 'mineral'),
+  ('mineral', 'graphite', 'Graphite', 'Graphite', 'mineral'),
+  ('mineral', 'silex', 'Silex', 'Flint', 'mineral'),
+  ('mineral', 'sel', 'Sel', 'Salt', 'mineral'),
+  ('mineral', 'iode', 'Iode', 'Iodine', 'mineral'),
+  ('mineral', 'pierre-mouillee', 'Pierre mouillée', 'Wet stone', 'mineral'),
+  ('defaut', 'defaut', 'Défaut', 'Off-note', ''),
+  ('defaut', 'ammoniac', 'Ammoniac', 'Ammonia', 'defaut'),
+  ('defaut', 'moisi', 'Moisi', 'Mould', 'defaut'),
+  ('defaut', 'carton-mouille', 'Carton mouillé', 'Wet cardboard', 'defaut'),
+  ('defaut', 'amertume-verte', 'Amertume verte', 'Green bitterness', 'defaut'),
+  ('defaut', 'soufre', 'Soufre', 'Sulphur', 'defaut'),
+  ('defaut', 'aigre', 'Aigre', 'Sour', 'defaut'),
+  ('defaut', 'metallique', 'Métallique', 'Metallic', 'defaut'),
+  ('defaut', 'acre', 'Âcre', 'Acrid', 'defaut');
+
+-- Passe 1 : les onze familles. `parent_slug` vide = racine.
+insert into public.aroma_taxonomy (family, slug, label_fr, label_en, parent_id)
+select a.family::public.aroma_family, a.slug, a.label_fr, nullif(a.label_en, ''), null
+  from _aromas a
+ where coalesce(a.parent_slug, '') = ''
+on conflict (slug) do update
+   set family   = excluded.family,
+       label_fr = excluded.label_fr,
+       label_en = excluded.label_en;
+
+-- Passe 2 : les descripteurs, rattachés à leur famille.
+insert into public.aroma_taxonomy (family, slug, label_fr, label_en, parent_id)
+select a.family::public.aroma_family, a.slug, a.label_fr, nullif(a.label_en, ''), p.id
+  from _aromas a
+  join public.aroma_taxonomy p on p.slug = a.parent_slug
+ where coalesce(a.parent_slug, '') <> ''
+on conflict (slug) do update
+   set family    = excluded.family,
+       label_fr  = excluded.label_fr,
+       label_en  = excluded.label_en,
+       parent_id = excluded.parent_id;
+
+-- Un descripteur orphelin est une faute de frappe dans le CSV, pas une donnée.
+-- Même garde-fou que pour une marque sans manufacture : on refuse plutôt que de
+-- charger une roue à laquelle il manque une branche, en silence.
+do $$
+declare orphans int;
+begin
+  select count(*) into orphans
+    from _aromas a
+    left join public.aroma_taxonomy p on p.slug = a.parent_slug
+   where coalesce(a.parent_slug, '') <> '' and p.id is null;
+  if orphans > 0 then
+    raise exception 'VITOLA_SEED: % arôme(s) référencent une famille inconnue', orphans;
+  end if;
+
+  -- Une feuille doit porter la famille de sa racine. Un descripteur rangé sous
+  -- « Boisé » mais marqué `epice` fausserait tout regroupement par famille, et
+  -- rien dans le schéma ne l'interdit : la contrainte est ici.
+  select count(*) into orphans
+    from public.aroma_taxonomy child
+    join public.aroma_taxonomy parent on parent.id = child.parent_id
+   where child.family <> parent.family;
+  if orphans > 0 then
+    raise exception 'VITOLA_SEED: % arôme(s) rangés sous une famille qui n''est pas la leur', orphans;
+  end if;
+end;
+$$;
+
 commit;
 
 -- --- Récapitulatif -------------------------------------------------------------------
@@ -1385,4 +1542,6 @@ union all select 'cigares',       count(*) from ref.cigars
 union all select '  en brouillon', count(*) from ref.cigars where status = 'draft'
 union all select '  sans vitole',  count(*) from ref.cigars where vitola_id is null
 union all select '  avec prix officiel', count(*) from ref.cigars where msrp_eur is not null
-union all select 'codes de boîte', count(*) from ref.box_codes;
+union all select 'codes de boîte', count(*) from ref.box_codes
+union all select 'arômes',         count(*) from public.aroma_taxonomy
+union all select '  dont familles', count(*) from public.aroma_taxonomy where parent_id is null;

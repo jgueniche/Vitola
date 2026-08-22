@@ -1,0 +1,88 @@
+family,slug,label_fr,label_en,parent_slug
+boise,boise,Boisé,Woody,
+boise,cedre,Cèdre,Cedar,boise
+boise,chene,Chêne,Oak,boise
+boise,pin,Pin,Pine,boise
+boise,bois-de-santal,Bois de santal,Sandalwood,boise
+boise,crayon-de-papier,Crayon de papier,Pencil shavings,boise
+boise,ecorce,Écorce,Bark,boise
+boise,bois-vert,Bois vert,Green wood,boise
+torrefie,torrefie,Torréfié,Roasted,
+torrefie,cafe,Café,Coffee,torrefie
+torrefie,expresso,Expresso,Espresso,torrefie
+torrefie,cacao,Cacao,Cocoa,torrefie
+torrefie,chocolat-noir,Chocolat noir,Dark chocolate,torrefie
+torrefie,pain-grille,Pain grillé,Toast,torrefie
+torrefie,noisette-grillee,Noisette grillée,Roasted hazelnut,torrefie
+torrefie,malt,Malt,Malt,torrefie
+epice,epice,Épicé,Spicy,
+epice,poivre-noir,Poivre noir,Black pepper,epice
+epice,poivre-blanc,Poivre blanc,White pepper,epice
+epice,cannelle,Cannelle,Cinnamon,epice
+epice,muscade,Muscade,Nutmeg,epice
+epice,clou-de-girofle,Clou de girofle,Clove,epice
+epice,gingembre,Gingembre,Ginger,epice
+epice,cumin,Cumin,Cumin,epice
+epice,piment,Piment,Chilli,epice
+terreux,terreux,Terreux,Earthy,
+terreux,terre-humide,Terre humide,Wet earth,terreux
+terreux,humus,Humus,Humus,terreux
+terreux,champignon,Champignon,Mushroom,terreux
+terreux,sous-bois,Sous-bois,Forest floor,terreux
+terreux,tourbe,Tourbe,Peat,terreux
+terreux,poussiere,Poussière,Dust,terreux
+animal,animal,Animal,Animal,
+animal,cuir,Cuir,Leather,animal
+animal,cuir-patine,Cuir patiné,Worn leather,animal
+animal,musc,Musc,Musk,animal
+animal,fourrure,Fourrure,Fur,animal
+animal,cire-d-abeille,Cire d'abeille,Beeswax,animal
+animal,ecurie,Écurie,Stable,animal
+fruite,fruite,Fruité,Fruity,
+fruite,agrume,Agrume,Citrus,fruite
+fruite,zeste-d-orange,Zeste d'orange,Orange zest,fruite
+fruite,raisin-sec,Raisin sec,Raisin,fruite
+fruite,figue,Figue,Fig,fruite
+fruite,datte,Datte,Date,fruite
+fruite,pruneau,Pruneau,Prune,fruite
+fruite,pomme-verte,Pomme verte,Green apple,fruite
+fruite,fruits-rouges,Fruits rouges,Red berries,fruite
+floral,floral,Floral,Floral,
+floral,rose,Rose,Rose,floral
+floral,violette,Violette,Violet,floral
+floral,jasmin,Jasmin,Jasmine,floral
+floral,fleur-d-oranger,Fleur d'oranger,Orange blossom,floral
+floral,lavande,Lavande,Lavender,floral
+floral,camomille,Camomille,Chamomile,floral
+sucre,sucre,Sucré,Sweet,
+sucre,miel,Miel,Honey,sucre
+sucre,caramel,Caramel,Caramel,sucre
+sucre,vanille,Vanille,Vanilla,sucre
+sucre,sirop-d-erable,Sirop d'érable,Maple syrup,sucre
+sucre,sucre-brun,Sucre brun,Brown sugar,sucre
+sucre,reglisse,Réglisse,Liquorice,sucre
+sucre,melasse,Mélasse,Molasses,sucre
+vegetal,vegetal,Végétal,Vegetal,
+vegetal,foin,Foin,Hay,vegetal
+vegetal,herbe-coupee,Herbe coupée,Cut grass,vegetal
+vegetal,the-vert,Thé vert,Green tea,vegetal
+vegetal,menthe,Menthe,Mint,vegetal
+vegetal,eucalyptus,Eucalyptus,Eucalyptus,vegetal
+vegetal,poivron-vert,Poivron vert,Green bell pepper,vegetal
+vegetal,paille,Paille,Straw,vegetal
+mineral,mineral,Minéral,Mineral,
+mineral,craie,Craie,Chalk,mineral
+mineral,graphite,Graphite,Graphite,mineral
+mineral,silex,Silex,Flint,mineral
+mineral,sel,Sel,Salt,mineral
+mineral,iode,Iode,Iodine,mineral
+mineral,pierre-mouillee,Pierre mouillée,Wet stone,mineral
+defaut,defaut,Défaut,Off-note,
+defaut,ammoniac,Ammoniac,Ammonia,defaut
+defaut,moisi,Moisi,Mould,defaut
+defaut,carton-mouille,Carton mouillé,Wet cardboard,defaut
+defaut,amertume-verte,Amertume verte,Green bitterness,defaut
+defaut,soufre,Soufre,Sulphur,defaut
+defaut,aigre,Aigre,Sour,defaut
+defaut,metallique,Métallique,Metallic,defaut
+defaut,acre,Âcre,Acrid,defaut

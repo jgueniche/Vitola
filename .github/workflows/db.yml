@@ -100,6 +100,23 @@ jobs:
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 
+      # 0006 ouvre la seule porte d'écriture vers `mod` — une fonction SECURITY
+      # DEFINER dans `public`, accordée à la clé de service et à personne
+      # d'autre. Son §3 (pg_cron) se déclare absent sur une base nue : c'est
+      # attendu ici, et son auto-contrôle vérifie la planification partout où
+      # l'extension existe.
+      - name: Apply 0006 — signalement et statistiques
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0006_signalement_et_statistiques.sql
+
+      - name: Signalement DSA
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/05_signalement.sql 2>&1 | tee "$RUNNER_TEMP/signalement.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/signalement.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.
       - name: RLS coverage
@@ -115,6 +132,10 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/00_supabase_stubs.sql
           psql -v ON_ERROR_STOP=1 -f docs/phase-0/03-schema-p1.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/0002_function_grants.sql
+          # 0003 pour public.aroma_taxonomy : depuis la roue des arômes, le seed
+          # n'écrit plus seulement dans `ref`. Sans elle, la section 6 échoue sur
+          # une table absente.
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/0003_carnet.sql
           cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql
 
       - name: Seed integrity
@@ -129,12 +150,17 @@ jobs:
           PGDATABASE: vitola_seed
         run: |
           before=$(psql -tAc "select count(*) from ref.cigars")
+          before_aromas=$(psql -tAc "select count(*) from public.aroma_taxonomy")
           (cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql > /dev/null)
           after=$(psql -tAc "select count(*) from ref.cigars")
+          after_aromas=$(psql -tAc "select count(*) from public.aroma_taxonomy")
           if [ "$before" != "$after" ]; then
             echo "Le rejeu du seed a changé le nombre de fiches : $before -> $after"; exit 1
           fi
-          echo "Rejeu sans duplication : $after fiches"
+          if [ "$before_aromas" != "$after_aromas" ]; then
+            echo "Le rejeu du seed a changé le nombre d'arômes : $before_aromas -> $after_aromas"; exit 1
+          fi
+          echo "Rejeu sans duplication : $after fiches, $after_aromas arômes"
 
       # The standalone file is derived. If a CSV changes and nobody regenerates
       # it, the dashboard path silently loads stale data.

@@ -7,13 +7,14 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 
 ---
 
-## 1. Deux sources, deux régimes
+## 1. Quatre sources, quatre régimes
 
 | Source | Ce qu'elle fournit | Régime |
 |---|---|---|
 | **A — Saisie de mémoire** | Manufactures, marques, vitoles, 123 fiches curées, codes de boîte | À relire (§2) |
 | **B — Arrêté d'homologation des prix (Douane)** | 900 prix de vente au détail, 817 fiches supplémentaires | Donnée publique officielle, exacte à sa date |
 | **C — Site officiel Habanos S.A.** | Confirmation de 13 vitoles, ajout d'une vitole manquante | Spécifications publiées par le fabricant |
+| **D — Nomenclature rédigée pour ce projet** | 11 familles d'arômes, 76 descripteurs | Vocabulaire de dégustation, écrit ici |
 
 ### Source A — saisie de mémoire
 
@@ -84,6 +85,42 @@ Deux enseignements en sont sortis :
 Il s'agit des spécifications publiées par le fabricant lui-même sur son site public, consultées
 manuellement — pas d'une base concurrente, et pas d'une extraction automatisée.
 
+### Source D — la roue des arômes
+
+`06_aroma_taxonomy.csv`. **Écrite pour ce projet, à partir du vocabulaire ordinaire de la
+dégustation**, et non extraite d'une roue existante.
+
+La distinction mérite d'être posée, parce qu'elle n'est pas la même que pour les sources A à C.
+Une roue des arômes publiée — celle d'un institut œnologique, d'une revue, d'un torréfacteur — est
+une **œuvre de sélection et d'arrangement** : quelqu'un a décidé quelles familles retenir, comment
+les nommer, quoi ranger sous quoi. C'est exactement ce que protègent le droit d'auteur et, pour un
+ensemble structuré, le droit *sui generis*. Recopier une roue existante en la traduisant serait le
+même geste que recopier une base de fiches.
+
+Ce qui n'est pas protégeable, en revanche, c'est qu'un cigare puisse sentir le cèdre, le poivre
+noir ou le cuir. Ce sont des mots de la langue employés dans leur sens ordinaire.
+
+Trois choses rendent cette nomenclature nôtre :
+
+1. **Les onze familles ne sont pas choisies ici** : elles sont imposées par l'enum
+   `public.aroma_family`, écrit au §5.4 du brief et figé par la migration `0001`. La structure de
+   premier niveau est donc une décision du projet, antérieure à ce fichier.
+2. **Les descripteurs sont rédigés en français d'abord**, puis traduits — et non traduits depuis
+   une roue anglophone. `label_en` est une commodité pour l'i18n de P8 (Q21), pas une source.
+3. **L'arbre est délibérément plat** — une famille, ses descripteurs, rien en dessous. Les roues
+   publiées sont pour la plupart à trois niveaux ; celle-ci est réglée sur ce que le formulaire de
+   dégustation sait afficher, et `01_seed_integrity.sql` échoue si un troisième niveau apparaît.
+
+**Un choix de fond, assumé.** La famille `defaut` décrit des défauts perçus — ammoniac, moisi,
+carton mouillé, âcre. Elle est aussi fournie que les autres, et c'est voulu : une nomenclature qui
+ne saurait nommer que l'agréable serait un outil promotionnel au sens du §2. Un vocabulaire qui
+permet de dire qu'un cigare est raté est ce qui distingue un référentiel d'un argumentaire.
+
+Pour la même raison, **aucun descripteur ne nomme le tabac lui-même**. Ce n'est pas de la pudeur :
+un mot comme « tabac blond » dans une liste d'arômes se lirait comme une qualité recherchée, et le
+§2 interdit la publicité indirecte. Les mesures et les sensations, pas les adjectifs de mérite —
+c'est la même règle que pour l'illustration de la page d'accueil.
+
 ## 2. Ce que cela ne garantit pas
 
 **Cette origine ne vaut pas exactitude.** Un modèle de langage restitue des faits mémorisés : il en
@@ -113,6 +150,7 @@ C'est pour cette raison que le chargement est conçu ainsi :
 | `04_cigars.csv` — 817 issues de l'arrêté | 817 | **Élevée** sur le nom et le prix (source officielle). **Nulle** sur le reste : ces colonnes sont vides. | Libellés à normaliser, vitoles / forces / capes à renseigner. |
 | Prix (900 fiches) | 900 | **Élevée à la date du 1ᵉʳ septembre 2026** | Rien à vérifier, mais **à rafraîchir à chaque arrêté** |
 | `05_box_codes.csv` | 18 | **Élevée** pour les 12 codes de mois. **Faible** pour les 6 sigles d'usine. | Voir §4 |
+| `06_aroma_taxonomy.csv` | 87 | **Sans objet** — une nomenclature n'est pas vraie ou fausse, elle est utile ou non | Rien à vérifier factuellement. À rouvrir si un descripteur manque à l'usage : c'est le seul retour qui compte. |
 
 ## 4. Le cas particulier des codes d'usine cubains
 

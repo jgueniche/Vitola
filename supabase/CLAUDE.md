@@ -52,6 +52,22 @@ partagées → tables → recherche → index → grants → RLS → storage →
   fonctions de trigger de `ref` sont restées appelables par un visiteur anonyme depuis le premier
   jour, et le test censé le voir filtrait lui aussi sur `public`. Corrigé par 0005. Leçon générale :
   **un contrôle qui ne regarde qu'un schéma ne protège qu'un schéma.**
+- **La clé de service passe par PostgREST comme tout le monde.** C'est le piège le plus coûteux de
+  ce dépôt après l'exposition des schémas, parce qu'il contredit l'intuition : `service_role`
+  contourne la RLS (`BYPASSRLS`), donc on le croit capable de tout. Il ne l'est pas — il n'a
+  **aucun droit de table dans `mod`**, seul `postgres` en a, et `mod` n'est de toute façon pas
+  exposé. Un `insert` depuis `app/api/**` n'aboutit pas, quel que soit le code écrit au-dessus.
+  Le passage est une fonction `SECURITY DEFINER` dans `public`, propriété de `postgres`, accordée
+  à `service_role` **et à personne d'autre** : `public.file_report()` (0006). Une porte de la
+  taille du geste, pas une réouverture du schéma.
+- **Le type d'un schéma non exposé ne se met pas dans la signature d'une fonction exposée.**
+  PostgREST doit résoudre chaque type pour le sérialiser. `file_report()` prend donc son motif en
+  `text` et le cast en `mod.report_reason` à l'intérieur : l'enum valide toujours, simplement une
+  valeur inconnue ressort en `22P02` au lieu d'être refusée à la porte.
+- **PostgreSQL analyse une condition d'un seul tenant, court-circuit compris.** Écrit
+  `if pg_cron existe and cron.job ne contient rien`, l'auto-contrôle de 0006 échouait sur
+  « relation "cron.job" does not exist » là où la garde devait précisément l'éviter. La branche
+  non évaluée est quand même **analysée**. Un `if` imbriqué, ou un `execute`, diffère l'analyse.
 - **Une vue matérialisée n'accepte pas de RLS.** `cigar_stats` n'est sûre que par son
   `where visibility = 'public'` : ce prédicat est la frontière de sécurité, pas une optimisation.
   L'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est toujours.
