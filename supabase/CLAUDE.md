@@ -52,6 +52,11 @@ contestation, la charge de la preuve nous incombe.
 cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql   # idempotent, rejouable
 ```
 
+Sans psql ni connecteur, il existe `seed_standalone.sql` : même logique, données inlinées, aucune
+méta-commande, collable dans l'éditeur SQL du tableau de bord. Il est **généré** — après toute
+modification d'un CSV, relancer `pnpm tsx tooling/scripts/build-standalone-seed.ts`, faute de quoi
+la CI échoue.
+
 Trois règles sur l'amorçage :
 
 1. **Il ne publie rien.** Les fiches arrivent en `draft`. `supabase/tests/01_seed_integrity.sql`

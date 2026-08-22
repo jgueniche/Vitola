@@ -79,6 +79,16 @@ jobs:
           fi
           echo "Rejeu sans duplication : $after fiches"
 
+      # The standalone file is derived. If a CSV changes and nobody regenerates
+      # it, the dashboard path silently loads stale data.
+      - name: Standalone seed is in sync with the CSVs
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --silent
+          pnpm tsx tooling/scripts/build-standalone-seed.ts
+          git diff --exit-code -- supabase/seed/seed_standalone.sql \
+            || { echo "seed_standalone.sql est périmé : lancer pnpm tsx tooling/scripts/build-standalone-seed.ts"; exit 1; }
+
       - name: Seed paths must not reference third-party sources
         run: |
           # Scans the DATA only. PROVENANCE.md names those sites on purpose, to
