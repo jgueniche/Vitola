@@ -35,12 +35,38 @@ partagées → tables → recherche → index → grants → RLS → storage →
 - **`search_path = ''` impose de qualifier les configurations de recherche** :
   `to_tsvector('pg_catalog.french', …)`, jamais `'french'`.
 - **Un `CHECK` ne peut pas appeler `current_date`.** La règle des 18 ans vit dans un trigger.
+- **Une policy qui interroge une table interroge aussi ses droits.** La branche `shared` de
+  `reviews` lit `review_shares`, sur laquelle `anon` n'a aucun `GRANT` : un simple
+  `select from reviews` en tant qu'anonyme échouait sur « permission denied for table
+  review_shares ». Découpez les policies **par rôle** — `to anon` ne doit contenir que des
+  branches qu'un anonyme peut évaluer. Elles sont OR-ées, le résultat est le même, et une branche
+  morte n'est jamais planifiée.
+- **Deux tables dont les policies se lisent l'une l'autre : récursion, même sans boucle de
+  données.** PostgreSQL détecte le cycle sur le **graphe des policies**, pas sur le chemin
+  d'exécution. `reviews` ↔ `review_shares` en est un ; le raisonnement « en pratique ça ne
+  reboucle pas » est faux et l'erreur est `infinite recursion detected in policy`. On coupe du
+  côté **froid** — celui qu'on écrit rarement — par une fonction `SECURITY DEFINER` :
+  `public.owns_review()`, comme `current_app_role()` avant elle. Le chemin chaud reste un `EXISTS`
+  ordinaire, servi par son index.
+- **`alter default privileges` est par schéma.** Celui de 0002 ne couvrait que `public` ; les deux
+  fonctions de trigger de `ref` sont restées appelables par un visiteur anonyme depuis le premier
+  jour, et le test censé le voir filtrait lui aussi sur `public`. Corrigé par 0005. Leçon générale :
+  **un contrôle qui ne regarde qu'un schéma ne protège qu'un schéma.**
+- **Une vue matérialisée n'accepte pas de RLS.** `cigar_stats` n'est sûre que par son
+  `where visibility = 'public'` : ce prédicat est la frontière de sécurité, pas une optimisation.
+  L'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est toujours.
 
 ## Colonnes que le client ne doit jamais écrire
 
 `profiles.role`, `profiles.reputation`, `profile_settings.adult_confirmed_at`,
 `cigars.search_vector`. Barrées deux fois : absentes de tout `GRANT`, et refusées par un trigger
 de garde. Ne pas relâcher l'une en pensant que l'autre suffit.
+
+Depuis 0003 et 0004, cinq de plus, barrées par le seul `GRANT` de colonne — et assertées par
+l'auto-contrôle de leur migration : `reviews.user_id` et `reviews.cigar_id` (une entrée ne change
+ni d'auteur ni de cigare), `comments.hidden_at`, `comments.hidden_by` et `comments.hidden_reason`
+(masquer est un acte de modération, écrit par du code à clé de service — y compris pour un
+modérateur connecté).
 
 ## Seed
 

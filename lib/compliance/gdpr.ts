@@ -45,7 +45,30 @@ type SourceIn<S extends 'public' | 'ref'> = {
  */
 type Erasure = 'erased' | 'anonymised'
 
-export type PersonalDataSource = SourceIn<'public'> | SourceIn<'ref'>
+/**
+ * A link that exists in the schema but that the export cannot reach.
+ *
+ * Only `mod` is in this shape today. That schema is deliberately absent from
+ * PostgREST's exposed list (migration 0004): who reported whom, and what a
+ * moderator did about it, is the most sensitive data in the product, and
+ * unreachability is a second barrier behind RLS. The service-role client goes
+ * through PostgREST like any other, so it cannot read those tables either.
+ *
+ * Not validated against `Database`, because the generated types do not contain
+ * an unexposed schema — which is precisely why these entries are hand-written
+ * and made to carry their own justification. `unreachable` is required: an
+ * omission from a subject access request has to be argued, not discovered.
+ */
+type UnreachableSource = {
+  key: string
+  schema: 'mod'
+  table: string
+  column: string
+  erasure: Erasure
+  unreachable: string
+}
+
+export type PersonalDataSource = SourceIn<'public'> | SourceIn<'ref'> | UnreachableSource
 
 export const PERSONAL_DATA_SOURCES = [
   { key: 'profile', schema: 'public', table: 'profiles', column: 'id', erasure: 'erased' },
@@ -140,12 +163,86 @@ export const PERSONAL_DATA_SOURCES = [
     column: 'created_by',
     erasure: 'anonymised',
   },
+
+  /* The notebook (migration 0003, ADR 0004). Entries and the record of who they
+     were shared with go with the account: both are the author's own act. */
+  { key: 'reviews', schema: 'public', table: 'reviews', column: 'user_id', erasure: 'erased' },
+  {
+    key: 'sharesReceived',
+    schema: 'public',
+    table: 'review_shares',
+    column: 'grantee_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'sharesGranted',
+    schema: 'public',
+    table: 'review_shares',
+    column: 'granted_by',
+    erasure: 'erased',
+  },
+
+  /* Comments (migration 0004, ADR 0005). `hidden_by` is a moderator's act, not
+     the commenter's, so it survives its author anonymised: a moderation
+     decision has to stay readable after the moderator leaves. */
+  { key: 'comments', schema: 'public', table: 'comments', column: 'author_id', erasure: 'erased' },
+  {
+    key: 'commentsHidden',
+    schema: 'public',
+    table: 'comments',
+    column: 'hidden_by',
+    erasure: 'anonymised',
+  },
+
+  /* Moderation. Declared, not exported — see UnreachableSource above. */
+  {
+    key: 'reportsFiled',
+    schema: 'mod',
+    table: 'reports',
+    column: 'reporter_id',
+    erasure: 'anonymised',
+    unreachable:
+      'The mod schema is not exposed to PostgREST, so no client can read it — ' +
+      'service-role included. Closing this needs a SECURITY DEFINER RPC in ' +
+      'public, and it ships with the reporting endpoint. No report exists yet.',
+  },
+  {
+    key: 'reportsDecided',
+    schema: 'mod',
+    table: 'reports',
+    column: 'decided_by',
+    erasure: 'anonymised',
+    unreachable: 'Same as reportsFiled: the mod schema is unreachable by design.',
+  },
+  {
+    key: 'moderationActions',
+    schema: 'mod',
+    table: 'moderation_actions',
+    column: 'moderator_id',
+    erasure: 'anonymised',
+    unreachable: 'Same as reportsFiled: the mod schema is unreachable by design.',
+  },
 ] as const satisfies readonly PersonalDataSource[]
 
 /** Every key of the inventory. An export missing one does not compile. */
 export type PersonalDataKey = (typeof PERSONAL_DATA_SOURCES)[number]['key']
 
-export type PersonalDataBundle = Record<PersonalDataKey, unknown[]>
+/**
+ * The sources the export actually reads.
+ *
+ * The difference with `PERSONAL_DATA_SOURCES` is the whole point of the
+ * distinction: the inventory declares everything we hold, this reads what can
+ * be reached. An entry that drops out here without an `unreachable` reason is a
+ * silent omission, which is why the type demands one.
+ */
+type DeclaredSource = (typeof PERSONAL_DATA_SOURCES)[number]
+type ReachableSource = Exclude<DeclaredSource, { unreachable: string }>
+
+export const READABLE_SOURCES: readonly ReachableSource[] = PERSONAL_DATA_SOURCES.filter(
+  (source): source is ReachableSource => !('unreachable' in source),
+)
+
+export type PersonalDataBundle = Record<string, unknown[]>
 
 /**
  * The slice of the Supabase client this module needs.
@@ -186,7 +283,7 @@ export async function collectPersonalData(
   subjectId: string,
 ): Promise<PersonalDataBundle> {
   const entries = await Promise.all(
-    PERSONAL_DATA_SOURCES.map(async (source) => {
+    READABLE_SOURCES.map(async (source) => {
       const { data, error } = await reader
         .schema(source.schema)
         .from(source.table)

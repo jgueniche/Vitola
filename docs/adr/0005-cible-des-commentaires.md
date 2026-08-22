@@ -1,7 +1,6 @@
 # 0005 — Accrocher les commentaires à la fiche cigare, et en tirer les conséquences de modération
 
-- **Statut** : Proposée — cible tranchée par @jgueniche le 22 août 2026 ; les conséquences
-  ci-dessous attendent validation
+- **Statut** : **Acceptée** le 22 août 2026
 - **Date** : 2026-08-22
 - **Décideur** : @jgueniche
 - **Concerne** : P1 (fiches, modération) · P3 (fil social) · P8 (back-office) · `ref.cigars`

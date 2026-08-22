@@ -1,6 +1,6 @@
 # 0004 — Donner une portée à chaque entrée du carnet, et n'en confier l'application qu'à la RLS
 
-- **Statut** : Proposée — attend validation
+- **Statut** : **Acceptée** le 22 août 2026
 - **Date** : 2026-08-22
 - **Décideur** : @jgueniche
 - **Concerne** : P2 (carnet, dégustation) · P3 (fil social) · P11 (statistiques) · `public.reviews`
@@ -117,9 +117,20 @@ using (
 La composition est correcte et mérite d'être écrite, parce qu'elle n'est pas évidente : la
 sous-requête sur `review_shares` est elle-même soumise à la policy de `review_shares`, qui est
 `grantee_id = auth.uid() or granted_by = auth.uid()` — exactement les lignes que le test interroge.
-Aucune récursion : la policy de `review_shares` ne lit pas `reviews`. Seule la policy `INSERT` de
-`review_shares` lit `reviews`, pour vérifier que celui qui partage est l'auteur ; elle y déclenche
-la branche `user_id = auth.uid()`, qui ne repasse pas par `review_shares`.
+
+> **Correction d'implémentation — 22 août 2026.** Ce paragraphe concluait « aucune récursion », en
+> raisonnant sur le chemin d'exécution. C'est faux : PostgreSQL détecte le cycle **structurellement**,
+> sur le graphe des policies et sans regarder les données. `review_shares` lit `reviews` pour savoir
+> qui est l'auteur, `reviews` lit `review_shares` pour savoir qui est nommé, et le partage échoue sur
+> `ERROR: infinite recursion detected in policy for relation "review_shares"`. Constaté par
+> l'assertion C6 de `supabase/tests/03_carnet_rls.sql`, pas par relecture.
+>
+> **La décision ne change pas** ; seul son mécanisme gagne une pièce. Le cycle est coupé du côté
+> froid par `public.owns_review(uuid)`, en `SECURITY DEFINER`, qui répond « suis-je l'auteur de cette
+> entrée ? » sans réexpanser la RLS de `reviews`. Lire `reviews` est le chemin chaud — fiche cigare,
+> fil de P3, statistiques — et reste un `EXISTS` ordinaire servi par `review_shares_grantee_idx` ;
+> partager est rare. C'est la même raison d'être que `current_app_role()` en 0001, et la même
+> précaution : la fonction ne répond que sur son appelant, donc elle ne divulgue rien.
 
 **Les quatre valeurs de l'enum sont déclarées maintenant**, `followers` comprise, bien que
 `public.follows` n'existe qu'en P3. Le motif est mesurable, et vérifié sur PostgreSQL 16.13 plutôt

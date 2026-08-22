@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   collectPersonalData,
   PERSONAL_DATA_SOURCES,
+  READABLE_SOURCES,
   type PersonalDataReader,
 } from '@/lib/compliance/gdpr'
 
@@ -38,7 +39,7 @@ describe('collectPersonalData', () => {
     const { client } = reader()
     const bundle = await collectPersonalData(client, SUBJECT)
 
-    expect(Object.keys(bundle).sort()).toEqual(PERSONAL_DATA_SOURCES.map((s) => s.key).sort())
+    expect(Object.keys(bundle).sort()).toEqual(READABLE_SOURCES.map((s) => s.key).sort())
   })
 
   /*
@@ -51,7 +52,7 @@ describe('collectPersonalData', () => {
     const { client, calls } = reader()
     await collectPersonalData(client, SUBJECT)
 
-    expect(calls).toHaveLength(PERSONAL_DATA_SOURCES.length)
+    expect(calls).toHaveLength(READABLE_SOURCES.length)
     for (const call of calls) {
       expect(call.endsWith(`=${SUBJECT}`)).toBe(true)
     }
@@ -61,7 +62,7 @@ describe('collectPersonalData', () => {
     const { client, calls } = reader()
     await collectPersonalData(client, SUBJECT)
 
-    for (const source of PERSONAL_DATA_SOURCES) {
+    for (const source of READABLE_SOURCES) {
       expect(calls).toContain(`${source.schema}.${source.table}.${source.column}=${SUBJECT}`)
     }
   })
@@ -89,5 +90,26 @@ describe('collectPersonalData', () => {
     const bundle = await collectPersonalData(client, SUBJECT)
     expect(bundle.profile).toEqual([])
     expect(bundle.consents).toEqual([])
+  })
+
+  /*
+   * The dangerous shape is a source that quietly stops being read. Dropping out
+   * of the export is allowed — the mod schema is not reachable through
+   * PostgREST — but only against a written reason, which the type demands and
+   * this asserts is not an empty string standing in for one.
+   */
+  it('omits a source only when it carries a reason', () => {
+    const readable = new Set<string>(READABLE_SOURCES.map((s) => s.key))
+    for (const source of PERSONAL_DATA_SOURCES) {
+      if (readable.has(source.key)) continue
+      expect('unreachable' in source).toBe(true)
+      if ('unreachable' in source) {
+        expect(source.unreachable.length).toBeGreaterThan(30)
+      }
+    }
+  })
+
+  it('still declares more than it reads, and knows the difference', () => {
+    expect(PERSONAL_DATA_SOURCES.length).toBeGreaterThan(READABLE_SOURCES.length)
   })
 })

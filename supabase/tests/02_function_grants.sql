@@ -1,5 +1,11 @@
--- Contrôles sur les droits d'appel des fonctions de `public`.
--- Exécuté en CI après la migration 0002.
+-- Contrôles sur les droits d'appel des fonctions, sur TOUS nos schémas.
+-- Exécuté en CI après les migrations 0002 et 0005.
+--
+-- Élargi à `ref` et `mod` le 22 août 2026. Il ne regardait que `public`, et ce
+-- angle mort a coûté exactement ce qu'un angle mort coûte : les deux fonctions
+-- de trigger de `ref` sont restées appelables par un visiteur anonyme depuis le
+-- premier jour, sans que ce fichier — qui existe pour cela — puisse le voir.
+-- Relevé par les advisors Supabase, pas par la CI. Voir 0005.
 --
 -- Pourquoi un test dédié : PostgreSQL accorde EXECUTE à PUBLIC sur toute
 -- fonction, et Supabase y ajoute un `alter default privileges` qui l'accorde à
@@ -12,22 +18,22 @@ declare
   fn text;
 begin
   -- 1. Personne n'appelle une fonction de `public` au titre de PUBLIC.
-  select string_agg(proname, ', ' order by proname) into offender
-    from pg_proc
-   where pronamespace = 'public'::regnamespace
+  select string_agg(format('%I.%I', n.nspname, p.proname), ', ' order by 1) into offender
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname in ('public', 'ref', 'mod')
      -- une entrée PUBLIC s'écrit `=X/grantor` : grantee vide avant le `=`
-     and array_to_string(coalesce(proacl, '{}')::text[], ' ') ~ '(^| )=X/';
+     and array_to_string(coalesce(p.proacl, '{}')::text[], ' ') ~ '(^| )=X/';
   if offender is not null then
     raise exception 'VITOLA_GRANT_GAP: EXECUTE accordé à PUBLIC sur : %', offender;
   end if;
 
   -- 2. Aucune fonction de trigger n'est appelable par un client.
-  select string_agg(proname, ', ' order by proname) into offender
-    from pg_proc
-   where pronamespace = 'public'::regnamespace
-     and pg_get_function_result(oid) = 'trigger'
-     and (has_function_privilege('anon', oid, 'EXECUTE')
-       or has_function_privilege('authenticated', oid, 'EXECUTE'));
+  select string_agg(format('%I.%I', n.nspname, p.proname), ', ' order by 1) into offender
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname in ('public', 'ref', 'mod')
+     and pg_get_function_result(p.oid) = 'trigger'
+     and (has_function_privilege('anon', p.oid, 'EXECUTE')
+       or has_function_privilege('authenticated', p.oid, 'EXECUTE'));
   if offender is not null then
     raise exception 'VITOLA_GRANT_GAP: fonction(s) de trigger appelables par un client : %', offender;
   end if;
@@ -57,6 +63,18 @@ begin
     end if;
   end loop;
 
-  raise notice 'Droits d''appel : PUBLIC fermé, triggers fermés, 4 fonctions exposées comme prévu.';
+  -- Les deux fonctions ajoutées par 0003 et 0004 sont appelées depuis des
+  -- policies, donc évaluées avec le rôle du client : leur retirer EXECUTE
+  -- casserait le partage d'une entrée de carnet et la prise de parole.
+  if not has_function_privilege('authenticated', 'public.owns_review(uuid)', 'EXECUTE') then
+    raise exception 'VITOLA_GRANT_GAP: authenticated a perdu owns_review — le partage est cassé';
+  end if;
+  foreach fn in array array['anon', 'authenticated'] loop
+    if not has_function_privilege(fn, 'public.comment_min_role()', 'EXECUTE') then
+      raise exception 'VITOLA_GRANT_GAP: % a perdu comment_min_role', fn;
+    end if;
+  end loop;
+
+  raise notice 'Droits d''appel : PUBLIC fermé sur public/ref/mod, triggers fermés, fonctions de policy exposées comme prévu.';
 end;
 $$;

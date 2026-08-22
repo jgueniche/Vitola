@@ -61,7 +61,43 @@ jobs:
       - name: Apply 0002 — function grants
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0002_function_grants.sql
 
-      - name: Function grants
+      # Le test des droits d'appel ne tourne plus ici mais après 0005 : il
+      # vérifie désormais aussi `owns_review()` et `comment_min_role()`, qui
+      # n'existent qu'à partir de 0003 et 0004.
+
+      # 0003 (carnet) et 0004 (commentaires + modération). Même scrutin du
+      # journal que ci-dessus : un `SET LOCAL ROLE` hors transaction rend une
+      # assertion RLS verte sans qu'elle teste quoi que ce soit.
+      - name: Apply 0003 — carnet
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0003_carnet.sql
+
+      - name: Apply 0004 — commentaires et modération
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0004_commentaires_moderation.sql
+
+      - name: Carnet — portées et moyenne publique
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/03_carnet_rls.sql 2>&1 | tee "$RUNNER_TEMP/carnet.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/carnet.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      - name: Commentaires et modération
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/04_comments_moderation.sql 2>&1 | tee "$RUNNER_TEMP/moderation.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/moderation.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0005 ferme dans `ref` et `mod` ce que 0002 n'avait fermé que dans
+      # `public`. Après 0004, donc, puisqu'il vise aussi les fonctions de `mod`.
+      - name: Apply 0005 — droits d'appel sur ref et mod
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0005_ref_function_grants.sql
+
+      - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 
       # §0.5: a table without RLS breaks the build. Belt and braces — the
