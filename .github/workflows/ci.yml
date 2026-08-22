@@ -47,7 +47,14 @@ jobs:
           AGE_GATE_SECRET: ${{ secrets.AGE_GATE_SECRET || 'ci-only-secret-at-least-32-characters' }}
       # Storybook is the exit criterion of P0 (§9): if it stops building, the
       # design system has drifted from the code.
+      #
+      # It needs AGE_GATE_SECRET as much as `pnpm build` does: Storybook loads
+      # next.config.ts through vite-plugin-storybook-nextjs, and that file now
+      # refuses to evaluate without the secret. Passing it only to `pnpm build`
+      # left this job red from fea4fc0 onwards.
       - run: pnpm build-storybook
+        env:
+          AGE_GATE_SECRET: ${{ secrets.AGE_GATE_SECRET || 'ci-only-secret-at-least-32-characters' }}
 
   e2e:
     name: e2e · age gate and health notice
