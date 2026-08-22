@@ -6,8 +6,8 @@ des maquettes, à traduire en React une fois la direction validée.
 
 | Fichier | Contenu | Cadre |
 |---|---|---|
-| `Main.dc.html` | La landing complète | 1440 × 9860 |
-| `Mobile.dc.html` | La même page à 390 px | 390 × 5320 |
+| `Main.dc.html` | La landing complète, neuf modules | 1440 × 10780 |
+| `Mobile.dc.html` | La même page à 390 px | 390 × 6760 |
 | `Bague.dc.html` | L'élément signature : la bague en volume + ses trois variantes plates | 900 × 880 |
 | `canvas.json` | Disposition des trois plans sur le canevas, notes de cadrage | — |
 

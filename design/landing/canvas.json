@@ -1,8 +1,8 @@
 {
   "artboards": [
-    { "file": "Main.dc.html",   "x": 0,    "y": 0,    "w": 1440, "h": 9860, "title": "Landing — 1440", "expand": "fill", "print": "flow" },
-    { "file": "Mobile.dc.html", "x": 1560, "y": 0,    "w": 390,  "h": 5320, "title": "Landing — 390",  "expand": "fill", "print": "flow" },
-    { "file": "Bague.dc.html",  "x": 1560, "y": 5460, "w": 900,  "h": 880,  "title": "La bague — élément signature", "print": "fixed" }
+    { "file": "Main.dc.html",   "x": 0,    "y": 0,    "w": 1440, "h": 10780, "title": "Landing — 1440", "expand": "fill", "print": "flow" },
+    { "file": "Mobile.dc.html", "x": 1560, "y": 0,    "w": 390,  "h": 6760, "title": "Landing — 390",  "expand": "fill", "print": "flow" },
+    { "file": "Bague.dc.html",  "x": 1560, "y": 6900, "w": 900,  "h": 880,  "title": "La bague — élément signature", "print": "fixed" }
   ],
   "annotations": [
     {

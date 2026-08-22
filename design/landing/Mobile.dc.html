@@ -141,6 +141,25 @@
                       font-size: 14px; line-height: 1.5; color: var(--fumee); }
     .yes li b, .no li b { color: var(--parchemin); font-weight: 500; }
 
+    /* le Cercle : deux plans empilés. L'action de la page reste « Entrer ». */
+    .plan { border: 1px solid var(--rule); background: var(--maduro); border-radius: var(--r);
+            padding: 0 18px 16px; }
+    .plan-on { background: var(--maduro-raised); }
+    .plan-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+              padding: 20px 0 14px; border-bottom: 1px solid var(--rule); }
+    .plan-on { padding-top: 14px; }
+    .plan-on .plan-h { border-bottom: 0; padding: 6px 0 12px; }
+    .plan-p { font-size: 17px; color: var(--parchemin); }
+    .plan-l li { display: grid; grid-template-columns: 12px 1fr; gap: 11px; align-items: start;
+                 padding: 11px 0; border-bottom: 1px solid var(--rule);
+                 font-size: 14px; line-height: 1.5; color: var(--fumee); }
+    .plan-l li:last-child { border-bottom: 0; }
+    .plan-l b { color: var(--parchemin); font-weight: 500; }
+    .plan-m { width: 10px; height: 2px; margin-top: 9px; border-radius: 1px;
+             background: var(--cedre-readable); }
+    .plan-on .plan-m { background: var(--claro); }
+    .plan-band { margin: 0 -18px; height: 2px; }
+
     .foot { border-top: 1px solid var(--rule); padding: 30px 0 40px; }
     .foot-nav { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; }
     .foot-nav a { color: var(--fumee); }
@@ -690,7 +709,9 @@
           <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
         <li><a href="#boutique"><span class="n mono">07</span><span class="t"><b>La boutique</b><span>Accessoires uniquement : coupes, briquets, caves, hygromètres.</span></span>
           <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
-        <li style="border-bottom:1px solid var(--rule)"><a href="#partenaires"><span class="n mono">08</span><span class="t"><b>Les partenaires</b><span>Qui peut l'être, qui ne peut pas. La charte est publique.</span></span>
+        <li><a href="#partenaires"><span class="n mono">08</span><span class="t"><b>Les partenaires</b><span>Qui peut l'être, qui ne peut pas. La charte est publique.</span></span>
+          <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
+        <li style="border-bottom:1px solid var(--rule)"><a href="#cercle"><span class="n mono">09</span><span class="t"><b>Le Cercle</b><span>Un abonnement et une marge boutique. Pas de régie publicitaire.</span></span>
           <svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--cedre-readable)"><path d="m9 5 7 7-7 7"/></svg></a></li>
       </ol>
     </div>
@@ -833,6 +854,52 @@
             <span><b>La mise en avant payante.</b> Le classement ne s'achète pas.</span></li>
         </ul>
       </div>
+    </div>
+  </section>
+
+  <!-- le Cercle -->
+  <section class="block" id="cercle">
+    <div class="sec">
+      <p class="eb"><span class="mono">09</span> &nbsp;· &nbsp;Le Cercle</p>
+      <h2 class="dsp h2" style="margin-top:14px">Un abonnement, pas une régie publicitaire.</h2>
+      <p class="body" style="margin-top:16px">Le site vit de deux choses : le Cercle et la marge de la
+        boutique d'accessoires. <strong>Il n'y en a pas de troisième</strong> — un référentiel dont le
+        classement se vend n'est plus un référentiel.</p>
+
+      <div class="plan" style="margin-top:24px">
+        <div class="plan-h">
+          <span class="eb">Compte libre</span>
+          <span class="mono plan-p">Gratuit</span>
+        </div>
+        <ul class="plan-l">
+          <li><span class="plan-m"></span><span><b>Le référentiel et le vitolario</b>, en entier.</span></li>
+          <li><span class="plan-m"></span><span><b>La reconnaissance de bague</b>, <span class="mono">[N]</span> scans par jour.</span></li>
+          <li><span class="plan-m"></span><span><b>Le carnet de dégustation</b>, sans limite d'entrées.</span></li>
+          <li><span class="plan-m"></span><span><b>Une cave</b>, jusqu'à <span class="mono">[N]</span> vitoles.</span></li>
+          <li><span class="plan-m"></span><span><b>Le fil, les clubs, les événements</b>, la messagerie.</span></li>
+          <li><span class="plan-m"></span><span><b>L'export et la suppression de votre compte.</b> Un droit, jamais une option payante.</span></li>
+        </ul>
+      </div>
+
+      <div class="plan plan-on" style="margin-top:14px">
+        <div class="brass plan-band"></div>
+        <div class="plan-h">
+          <span class="eb" style="color:var(--parchemin)">Le Cercle</span>
+          <span class="mono plan-p">[PRIX] € <span class="faint" style="font-size:12px">/ mois</span></span>
+        </div>
+        <div class="brass plan-band"></div>
+        <ul class="plan-l">
+          <li><span class="plan-m"></span><span><b>Tout ce que contient le compte libre.</b></span></li>
+          <li><span class="plan-m"></span><span><b>Caves illimitées</b>, avec la valorisation du stock.</span></li>
+          <li><span class="plan-m"></span><span><b>Statistiques avancées</b> : palmarès, pays goûtés, distribution des arômes.</span></li>
+          <li><span class="plan-m"></span><span><b>Dégustation à l'aveugle</b> : la fiche n'est révélée qu'une fois la note posée.</span></li>
+          <li><span class="plan-m"></span><span><b>Export CSV</b> de la cave et des dégustations.</span></li>
+          <li><span class="plan-m"></span><span><b>Aucune publicité</b> — et jamais pour un produit du tabac, abonné ou non.</span></li>
+        </ul>
+      </div>
+
+      <p class="hint" style="margin-top:16px">Sans engagement, résiliable depuis les paramètres. Le
+        paiement est hébergé : aucune donnée de carte ne transite par le site.</p>
     </div>
   </section>
 

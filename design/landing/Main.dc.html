@@ -754,6 +754,30 @@
                 color: var(--fumee); }
     .yesno li b { color: var(--parchemin); font-weight: 500; }
 
+    /* --- le Cercle : deux colonnes, une comparaison, aucun bouton --------
+       L'action de la page reste « Entrer ». Un second bouton primaire ici
+       ferait deux actions concurrentes et n'en laisserait aucune. */
+    .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule);
+             border: 1px solid var(--rule); border-radius: var(--r); }
+    .plan { background: var(--maduro); padding: 0 32px 30px; display: flex; flex-direction: column; }
+    .plan-on { background: var(--maduro-raised); }
+    .plan-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+              padding: 28px 0 18px; border-bottom: 1px solid var(--rule); }
+    .plan-p { font-size: 18px; color: var(--parchemin); }
+    .plan-l li { display: grid; grid-template-columns: 14px 1fr; gap: 13px; align-items: start;
+                 padding: 13px 0; border-bottom: 1px solid var(--rule);
+                 font-size: 15px; line-height: 1.52; color: var(--fumee); }
+    .plan-l li:last-child { border-bottom: 0; }
+    .plan-l b { color: var(--parchemin); font-weight: 500; }
+    .plan-m { width: 11px; height: 2px; margin-top: 10px; border-radius: 1px;
+             background: var(--cedre-readable); }
+    .plan-on .plan-m { background: var(--claro); }
+    /* 2 px, et non le filet de 1 px : collé au bord du panneau il tombe sur
+       un demi-pixel et disparaît une fois sur deux. */
+    .plan-band { margin: 0 -32px; height: 2px; }
+    .plan-on { padding-top: 20px; }
+    .plan-on .plan-h { border-bottom: 0; padding: 8px 0 14px; }
+
     /* --- CTA final + footer -------------------------------------------- */
     .final { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 26px; }
     .foot { border-top: 1px solid var(--rule); padding: 40px 0 56px; }
@@ -836,7 +860,7 @@
           <div class="toc">
             <div class="toc-h">
               <span class="eb">Ce que contient le site</span>
-              <span class="toc-n mono">08</span>
+              <span class="toc-n mono">09</span>
             </div>
             <ol>
               <li><a href="#referentiel"><span class="toc-n mono">01</span><span>Le référentiel</span><span class="toc-k">Wiki</span></a></li>
@@ -847,6 +871,7 @@
               <li><a href="#lieux"><span class="toc-n mono">06</span><span>Les lieux</span><span class="toc-k">Carte</span></a></li>
               <li><a href="#boutique"><span class="toc-n mono">07</span><span>La boutique</span><span class="toc-k">Accessoires</span></a></li>
               <li><a href="#partenaires"><span class="toc-n mono">08</span><span>Les partenaires</span><span class="toc-k">Charte</span></a></li>
+              <li><a href="#cercle"><span class="toc-n mono">09</span><span>Le Cercle</span><span class="toc-k">Abonnement</span></a></li>
             </ol>
           </div>
 
@@ -1667,6 +1692,65 @@
     </div>
   </section>
 
+  <!-- =========================== 09 LE CERCLE ======================== -->
+  <section class="block" id="cercle">
+    <div class="sec">
+      <div class="split" style="align-items:end">
+        <div class="sec-h">
+          <p class="eb"><span class="mono">09</span> &nbsp;· &nbsp;Le Cercle</p>
+          <h2 class="dsp h2">Un abonnement, pas une régie publicitaire.</h2>
+        </div>
+        <p class="body">Le site vit de deux choses : le Cercle et la marge de la boutique
+          d'accessoires. <strong>Il n'y en a pas de troisième</strong>, et c'est ce qui rend la charte
+          ci-dessus tenable — un référentiel dont le classement se vend n'est plus un référentiel.</p>
+      </div>
+
+      <div class="plans" style="margin-top:48px">
+        <div class="plan">
+          <div class="plan-h">
+            <span class="eb">Compte libre</span>
+            <span class="mono plan-p">Gratuit</span>
+          </div>
+          <ul class="plan-l">
+            <li><span class="plan-m"></span><span><b>Le référentiel et le vitolario</b>, en entier.
+              Aucune fiche derrière un péage.</span></li>
+            <li><span class="plan-m"></span><span><b>La reconnaissance de bague</b>, <span class="mono">[N]</span>
+              scans par jour.</span></li>
+            <li><span class="plan-m"></span><span><b>Le carnet de dégustation</b>, sans limite d'entrées.</span></li>
+            <li><span class="plan-m"></span><span><b>Une cave</b>, jusqu'à <span class="mono">[N]</span> vitoles.</span></li>
+            <li><span class="plan-m"></span><span><b>Le fil, les clubs, les événements</b>, la messagerie.</span></li>
+            <li><span class="plan-m"></span><span><b>L'export et la suppression de votre compte.</b>
+              Un droit, jamais une option payante.</span></li>
+          </ul>
+        </div>
+
+        <div class="plan plan-on">
+          <div class="brass plan-band"></div>
+          <div class="plan-h">
+            <span class="eb" style="color:var(--parchemin)">Le Cercle</span>
+            <span class="mono plan-p">[PRIX] € <span class="faint" style="font-size:13px">/ mois</span></span>
+          </div>
+          <div class="brass plan-band"></div>
+          <ul class="plan-l">
+            <li><span class="plan-m"></span><span><b>Tout ce que contient le compte libre.</b></span></li>
+            <li><span class="plan-m"></span><span><b>Caves illimitées</b>, avec la valorisation du stock
+              et les alertes de rotation.</span></li>
+            <li><span class="plan-m"></span><span><b>Statistiques avancées</b> : palmarès, pays goûtés,
+              distribution des arômes, évolution des notes sur 90 jours.</span></li>
+            <li><span class="plan-m"></span><span><b>Dégustation à l'aveugle</b> : la fiche n'est révélée
+              qu'une fois la note posée.</span></li>
+            <li><span class="plan-m"></span><span><b>Export CSV</b> de la cave et des dégustations.</span></li>
+            <li><span class="plan-m"></span><span><b>Aucune publicité</b> — et jamais pour un produit du
+              tabac, abonné ou non.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="hint" style="margin-top:22px">Sans engagement, résiliable depuis les paramètres. Le
+        paiement est hébergé : aucune donnée de carte ne transite par le site.</p>
+    </div>
+  </section>
+
   <!-- ============================ ENTRER ============================= -->
   <section class="block" id="entrer" style="padding:112px 0 120px">
     <div class="sec">
@@ -1709,7 +1793,7 @@
 
 </div>
 </x-dc>
-<script data-dc-script data-props='{"$preview":{"width":1440,"height":9860},"ember":{"editor":"color","default":"#ff5a2b","options":["#ff5a2b","#e2452a","#ff7a3d","#c9421f"],"section":"Braise"},"brass":{"editor":"color","default":"#c9a227","options":["#c9a227","#d9bc72","#b8863b","#a47c5a"],"section":"Bague"},"animate":{"editor":"boolean","default":true,"section":"Mouvement"}}'>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":10780},"ember":{"editor":"color","default":"#ff5a2b","options":["#ff5a2b","#e2452a","#ff7a3d","#c9421f"],"section":"Braise"},"brass":{"editor":"color","default":"#c9a227","options":["#c9a227","#d9bc72","#b8863b","#a47c5a"],"section":"Bague"},"animate":{"editor":"boolean","default":true,"section":"Mouvement"}}'>
 class Component extends DCLogic {
   renderVals() {
     return {
