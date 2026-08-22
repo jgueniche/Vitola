@@ -34,6 +34,16 @@ pardonné.
 Il n'est pas négociable sans me le dire, parce que chaque phase ouvre la suivante et qu'une phase
 qu'on quitte avant son critère de sortie est une dette qu'on ne retrouve qu'en production.
 
+**Le rythme attendu : enchaîne.** Ne t'arrête pas au premier item livré pour me demander la suite.
+Prends l'item 4, livre-le en entier — écrans compris, parcourus, nettoyés derrière —, puis passe au
+5, puis au 6, jusqu'à ce que la session soit pleine. Un item est fini quand il est **parcourable et
+parcouru**, pas quand il compile. Commite par item, avec `pnpm check` dans la même commande, pour
+que ce qui est fait reste acquis même si la session s'arrête au milieu du suivant.
+
+Deux choses seulement doivent m'être posées avant d'être décidées : ce qui est listé sous
+« À me signaler », et toute ambiguïté d'architecture — laquelle vaut une ADR, pas un choix rapide.
+Tout le reste : applique le défaut documenté et signale-le dans ton compte rendu.
+
 **La QA est humaine, directement sur le front.** Conséquence sur ta façon de travailler :
 
 - Une phase n'est livrée que si elle est **parcourable dans un navigateur** par une personne
@@ -378,7 +388,7 @@ reconstruit.
 
 Les items 0 à 3 sont livrés. La numérotation reprend là où elle s'est arrêtée.
 
-### 4. La cave, et ce qu'elle referme — **fin de P2. C'est cette session.**
+### 4. La cave, et ce qu'elle referme — **fin de P2. Commence par là.**
 
 **Pourquoi la cave avant le reste de P1** : le §9 donne à P2 un critère de sortie mesurable —
 « **créer une dégustation et décrémenter la cave de bout en bout** ». La dégustation existe depuis la
@@ -422,7 +432,7 @@ mes moyennes — en ne comptant que ce que la RLS me laisse voir, sans filtre Ty
 **Rappel qui vaut pour tout ce qui suit** : `pnpm check` doit être dans la **même commande** que le
 commit, et la migration doit se terminer par son auto-contrôle RLS.
 
-### 5. Le reste de P1
+### 5. Le reste de P1 — **enchaîne dès que la cave est parcourue**
 
 Contribution wiki (proposer, historique, nouveau, file de validation — `cigar_revisions` est prête
 et vide), comparateur 2–4 cigares, décodeur de codes de boîte, `/parametres` (profil, préférences,
@@ -430,7 +440,7 @@ confidentialité, consentements, RGPD — la bascule /100 ↔ /20 y déménagera
 OG, `sitemap.ts`, `types-drift.yml`. **La file wiki est aussi ce qui rouvre `ref.lines`** — voir
 `CLAUDE.md`.
 
-### 6. Puis les phases, dans l'ordre du §9
+### 6. Puis les phases, dans l'ordre du §9 — **et continue tant qu'il reste de la session**
 
 P3 social (`follows`, feed keyset, braises, clubs, événements, messagerie, profils publics — et
 c'est là que la branche `followers` du carnet devient vraie) → P4 scan → P5 lieux → P6 éditorial/SEO
