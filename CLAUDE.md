@@ -134,6 +134,10 @@ pnpm storybook      # galerie des primitives
 - **Les commentaires ne sont pas du code.** Les scans de conformité masquent les commentaires avant
   d'analyser : sans cela, une phrase expliquant pourquoi une chose est absente déclenche
   l'alerte que cette chose est présente.
+- **Un droit légal ne se vérifie qu'en l'exerçant.** `/api/gdpr/export` répondait 500 à tout membre
+  connecté depuis sa mise en service : `service_role` n'avait aucun droit de table sur `ref`, et
+  rien dans le dépôt ne pouvait le dire. Corrigé par la 0007. Tout endpoint qui met en œuvre une
+  obligation du §2 doit être **parcouru une fois avec un compte réel**, pas seulement compilé.
 - **La clé de service ne passe pas partout.** `service_role` contourne la RLS, donc on le croit
   capable de tout ; il n'a **aucun droit de table dans `mod`**, et ce schéma n'est de toute façon
   pas exposé à PostgREST. Une écriture dans la file DSA passe par `public.file_report()`, une

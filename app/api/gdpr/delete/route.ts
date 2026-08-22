@@ -82,12 +82,27 @@ export async function POST(request: NextRequest) {
 
   const admin = createSupabaseAdminClient()
 
-  // Counted before the cascade takes them, because afterwards nothing can.
-  const { count: revisionsAuthored } = await admin
+  /*
+   * Counted before the cascade takes them, because afterwards nothing can.
+   *
+   * The error is read, and that is the fix rather than a nicety. It used to be
+   * discarded — and the service key turned out to hold no privilege at all on
+   * `ref` until migration 0007, so this returned `undefined`, `?? 0` made it
+   * zero, and the audit entry recorded "no revisions lost" for an erasure that
+   * may well have destroyed some. A wrong number in an audit log is worse than
+   * a missing one: it is read as a fact. An unknown count is now `null`, which
+   * nobody can mistake for a measurement.
+   */
+  const { count, error: countError } = await admin
     .schema('ref')
     .from('cigar_revisions')
     .select('id', { count: 'exact', head: true })
     .eq('author_id', user.id)
+
+  if (countError) {
+    console.error('[gdpr/delete] revision count failed, erasure proceeds unmeasured', countError)
+  }
+  const revisionsAuthored = countError ? null : (count ?? 0)
 
   /*
    * The trace is written first, and a failure to write it aborts the erasure.
@@ -105,7 +120,7 @@ export async function POST(request: NextRequest) {
       actorId: user.id,
       action: 'gdpr.erase',
       entity: { schema: 'auth', table: 'users', id: user.id },
-      before: { revisionsAuthored: revisionsAuthored ?? 0 },
+      before: { revisionsAuthored },
     })
   } catch (cause) {
     console.error('[gdpr/delete] audit write failed, erasure aborted', cause)
@@ -123,7 +138,7 @@ export async function POST(request: NextRequest) {
   await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined)
 
   return NextResponse.json(
-    { status: 'erased', revisionsDestroyed: revisionsAuthored ?? 0 },
+    { status: 'erased', revisionsDestroyed: revisionsAuthored },
     { status: 200, headers: NO_STORE },
   )
 }

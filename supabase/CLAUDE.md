@@ -52,6 +52,15 @@ partagées → tables → recherche → index → grants → RLS → storage →
   fonctions de trigger de `ref` sont restées appelables par un visiteur anonyme depuis le premier
   jour, et le test censé le voir filtrait lui aussi sur `public`. Corrigé par 0005. Leçon générale :
   **un contrôle qui ne regarde qu'un schéma ne protège qu'un schéma.**
+- **BYPASSRLS ne dit rien des droits de table.** `service_role` contourne la RLS, donc on le
+  suppose capable de tout ; il n'avait **aucun droit** sur `ref` jusqu'à la 0007, et l'export RGPD
+  répondait 500 à tout membre connecté. Même cause que le piège précédent, à l'envers :
+  l'amorçage de Supabase est **par schéma** lui aussi — il accorde tout sur `public` et ignore les
+  schémas qu'on crée soi-même. Un schéma neuf doit accorder explicitement à `service_role` ce dont
+  le code serveur a besoin, et rien de plus.
+- **Un auto-contrôle de migration ne peut pas attraper ce que sa migration vient de corriger.**
+  Elle accorde puis vérifie : le contrôle passe toujours. La régression future ne se voit que
+  depuis un fichier de `tests/` qui n'accorde rien — ici `06_service_role_reads.sql`.
 - **La clé de service passe par PostgREST comme tout le monde.** C'est le piège le plus coûteux de
   ce dépôt après l'exposition des schémas, parce qu'il contredit l'intuition : `service_role`
   contourne la RLS (`BYPASSRLS`), donc on le croit capable de tout. Il ne l'est pas — il n'a

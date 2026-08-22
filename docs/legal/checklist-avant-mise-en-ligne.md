@@ -53,7 +53,9 @@ e-commerce) doit confirmer, et ce que nous avons déjà mis en place pour y rép
 - [x] Endpoints RGPD export et suppression opérationnels — livrés en P1. L'export couvre désormais
       aussi les trois liens vers `mod` (signalements déposés, décisions rendues, actes de
       modération), par la fonction `public.moderation_records_for_subject()` de la migration 0006.
-      **Reste à exercer le chemin authentifié complet contre le projet réel, avec un compte de QA.**
+      Chemin authentifié exercé contre le projet réel avec `test_un` le 22 août 2026 : `200`,
+      `Cache-Control: no-store, private`, 22 sources rendues. Il répondait `500` avant la
+      migration 0007 — voir `docs/decisions-log.md`.
 - [ ] DPA signés : Supabase, Vercel, Resend, Sentry, PostHog, Upstash, Stripe
 - [ ] Vérification de disponibilité de la marque avant dépôt du nom retenu (Q7)
 - [ ] CGV et droit de rétractation de 14 jours, avant toute ouverture de la boutique

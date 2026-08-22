@@ -2,6 +2,62 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## L'export RGPD répondait 500, et personne ne pouvait le savoir
+
+Migration 0007, appliquée le 22 août 2026, trouvée en exerçant le chemin authentifié complet contre
+le projet réel — ce que la reprise de session demandait de faire une fois avec un compte de QA, et
+que ce fichier notait comme jamais fait.
+
+```
+[gdpr/export] collection failed
+Error: ref.cigars.created_by: permission denied for table cigars
+```
+
+**La clé de service n'avait aucun droit sur `ref`.** Pas un droit trop faible : aucun. C'est la
+leçon de la 0005 prise par l'autre bout — **`alter default privileges` est par schéma, et
+l'amorçage de Supabase aussi.** Supabase accorde tout à `anon`, `authenticated` et `service_role`
+sur les nouvelles tables de `public` ; il ne connaît pas `ref`, créé par la migration 0001. Chaque
+table de `ref` a donc reçu ses grants explicites pour les deux rôles clients, et rien pour
+`service_role`, à qui personne n'avait pensé — moi compris, en écrivant l'export.
+
+Ce qui rendait le trou invisible de partout : la lecture publique passe par `anon`, la contribution
+par `authenticated`, et `service_role` contourne la RLS, donc on le suppose capable de tout.
+**BYPASSRLS ne dit rien des droits de table** ; il ne les remplace pas. La CI n'a pas d'endpoint, les
+tests SQL n'avaient jamais joué `service_role` sur `ref`, et le §9 ne mesure pas un export.
+
+Deux droits n'étaient donc pas tenus, art. 15 et 17 en main :
+
+1. `/api/gdpr/export` — 500 pour tout membre connecté. Le droit d'accès, refusé.
+2. `/api/gdpr/delete` — l'effacement aboutissait, mais le décompte des révisions détruites échouait
+   **sans que l'erreur soit lue** et retombait sur `0` par `?? 0`. La trace d'audit annonçait donc
+   « aucune perte » là où il pouvait y en avoir. Un chiffre faux dans un journal d'audit est pire
+   qu'un chiffre absent : il se lit comme un fait. Une valeur inconnue s'écrit désormais `null`.
+
+**L'auto-contrôle d'une migration ne peut pas attraper ce qu'elle vient de corriger.** Elle accorde
+puis vérifie ; son contrôle passe donc toujours. La régression future ne se voit que depuis un
+fichier qui n'accorde rien : `supabase/tests/06_service_role_reads.sql`, joué en CI après toutes les
+migrations. Ses deux gardes ont été vérifiées en cassant volontairement les deux cas.
+
+**L'énoncé vérifié est plus large que le bug** : « toute table de `public` et de `ref` est lisible
+par la clé de service », et non « les quatorze sources de l'inventaire le sont ». Une assertion
+taillée sur l'inventaire d'aujourd'hui laisse passer la quinzième source de demain — c'est exactement
+comment `02_function_grants.sql` avait manqué les deux fonctions de `ref` en filtrant sur `public`.
+
+**SELECT seulement, et `mod` reste dehors.** L'export lit ; aucune écriture de `service_role` dans
+`ref` n'est nécessaire, et une assertion échoue si un `grant all` est écrit par commodité. La porte
+sur `mod` reste la fonction de la 0006, et une troisième assertion échoue si la clé de service
+gagne un jour un accès direct à ces tables.
+
+**Le contrôle porte aussi sur `public`, où il ne corrige rien.** Sur le projet réel, Supabase avait
+déjà tout accordé — mais cet amorçage ne vit dans aucun fichier du dépôt, comme les trois réglages de
+`docs/setup/supabase.md`. Une base reconstruite depuis `supabase/migrations/` seule échouait de la
+même façon, à un schéma près. La 0007 l'écrit, et l'invariant devient vrai sur la base nue de la CI —
+le seul endroit où il sera vérifié avant qu'un membre ne le découvre.
+
+**Vérifié en HTTP réel après coup**, avec le compte `test_un` sur le projet : 200, `no-store,
+private`, 22 sources dont les trois liens vers `mod`. C'est la première fois que le droit d'accès
+est effectivement servi.
+
 ## Signalement DSA, commentaires à l'écran, roue des arômes
 
 Migration 0006 et seed section 6, appliqués sur le projet réel le 22 août 2026. Ce qui manquait

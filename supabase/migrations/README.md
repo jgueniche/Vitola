@@ -11,6 +11,7 @@ enregistré dans `supabase_migrations.schema_migrations` :
 | `0004` | `commentaires_moderation` | `0004_commentaires_moderation.sql` |
 | `0005` | `ref_function_grants` | `0005_ref_function_grants.sql` |
 | `0006` | `signalement_et_statistiques` | `0006_signalement_et_statistiques.sql` |
+| `0007` | `ref_service_role_grants` | `0007_ref_service_role_grants.sql` |
 
 ## Pourquoi ce dossier commence à 0002
 
@@ -44,6 +45,7 @@ psql -f supabase/migrations/0003_carnet.sql
 psql -f supabase/migrations/0004_commentaires_moderation.sql
 psql -f supabase/migrations/0005_ref_function_grants.sql
 psql -f supabase/migrations/0006_signalement_et_statistiques.sql
+psql -f supabase/migrations/0007_ref_service_role_grants.sql
 cd supabase/seed && psql -f seed.sql
 ```
 

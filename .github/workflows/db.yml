@@ -117,6 +117,17 @@ jobs:
             exit 1
           fi
 
+      # 0007 rend `ref` lisible par la clé de service. Sans elle, l'export RGPD
+      # répond 500 à tout membre connecté — constaté en HTTP réel, pas supposé.
+      - name: Apply 0007 — lecture de ref par la clé de service
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0007_ref_service_role_grants.sql
+
+      # Le seul endroit d'où une régression de ces droits se voit : une
+      # migration corrige puis vérifie, donc son auto-contrôle ne peut pas
+      # échouer sur ce qu'elle vient d'accorder. Ce fichier n'accorde rien.
+      - name: La clé de service lit tout ce que l'export doit rendre
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/06_service_role_reads.sql
+
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.
       - name: RLS coverage
