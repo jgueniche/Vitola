@@ -1,0 +1,12 @@
+# Fichiers générés : ils doivent rester identiques, octet pour octet, à la
+# sortie de leur générateur. Les reformater ferait diverger le contrôle de
+# dérive qui les compare à une régénération fraîche.
+# Syntaxe .gitignore : pas de commentaire en fin de ligne, il ferait partie du motif.
+
+# supabase gen types — voir docs/setup/supabase.md
+lib/supabase/database.types.ts
+
+# pnpm tsx tooling/scripts/build-standalone-seed.ts
+supabase/seed/seed_standalone.sql
+
+pnpm-lock.yaml

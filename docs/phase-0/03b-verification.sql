@@ -59,6 +59,11 @@ grant usage on schema storage to anon, authenticated, service_role;
 -- Supabase grants ALL on public tables to anon/authenticated by default.
 -- Reproduced so the migration's REVOKEs are exercised for real.
 alter default privileges in schema public grant all on tables to anon, authenticated;
+-- And EXECUTE on every function created in `public`. Missing here until August
+-- 2026, which made this stand-in strictly safer than the real project: the nine
+-- functions of `public` were callable by an anonymous visitor there, and no
+-- local run could see it. See supabase/migrations/0002_function_grants.sql.
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
 
 
 -- ---------- 2. Migration ----------
@@ -294,6 +299,19 @@ begin;
     from public.profile_settings;
 commit;
 
+-- T9 has just published the only draft in the table. Without a draft present,
+-- "anon sees no draft" is true because there is nothing to see, and T6/T7 pass
+-- without exercising a single policy. One is inserted here, privileged, and its
+-- presence is asserted before the role switch.
+insert into ref.cigars (brand_id,vitola_id,commercial_name,slug,created_by,status)
+ values ('bbbbbbbb-0000-0000-0000-000000000001','dddddddd-0000-0000-0000-000000000001',
+         'Brouillon Temoin','brouillon-temoin','11111111-1111-1111-1111-111111111111','draft');
+do $$ begin
+  if not exists (select 1 from ref.cigars where status='draft') then
+    raise exception 'FAIL: aucun brouillon en base — T6 et T7 seraient vides';
+  end if;
+end $$;
+
 \echo '=== T6  anon sees published only, never drafts'
 begin;
   set local role anon;
@@ -316,7 +334,9 @@ begin;
   insert into ref.cigars (brand_id,vitola_id,commercial_name,slug,created_by,status)
    values ('bbbbbbbb-0000-0000-0000-000000000001','dddddddd-0000-0000-0000-000000000001',
            'Second Brouillon','second-brouillon','11111111-1111-1111-1111-111111111111','draft');
-  select case when count(*) filter (where status='draft')=1 then 'PASS (author sees own draft)'
+  -- brouillon-temoin (inserted before T6) plus second-brouillon, both authored
+  -- by this member: the author sees two, a third party and anon see none.
+  select case when count(*) filter (where status='draft')=2 then 'PASS (author sees own 2 drafts)'
               else 'FAIL n='||count(*) filter (where status='draft') end from ref.cigars;
 commit;
 

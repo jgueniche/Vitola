@@ -1,8 +1,11 @@
 # Procédure — donner à Claude accès au projet Supabase
 
 > Lisible sur téléphone. Une action, environ 5 minutes.
-> État au moment d'écrire : **le projet `vitola` existe**, dans l'organisation `jgueniche`.
-> Ce qui manque est l'accès, pas le projet.
+>
+> **L'accès est en place depuis le 22 août 2026, et le schéma comme le référentiel sont
+> chargés.** La procédure ci-dessous reste écrite au futur : elle sert à refaire le
+> montage, sur un autre poste ou après révocation du jeton. L'état réel du projet est
+> plus bas, section « Fait ».
 
 ---
 
@@ -87,15 +90,49 @@ temporairement, ajouter `&read_only=true` à l'URL — je ne pourrai alors plus 
 
 ---
 
-## Ce que je fais dès que l'accès est en place
+## Fait — état au 22 août 2026
 
-1. Je vérifie le droit d'écriture par une migration à vide.
-2. J'applique la migration P1 (`docs/phase-0/03-schema-p1.sql`), déjà relue et testée.
-3. Je charge les 940 fiches (`supabase/seed/seed.sql`).
-4. Je rejoue les 25 assertions de vérification contre le projet réel.
-5. Je lance les *security advisors* de Supabase sur la RLS réelle.
-6. Je génère les types TypeScript et je les commite.
-7. Je remplis `.env.example` avec les bons noms de variables.
+L'accès est en place et le projet est chargé. Ce qui suit est constaté, pas prévu.
+
+| | État |
+|---|---|
+| Droit d'écriture | Vérifié. `postgres` est membre de `supabase_privileged_role` : trigger sur `auth.users` et policies sur `storage.objects` acceptés. |
+| Migration `0001` | Appliquée. 13 tables, RLS partout, `FORCE` sauf `public.profiles`. Enregistrée dans `supabase_migrations.schema_migrations`. |
+| Migration `0002` | Appliquée. Referme les `EXECUTE` accordés par défaut, voir ci-dessous. |
+| Référentiel | 940 fiches, **toutes en brouillon**. 900 prix officiels, 114 marques, 51 vitoles, 30 manufactures, 18 codes de boîte. Rejeu vérifié sans duplication. |
+| 25 assertions | **26 PASS** (25 + couverture RLS), rejouées par `supabase/tests/03_remote_verification.sql`. |
+| Advisors sécurité | 4 avertissements → 2, tous deux sur `current_app_role()`. |
+| Types TypeScript | `lib/supabase/database.types.ts`, schémas `public` **et** `ref`. |
+| `.env.example` | Complet : toute variable lue par le code y figure. |
+
+### Les valeurs à déposer chez Vercel
+
+`NEXT_PUBLIC_SUPABASE_URL` vaut `https://upbewqsmgcrogoapubyz.supabase.co` — la
+référence de projet n'est pas un secret, et elle est déjà nécessaire au montage MCP
+ci-dessus.
+
+**Aucune clé n'est écrite ici, et aucune ne devrait l'être.** La clé publiable
+(`sb_publishable_…`) se lit dans le tableau de bord, ou par `get_publishable_keys` sur
+le serveur MCP. Elle est publique par nature, mais ce dépôt l'est aussi : une clé
+committée survit à sa rotation dans l'historique git.
+
+**`sb_secret_…` ne passe ni par ce dépôt ni par une conversation.** Tableau de bord →
+Vercel et secrets GitHub, directement.
+
+### Ce que le premier chargement réel a révélé
+
+Un défaut que la base locale ne pouvait pas voir. PostgreSQL accorde `EXECUTE` à
+`PUBLIC` sur toute fonction ; Supabase ajoute par-dessus un `alter default privileges`
+qui l'accorde à `anon` et `authenticated` sur tout ce qui est créé dans `public`. Le
+§8 de la migration 0001 croyait n'exposer que quatre fonctions : les neuf étaient
+appelables par un visiteur anonyme via `/rest/v1/rpc/…`, dont deux en
+`SECURITY DEFINER`.
+
+La doublure de CI ne reproduisait que la moitié `on tables` de ce mécanisme. Une
+doublure plus fermée que la production ne prouve rien : la ligne `on functions`
+manquante est ajoutée, et `supabase/tests/02_function_grants.sql` échoue désormais
+si le trou se rouvre — vérifié en contre-épreuve, la CI passe de vert à rouge sans
+la migration 0002.
 
 ---
 

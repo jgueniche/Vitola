@@ -55,6 +55,15 @@ jobs:
             exit 1
           fi
 
+      # PostgreSQL accorde EXECUTE à PUBLIC sur toute fonction, et Supabase y
+      # ajoute anon et authenticated. Les deux sont silencieux : le §8 de 0001
+      # croyait exposer quatre fonctions, il y en avait neuf sur le projet réel.
+      - name: Apply 0002 — function grants
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0002_function_grants.sql
+
+      - name: Function grants
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
+
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.
       - name: RLS coverage
@@ -69,6 +78,7 @@ jobs:
           createdb vitola_seed
           psql -v ON_ERROR_STOP=1 -f supabase/tests/00_supabase_stubs.sql
           psql -v ON_ERROR_STOP=1 -f docs/phase-0/03-schema-p1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/0002_function_grants.sql
           cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql
 
       - name: Seed integrity

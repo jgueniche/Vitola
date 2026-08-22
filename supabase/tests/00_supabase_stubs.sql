@@ -48,3 +48,10 @@ grant usage on schema storage to anon, authenticated, service_role;
 -- Supabase grants ALL on public tables to anon/authenticated by default.
 -- Reproduced so the migration's REVOKEs are exercised for real.
 alter default privileges in schema public grant all on tables to anon, authenticated;
+
+-- And EXECUTE on every function created in `public` — the half that was missing
+-- here until August 2026. Sans cette ligne, la doublure était plus fermée que
+-- la vraie base : les neuf fonctions de `public` y étaient appelables par un
+-- visiteur anonyme sur le projet réel, et le contrôle local ne pouvait pas le
+-- voir. Une doublure plus sûre que la production ne prouve rien.
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
