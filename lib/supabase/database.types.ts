@@ -184,6 +184,187 @@ export type Database = {
         }
         Relationships: []
       }
+      humidor_events: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          occurred_at: string
+          qty: number
+          review_id: string | null
+          type: Database["public"]["Enums"]["humidor_event_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          occurred_at?: string
+          qty: number
+          review_id?: string | null
+          type: Database["public"]["Enums"]["humidor_event_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          occurred_at?: string
+          qty?: number
+          review_id?: string | null
+          type?: Database["public"]["Enums"]["humidor_event_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "humidor_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "humidor_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "humidor_events_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      humidor_items: {
+        Row: {
+          aging_start_date: string | null
+          box_code: string | null
+          cigar_id: string
+          created_at: string
+          currency: string
+          humidor_id: string
+          id: string
+          notes: string | null
+          position: string | null
+          purchase_date: string | null
+          purchase_price_eur: number | null
+          qty: number
+          updated_at: string
+          vendor_name: string | null
+        }
+        /*
+         * `qty` is insertable and NOT updatable, which is ADR 0006 D3 rendered
+         * in TypeScript: an opening balance is declared when the lot is born,
+         * and every later move is an event. The GRANT is what enforces it —
+         * this shape only makes the refusal visible before the round trip.
+         */
+        Insert: {
+          aging_start_date?: string | null
+          box_code?: string | null
+          cigar_id: string
+          created_at?: string
+          currency?: string
+          humidor_id: string
+          id?: string
+          notes?: string | null
+          position?: string | null
+          purchase_date?: string | null
+          purchase_price_eur?: number | null
+          qty?: number
+          updated_at?: string
+          vendor_name?: string | null
+        }
+        Update: {
+          aging_start_date?: string | null
+          box_code?: string | null
+          created_at?: string
+          currency?: string
+          humidor_id?: string
+          id?: string
+          notes?: string | null
+          position?: string | null
+          purchase_date?: string | null
+          purchase_price_eur?: number | null
+          updated_at?: string
+          vendor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "humidor_items_humidor_id_fkey"
+            columns: ["humidor_id"]
+            isOneToOne: false
+            referencedRelation: "humidors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      humidor_readings: {
+        Row: {
+          created_at: string
+          humidor_id: string
+          id: string
+          recorded_at: string
+          rh: number | null
+          source: Database["public"]["Enums"]["humidor_reading_source"]
+          temp_c: number | null
+        }
+        Insert: {
+          created_at?: string
+          humidor_id: string
+          id?: string
+          recorded_at?: string
+          rh?: number | null
+          source?: Database["public"]["Enums"]["humidor_reading_source"]
+          temp_c?: number | null
+        }
+        Update: {
+          created_at?: string
+          humidor_id?: string
+          id?: string
+          recorded_at?: string
+          rh?: number | null
+          source?: Database["public"]["Enums"]["humidor_reading_source"]
+          temp_c?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "humidor_readings_humidor_id_fkey"
+            columns: ["humidor_id"]
+            isOneToOne: false
+            referencedRelation: "humidors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      humidors: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          target_rh: number | null
+          target_temp: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          target_rh?: number | null
+          target_temp?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          target_rh?: number | null
+          target_temp?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_settings: {
         Row: {
           adult_confirmed_at: string | null
@@ -399,6 +580,34 @@ export type Database = {
       }
     }
     Views: {
+      humidor_inventory: {
+        Row: {
+          aging_days: number | null
+          box_code: string | null
+          cigar_id: string | null
+          created_at: string | null
+          currency: string | null
+          humidor_id: string | null
+          id: string | null
+          last_smoked_on: string | null
+          notes: string | null
+          position: string | null
+          purchase_date: string | null
+          purchase_price_eur: number | null
+          qty: number | null
+          stock_value_eur: number | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "humidor_items_humidor_id_fkey"
+            columns: ["humidor_id"]
+            isOneToOne: false
+            referencedRelation: "humidors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cigar_stats: {
         Row: {
           bayesian_score: number | null
@@ -447,11 +656,38 @@ export type Database = {
         Args: { minimum: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      humidor_event_delta: {
+        Args: {
+          p_type: Database["public"]["Enums"]["humidor_event_type"]
+          p_qty: number
+        }
+        Returns: number
+      }
       immutable_unaccent: { Args: { value: string }; Returns: string }
       is_privileged_context: { Args: never; Returns: boolean }
       moderation_records_for_subject: { Args: { p_subject: string }; Returns: Json }
       owns_review: { Args: { target: string }; Returns: boolean }
       refresh_cigar_stats: { Args: never; Returns: undefined }
+      /*
+       * ADR 0006, D1. The only call in the app that writes two tables at once,
+       * and the only one that has to: PostgREST gives one transaction per
+       * request, so the notebook entry and the `smoke` event land together or
+       * not at all. SECURITY INVOKER, so RLS still decides — see the migration.
+       *
+       * Returns the entry id, or null when nothing was noted. Null is a
+       * success: the ledger event is then the whole record.
+       */
+      smoke_from_humidor: {
+        Args: {
+          p_item_id: string
+          p_qty?: number
+          p_smoked_on?: string
+          p_visibility?: Database["public"]["Enums"]["review_visibility"]
+          p_score?: number | null
+          p_body?: string | null
+        }
+        Returns: string | null
+      }
       slugify: { Args: { value: string }; Returns: string }
     }
     Enums: {
@@ -475,6 +711,14 @@ export type Database = {
         | "analytics"
         | "marketing_email"
         | "health_related_processing"
+      humidor_event_type:
+        | "add"
+        | "smoke"
+        | "gift"
+        | "loss"
+        | "move"
+        | "adjust"
+      humidor_reading_source: "manual" | "device"
       review_kind: "log" | "tasting"
       review_visibility: "private" | "shared" | "followers" | "public"
     }

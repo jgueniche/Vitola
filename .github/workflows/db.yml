@@ -128,6 +128,25 @@ jobs:
       - name: La clé de service lit tout ce que l'export doit rendre
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/06_service_role_reads.sql
 
+      # 0008 pose la cave. Son geste central — fumer un cigare — écrit deux
+      # tables dans la même transaction par une fonction SECURITY **INVOKER** :
+      # l'atomicité sans le privilège (ADR 0006, D1).
+      - name: Apply 0008 — la cave
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0008_cave.sql
+
+      # Le seul endroit d'où se voit une régression des décisions de l'ADR 0006 :
+      # ce fichier n'accorde rien, donc il peut échouer là où l'auto-contrôle de
+      # 0008 ne le peut pas. Même scrutin du journal qu'ailleurs — un
+      # `SET LOCAL ROLE` hors transaction rend une assertion verte pour rien.
+      - name: Cave — stock, grand livre et geste atomique
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/07_cave_rls.sql 2>&1 | tee "$RUNNER_TEMP/cave.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/cave.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.
       - name: RLS coverage
