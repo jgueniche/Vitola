@@ -24,6 +24,8 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `release.ts` | La phase de la roadmap et le commit déployé, servis par `/api/health`. |
 | `reviews/model.ts` | Les quatre portées, ce que chacune fait *aujourd'hui*, les bornes de `reviews`, et l'échelle des six critères. |
 | `reviews/draft.ts` | Ce qu'est un brouillon de dégustation valide, et ce qui le rend invalide. |
+| `humidor/model.ts` | Le signe d'un mouvement, les bornes de la cave, la courbe de maturité, le format CSV. |
+| `stats/queries.ts` | Ce que comptent les statistiques, et le plafond qu'elles annoncent. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 
@@ -65,3 +67,24 @@ survivrait à la policy qu'elle double.
 Ce qui **est** dupliqué, ce sont les bornes — longueurs, intervalles, les six clés de `scores` —
 parce qu'un `CHECK` refuse en `23514`, ce qui n'est une phrase pour personne.
 `tests/unit/reviews-model.test.ts` relit la migration 0003 et échoue si l'une d'elles dérive.
+
+## La seule règle dupliquée qui ne soit pas une borne
+
+`humidor/model.ts` recopie le **signe** d'un mouvement de cave, que `public.humidor_event_delta()`
+définit déjà. C'est la seule duplication de logique du dossier, et elle est justifiée par une
+phrase : « il vous en restera 4 » se lit **avant** de confirmer, pas après un aller-retour.
+
+Une duplication de logique se paie autrement qu'une duplication de borne. Une borne qui dérive
+affiche un message maladroit ; un signe qui dérive affiche un stock que la base contredit, en
+silence, dans la direction que personne ne vérifie. `tests/unit/humidor-model.test.ts` relit donc
+les branches du `case` dans la migration 0008 et compare arme par arme — `move` compris, qui vaut
+zéro des deux côtés et que « corriger » en `-qty` viderait tous les lots déplacés.
+
+## Les caves ne se filtrent pas ici non plus
+
+`humidor/queries.ts` ne contient aucun `.eq('user_id', …)`, et cette fois ce n'est pas une nuance :
+`humidors` n'a qu'une policy `select`, `user_id = auth.uid()`, et les trois autres tables la
+rejoignent par un `EXISTS`. « Mes caves », c'est donc ce que rend `select * from humidors`. Le jour
+où P3 ouvrira une cave à un tiers via `privacy.show_humidor`, ces fonctions renverront celle d'un
+autre — correctement, sans qu'une ligne change — et c'est la page qui devra dire de quoi elle
+parle, comme `listMyNotebook` le fait déjà.

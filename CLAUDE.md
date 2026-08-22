@@ -99,6 +99,34 @@ défaut de la Q12 ne tient plus.
 légales, lu depuis `feature_flags`). Il manque **qui modère** — pas de back-office avant P8, et
 personne n'est encore désigné pour relever la file.
 
+## La cave — livrée, et c'est elle qui ferme P2
+
+Le §9 donne à P2 un critère de sortie qui ne parle ni de schéma ni d'écran : « créer une dégustation
+et **décrémenter la cave** de bout en bout ». Tout tient dans une colonne que le §5.5 écrit en
+passant, `humidor_events.review_id`, et dans ce qui garantit que les deux lignes s'écrivent
+ensemble. L'[ADR 0006](docs/adr/0006-atomicite-de-la-cave.md) tranche les quatre points.
+
+**Ce qui est à l'écran** : `/cave` (plusieurs caves, ce qu'elles tiennent, ce qui est à faire
+tourner), `/cave/[id]` (inventaire, grand livre, hygrométrie, import et export CSV, réglages),
+« j'en fume un » sur la fiche cigare **et** sur la cave, un lot facultatif à décompter depuis le
+formulaire de dégustation, et `/statistiques` (F11).
+
+**Quatre règles qui ne se contournent pas :**
+
+1. **Un geste qui touche deux tables est une fonction `SECURITY INVOKER`.** Un appel PostgREST est
+   une transaction ; les droits d'appelant laissent la RLS décider. On n'achète pas un privilège
+   pour obtenir une transaction.
+2. **`qty` ne s'écrit pas à la main.** Dans le `GRANT INSERT` — l'inventaire d'ouverture — et dans
+   aucun `GRANT UPDATE`. Après la naissance du lot, seul le trigger de somme l'écrit.
+3. **Ce qui sort de la cave entre au carnet en `private`**, avec le sélecteur de portée du carnet
+   et pas une case « publier ». Et seulement si on a quelque chose à dire : exiger une note pour
+   décompter un stock produirait des notes inventées ou des cigares que la cave ignore.
+4. **Un lot par achat.** Deux boîtes du même cigare n'ont ni le même âge ni le même prix.
+
+**La cave est privée, et le carnet l'est séparément.** `privacy.show_humidor` gouverne qui voit
+l'inventaire ; `reviews.visibility` gouverne qui lit l'entrée. Une entrée publique écrite depuis une
+cave privée est normale : elle dit qu'on a fumé ce cigare, jamais qu'on en a sept autres.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent
@@ -146,6 +174,17 @@ pnpm storybook      # galerie des primitives
   `/majorite`, au moment précis où l'on saisit sa date de naissance. La vérification est remontée
   dans `next.config.ts` et casse désormais le build. Vaut pour toute variable sans laquelle
   l'application ne peut pas fonctionner.
+- **Une transaction ne demande pas un privilège.** Deux tables à écrire ensemble font tendre la
+  main vers `SECURITY DEFINER` ; un appel PostgREST **est** une transaction, donc une fonction
+  `SECURITY INVOKER` suffit et laisse la RLS décider. L'atomicité de la cave a été achetée sans
+  acheter une frontière de sécurité. Voir `supabase/CLAUDE.md`.
+- **Une contrainte peut être cohérente et fausse.** `aging_start_date >= purchase_date` a passé son
+  auto-contrôle, ses dix-sept assertions et `pnpm check` avant qu'un navigateur ne montre ce qu'elle
+  interdisait : une boîte achetée vieillie se repose **avant** d'être achetée. Le SQL ne dit jamais
+  ce qu'une date signifie ; seul l'usage le dit.
+- **Un état d'interface dans un composant client se referme à chaque écriture.** Une Server Action
+  qui appelle `revalidatePath` provoque un nouveau rendu serveur, et le panneau qu'on venait
+  d'ouvrir disparaît sous les doigts. Dans l'URL, il reste, se partage et survit au retour arrière.
 - **Les commentaires ne sont pas du code.** Les scans de conformité masquent les commentaires avant
   d'analyser : sans cela, une phrase expliquant pourquoi une chose est absente déclenche
   l'alerte que cette chose est présente.

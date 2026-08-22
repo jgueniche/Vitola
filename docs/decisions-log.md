@@ -2,6 +2,61 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La cave, et le geste qui ferme P2
+
+22 août 2026, seconde moitié de P2. La dégustation existait depuis la PR #7 ; le critère de sortie
+du §9 — « créer une dégustation et **décrémenter la cave** de bout en bout » — non. Huit décisions
+valent d'être retrouvées, et trois d'entre elles ont été prises par un navigateur.
+
+**L'atomicité n'a coûté aucun privilège.** L'ADR 0006 tranche pour une fonction `SECURITY
+INVOKER` : un appel PostgREST est une transaction, et les droits d'appelant laissent la RLS
+décider des deux `insert`. La tentation était `SECURITY DEFINER`, sur le modèle de
+`file_report()` — mais celle-là a payé une frontière de sécurité parce que `mod` est injoignable
+autrement, ce qui n'est pas le cas ici. Acheter une transaction ne demande pas d'acheter un
+privilège, et confondre les deux est le raccourci qu'on regrette deux migrations plus tard.
+
+**Fumer sans rien noter n'écrit pas d'entrée**, et ce n'est pas une simplification : c'est le
+premier test SQL qui l'a imposé. `reviews_log_says_something` refuse une entrée sans note ni mot,
+et le commentaire de la migration 0003 disait déjà pourquoi — « *j'ai fumé ce cigare* est une ligne vide avec
+une date ». La cave est exactement ce qui rend cette ligne inutile. Exiger une note pour
+décompter un stock aurait produit des notes inventées ou des cigares que la cave ignore ; ni l'un
+ni l'autre n'est un inventaire.
+
+**`qty` est dans le `GRANT INSERT` et dans aucun `GRANT UPDATE`.** Déclarer ce qu'on vient
+d'acheter est un inventaire d'ouverture, pas une mise à jour de stock — et c'est ce qui permet à
+l'ajout de rester **une seule requête** : un trigger `after insert` en tire l'événement `add`.
+Même motif que `reviews.user_id` avant lui. Le trigger de stock recalcule ensuite par la **somme**
+des événements et non par un delta : un compteur incrémental se trompe une fois et ment ensuite
+pour toujours, là où une somme se répare toute seule au mouvement suivant. Asserté par V16.
+
+**Un lot par achat, jamais un lot par cigare.** Cinq Robusto achetés aujourd'hui font une seconde
+ligne à côté des trois de l'an dernier. Fusionner ferait une moyenne d'âge que personne n'a
+vieillie, et le §5.5 demande l'âge de vieillissement.
+
+**La contrainte de vieillissement était à l'envers, et seul un navigateur pouvait le dire.**
+`aging_start_date >= purchase_date` a été écrite, appliquée, testée verte — puis retirée le jour
+même en rangeant une boîte achetée vieillie. Un module de 2019 acheté aujourd'hui *se repose
+depuis 2019* ; la contrainte obligeait à le rajeunir de six ans, c'est-à-dire à falsifier le seul
+chiffre que la fonctionnalité existe pour montrer. Aucun test unitaire ne l'aurait vue : la
+contrainte était cohérente, elle était simplement fausse. Ce qui reste refusé — une date future —
+ne peut pas être un `CHECK` (`current_date` y est interdit, leçon de la 0001) et vit dans Zod.
+
+**`page.request` ne porte pas les cookies du contexte.** Mesuré : il prend un 307 vers le portail
+même sur `/cave`. Un export CSV testé par là échoue pour une raison qui n'existe pas dans un
+navigateur. Ce qu'une personne fait, c'est **cliquer**, et ce qui arrive, c'est un téléchargement :
+`page.waitForEvent('download')`, puis lire le fichier sur le disque.
+
+**Une assertion qui lit la page une fois court après le serveur.** Une Server Action renvoie
+*avant* que le rendu de `revalidatePath` n'arrive. Deux assertions ont échoué sur un produit qui
+marchait, et une troisième a réussi pour rien — `contains(texte, '5')` trouvait « 0 / 50 ». Les
+parcours attendent maintenant le texte au lieu de le lire.
+
+**Le refus qui compte est celui d'une demande périmée.** Le navigateur borne la quantité à ce qui
+reste, donc le message du serveur n'apparaît jamais par le chemin normal. Il apparaît quand un
+panneau reste ouvert pendant qu'un autre onglet vide le lot — et c'est le seul cas que ni le
+compilateur, ni les 193 tests unitaires, ni les 56 e2e ne peuvent atteindre. Le parcours le met
+en scène avec deux onglets.
+
 ## Le carnet à l'écran, et trois bugs qu'aucun build ne pouvait voir
 
 P2 commencée le 22 août 2026. L'ADR 0004 était acceptée depuis le matin et rien ne l'appliquait :

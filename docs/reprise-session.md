@@ -1,14 +1,14 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 22 août 2026, après la mise à
-> l'écran du carnet (PR #7).
+> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 22 août 2026 au soir, après la
+> cave — qui ferme P2.
 
 ---
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
 `docs/decisions-log.md` (les huit sections — la première est de la session précédente),
-`docs/adr/` (0004 et 0005 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
+`docs/adr/` (0004, 0005 et 0006 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`. Un `CLAUDE.md` par domaine complète le racine :
 `app/`, `lib/`, `supabase/` — les trois ont été enrichis par la dernière session et leurs nouveaux
 paragraphes sont exactement ceux qu'on regrette de ne pas avoir lus.
@@ -18,9 +18,16 @@ travail décrit ici (PR #7 fusionnée le 22 août 2026). Vérifie d'un coup d'œ
 supposer : `git log --oneline origin/master -3` doit montrer la fusion de #7, et `/api/health` sert
 le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **sept migrations**, toutes dans
+Le code du dépôt et l'état de la base concordent : **huit migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet. Le carnet n'en a demandé aucune — la 0003
-avait tout prévu, ce qui est la meilleure chose qu'on puisse dire d'une ADR écrite avant le SQL.
+avait tout prévu, ce qui est la meilleure chose qu'on puisse dire d'une ADR écrite avant le SQL. La
+cave en a demandé une, la 0008, et ses six empreintes de schéma ont été comparées entre le fichier
+et le projet plutôt que supposées égales.
+
+**Vérifie la branche plutôt que de la supposer.** La branche assignée à la session précédente
+pointait sur un commit vieux de deux PR : `git log --oneline -3` affichait la fusion de #2 là où
+`origin/master` en était à #8. Recréer la branche depuis `master` a pris trente secondes ; bâtir
+dessus sans regarder aurait coûté la session.
 
 Une chose à savoir sur l'ordre des choses : **une migration additive peut précéder son écran,
 l'inverse est un 500.** Les 0006 et 0007 ont vécu quelques heures appliquées en base pendant que
@@ -66,7 +73,8 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #7 fusionnées. La #7 a porté le carnet du fumeur en entier (P2, première moitié).
+PR #1 à #8 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la cave et les
+statistiques sont sur la branche de session en cours et **ferment le critère de sortie de P2**.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
@@ -94,6 +102,17 @@ PR #1 à #7 fusionnées. La #7 a porté le carnet du fumeur en entier (P2, premi
     suppression ;
   - `cigar_stats` sur la fiche cigare : note pondérée, moyenne simple, fenêtre 90 jours,
     répartition. Rien n'est recalculé en TypeScript.
+- **La cave (P2, seconde moitié)** — **42 assertions de parcours, deux comptes, deux onglets,
+  contre la vraie base, 0 échec** :
+  - `/cave` — plusieurs caves, ce qu'elles tiennent, leur valorisation, ce qui est à faire tourner ;
+  - `/cave/[id]` — inventaire par lot (âge, maturité, valeur, emplacement), grand livre en ajout
+    seul, hygrométrie, import **et** export CSV, réglages et suppression ;
+  - « j'en fume un » depuis la fiche cigare **et** depuis la cave : une seule transaction écrit
+    l'entrée de carnet et l'événement `smoke` (`public.smoke_from_humidor()`, ADR 0006) ;
+  - un lot facultatif à décompter depuis le formulaire de dégustation, et sur l'entrée la mention
+    « pas encore décomptée de votre cave » avec le bouton qui ferme l'écart ;
+  - **`/statistiques` (F11)** : entrées, cigares fumés, note moyenne, rythme sur douze mois, les
+    cigares qui reviennent, ce qui reste en cave.
 - `/api/gdpr/export` et `/api/gdpr/delete`. L'export a été exercé avec `test_un` contre le projet
   réel : `200`, `Cache-Control: no-store, private`, 22 sources rendues.
 - Critère de sortie P1 mesuré : 0,14 à 0,97 ms sur données réelles, 27,5 ms sur 50 000 lignes
@@ -123,6 +142,7 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0005` | `ref_function_grants` | `supabase/migrations/0005_ref_function_grants.sql` |
 | `0006` | `signalement_et_statistiques` | `supabase/migrations/0006_signalement_et_statistiques.sql` |
 | `0007` | `ref_service_role_grants` | `supabase/migrations/0007_ref_service_role_grants.sql` |
+| `0008` | `cave` | `supabase/migrations/0008_cave.sql` |
 
 Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref`.
 `mod` en est délibérément **absent**.
@@ -146,6 +166,10 @@ ref.cigars                940      public.comments             1
 ref.box_codes              18      mod.reports                 0
 ref.cigar_images            0      mod.moderation_actions      0
 ref.cigar_revisions         0      public.cigar_stats     0 ligne (vue matérialisée)
+                                   public.humidors             0
+                                   public.humidor_items        0
+                                   public.humidor_events       0
+                                   public.humidor_readings     0
 ```
 
 `reviews` est à zéro et c'est **normal cette fois** : les entrées écrites en parcourant le carnet ont
@@ -280,7 +304,7 @@ mod.report_status          open | reviewing | upheld | dismissed
 mod.moderation_verb        hide | restore | warn | suspend | delete
 ```
 
-### Policies RLS — 75 au total, toutes les tables couvertes
+### Policies RLS — 88 au total, toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -296,7 +320,16 @@ mod.reports              3  select_own, select_moderator, update_moderator
 mod.moderation_actions   1  select_moderator
 ref.cigars               5  · ref.cigar_revisions 7 · ref.cigar_images 5
 ref.brands / lines / vitolas / manufacturers / box_codes  3 chacune
+public.humidors          4  select_own, insert_own, update_own, delete_own
+public.humidor_items     4  · public.humidor_events 2 (ajout seul) · public.humidor_readings 3
 ```
+
+**La cave est strictement propriétaire en v1.** Les trois tables filles rejoignent `humidors` par
+un `EXISTS`, et P3 **ajoutera** une policy pour `privacy.show_humidor` plutôt que d'en modifier une
+— comme pour `reviews`. Piège consigné d'avance dans l'ADR 0006 : `profile_settings` n'est lisible
+que de son propriétaire, donc lire `privacy->>'show_humidor'` chez quelqu'un d'autre ne renverra
+jamais rien. Ce sera un troisième accesseur `SECURITY DEFINER`, après `current_app_role()` et
+`owns_review()`.
 
 **Les policies SELECT de `reviews` sont découpées par rôle, et ce n'est pas du style.** Une seule
 policy `to anon, authenticated` faisait évaluer la sous-requête sur `review_shares` par un visiteur
@@ -321,6 +354,13 @@ Une entrée `followers` est donc aujourd'hui lisible de son seul auteur, et l'in
 | `public.file_report(uuid,text,text,text,text,text)` | **oui** | ✗ | ✗ | **✓** |
 | `public.moderation_records_for_subject(uuid)` | **oui** | ✗ | ✗ | **✓** |
 | `public.is_privileged_context()` | non | ✗ | ✗ | ✗ |
+| `public.humidor_event_delta(type,int)` | non | ✗ | ✓ | ✓ |
+| `public.smoke_from_humidor(uuid,int,date,visibility,numeric,text)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+
+`smoke_from_humidor()` est la seule fonction du dépôt qui écrive deux tables, et **elle n'a aucun
+privilège**. C'est la décision D1 de l'ADR 0006 : un appel PostgREST est une transaction, donc les
+droits d'appelant suffisent et la RLS reste seule juge. L'auto-contrôle de 0008 échoue si elle
+repasse un jour en `SECURITY DEFINER`. Ne la « durcis » pas : ce serait l'affaiblir.
 
 `owns_review()` existe pour **casser une récursion** : `reviews` et `review_shares` se lisent
 mutuellement dans leurs policies, et PostgreSQL détecte le cycle sur le graphe des policies, pas sur
@@ -388,51 +428,25 @@ reconstruit.
 
 Les items 0 à 3 sont livrés. La numérotation reprend là où elle s'est arrêtée.
 
-### 4. La cave, et ce qu'elle referme — **fin de P2. Commence par là.**
+### ~~4. La cave, et ce qu'elle referme~~ — **livrée le 22 août 2026 au soir**
 
-**Pourquoi la cave avant le reste de P1** : le §9 donne à P2 un critère de sortie mesurable —
-« **créer une dégustation et décrémenter la cave de bout en bout** ». La dégustation existe depuis la
-PR #7 ; la cave n'existe pas, donc le critère n'est pas tenu et la phase n'est pas finie. Une phase
-qu'on quitte avant son critère est une dette qu'on retrouve en production. Si tu préfères l'ordre
-inverse, dis-le-moi — les deux chantiers sont indépendants — mais ne le décide pas seul.
+Migration `0008`, ADR 0006, `supabase/tests/07_cave_rls.sql` (17 assertions), écrans parcourus
+(42 assertions, deux comptes, deux onglets). **Le critère de sortie de P2 est tenu** : on crée une
+dégustation et on décrémente la cave de bout en bout, dans un navigateur, avec un vrai compte.
 
-**Le schéma du §5.5, à écrire en migration `0008`** :
+Les quatre points que le prompt demandait de trancher le sont, dans l'ADR 0006 — atomicité par
+fonction `SECURITY INVOKER`, portée `private` par défaut, policies propriétaires qui anticipent
+`show_humidor` sans le mentionner, `qty` tenue par un trigger et hors de tout `GRANT UPDATE`. Deux
+choix ont été ajoutés en construisant et sont argumentés au même endroit : **fumer sans rien noter
+n'écrit pas d'entrée** (l'événement est le registre ; exiger une note pour décompter un stock
+produirait des notes inventées), et **un lot par achat** plutôt qu'un lot par cigare (deux boîtes
+n'ont ni le même âge ni le même prix).
 
-```
-humidors         id, user_id, name, capacity, target_rh, target_temp, is_default
-humidor_items    id, humidor_id, cigar_id, qty, purchase_date, purchase_price_eur,
-                 currency, vendor_name, box_code, position, aging_start_date, notes
-humidor_events   id, item_id, type enum(add|smoke|gift|loss|move|adjust),
-                 qty, occurred_at, review_id
-humidor_readings id, humidor_id, rh, temp_c, recorded_at, source enum(manual|device)
-```
+Reste en dette, petit et nommé : `move` et `device` existent dans leurs enums sans être offerts —
+déplacer un lot est un `update` de `humidor_id` que le trigger consigne, et un capteur n'a pas de
+session, donc pas de porte (c'est l'ADR de l'authentification d'un appareil, pas celle de la cave).
 
-**Quatre points qui méritent d'être tranchés avant la première ligne de SQL, et peut-être une ADR** :
-
-1. **`humidor_events.review_id` est le lien avec le carnet, et c'est lui le critère de sortie.**
-   Fumer un cigare depuis la cave doit créer l'entrée de carnet *et* l'événement `smoke`, en une
-   seule intention de l'utilisateur. Décide où vit l'atomicité : PostgREST n'offre pas de
-   transaction sur deux tables, donc c'est une fonction SQL ou un demi-résultat assumé et lisible.
-   L'ADR 0004 a écarté la référence polymorphe ; cette colonne en est la contrepartie, ne la
-   transforme pas en `entity_type`.
-2. **La portée de l'entrée créée par la cave.** Le défaut du carnet est `private` au titre de
-   l'art. 25. Fumer depuis la cave ne doit pas ouvrir une porte que le carnet ferme.
-3. **`privacy.show_humidor` vaut `false` par défaut** dans `profile_settings`. La cave est donc
-   privée par défaut, et P3 lira ce drapeau. Les policies doivent l'anticiper sans le dupliquer.
-4. **`qty` ne se met pas à jour à la main.** Un stock est la somme de ses événements, ou une colonne
-   dénormalisée qu'un trigger tient — pas les deux au choix du code appelant. Le §5.5 demande aussi
-   l'âge de vieillissement, la valorisation et les alertes de rotation : ce sont des lectures
-   dérivées, pas des colonnes.
-
-**À livrer à l'écran** : `/cave` (multi-caves, inventaire, ajout, relevés d'hygrométrie),
-décrémentation depuis la fiche cigare et depuis la cave, import/export CSV, et
-**`/statistiques`** (F11, que le §9 place en fin de P2) : ce que j'ai fumé, quand, à quel rythme,
-mes moyennes — en ne comptant que ce que la RLS me laisse voir, sans filtre TypeScript.
-
-**Rappel qui vaut pour tout ce qui suit** : `pnpm check` doit être dans la **même commande** que le
-commit, et la migration doit se terminer par son auto-contrôle RLS.
-
-### 5. Le reste de P1 — **enchaîne dès que la cave est parcourue**
+### 5. Le reste de P1 — **commence par là**
 
 Contribution wiki (proposer, historique, nouveau, file de validation — `cigar_revisions` est prête
 et vide), comparateur 2–4 cigares, décodeur de codes de boîte, `/parametres` (profil, préférences,
@@ -462,6 +476,20 @@ Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
+- **La cave est livrée mais n'a jamais servi d'un déploiement.** Tout ce qui est décrit plus haut a
+  été parcouru **en local**, contre la vraie base : c'est le seul moyen dont dispose une session
+  distante, Chromium ne joignant aucun hôte externe depuis ce conteneur. Ce qui reste à vérifier
+  une fois déployé tient en deux gestes — ranger un lot, en fumer un — et en une observation : la
+  moyenne publique doit bouger tout de suite si l'entrée est publique (voir le point suivant).
+- **La granularité de « fumer » depuis la fiche cigare est un choix, pas une limite.** Quand on
+  possède plusieurs lots du même cigare, la fiche tire du **plus ancien** sans demander lequel.
+  C'est le bon défaut — c'est ce que veut dire FIFO dans une cave — mais quelqu'un qui garde deux
+  boîtes d'âges très différents voudra peut-être choisir. La cave, elle, le permet déjà. **À me
+  dire si le défaut ne convient pas.**
+- **Le mot de passe des comptes de QA est dans le dépôt**, dans ce fichier et comme valeur par
+  défaut de `tooling/parcours/cave.ts` (surchargeable par `PARCOURS_PASSWORD`). Tenable tant que
+  rien n'est ouvert et que le projet n'est pas en production réelle. **À changer avant
+  l'ouverture**, en même temps que les 862 fiches non relues.
 - **Le rafraîchissement de `cigar_stats` à l'écriture n'a jamais tourné pour de vrai.** Il est écrit
   et correctement gaté — mesuré : une tentative d'appel par écriture susceptible de bouger une
   moyenne publique, aucune pour les autres, dépublication et suppression comprises — mais la clé de
@@ -482,8 +510,11 @@ Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
   commentables, notables et signalables** : à rouvrir avant toute mise en ligne réelle.
 - **`verified_by` est NULL sur les 940 fiches** : elles ont été publiées avant que les comptes
   n'existent. La traçabilité est dans `public.audit_log`.
-- **La page confidentialité n'a pas été relue depuis que le carnet existe**, et elle doit maintenant
-  décrire les droits d'export et d'effacement, comment les exercer, **et ce que le carnet
+- **La page confidentialité n'a pas été relue depuis que le carnet existe**, et **la cave n'a fait
+  qu'allonger la liste** : elle enregistre ce qu'on possède, ce qu'on a payé et quand on l'a fumé.
+  Les quatre tables sont bien dans l'export RGPD — vérifié par le test d'inventaire, qui a d'ailleurs
+  cassé le build jusqu'à ce qu'elles y soient — mais la page ne les décrit pas. Elle doit décrire
+  les droits d'export et d'effacement, comment les exercer, **et ce que le carnet
   enregistre** — le §2 range possiblement ces données à l'art. 9. Elle doit aussi dire, comme l'ADR
   0004 l'exige, que **retirer un destinataire ferme l'accès à venir sans défaire une lecture
   passée**. Voir `docs/legal/`.
@@ -560,6 +591,18 @@ toujours validation ; 0004 et 0005 sont acceptées.
   Deux comptes de test dont les UUID partagent ce préfixe se heurtent sur `profiles_handle_key`.
 - **`pkill -f "next"` tue le shell.** Ferme le serveur par son port : `ss -lptn 'sport = :3100'`,
   ou par `ps aux | grep next-server`.
+- **`page.request` de Playwright ne porte pas les cookies du contexte.** Mesuré : il prend un 307
+  vers le portail même sur `/cave`, alors que la page rend parfaitement. Une route qui répond un
+  fichier se teste donc **en cliquant** — `page.waitForEvent('download')` — et pas en la requêtant.
+- **Une assertion qui lit la page une fois court après le serveur.** Une Server Action renvoie
+  *avant* que le rendu de `revalidatePath` n'arrive : `networkidle` plus une attente fixe ne suffit
+  pas. `tooling/parcours/cave.ts` a un helper `seen()` qui **attend** le texte ; deux assertions ont
+  échoué sur un produit qui marchait, et une troisième a réussi pour rien (`contains(texte, '5')`
+  trouvait « 0 / 50 »).
+- **Un `<input type="number" max=…>` empêche le submit**, donc le message d'erreur du serveur
+  n'apparaît jamais par le chemin normal. Pour tester un refus serveur, il faut le rendre **périmé**
+  — ouvrir un panneau, changer l'état ailleurs, puis valider — et c'est le seul chemin qu'aucun test
+  unitaire n'atteint.
 
 ### Pièges SQL propres à ce dépôt — lis `supabase/CLAUDE.md` en entier
 
@@ -612,6 +655,40 @@ Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un second onglet
 
 ---
 
+## LES URL À OUVRIR POUR RECETTER LA CAVE (livré le 22 août au soir)
+
+Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`). **La base est vide de caves** : le
+parcours a nettoyé derrière lui, donc tout commence par un état vide, qui est un écran.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/cave` | « Votre cave est vide », en invitation, et le formulaire « Nouvelle cave » en dessous. |
+| ⟶ créer « Cave du salon », capacité 50, hygrométrie 69 | La cave apparaît, marquée **Par défaut** — la première l'est toujours, quoi qu'on coche. |
+| `/cave/<id>` | « Cette cave est vide », la jauge à `0 / 50`, la recherche de cigare. |
+| ⟶ chercher « undercrown », puis « Mettre en cave » | Le formulaire de lot : seule la quantité est requise. Mettre 5, prix 12,50 €, **vieillit depuis le 2024-01-15** (antérieur à l'achat : c'est permis, et c'est le cas d'une boîte achetée vieillie). |
+| ⟶ retour sur la cave | `5 / 50`, la valeur `62,50 €`, l'âge en mois, la maturité, et « À faire tourner » si le lot dort depuis plus de dix-huit mois. |
+| ⟶ cliquer le lot | Le panneau s'ouvre **dans l'URL** (`?lot=…`) : grand livre avec « Entrée en cave », puis « J'en fume un », puis les autres mouvements. |
+| ⟶ « J'en fume un » avec une note et un mot | « Décompté, et noté au carnet », avec le lien vers l'entrée. Le stock passe à `4 / 50`. |
+| ⟶ « J'en fume un » **sans rien saisir** | « Décompté de votre cave » — et **aucune entrée** n'est créée. C'est voulu : voir l'ADR 0006, D2. |
+| ⟶ ouvrir le panneau, puis fumer depuis un second onglet, puis valider le premier | « Il n'en reste que N » — le refus du serveur sur une demande périmée. Le seul chemin qu'aucun test unitaire n'atteint. |
+| ⟶ relever 66,5 % / 19 °C | Le relevé s'affiche, et l'écart avec la cible est dit en toutes lettres. |
+| ⟶ « Exporter ma cave (CSV) » | Un fichier `vitola-cave.csv`, en-tête `cigar_slug,qty,…`. **Aucun identifiant interne** : un uuid ne veut rien dire ailleurs qu'ici. |
+| ⟶ importer un CSV avec un slug inconnu | L'identifiant fautif est **nommé**, et rien n'est importé. Un import qui saute quatre lignes sur quarante est le pire résultat possible. |
+| `/cigares/undercrown-10-robusto` | « Dans votre cave », le compte, et « J'en fume un » qui tire du lot le plus ancien. |
+| `/cigares/<slug>/degustation` | Un sélecteur « Depuis quel lot », facultatif, sous les arômes. |
+| `/carnet/<id>` d'une dégustation non décomptée | « Pas encore décomptée de votre cave » et le bouton qui le fait. |
+| `/statistiques` | Entrées, cigares fumés (**plus grand** que les entrées, et la page dit pourquoi), note moyenne, rythme sur douze mois, ce qui reste en cave. |
+| La cave d'autrui, par son URL | 404 — jamais « accès refusé », qui confirmerait qu'elle existe. |
+
+Le parcours complet se rejoue d'une commande, contre la vraie base, et nettoie derrière lui :
+
+```bash
+pnpm build && pnpm start --port 3100
+pnpm tsx tooling/parcours/cave.ts        # 42 assertions
+```
+
+---
+
 ## UTILE
 
 Une base PostgreSQL 16 locale est disponible : `pg_ctlcluster 16 main start`, puis travailler sous
@@ -632,6 +709,8 @@ psql -f supabase/tests/05_signalement.sql          # 11 assertions
 psql -f supabase/migrations/0007_ref_service_role_grants.sql
 psql -f supabase/tests/06_service_role_reads.sql   # 3 assertions
 psql -f supabase/tests/02_function_grants.sql
+psql -f supabase/migrations/0008_cave.sql
+psql -f supabase/tests/07_cave_rls.sql            # 17 assertions
 psql -f supabase/tests/00_rls_coverage.sql
 ```
 

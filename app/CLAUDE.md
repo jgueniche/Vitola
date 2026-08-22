@@ -4,7 +4,8 @@
 
 `'use client'` est l'exception et doit être justifié par un commentaire d'une ligne juste au-dessus.
 La recherche facettée n'en est pas un : ses facettes sont des liens et son champ un
-`<form method="get">`, donc zéro JavaScript. Cinq existent :
+`<form method="get">`, donc zéro JavaScript. La recherche de la cave non plus, pour la même
+raison. Seize existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -20,8 +21,12 @@ La recherche facettée n'en est pas un : ses facettes sont des liens et son cham
 | `carnet/[id]/delete-entry-form.tsx` | `window.confirm` avant une suppression en cascade |
 | `components/reviews/scope-selector.tsx` | l'avertissement « abonnés » s'affiche au choix, pas au submit |
 | `components/reviews/aroma-wheel.tsx` | une roue est un contrôle, et un contrôle retient ce qu'on a pris |
+| `cave/humidor-form.tsx` | `useActionState` — créer et régler une cave partagent leurs champs |
+| `cave/[id]/lot-forms.tsx` | fumer, offrir, perdre, ajuster, déplacer, supprimer un lot |
+| `cave/[id]/cave-forms.tsx` | ranger un cigare, relever l'hygrométrie, importer un CSV |
+| `carnet/[id]/attach-smoke-form.tsx` | décompter après coup une dégustation de sa cave |
 
-Quatre règles apprises en les écrivant :
+Cinq règles apprises en les écrivant :
 
 - **Un formulaire qui doit se refermer tout seul n'utilise pas `useActionState`.** La règle
   `react-hooks/set-state-in-effect` refuse `setState` dans un `useEffect`, et surveiller l'état
@@ -40,6 +45,12 @@ Quatre règles apprises en les écrivant :
 - **Un état dérivé d'une prop se réconcilie pendant le rendu**, jamais dans un effet — la règle
   `set-state-in-effect` interdit le second, et React documente le premier. `useState(prop)` ne relit
   rien après le montage.
+- **L'état d'interface d'une page qui écrit doit vivre dans l'URL, pas dans un composant client.**
+  `/cave/[id]` en a trois — le terme cherché, le cigare qu'on ajoute, le lot qu'on ouvre — et les
+  trois sont des liens. Ce n'est pas de la pureté : **chaque écriture provoque un nouveau rendu
+  serveur**, et un panneau ouvert par `useState` se referme à ce moment-là, sous les doigts de la
+  personne qui vient de fumer un cigare. Dans l'URL, il reste ouvert, se partage et survit au
+  retour arrière. Les formulaires à l'intérieur sont le seul code client de la page.
 - **Lire `localStorage` demande `useSyncExternalStore`.** Pendant le rendu, serveur et client
   divergent ; dans un effet, `set-state-in-effect` refuse. Le hook rend l'instantané serveur
   (`null`) pendant l'hydratation puis relit côté client, sans écart. C'est le brouillon de
