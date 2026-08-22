@@ -39,6 +39,11 @@ pnpm storybook      # galerie des primitives
   Elle est épinglée dans `eslint.config.mjs` ; ne pas repasser en `detect`.
 - **`next lint` n'existe plus en Next 16.** ESLint tourne seul, et la clé `eslint` de
   `next.config.ts` n'existe plus non plus.
+- **Un garde-fou qui ne se déclenche qu'à l'exécution se déclenche chez l'utilisateur.**
+  `AGE_GATE_SECRET` manquait chez Vercel : le build passait au vert et le site renvoyait une 500 sur
+  `/majorite`, au moment précis où l'on saisit sa date de naissance. La vérification est remontée
+  dans `next.config.ts` et casse désormais le build. Vaut pour toute variable sans laquelle
+  l'application ne peut pas fonctionner.
 - **Les commentaires ne sont pas du code.** Les scans de conformité masquent les commentaires avant
   d'analyser : sans cela, une phrase expliquant pourquoi une chose est absente déclenche
   l'alerte que cette chose est présente.

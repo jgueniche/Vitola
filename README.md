@@ -28,6 +28,18 @@ pnpm dev                            # http://localhost:3000
 | `pnpm storybook` | Galerie des primitives, http://localhost:6006 |
 | `pnpm build` | Build de production |
 
+## Déploiement
+
+Une seule variable est indispensable pour que le site démarre : **`AGE_GATE_SECRET`**, n'importe
+quelle chaîne aléatoire d'au moins 32 caractères (visez-en 40).
+
+À renseigner dans **Vercel → Project → Settings → Environment Variables**, cochée sur *Production*,
+*Preview* et *Development*.
+
+Sans elle, **le build échoue** avec un message qui le dit. C'est délibéré : l'age gate refuse de
+signer sans clé, et un site déployé qui renvoie une 500 sur sa propre porte d'entrée est pire qu'un
+déploiement qui refuse de partir.
+
 ## Où trouver quoi
 
 | | |
