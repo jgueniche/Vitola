@@ -32,7 +32,14 @@ pnpm storybook      # galerie des primitives
 ## Pièges connus, appris à nos dépens
 
 - **`SET LOCAL ROLE` hors transaction est ignoré en silence.** Un test RLS qui l'oublie s'exécute
-  en superutilisateur et voit tout passer. Toujours ouvrir un `BEGIN` explicite.
+  en superutilisateur et voit tout passer. Toujours ouvrir un `BEGIN` explicite. Ce n'est pas
+  théorique : quatre assertions de `03b-verification.sql` (T9, T16, T17, et T8 par ricochet) sont
+  restées vertes ainsi jusqu'en août 2026. `ON_ERROR_STOP` ne se déclenche pas sur un WARNING —
+  le workflow `db.yml` relit donc le journal et casse le build si le message apparaît.
+- **Une assertion dont la donnée de test n'existe pas réussit sans rien tester.** T8 vérifiait
+  qu'un auteur ne peut pas publier son brouillon en comptant les lignes modifiées : zéro. Le
+  brouillon n'avait jamais été inséré. Une assertion « zéro ligne » doit d'abord prouver que la
+  ligne existe.
 - **`typescript-eslint` ne supporte pas TypeScript 7.** Le projet est épinglé sur TS 6 : remonter
   casse `pnpm lint`. Revérifier avant de relever la version.
 - **`eslint-plugin-react` plante sur ESLint 10** si on le laisse détecter la version de React.

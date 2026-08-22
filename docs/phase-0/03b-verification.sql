@@ -10,7 +10,7 @@
 --
 -- Il crée d'abord des doublures minimales des objets gérés par Supabase
 -- (auth.users, auth.uid(), storage.*, rôles anon/authenticated/service_role),
--- applique la migration, puis exécute 23 assertions.
+-- applique la migration, puis exécute 25 assertions.
 --
 -- Note de méthode : chaque assertion qui change de rôle est enveloppée dans un
 -- BEGIN/COMMIT explicite. `SET LOCAL ROLE` hors transaction est silencieusement
@@ -92,6 +92,14 @@ insert into ref.cigars (id,brand_id,line_id,vitola_id,commercial_name,slug,origi
          'cccccccc-0000-0000-0000-000000000001','dddddddd-0000-0000-0000-000000000001',
          'Siglo VI','cohiba-siglo-vi','CU','colorado','moyen_corse','published');
 
+-- The draft T8 and T9 act on. Authored by the member, so T8 exercises "an author
+-- cannot publish their own entry" and T9 "an editor can". Without this row both
+-- assertions match zero rows and report success without testing anything.
+insert into ref.cigars (id,brand_id,vitola_id,commercial_name,slug,created_by,status)
+ values ('eeeeeeee-0000-0000-0000-000000000002','bbbbbbbb-0000-0000-0000-000000000001',
+         'dddddddd-0000-0000-0000-000000000001','Brouillon Test','brouillon-test',
+         '11111111-1111-1111-1111-111111111111','draft');
+
 \echo '=== T1  signup trigger provisions both rows + adult_confirmed_at'
 select case when count(*)=3 then 'PASS' else 'FAIL '||count(*) end
   from public.profiles p join public.profile_settings s using (id)
@@ -133,6 +141,12 @@ end $$;
 
 \echo '=== T8  author cannot publish their own draft'
 do $$ begin
+  -- Checked privileged, before switching role: "0 rows matched" is indistinguishable
+  -- from "the fixture does not exist", and a missing fixture would report success.
+  if not exists (select 1 from ref.cigars where slug='brouillon-test' and status='draft') then
+    raise exception 'FAIL: fixture brouillon-test missing — the assertion would be vacuous';
+  end if;
+
   set local role authenticated;
   perform set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',true);
   begin
@@ -145,12 +159,20 @@ do $$ begin
 end $$;
 
 \echo '=== T9  editor can publish'
-set local role authenticated;
-select set_config('request.jwt.claim.sub','22222222-2222-2222-2222-222222222222',true);
-update ref.cigars set status='published', verified_at=now(),
-       verified_by='22222222-2222-2222-2222-222222222222' where slug='brouillon-test';
-select case when status='published' then 'PASS' else 'FAIL' end from ref.cigars where slug='brouillon-test';
-reset role;
+begin;
+  set local role authenticated;
+  set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+  update ref.cigars set status='published', verified_at=now(),
+         verified_by='22222222-2222-2222-2222-222222222222' where slug='brouillon-test';
+  select case
+           when count(*) = 0 then 'FAIL: no row — fixture missing or invisible to the editor'
+           when count(*) filter (
+                  where status='published'
+                    and verified_by='22222222-2222-2222-2222-222222222222') = 1 then 'PASS'
+           else 'FAIL: still '||max(status::text)
+         end
+    from ref.cigars where slug='brouillon-test';
+commit;
 
 \echo '=== T10 member cannot write ref.brands directly'
 do $$ begin
@@ -207,11 +229,12 @@ do $$ begin
 end $$;
 
 \echo '=== T16 consent ledger is append-only for clients'
-set local role authenticated;
-select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',true);
-insert into public.consents (user_id,kind,granted,version)
- values ('11111111-1111-1111-1111-111111111111','health_related_processing',true,'2026-08-01');
-reset role;
+begin;
+  set local role authenticated;
+  set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+  insert into public.consents (user_id,kind,granted,version)
+   values ('11111111-1111-1111-1111-111111111111','health_related_processing',true,'2026-08-01');
+commit;
 do $$ begin
   set local role authenticated;
   perform set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',true);
@@ -224,10 +247,16 @@ do $$ begin
 end $$;
 
 \echo '=== T17 audit_log unreadable by a non-admin, no client INSERT'
-set local role authenticated;
-select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',true);
-select case when count(*)=0 then 'PASS(select)' else 'FAIL' end from public.audit_log;
-reset role;
+-- Seeded privileged: against an empty table, "the member sees 0 rows" is true
+-- whatever the policy does. One row makes the assertion mean something.
+insert into public.audit_log (actor_id, action, entity_table, entity_id)
+ values ('22222222-2222-2222-2222-222222222222','cigar.publish','ref.cigars','brouillon-test');
+begin;
+  set local role authenticated;
+  set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+  select case when count(*)=0 then 'PASS(select)' else 'FAIL: '||count(*)||' row(s) visible' end
+    from public.audit_log;
+commit;
 do $$ begin
   set local role authenticated;
   perform set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',true);
@@ -328,10 +357,36 @@ begin;
 commit;
 
 \echo '=== T20 la recherche facettée passe par les index partiels'
-explain (costs off)
-select c.id from ref.cigars c join ref.vitolas v on v.id = c.vitola_id
- where c.status = 'published' and c.strength = 'moyen_corse'
-   and v.ring_gauge between 30 and 45;
+-- Was an EXPLAIN printed for a human to read, with no verdict: nothing could fail it.
+-- The plan is now asserted, so a dropped or unused partial index breaks the run.
+create temporary table _t20_plan (line text);
+do $t20$
+declare rec record;
+begin
+  -- EXPLAIN is not a subquery in plain SQL; it has to be driven from PL/pgSQL.
+  for rec in execute
+    'explain (costs off) '
+    'select c.id from ref.cigars c join ref.vitolas v on v.id = c.vitola_id '
+    ' where c.status = ''published'' and c.strength = ''moyen_corse'' '
+    '   and v.ring_gauge between 30 and 45'
+  loop
+    insert into _t20_plan (line) values (rec."QUERY PLAN");
+  end loop;
+end $t20$;
+
+select case
+         when bool_or(line like '%cigars_facet_%')
+          and bool_or(line like '%vitolas_dimensions_idx%')
+           then 'PASS (partial facet index + vitola dimensions index)'
+         when not bool_or(line like '%cigars_facet_%')
+           then 'FAIL: no partial facet index in the plan'
+         else 'FAIL: vitolas_dimensions_idx not used'
+       end
+  from _t20_plan;
+
+-- Kept visible: the plan is worth reading when the assertion above turns red.
+select line as "plan" from _t20_plan;
+drop table _t20_plan;
 
 \echo ''
 \echo '=== Couverture RLS : toute table de public/ref doit avoir RLS + une policy'

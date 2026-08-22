@@ -39,10 +39,21 @@ jobs:
 
       # The Phase 0 verification file creates its own Supabase stand-ins
       # (auth.users, auth.uid(), storage.*, the anon/authenticated roles),
-      # applies the P1 migration and runs 23 behavioural assertions.
+      # applies the P1 migration and runs 25 behavioural assertions.
+      #
+      # `SET LOCAL ROLE` outside a transaction is ignored with a WARNING, not an
+      # error: the assertion then runs as superuser, bypasses RLS and passes for
+      # the wrong reason. ON_ERROR_STOP does not trip on a warning, so the log is
+      # scanned for it. Four assertions were green this way until August 2026.
       - name: Apply schema and run assertions
         working-directory: docs/phase-0
-        run: psql -v ON_ERROR_STOP=1 -f 03b-verification.sql
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f 03b-verification.sql 2>&1 | tee "$RUNNER_TEMP/assertions.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/assertions.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle s'exécute en superutilisateur et ne teste rien."
+            exit 1
+          fi
 
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.
