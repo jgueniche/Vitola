@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 /**
  * Regression: the gate asked for a date of birth again on every pass through
@@ -26,7 +26,7 @@ import { expect, test } from '@playwright/test'
 
 const ADULT = '1985-04-02'
 
-async function clearTheGate(page: import('@playwright/test').Page) {
+async function clearTheGate(page: Page) {
   await page.goto('/primitives')
   await expect(page).toHaveURL(/\/majorite/)
   await page.getByLabel('Date de naissance').fill(ADULT)
