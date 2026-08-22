@@ -25,7 +25,11 @@ const NAV = [
 /* Shown only to a signed-in member, because that is the only person it is a
    destination for: /carnet redirects a visitor to the sign-in page, and a nav
    entry whose one behaviour is to bounce you is a promise it cannot keep. */
-const MEMBER_NAV = [{ label: m.notebook.title, href: routes.notebook() }] as const
+const MEMBER_NAV = [
+  { label: m.notebook.title, href: routes.notebook() },
+  { label: m.humidor.title, href: routes.humidor() },
+  { label: m.statistics.title, href: routes.statistics() },
+] as const
 
 /**
  * Rendered only inside app/(app)/, never on the public side — which is why

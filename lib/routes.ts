@@ -73,6 +73,12 @@ export const routes = {
 
   scanner: () => `/${SEGMENTS.scanner}`,
   humidor: () => `/${SEGMENTS.humidor}`,
+  /* One cave per page rather than an accordion on `/cave`: the inventory, the
+     ledger and the hygrometry of a single humidor are already a page, and the
+     multi-cave case of §5.5 would otherwise nest three lists inside a fourth. */
+  humidorDetail: (id: string) => `/${SEGMENTS.humidor}/${id}`,
+  humidorExport: () => `/${SEGMENTS.humidor}/export`,
+  statistics: () => `/${SEGMENTS.statistics}`,
   journal: () => `/${SEGMENTS.journal}`,
   venues: () => `/${SEGMENTS.venues}`,
   shop: () => `/${SEGMENTS.shop}`,

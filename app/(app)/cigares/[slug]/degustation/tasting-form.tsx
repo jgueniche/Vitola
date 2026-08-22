@@ -95,11 +95,15 @@ export function TastingForm({
   slug,
   families,
   today,
+  lots = [],
 }: {
   cigarId: string
   slug: string
   families: AromaFamily[]
   today: string
+  /* The member's lots of this cigar, oldest first. Empty for anyone who does
+     not keep one, and the section below then does not render at all. */
+  lots?: { id: string; qty: number; label: string }[]
 }) {
   const router = useRouter()
   const storageKey = draftStorageKey(slug)
@@ -471,6 +475,26 @@ export function TastingForm({
       <Section title={copy.body}>
         <Textarea name="body" maxLength={REVIEW_LIMITS.bodyMax} defaultValue={field('body')} />
       </Section>
+
+      {/* -------------------------------------------------- the humidor */}
+      {lots.length > 0 ? (
+        <Section title={m.humidor.inHumidor}>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="tasting-lot">{m.humidor.smokeLot}</Label>
+            <Select id="tasting-lot" name="humidorItemId" defaultValue="">
+              <option value="">{m.humidor.smokeLotNone}</option>
+              {lots.map((lot) => (
+                <option key={lot.id} value={lot.id}>
+                  {m.humidor.smokeLotOption
+                    .replace('{cigar}', lot.label)
+                    .replace('{count}', String(lot.qty))}
+                </option>
+              ))}
+            </Select>
+            <p className="text-ink-muted text-xs leading-relaxed">{m.humidor.smokeLotHint}</p>
+          </div>
+        </Section>
+      ) : null}
 
       <Section title={m.notebook.scope.legend}>
         <ScopeSelector

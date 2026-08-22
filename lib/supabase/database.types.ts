@@ -1345,6 +1345,8 @@ export const Constants = {
         "marketing_email",
         "health_related_processing",
       ],
+      humidor_event_type: ["add", "smoke", "gift", "loss", "move", "adjust"],
+      humidor_reading_source: ["manual", "device"],
       review_kind: ["log", "tasting"],
       review_visibility: ["private", "shared", "followers", "public"],
     },

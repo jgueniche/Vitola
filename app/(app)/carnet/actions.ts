@@ -208,6 +208,9 @@ const tastingSchema = z.object({
   ),
   thirds: z.array(optionalText(REVIEW_LIMITS.thirdNotesMax, m.notebook.errors.thirdTooLong)).length(3),
   scores: z.record(z.string(), subScoreSchema),
+  /* The lot this cigar came out of, when it came out of one. Optional, and the
+     tasting is saved either way — see the note on the write below. */
+  humidorItemId: z.preprocess(blank, z.uuid().nullable()),
 })
 
 /**
@@ -253,6 +256,7 @@ export async function saveTasting(formData: FormData): Promise<EntryState> {
     aromaTags: formData.getAll('aromaTags'),
     thirds: [formData.get('third_1'), formData.get('third_2'), formData.get('third_3')],
     scores,
+    humidorItemId: formData.get('humidorItemId'),
   })
 
   if (!parsed.success) return { error: firstMessage(parsed.error) }
@@ -298,6 +302,35 @@ export async function saveTasting(formData: FormData): Promise<EntryState> {
   if (thirds.length > 0) {
     const { error: thirdsError } = await supabase.from('review_thirds').insert(thirds)
     if (thirdsError) return { error: refusalMessage(thirdsError.code), id: data.id }
+  }
+
+  /*
+   * The humidor, when the cigar came out of one — ADR 0006, D1, second path.
+   *
+   * Two writes rather than the one transaction `smoke_from_humidor()` gives the
+   * daily gesture, and the ADR argues at length for why: a function taking this
+   * form's twenty-four fields would be a second copy of `reviews`' column list,
+   * which drifts at the first `alter table`.
+   *
+   * The order is the mitigation. The tasting is written first because it is the
+   * commitment; a failure here leaves an entry that exists and a stock that has
+   * not moved, which `HumidorLink` shows on the entry with the one click that
+   * fixes it. The reverse order would take a cigar off a shelf with nothing to
+   * say where it went, and nothing to notice.
+   *
+   * The error is deliberately not returned: the tasting *was* saved, and telling
+   * someone their tasting failed because a stock did not move would send them
+   * to write it again.
+   */
+  if (parsed.data.humidorItemId) {
+    const { error: eventError } = await supabase.from('humidor_events').insert({
+      item_id: parsed.data.humidorItemId,
+      type: 'smoke',
+      qty: 1,
+      occurred_at: parsed.data.smokedOn,
+      review_id: data.id,
+    })
+    if (eventError) console.error('[carnet] humidor event not written:', eventError.message)
   }
 
   await settle(parsed.data.slug, null, parsed.data.visibility)

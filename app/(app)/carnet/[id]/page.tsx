@@ -24,6 +24,7 @@ import { currentUser } from '@/lib/supabase/server'
 
 import { DeleteEntryForm } from './delete-entry-form'
 import { EntryEditor } from './entry-editor'
+import { HumidorLink } from './humidor-link'
 import { SharePanel } from './share-panel'
 
 const copy = m.notebook.entry
@@ -216,6 +217,13 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
           </Row>
         ) : null}
       </dl>
+
+      {/* Whether this entry ever left a humidor. ADR 0006 D1 accepts two writes
+          on the tasting path only because the gap they can leave is shown
+          here, with the one click that closes it. */}
+      {entry.cigar ? (
+        <HumidorLink reviewId={entry.id} cigarId={entry.cigar_id} isMine={isMine} />
+      ) : null}
 
       {isMine ? (
         <>

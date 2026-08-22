@@ -12,6 +12,7 @@ import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 
 import { CommentThread } from './comment-thread'
+import { HumidorSection } from './humidor-section'
 import { NotebookSection } from './notebook-section'
 
 type Params = { params: Promise<{ slug: string }> }
@@ -116,6 +117,11 @@ export default async function CigarPage({ params }: Params) {
           </Row>
         ) : null}
       </dl>
+
+      {/* Before the notebook, because it is the earlier gesture: one takes the
+          cigar out, then writes about it. The section renders nothing at all
+          for a visitor with no humidor. */}
+      <HumidorSection cigarId={cigar.id} slug={cigar.slug} />
 
       <NotebookSection cigarId={cigar.id} slug={cigar.slug} />
 
