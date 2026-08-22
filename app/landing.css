@@ -1,0 +1,901 @@
+/* ==========================================================================
+   VITOLA — the lit cigar of the landing page
+   --------------------------------------------------------------------------
+   Pigment lives in app/globals.css (--plate-*); what is here is geometry and
+   light. The split is deliberate: retuning the leaf is a colour edit in the
+   token file, retuning the lighting is a structural edit here.
+
+   Everything is drawn at 1440 x 640 and scaled to the container, so the
+   proportions never drift. Below 768px the plate is cropped instead of
+   shrunk — a 31px-thick cigar reads as a twig.
+
+   Three ideas do most of the work:
+     1. Matter is painted OVER the lighting, not under it. Painting the
+        cylindrical drape last would wipe the texture out.
+     2. Both the wrapper and the ash run through a turbulence displacement.
+        A seam that is straight to the pixel reads as a drawing.
+     3. The band is a real 3D ring of sixteen slats lit by a fixed
+        screen-space sheet, so the foreshortening reads as brass.
+   ========================================================================== */
+
+.cigar-plate {
+  container-type: inline-size;
+  width: 100%;
+}
+
+/* Mobile first, and the order matters twice over. A phone gets the plate
+   CROPPED rather than shrunk — a 31px-thick cigar reads as a twig — and an
+   engine that cannot divide a length by a length simply keeps that crop
+   instead of losing the illustration to an invalid transform.
+
+   `100cqw / 1440px` is a length over a length, which resolves to the plain
+   number scale() wants. Dropping the `px` yields a length, scale() rejects
+   it, and the whole transform is silently ignored. */
+.cigar-plate__box {
+  position: relative;
+  height: 186px;
+  overflow: hidden;
+}
+
+.cigar-plate__inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: 520px;
+  transform: scale(0.37) translate(-128px, -3px);
+  transform-origin: top left;
+}
+
+@media (min-width: 768px) {
+  .cigar-plate__box {
+    height: calc(520px * (100cqw / 1440px));
+  }
+  .cigar-plate__inner {
+    transform: scale(calc(100cqw / 1440px));
+  }
+}
+
+/* The single light source of the composition (§4.5, clair-obscur). */
+.cigar-plate .glow {
+  position: absolute;
+  left: -252px;
+  top: -100px;
+  width: 1000px;
+  height: 820px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--plate-ember) 26%, transparent) 0%,
+    color-mix(in oklab, var(--plate-ember) 10%, transparent) 20%,
+    color-mix(in oklab, var(--plate-ember) 3%, transparent) 42%,
+    transparent 66%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.cigar-plate .scene {
+  position: absolute;
+  inset: 0;
+  perspective: 1600px;
+  perspective-origin: 46% 46%;
+}
+
+.cigar-plate .cigar {
+  position: absolute;
+  left: 96px;
+  top: 252px;
+  width: 1330px;
+  height: 116px;
+  transform-style: preserve-3d;
+  transform: rotateZ(-1.6deg) rotateX(6deg);
+  animation: vt-drift 14s ease-in-out infinite;
+}
+
+@keyframes vt-drift {
+  0%,
+  100% {
+    transform: rotateZ(-1.6deg) rotateX(6deg) rotateY(0deg) translateY(0);
+  }
+  50% {
+    transform: rotateZ(-1.2deg) rotateX(9deg) rotateY(-3deg) translateY(-7px);
+  }
+}
+
+/* --- the wrapper ---------------------------------------------------------
+   The layers, in painting order: base, light, matter, accents. The whole
+   stack is displaced together so the seam wavers with the silhouette. */
+.cigar-plate .body-wrap {
+  position: absolute;
+  left: 150px;
+  top: 0;
+  width: 1180px;
+  height: 116px;
+  filter: url(#vt-leaf-rough) blur(0.5px);
+}
+
+/* The ambient shadow stays outside the filter, which would clip it. */
+.cigar-plate .cast {
+  position: absolute;
+  left: 190px;
+  top: 314px;
+  width: 1120px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgb(0 0 0 / 0.72) 0%,
+    rgb(0 0 0 / 0.34) 46%,
+    transparent 74%
+  );
+  filter: blur(26px);
+}
+
+.cigar-plate .stick,
+.cigar-plate .shade,
+.cigar-plate .mottle,
+.cigar-plate .veins,
+.cigar-plate .grain,
+.cigar-plate .sheen,
+.cigar-plate .rimlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px 44px 44px 2px / 2px 58px 58px 2px;
+}
+
+.cigar-plate .stick {
+  background-image:
+    /* the rolled seam: an edge of shadow, then the lit rim of the leaf */
+    repeating-linear-gradient(
+      74deg,
+      transparent 0 44px,
+      rgb(0 0 0 / 0.17) 44px 46px,
+      rgb(0 0 0 / 0.07) 46px 49px,
+      rgb(255 226 180 / 0.05) 49px 51.5px,
+      transparent 51.5px 92px
+    ),
+    /* a second period, beating against the first: the spiral stops being regular */
+    repeating-linear-gradient(
+        77deg,
+        transparent 0 137px,
+        rgb(0 0 0 / 0.06) 137px 139.5px,
+        transparent 139.5px 274px
+      ),
+    /* blotches: a wrapper is never one brown */
+    radial-gradient(ellipse 320px 90px at 22% 38%, rgb(134 76 40 / 0.26), transparent 70%),
+    radial-gradient(ellipse 260px 70px at 48% 70%, rgb(64 32 16 / 0.42), transparent 72%),
+    radial-gradient(ellipse 420px 110px at 71% 34%, rgb(126 70 36 / 0.24), transparent 74%),
+    radial-gradient(ellipse 200px 80px at 88% 66%, rgb(52 26 12 / 0.4), transparent 76%),
+    var(--plate-leaf);
+}
+
+/* The drape of the cylinder, and the fall-off away from the ember. */
+.cigar-plate .shade {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0) 0%,
+      rgb(0 0 0 / 0.15) 26%,
+      rgb(0 0 0 / 0.34) 58%,
+      rgb(0 0 0 / 0.48) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.93) 0%,
+      rgb(0 0 0 / 0.66) 5%,
+      rgb(0 0 0 / 0.31) 14%,
+      rgb(0 0 0 / 0.07) 26%,
+      rgb(0 0 0 / 0.02) 33%,
+      rgb(0 0 0 / 0.03) 44%,
+      rgb(0 0 0 / 0.18) 57%,
+      rgb(0 0 0 / 0.48) 73%,
+      rgb(0 0 0 / 0.74) 88%,
+      rgb(0 0 0 / 0.95) 100%
+    );
+}
+
+.cigar-plate .mottle {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0ODAnIGhlaWdodD0nMjQwJz48ZmlsdGVyIGlkPSduJyB4PScwJyB5PScwJyB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC4wMDYgMC4wMjgnIG51bU9jdGF2ZXM9JzMnIHN0aXRjaFRpbGVzPSdzdGl0Y2gnIHNlZWQ9JzExJy8+PGZlQ29sb3JNYXRyaXggdHlwZT0nc2F0dXJhdGUnIHZhbHVlcz0nMCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSc0ODAnIGhlaWdodD0nMjQwJyBmaWx0ZXI9J3VybCgjbiknLz48L3N2Zz4=');
+  background-size: 560px 260px;
+  mix-blend-mode: overlay;
+  opacity: 0.78;
+}
+
+.cigar-plate .veins {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0MjAnIGhlaWdodD0nMjEwJz48ZmlsdGVyIGlkPSduJyB4PScwJyB5PScwJyB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJz48ZmVUdXJidWxlbmNlIHR5cGU9J3R1cmJ1bGVuY2UnIGJhc2VGcmVxdWVuY3k9JzAuMDA0IDAuMTMnIG51bU9jdGF2ZXM9JzInIHN0aXRjaFRpbGVzPSdzdGl0Y2gnIHNlZWQ9JzE5Jy8+PGZlQ29sb3JNYXRyaXggdHlwZT0nc2F0dXJhdGUnIHZhbHVlcz0nMCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSc0MjAnIGhlaWdodD0nMjEwJyBmaWx0ZXI9J3VybCgjbiknLz48L3N2Zz4=');
+  background-size: 330px 168px;
+  mix-blend-mode: overlay;
+  opacity: 0.62;
+}
+
+.cigar-plate .grain {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNDAnIGhlaWdodD0nMjQwJz48ZmlsdGVyIGlkPSduJyB4PScwJyB5PScwJyB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC43NScgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcgc2VlZD0nMycvPjxmZUNvbG9yTWF0cml4IHR5cGU9J3NhdHVyYXRlJyB2YWx1ZXM9JzAnLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMjQwJyBoZWlnaHQ9JzI0MCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+');
+  background-size: 112px 112px;
+  mix-blend-mode: overlay;
+  opacity: 0.42;
+}
+
+/* The oil of the wrapper: a long soft highlight, never a sharp one. */
+.cigar-plate .sheen {
+  background-image: linear-gradient(
+    180deg,
+    transparent 22%,
+    rgb(255 236 202 / 0.1) 31%,
+    rgb(255 240 210 / 0.16) 36%,
+    rgb(255 236 202 / 0.05) 43%,
+    transparent 52%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.95) 0%,
+    rgb(0 0 0 / 0.55) 34%,
+    rgb(0 0 0 / 0.28) 62%,
+    rgb(0 0 0 / 0.12) 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.95) 0%,
+    rgb(0 0 0 / 0.55) 34%,
+    rgb(0 0 0 / 0.28) 62%,
+    rgb(0 0 0 / 0.12) 100%
+  );
+  filter: blur(3px);
+}
+
+/* A thread of light on the top edge lifts the cigar off the ground, the
+   further from the ember the stronger. Without it the far half drowns. */
+.cigar-plate .rimlight {
+  background-image: linear-gradient(
+    180deg,
+    rgb(236 220 196 / 0.34) 0%,
+    rgb(236 220 196 / 0.13) 2.6%,
+    rgb(236 220 196 / 0.03) 6%,
+    transparent 11%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(0 0 0 / 0.25) 24%,
+    rgb(0 0 0 / 0.8) 60%,
+    rgb(0 0 0 / 1) 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(0 0 0 / 0.25) 24%,
+    rgb(0 0 0 / 0.8) 60%,
+    rgb(0 0 0 / 1) 100%
+  );
+  mix-blend-mode: screen;
+  filter: blur(1px);
+}
+
+/* Bounce: the ember lights the underside too, faintly. */
+.cigar-plate .bounce {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 460px;
+  height: 116px;
+  border-radius: 2px 44px 44px 2px / 2px 58px 58px 2px;
+  background-image: linear-gradient(
+    180deg,
+    transparent 62%,
+    rgb(255 138 70 / 0.07) 80%,
+    rgb(255 150 84 / 0.11) 91%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 1) 0%,
+    rgb(0 0 0 / 0.35) 42%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(90deg, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 0.35) 42%, transparent 100%);
+  mix-blend-mode: screen;
+  filter: blur(6px);
+}
+
+/* --- the cut head -------------------------------------------------------- */
+.cigar-plate .head {
+  position: absolute;
+  right: -6px;
+  top: 10px;
+  width: 30px;
+  height: 96px;
+  border-radius: 50%;
+  background-image: var(--plate-cut);
+  box-shadow:
+    inset -3px 0 7px rgb(0 0 0 / 0.7),
+    inset 4px 0 9px rgb(0 0 0 / 0.55),
+    inset 0 0 0 1px rgb(203 166 120 / 0.1);
+}
+
+.cigar-plate .head-rim {
+  position: absolute;
+  right: -8px;
+  top: 8px;
+  width: 11px;
+  height: 100px;
+  border-radius: 50%;
+  background-image: linear-gradient(
+    180deg,
+    transparent,
+    rgb(233 200 150 / 0.16) 36%,
+    transparent 68%
+  );
+}
+
+/* --- the ash -------------------------------------------------------------
+   It starts at the cigar's full diameter and blunts toward the tip: the
+   continuity of the silhouette is what welds it on. The displacement then
+   crumbles the edge — ash regular to the pixel reads as a drawing. */
+.cigar-plate .ash-wrap {
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 154px;
+  height: 116px;
+  filter: url(#vt-ash-rough) blur(0.4px);
+}
+
+.cigar-plate .ash,
+.cigar-plate .ash-grain,
+.cigar-plate .ash-crack,
+.cigar-plate .ash-shade {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(
+    100% 1%,
+    100% 99%,
+    47% 100%,
+    31% 98%,
+    16% 92%,
+    6% 81%,
+    1% 65%,
+    0% 50%,
+    1% 34%,
+    6% 20%,
+    15% 9%,
+    30% 2%,
+    47% 0%
+  );
+}
+
+.cigar-plate .ash {
+  background-image:
+    repeating-linear-gradient(
+      95deg,
+      transparent 0 3px,
+      rgb(0 0 0 / 0.24) 3px 3.9px,
+      rgb(255 250 240 / 0.07) 3.9px 4.5px,
+      transparent 4.5px 9.6px
+    ),
+    repeating-linear-gradient(92deg, transparent 0 23px, rgb(0 0 0 / 0.2) 23px 24.6px),
+    repeating-linear-gradient(3deg, transparent 0 9px, rgb(0 0 0 / 0.1) 9px 10px), var(--plate-ash);
+}
+
+.cigar-plate .ash-grain {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSczMDAnIGhlaWdodD0nMzAwJz48ZmlsdGVyIGlkPSduJyB4PScwJyB5PScwJyB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJz48ZmVUdXJidWxlbmNlIHR5cGU9J3R1cmJ1bGVuY2UnIGJhc2VGcmVxdWVuY3k9JzAuMDUgMC4xOScgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcgc2VlZD0nNScvPjxmZUNvbG9yTWF0cml4IHR5cGU9J3NhdHVyYXRlJyB2YWx1ZXM9JzAnLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMzAwJyBoZWlnaHQ9JzMwMCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+');
+  background-size: 128px 128px;
+  mix-blend-mode: overlay;
+  opacity: 0.86;
+}
+
+.cigar-plate .ash-crack {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSczMDAnIGhlaWdodD0nMzAwJz48ZmlsdGVyIGlkPSduJyB4PScwJyB5PScwJyB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJz48ZmVUdXJidWxlbmNlIHR5cGU9J3R1cmJ1bGVuY2UnIGJhc2VGcmVxdWVuY3k9JzAuMDUgMC4xOScgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcgc2VlZD0nNScvPjxmZUNvbG9yTWF0cml4IHR5cGU9J3NhdHVyYXRlJyB2YWx1ZXM9JzAnLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMzAwJyBoZWlnaHQ9JzMwMCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+');
+  background-size: 52px 52px;
+  mix-blend-mode: multiply;
+  opacity: 0.34;
+}
+
+/* Ash is a pale material: crushing its shoulders to black would shrink its
+   silhouette and unstick it from the cigar. */
+.cigar-plate .ash-shade {
+  background-image: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0.74) 0%,
+    rgb(0 0 0 / 0.48) 8%,
+    rgb(0 0 0 / 0.16) 22%,
+    rgb(255 252 246 / 0.09) 33%,
+    rgb(255 252 246 / 0.02) 44%,
+    rgb(0 0 0 / 0.17) 58%,
+    rgb(0 0 0 / 0.5) 79%,
+    rgb(0 0 0 / 0.78) 100%
+  );
+}
+
+/* --- the burn line ------------------------------------------------------- */
+.cigar-plate .ash-heat {
+  position: absolute;
+  left: 56px;
+  top: 0;
+  width: 104px;
+  height: 116px;
+  background: radial-gradient(
+    ellipse at 94% 50%,
+    color-mix(in oklab, var(--plate-ember) 92%, transparent) 0%,
+    color-mix(in oklab, var(--plate-ember) 40%, transparent) 30%,
+    color-mix(in oklab, var(--plate-ember) 12%, transparent) 56%,
+    transparent 78%
+  );
+  mix-blend-mode: screen;
+  filter: blur(7px);
+}
+
+.cigar-plate .char {
+  position: absolute;
+  left: 150px;
+  top: 0;
+  width: 138px;
+  height: 116px;
+  border-radius: 2px 0 0 2px / 2px 0 0 2px;
+  background-image: var(--plate-char);
+}
+
+.cigar-plate .rim {
+  position: absolute;
+  left: 164px;
+  top: 0;
+  width: 124px;
+  height: 116px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--plate-ember) 34%, transparent) 0%,
+    color-mix(in oklab, var(--plate-ember) 12%, transparent) 26%,
+    color-mix(in oklab, var(--plate-ember) 3%, transparent) 54%,
+    transparent 82%
+  );
+  mix-blend-mode: screen;
+  filter: blur(11px);
+}
+
+.cigar-plate .ember {
+  position: absolute;
+  left: 145px;
+  top: 3px;
+  width: 16px;
+  height: 110px;
+  border-radius: 50%;
+  background-image: var(--plate-ember-line);
+  filter: blur(2.4px);
+  opacity: 0.92;
+  animation: vt-breathe 3.6s ease-in-out infinite;
+}
+
+.cigar-plate .ember-core {
+  position: absolute;
+  left: 149px;
+  top: 14px;
+  width: 7px;
+  height: 88px;
+  border-radius: 50%;
+  background-image: var(--plate-ember-core);
+  filter: blur(1.6px);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  animation: vt-breathe 3.6s ease-in-out infinite;
+}
+
+.cigar-plate .ember-glow {
+  position: absolute;
+  left: 56px;
+  top: -76px;
+  width: 196px;
+  height: 266px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--plate-ember) 46%, transparent) 0%,
+    color-mix(in oklab, var(--plate-ember) 13%, transparent) 28%,
+    transparent 64%
+  );
+  filter: blur(17px);
+  mix-blend-mode: screen;
+  animation: vt-breathe 3.6s ease-in-out infinite;
+}
+
+@keyframes vt-breathe {
+  0%,
+  100% {
+    opacity: 0.86;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+
+/* --- la bague -------------------------------------------------------------
+   A real 3D ring: sixteen slats laid on a cylinder of radius 58px, wrapped
+   around the cigar's axis. It sways rather than spins — a band on a lit
+   cigar does not rotate, and the lockup has to stay readable. The lighting
+   is a FIXED screen-space sheet, outside the rotating group: the light does
+   not move when the ring does, which is exactly why the foreshortening of
+   the slats reads as metal rather than as stripes. */
+.cigar-plate .ring {
+  position: absolute;
+  left: 796px;
+  top: 0;
+  width: 240px;
+  height: 116px;
+  transform-style: preserve-3d;
+  animation: vt-sway 11s ease-in-out infinite -2.75s;
+}
+
+@keyframes vt-sway {
+  0%,
+  100% {
+    transform: rotateX(-8deg);
+  }
+  50% {
+    transform: rotateX(8deg);
+  }
+}
+
+.cigar-plate .slat {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 240px;
+  height: 26px;
+  margin-top: -13px;
+  backface-visibility: hidden;
+  transform: rotateX(calc(var(--i) * 22.5deg)) translateZ(58px);
+  background-image:
+    /* the two rules that run around the circumference */
+    linear-gradient(
+      90deg,
+      rgb(84 60 30 / 0.85) 0px,
+      var(--plate-band-edge) 2px,
+      var(--color-claro-bright) 4px,
+      var(--color-claro) 7px,
+      rgb(122 92 67 / 0.5) 10px,
+      rgb(122 92 67 / 0.22) 15px,
+      transparent 24px,
+      transparent 216px,
+      rgb(122 92 67 / 0.22) 225px,
+      rgb(122 92 67 / 0.5) 230px,
+      var(--color-claro) 233px,
+      var(--color-claro-bright) 236px,
+      var(--plate-band-edge) 238px,
+      rgb(84 60 30 / 0.85) 240px
+    ),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-claro) 90%, white) 0%,
+      var(--color-claro) 55%,
+      color-mix(in oklab, var(--color-claro) 94%, black) 100%
+    );
+}
+
+.cigar-plate .slat-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: var(--plate-band-ink);
+}
+
+.cigar-plate .lk-mark {
+  font-family: var(--font-eyebrow);
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgb(255 245 210 / 0.55),
+    0 -1px 0 rgb(60 40 8 / 0.4);
+}
+
+.cigar-plate .lk-fil {
+  width: 34px;
+  height: 1px;
+  background-color: rgb(51 34 10 / 0.55);
+}
+
+.cigar-plate .slat-sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-eyebrow);
+  font-size: 8px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgb(44 28 7 / 0.86);
+}
+
+.cigar-plate .ring-light,
+.cigar-plate .ring-spec {
+  position: absolute;
+  left: 796px;
+  top: 0;
+  width: 240px;
+  height: 116px;
+  pointer-events: none;
+}
+
+.cigar-plate .ring-light {
+  transform: translateZ(58.6px);
+  background-image: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0.58) 0%,
+    rgb(0 0 0 / 0.44) 9%,
+    rgb(0 0 0 / 0.08) 23%,
+    rgb(255 250 226 / 0.26) 34%,
+    rgb(255 250 226 / 0.05) 47%,
+    rgb(0 0 0 / 0.07) 58%,
+    rgb(0 0 0 / 0.38) 80%,
+    rgb(0 0 0 / 0.6) 100%
+  );
+}
+
+.cigar-plate .ring-spec {
+  transform: translateZ(58.9px);
+  overflow: hidden;
+  mix-blend-mode: screen;
+  background-image: linear-gradient(
+    104deg,
+    transparent 36%,
+    rgb(255 252 236 / 0.3) 48%,
+    rgb(255 252 236 / 0.09) 54%,
+    transparent 64%
+  );
+  background-size: 260% 100%;
+  animation: vt-spec 7s ease-in-out infinite -1.5s;
+}
+
+@keyframes vt-spec {
+  0%,
+  100% {
+    background-position: 128% 0;
+  }
+  50% {
+    background-position: -32% 0;
+  }
+}
+
+/* The ring casts a hairline of shadow on the wrapper either side. */
+.cigar-plate .ring-cast {
+  position: absolute;
+  left: 782px;
+  top: 2px;
+  width: 268px;
+  height: 112px;
+  border-radius: 46px;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(0 0 0 / 0.42) 5.5%,
+    transparent 14%,
+    transparent 86%,
+    rgb(0 0 0 / 0.42) 94.5%,
+    transparent 100%
+  );
+}
+
+/* --- la fumée -------------------------------------------------------------
+   Born on the ember — narrow and dense at the source — and only breaking up
+   as it climbs. Anchoring the column on the burn line is the whole trick:
+   puffs that start wide and blurred above the cigar read as a detached
+   cloud, which is what the first draft looked like. */
+.cigar-plate .smoke {
+  position: absolute;
+  left: 179px;
+  top: -524px;
+  width: 360px;
+  height: 800px;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to top,
+    rgb(0 0 0) 0%,
+    rgb(0 0 0) 26%,
+    rgb(0 0 0 / 0.4) 58%,
+    transparent 90%
+  );
+  mask-image: linear-gradient(
+    to top,
+    rgb(0 0 0) 0%,
+    rgb(0 0 0) 26%,
+    rgb(0 0 0 / 0.4) 58%,
+    transparent 90%
+  );
+}
+
+.cigar-plate .ember-lit {
+  position: absolute;
+  bottom: -18px;
+  left: 46px;
+  width: 46px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    color-mix(in oklab, var(--plate-ember) 46%, transparent) 0%,
+    color-mix(in oklab, var(--plate-ember) 14%, transparent) 42%,
+    transparent 74%
+  );
+  filter: blur(9px);
+  mix-blend-mode: screen;
+}
+
+.cigar-plate .thread {
+  position: absolute;
+  bottom: -6px;
+  left: 62px;
+  width: 14px;
+  height: 168px;
+  border-radius: 60% 60% 40% 40%;
+  background-image: linear-gradient(
+    to top,
+    rgb(240 234 222 / 0.68) 0%,
+    rgb(240 234 222 / 0.42) 34%,
+    rgb(240 234 222 / 0.14) 68%,
+    transparent 100%
+  );
+  filter: blur(4px);
+  animation: vt-waver 6.5s ease-in-out infinite;
+}
+
+@keyframes vt-waver {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(1);
+  }
+  50% {
+    transform: translateX(16px) scaleX(1.5);
+  }
+}
+
+.cigar-plate .wisp {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  transform-origin: 50% 100%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(238 232 220 / 0.52) 0%,
+    rgb(238 232 220 / 0.2) 44%,
+    transparent 72%
+  );
+  filter: blur(11px);
+  opacity: 0;
+  animation: vt-rise 11s linear infinite;
+}
+
+@keyframes vt-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.1) rotate(0deg);
+  }
+  7% {
+    opacity: 0.72;
+  }
+  52% {
+    opacity: 0.46;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx, 60px), -700px, 0) scale(2.1) rotate(20deg);
+  }
+}
+
+/* --- annotations : this is a plate in a reference work, not a poster ------ */
+.cigar-plate .note-l {
+  position: absolute;
+  width: 1px;
+  background-color: var(--color-rule-strong);
+}
+
+.cigar-plate .note-d {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid var(--color-accent);
+}
+
+/* Freeze rather than remove: `animation: none` returns every puff to its
+   initial state, which is opacity 0 — a still frame with no smoke at all. */
+@media (prefers-reduced-motion: reduce) {
+  .cigar-plate *,
+  .cigar-plate *::before,
+  .cigar-plate *::after {
+    animation-play-state: paused !important;
+  }
+}
+
+/* The annotations are a desktop affordance: on a cropped phone plate the
+   leader lines would point off-frame. */
+.cigar-plate .note {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .cigar-plate .note {
+    display: block;
+  }
+}
+
+/* ==========================================================================
+   Landing furniture — the two surfaces the interface has no component for yet
+   ========================================================================== */
+
+/* The scan viewfinder. Its frame is a <Band />; what is here is the dark it
+   sits on and the sweep of the aiming line. */
+.viewfinder {
+  position: relative;
+  background-image: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--color-surface-raised) 85%, var(--color-accent) 15%) 0%,
+    var(--color-ground) 60%,
+    var(--color-ground) 100%
+  );
+}
+
+.viewfinder .finder-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-accent);
+  opacity: 0.55;
+}
+
+.viewfinder .finder-corner[data-corner='tl'] {
+  top: 16px;
+  left: 16px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.viewfinder .finder-corner[data-corner='tr'] {
+  top: 16px;
+  right: 16px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.viewfinder .finder-corner[data-corner='bl'] {
+  bottom: 16px;
+  left: 16px;
+  border-right: 0;
+  border-top: 0;
+}
+.viewfinder .finder-corner[data-corner='br'] {
+  bottom: 16px;
+  right: 16px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.viewfinder .scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-image: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  animation: vt-scan 3.4s ease-in-out infinite;
+}
+
+@keyframes vt-scan {
+  0%,
+  100% {
+    top: 14%;
+    opacity: 0.25;
+  }
+  50% {
+    top: 86%;
+    opacity: 0.9;
+  }
+}
+
+/* The venue map: a grid and two roads, enough to read as a map without
+   pretending to be one. Real cartography arrives with P8. */
+.venue-map {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(237 230 216 / 0.035) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, rgb(237 230 216 / 0.035) 0 1px, transparent 1px 44px),
+    radial-gradient(
+      ellipse at 38% 44%,
+      var(--color-surface-raised) 0%,
+      var(--color-surface) 62%,
+      var(--color-ground) 100%
+    );
+}

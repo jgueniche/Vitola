@@ -13,6 +13,30 @@ Un `CLAUDE.md` par domaine complète celui-ci : `app/`, `lib/`, `supabase/`.
 3. **`pnpm check` passe avant chaque commit.** `typecheck` + `lint` + `tokens:check` + `test`.
 4. **Une ambiguïté d'architecture → une ADR + une question.** On ne devine pas. `docs/adr/`.
 
+## À trancher avant commercialisation
+
+Les quatre règles ci-dessus bloquent un commit. Celles-ci ne bloquent rien aujourd'hui : ce sont
+des décisions prises en connaissance de cause, reportées, et qui doivent être rouvertes **avant
+l'ouverture commerciale** — pas avant le prochain déploiement. Elles vivent ici pour qu'on ne les
+retrouve pas par surprise le jour où le site s'ouvre au public.
+
+Une entrée porte toujours les trois mêmes choses : ce qui est assumé, ce qui la rouvre, et quand.
+Un point sans déclencheur n'est pas une décision reportée, c'est une inquiétude — et une liste
+d'inquiétudes finit par noyer les vraies.
+
+### Cigare allumé en page publique
+
+**Assumé.** L'accueil montre une illustration de cigare allumé, visible **avant** le portail 18+.
+Le §2 du brief et la loi Évin interdisent la publicité, directe ou indirecte, en faveur du tabac.
+L'illustration est dessinée pour rester du bon côté : planche annotée, légendes en mesures et non
+en adjectifs (« Combustion — env. 90 min », « Colorado maduro — 4ᵉ nuance sur 6 »), aucune marque
+nulle part. Ce qui n'a pas été validé, c'est l'emplacement — devant le portail plutôt que derrière.
+
+**Ce qui rouvre.** Un avis de conseil juridique.
+
+**Quand.** Avant l'ouverture commerciale. Pas avant le prochain déploiement : tant que le site
+n'est pas commercialisé, on avance sans y revenir.
+
 ## Phases
 
 Une phase = une branche. Le brief prévoit `feat/pXX-nom` ; les sessions Claude Code distantes

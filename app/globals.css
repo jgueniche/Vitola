@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './landing.css';
 
 /* ==========================================================================
    VITOLA — design tokens
@@ -133,6 +134,75 @@
   --vt-caution: var(--color-alerte);
   --vt-negative: var(--color-erreur-readable);
 
+  /* --- The lit-cigar plate of the landing page --------------------------
+     Pigment only. The lighting layers — pure black and white alphas, the
+     drape of the cylinder, the sheen — live with the illustration in
+     app/landing.css, because they are geometry rather than colour.
+
+     These are a picture, not an interface palette: nothing outside the plate
+     may consume them, and they deliberately do not flip with the theme. A
+     photograph does not have a light mode. */
+  --plate-leaf: linear-gradient(
+    90deg,
+    #6f4022 0%,
+    #63391d 11%,
+    #543018 29%,
+    #5a3419 47%,
+    #563015 65%,
+    #492812 83%,
+    #3b2010 100%
+  );
+  --plate-ash: linear-gradient(
+    90deg,
+    #3f3931 0%,
+    #4c463d 15%,
+    #5c554a 34%,
+    #6e665a 56%,
+    #837a6c 76%,
+    #8f8577 90%,
+    #786f61 100%
+  );
+  /* The cut head: the bunched filler seen slightly from the side. */
+  --plate-cut: radial-gradient(
+    ellipse at 42% 46%,
+    #432715 0%,
+    #2c1910 44%,
+    #190e08 76%,
+    #0d0604 100%
+  );
+  /* The charred band the burn line leaves behind it on the wrapper. */
+  --plate-char: linear-gradient(
+    90deg,
+    #0c0400 0%,
+    rgb(18 9 3 / 0.96) 15%,
+    rgb(30 15 7 / 0.8) 34%,
+    rgb(48 26 13 / 0.36) 64%,
+    transparent 100%
+  );
+  /* La braise. The flat value is what the glows mix with; the two gradients
+     are the burn line itself and its incandescent core. */
+  --plate-ember: #ff5a2b;
+  --plate-ember-line: radial-gradient(
+    ellipse at 46% 50%,
+    #ffdc92 0%,
+    #ffc275 24%,
+    #ff5a2b 54%,
+    #a83a1c 84%,
+    rgb(30 6 2 / 0) 100%
+  );
+  --plate-ember-core: radial-gradient(
+    ellipse at 50% 46%,
+    #fff6d8 0%,
+    #ffcf72 38%,
+    #ffc275 70%,
+    rgb(255 120 40 / 0) 100%
+  );
+  /* The band: brass comes from the palette, these two are what the palette
+     has no name for — the darkened edge of the ring, and the ink stamped
+     on it. */
+  --plate-band-edge: #8a6a35;
+  --plate-band-ink: #33220a;
+
   /* The brass hairline of <Band />. Defined once, here. */
   --vt-brass: linear-gradient(
     90deg,
@@ -183,7 +253,9 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     /* Tabular figures by default: columns of scores must not dance (§4.3). */
-    font-feature-settings: 'tnum' 1, 'cv05' 1;
+    font-feature-settings:
+      'tnum' 1,
+      'cv05' 1;
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
