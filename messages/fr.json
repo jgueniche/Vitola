@@ -116,7 +116,7 @@
   "auth": {
     "eyebrow": "Compte",
     "title": "Se connecter",
-    "lede": "Un lien de connexion vous est envoyé par courriel. Pas de mot de passe à retenir, pas de mot de passe à se faire voler.",
+    "lede": "Entrez votre adresse et votre mot de passe. Si vous n'en avez pas, demandez un lien de connexion : il vous arrive par courriel et vous connecte sans mot de passe.",
     "emailLabel": "Adresse électronique",
     "submit": "Recevoir le lien",
     "sent": "Lien envoyé",
@@ -128,7 +128,13 @@
       "email": "Cette adresse ne semble pas valide.",
       "link": "Ce lien n'est plus valable. Demandez-en un nouveau.",
       "rate": "Trop de demandes. Patientez quelques minutes avant de réessayer.",
-      "unknown": "L'envoi a échoué. Réessayez dans un instant."
-    }
+      "unknown": "L'envoi a échoué. Réessayez dans un instant.",
+      "credentials": "Adresse ou mot de passe incorrect.",
+      "passwordRequired": "Renseignez votre mot de passe, ou demandez un lien de connexion."
+    },
+    "passwordLabel": "Mot de passe",
+    "submitPassword": "Se connecter",
+    "submitLink": "Recevoir un lien",
+    "orLink": "Pas de mot de passe ?"
   }
 }

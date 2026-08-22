@@ -9,19 +9,26 @@ import { Button } from '@/components/ui/button'
 import { FieldError, Input, Label } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 
-import { sendMagicLink, type SignInState } from './actions'
+import { signIn, type SignInState } from './actions'
 
-function SubmitButton() {
+function Submit({ intent, children }: { intent: 'password' | 'link'; children: string }) {
   const { pending } = useFormStatus()
   return (
-    <Button type="submit" size="lg" disabled={pending}>
-      {m.auth.submit}
+    <Button
+      type="submit"
+      name="intent"
+      value={intent}
+      size={intent === 'password' ? 'lg' : 'sm'}
+      variant={intent === 'password' ? undefined : 'ghost'}
+      disabled={pending}
+    >
+      {children}
     </Button>
   )
 }
 
 export function SignInForm({ suite, linkError }: { suite: string; linkError: boolean }) {
-  const [state, formAction] = useActionState<SignInState, FormData>(sendMagicLink, {})
+  const [state, formAction] = useActionState<SignInState, FormData>(signIn, {})
   const errorId = 'sign-in-error'
   const error = state.error ?? (linkError ? m.auth.errors.link : undefined)
 
@@ -37,7 +44,7 @@ export function SignInForm({ suite, linkError }: { suite: string; linkError: boo
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex max-w-80 flex-col gap-4">
       <input type="hidden" name="suite" value={suite} />
 
       <div className="flex flex-col gap-2">
@@ -48,14 +55,23 @@ export function SignInForm({ suite, linkError }: { suite: string; linkError: boo
           type="email"
           required
           autoComplete="email"
-          className="max-w-80"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="password">{m.auth.passwordLabel}</Label>
+        <Input id="password" name="password" type="password" autoComplete="current-password" />
         {error ? <FieldError id={errorId}>{error}</FieldError> : null}
       </div>
 
-      <SubmitButton />
+      <Submit intent="password">{m.auth.submitPassword}</Submit>
+
+      <div className="border-rule flex items-center gap-3 border-t pt-4">
+        <span className="text-ink-muted text-xs">{m.auth.orLink}</span>
+        <Submit intent="link">{m.auth.submitLink}</Submit>
+      </div>
     </form>
   )
 }

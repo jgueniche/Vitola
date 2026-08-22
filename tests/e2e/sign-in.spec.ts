@@ -9,11 +9,26 @@ import { expect, test } from '@playwright/test'
  * treats a failure as "nobody", which is exactly what CI produces.
  */
 
-test('sign-in is reachable without clearing the age gate', async ({ page }) => {
+test('sign-in offers both a password and a link, without clearing the gate', async ({
+  page,
+}) => {
   await page.goto('/connexion')
   await expect(page).toHaveURL(/\/connexion/)
   await expect(page.getByLabel('Adresse électronique')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Recevoir le lien' })).toBeVisible()
+  await expect(page.getByLabel('Mot de passe')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Recevoir un lien' })).toBeVisible()
+})
+
+test('submitting without a password asks for one rather than emailing a link', async ({
+  page,
+}) => {
+  // The two buttons are distinguishable by intent, not by guessing from which
+  // fields happen to be filled. An empty password must not silently send mail.
+  await page.goto('/connexion')
+  await page.getByLabel('Adresse électronique').fill('quelquun@example.test')
+  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await expect(page.locator('#sign-in-error')).toContainText(/mot de passe/i)
 })
 
 test('sign-in shows no product before the gate', async ({ page }) => {

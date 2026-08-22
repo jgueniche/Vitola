@@ -6,13 +6,19 @@ import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
 
+/*
+ * Only destinations that exist.
+ *
+ * Lieux (P5), Journal (P6) and Boutique (P7) were listed here from P0 to show
+ * the shape of the product. They have no page, so every visitor got a 404 on
+ * click — and Next prefetches nav links, so the 404s were already firing on
+ * page load without anyone clicking anything. A nav is a promise; each entry
+ * comes back with its phase.
+ */
 const NAV = [
   { label: 'Cigares', href: routes.cigars() },
   { label: 'Marques', href: routes.brands() },
   { label: 'Vitoles', href: routes.vitolas() },
-  { label: 'Lieux', href: routes.venues() },
-  { label: 'Journal', href: routes.journal() },
-  { label: 'Boutique', href: routes.shop() },
 ] as const
 
 /**
