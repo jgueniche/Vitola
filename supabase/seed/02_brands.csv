@@ -1,0 +1,115 @@
+name,slug,manufacturer_slug,country,founded_year,is_cuban,description
+Cohíba,cohiba,empresa-cubana-del-tabaco,CU,1966,true,"Créée pour Fidel Castro avant sa commercialisation en 1982. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Montecristo,montecristo,empresa-cubana-del-tabaco,CU,1935,true,"Nom inspiré du roman d'Alexandre Dumas, lu aux torcedores en atelier. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Partagás,partagas,empresa-cubana-del-tabaco,CU,1845,true,"Fondée par Jaime Partagás. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Romeo y Julieta,romeo-y-julieta,empresa-cubana-del-tabaco,CU,1875,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+H. Upmann,h-upmann,empresa-cubana-del-tabaco,CU,1844,true,"Fondée par le banquier allemand Hermann Upmann. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Hoyo de Monterrey,hoyo-de-monterrey,empresa-cubana-del-tabaco,CU,1865,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Trinidad,trinidad,empresa-cubana-del-tabaco,CU,1969,true,"Longtemps réservée au corps diplomatique, commercialisée en 1998. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Bolívar,bolivar,empresa-cubana-del-tabaco,CU,1902,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Punch,punch,empresa-cubana-del-tabaco,CU,1840,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Ramón Allones,ramon-allones,empresa-cubana-del-tabaco,CU,1837,true,Première marque à avoir utilisé la boîte habillée dite « 8-9-8 ».
+Vegas Robaina,vegas-robaina,empresa-cubana-del-tabaco,CU,1997,true,Nommée d'après le veguero Alejandro Robaina.
+Cuaba,cuaba,empresa-cubana-del-tabaco,CU,1996,true,Marque entièrement consacrée aux figurados double figurado.
+San Cristóbal de La Habana,san-cristobal-de-la-habana,empresa-cubana-del-tabaco,CU,1999,true,Vitoles nommées d'après les forteresses de La Havane.
+El Rey del Mundo,el-rey-del-mundo,empresa-cubana-del-tabaco,CU,1848,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Fonseca,fonseca,empresa-cubana-del-tabaco,CU,1892,true,"Cigares emballés individuellement dans du papier de soie. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Diplomáticos,diplomaticos,empresa-cubana-del-tabaco,CU,1966,true,Créée pour le marché français.
+Juan López,juan-lopez,empresa-cubana-del-tabaco,CU,1876,true,
+La Gloria Cubana,la-gloria-cubana,empresa-cubana-del-tabaco,CU,1885,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Por Larrañaga,por-larranaga,empresa-cubana-del-tabaco,CU,1834,true,"L'une des plus anciennes marques cubaines encore actives. Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Quai d'Orsay,quai-d-orsay,empresa-cubana-del-tabaco,CU,1973,true,Créée à la demande de la SEITA pour le marché français.
+Quintero,quintero,empresa-cubana-del-tabaco,CU,1924,true,
+Rafael González,rafael-gonzalez,empresa-cubana-del-tabaco,CU,1928,true,
+Saint Luis Rey,saint-luis-rey,empresa-cubana-del-tabaco,CU,1940,true,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Sancho Panza,sancho-panza,empresa-cubana-del-tabaco,CU,1852,true,
+José L. Piedra,jose-l-piedra,empresa-cubana-del-tabaco,CU,,true,Cigares faits à la main avec tripe courte.
+Guantanamera,guantanamera,empresa-cubana-del-tabaco,CU,2002,true,Cigares faits à la machine.
+Vegueros,vegueros,empresa-cubana-del-tabaco,CU,1997,true,Relancée en 2014 avec un nouveau conditionnement.
+La Flor de Cano,la-flor-de-cano,empresa-cubana-del-tabaco,CU,1884,true,
+Cohíba,cohiba-non-cubain,general-cigar-dominicana,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Montecristo,montecristo-non-cubain,tabacalera-de-garcia,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Partagás,partagas-non-cubain,general-cigar-dominicana,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Romeo y Julieta,romeo-y-julieta-non-cubain,tabacalera-de-garcia,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+H. Upmann,h-upmann-non-cubain,tabacalera-de-garcia,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Hoyo de Monterrey,hoyo-de-monterrey-non-cubain,honduras-american-tabaco,HN,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Punch,punch-non-cubain,honduras-american-tabaco,HN,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Bolívar,bolivar-non-cubain,general-cigar-dominicana,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Trinidad,trinidad-non-cubain,tabacalera-de-garcia,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+La Gloria Cubana,la-gloria-cubana-non-cubain,general-cigar-dominicana,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+El Rey del Mundo,el-rey-del-mundo-non-cubain,honduras-american-tabaco,HN,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Fonseca,fonseca-non-cubain,manufactura-de-tabacos-s-a,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Por Larrañaga,por-larranaga-non-cubain,tabacalera-de-garcia,DO,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Saint Luis Rey,saint-luis-rey-non-cubain,honduras-american-tabaco,HN,,false,"Marque scindée après 1959 : une version cubaine et une version non cubaine coexistent sous le même nom, produites par des groupes différents."
+Padrón,padron,padron-cigars,NI,1964,false,Fondée par José Orlando Padrón. Toutes les feuilles sont nicaraguayennes.
+Oliva,oliva,oliva-cigar-co,NI,1995,false,
+My Father,my-father,my-father-cigars,NI,2008,false,Fondée par José « Pepín » García et son fils Jaime.
+Flor de las Antillas,flor-de-las-antillas,my-father-cigars,NI,2012,false,
+Drew Estate,drew-estate,drew-estate,NI,1996,false,
+Liga Privada,liga-privada,drew-estate,NI,2007,false,Initialement produite pour la consommation interne de la manufacture.
+Undercrown,undercrown,drew-estate,NI,2011,false,
+Herrera Estelí,herrera-esteli,drew-estate,NI,2012,false,
+Nica Rustica,nica-rustica,drew-estate,NI,2013,false,
+Joya de Nicaragua,joya-de-nicaragua,joya-de-nicaragua,NI,1968,false,La plus ancienne manufacture de cigares premium du Nicaragua.
+Perdomo,perdomo,perdomo-cigars,NI,1992,false,
+Rocky Patel,rocky-patel,nicaraguan-american-tobacco,NI,1996,false,
+AJ Fernandez,aj-fernandez,tabacalera-aj-fernandez,NI,,false,
+Plasencia,plasencia,plasencia-cigars,NI,2017,false,La famille Plasencia cultive du tabac depuis 1865.
+Foundation Cigar Company,foundation-cigar-company,tabacalera-fernandez,NI,2015,false,Fondée par Nicholas Melillo.
+Aganorsa Leaf,aganorsa-leaf,tabacalera-fernandez,NI,,false,
+Tatuaje,tatuaje,my-father-cigars,NI,2003,false,Fondée par Pete Johnson.
+Illusione,illusione,tabacalera-fernandez,NI,2006,false,
+Crowned Heads,crowned-heads,my-father-cigars,NI,2011,false,
+Warped,warped,tabacalera-fernandez,NI,,false,
+RoMa Craft Tobac,roma-craft-tobac,tabacalera-fernandez,NI,2012,false,
+Espinosa,espinosa,tabacalera-aj-fernandez,NI,2012,false,
+Alec Bradley,alec-bradley,tabacalera-aj-fernandez,NI,1996,false,
+Nub,nub,oliva-cigar-co,NI,2008,false,"Format court et large, conçu pour atteindre vite le cœur du cigare."
+Cain,cain,oliva-cigar-co,NI,2009,false,
+Diesel,diesel,tabacalera-aj-fernandez,NI,,false,
+Man O' War,man-o-war,tabacalera-aj-fernandez,NI,,false,
+601,601,tabacalera-aj-fernandez,NI,,false,
+Southern Draw,southern-draw,tabacalera-aj-fernandez,NI,2016,false,
+Black Label Trading Company,black-label-trading-company,tabacalera-fernandez,NI,2013,false,
+Arturo Fuente,arturo-fuente,tabacalera-a-fuente-y-cia,DO,1912,false,"Fondée à Tampa, transférée en République dominicaine."
+Fuente Fuente OpusX,fuente-fuente-opusx,tabacalera-a-fuente-y-cia,DO,1995,false,Première cape dominicaine cultivée sous ombrière par la famille Fuente.
+Davidoff,davidoff,cigars-davidoff,DO,1968,false,"Production initialement cubaine, transférée en République dominicaine en 1991."
+Avo,avo,cigars-davidoff,DO,1988,false,Créée par le pianiste Avo Uvezian.
+Zino Platinum,zino-platinum,cigars-davidoff,DO,,false,
+The Griffin's,the-griffin-s,cigars-davidoff,DO,,false,
+Winston Churchill,winston-churchill,cigars-davidoff,DO,2015,false,
+Ashton,ashton,tabacalera-a-fuente-y-cia,DO,1985,false,Produite par la famille Fuente.
+La Flor Dominicana,la-flor-dominicana,la-flor-dominicana,DO,1994,false,
+La Aurora,la-aurora,la-aurora,DO,1903,false,La plus ancienne manufacture de République dominicaine.
+León Jimenes,leon-jimenes,la-aurora,DO,,false,
+Macanudo,macanudo,general-cigar-dominicana,DO,,false,
+E.P. Carrillo,e-p-carrillo,epc-cigar-co,DO,2009,false,
+Quesada,quesada,manufactura-de-tabacos-s-a,DO,1974,false,
+Casa Magna,casa-magna,manufactura-de-tabacos-s-a,DO,2008,false,
+Cuesta-Rey,cuesta-rey,tabacalera-a-fuente-y-cia,DO,1884,false,
+Diamond Crown,diamond-crown,tabacalera-a-fuente-y-cia,DO,1995,false,
+VegaFina,vegafina,tabacalera-de-garcia,DO,1997,false,
+Don Diego,don-diego,tabacalera-de-garcia,DO,,false,
+Vega Fina Nicaragua,vega-fina-nicaragua,tabacalera-de-garcia,DO,,false,
+Kristoff,kristoff,tabacalera-palma,DO,2007,false,
+Davidoff Yamasá,davidoff-yamasa,kelner-boutique-factory,DO,2015,false,
+Camacho,camacho,agroindustria-laepe,HN,1961,false,
+Flor de Selva,flor-de-selva,fabrica-de-tabacos-raices-cubanas,HN,1995,false,Fondée par Maya Selva.
+Rocky Patel Vintage,rocky-patel-vintage,nestor-plasencia-honduras,HN,,false,
+JFR,jfr,fabrica-de-tabacos-raices-cubanas,HN,,false,
+Cuban Crafters,cuban-crafters,fabrica-de-tabacos-raices-cubanas,HN,,false,
+Casa Turrent,casa-turrent,a-turrent,MX,,false,Feuille San Andrés.
+Te-Amo,te-amo,a-turrent,MX,,false,
+Santa Clara,santa-clara,a-turrent,MX,1830,false,
+Matacán,matacan,a-turrent,MX,,false,
+J.C. Newman,j-c-newman,j-c-newman-cigar-co,US,1895,false,Plus ancienne entreprise familiale de cigares des États-Unis.
+Brick House,brick-house,j-c-newman-cigar-co,NI,2009,false,
+El Baton,el-baton,j-c-newman-cigar-co,NI,,false,
+Nat Sherman,nat-sherman,tabacalera-de-garcia,DO,1930,false,
+Ferio Tego,ferio-tego,tabacalera-de-garcia,DO,2021,false,Reprise du portefeuille Nat Sherman.
+CAO,cao,general-cigar-dominicana,NI,1968,false,
+Room101,room101,tabacalera-aj-fernandez,NI,2009,false,
+Gurkha,gurkha,tabacalera-aj-fernandez,NI,,false,
+Villiger,villiger,villiger-sohne,CH,1888,false,
+Dannemann,dannemann,villiger-sohne,CH,1873,false,
+Neos,neos,villiger-sohne,BE,,false,

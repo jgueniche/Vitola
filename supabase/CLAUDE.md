@@ -45,4 +45,18 @@ de garde. Ne pas relâcher l'une en pensant que l'autre suffit.
 ## Seed
 
 Aucun scraping, jamais (§2, art. L341-1 CPI). Chaque ligne de `seed/*.csv` doit être justifiable
-dans `seed/PROVENANCE.md`. C'est une contrainte juridique, pas une préférence.
+dans `seed/PROVENANCE.md`. C'est une contrainte juridique, pas une préférence : en cas de
+contestation, la charge de la preuve nous incombe.
+
+```bash
+cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql   # idempotent, rejouable
+```
+
+Trois règles sur l'amorçage :
+
+1. **Il ne publie rien.** Les fiches arrivent en `draft`. `supabase/tests/01_seed_integrity.sql`
+   échoue si une seule est publiée — une donnée non relue ne doit jamais être visible.
+2. **L'incertitude se signale, elle ne se cache pas.** Une dimension douteuse porte
+   `Dimensions à vérifier` ; une vitole inconnue reste vide plutôt que d'être approximée. Un
+   référentiel qui promet d'être vérifié ne peut pas combler ses trous par des suppositions.
+3. **Le rejeu ne duplique pas.** La clé de rapprochement est le slug. Vérifié en CI.

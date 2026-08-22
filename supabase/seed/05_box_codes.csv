@@ -1,0 +1,19 @@
+kind,code,factory_code,month,year,notes
+month,ENE,,1,,Mois de production : janvier (« enero »).
+month,FEB,,2,,Mois de production : février (« febrero »).
+month,MAR,,3,,Mois de production : mars (« marzo »).
+month,ABR,,4,,Mois de production : avril (« abril »).
+month,MAY,,5,,Mois de production : mai (« mayo »).
+month,JUN,,6,,Mois de production : juin (« junio »).
+month,JUL,,7,,Mois de production : juillet (« julio »).
+month,AGO,,8,,Mois de production : août (« agosto »).
+month,SEP,,9,,Mois de production : septembre (« septiembre »).
+month,OCT,,10,,Mois de production : octobre (« octubre »).
+month,NOV,,11,,Mois de production : novembre (« noviembre »).
+month,DIC,,12,,Mois de production : décembre (« diciembre »).
+factory,EL,El Laguito,,,La Havane. Berceau de Cohíba. Correspondance sigle/manufacture à vérifier : les codes usine cubains ont été volontairement modifiés à plusieurs reprises.
+factory,FPG,Francisco Pérez Germán,,,La Havane. Manufacture historique de Partagás. Correspondance sigle/manufacture à vérifier : les codes usine cubains ont été volontairement modifiés à plusieurs reprises.
+factory,BM,Briones Montoto,,,La Havane. Manufacture historique de Romeo y Julieta. Correspondance sigle/manufacture à vérifier : les codes usine cubains ont été volontairement modifiés à plusieurs reprises.
+factory,JM,José Martí,,,La Havane. Manufacture historique de H. Upmann. Correspondance sigle/manufacture à vérifier : les codes usine cubains ont été volontairement modifiés à plusieurs reprises.
+factory,HM,Heroes del Moncada,,,La Havane. Correspondance sigle/manufacture à vérifier : les codes usine cubains ont été volontairement modifiés à plusieurs reprises.
+factory,FR,La Corona,,,La Havane. Correspondance sigle/manufacture à vérifier : les codes usine cubains ont été volontairement modifiés à plusieurs reprises.

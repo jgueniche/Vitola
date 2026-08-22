@@ -48,3 +48,44 @@ jobs:
       # migration asserts this too, but a future migration might not.
       - name: RLS coverage
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/00_rls_coverage.sql
+
+      # The seed runs on its own database: the verification file above inserts
+      # fixtures that would otherwise collide with real seed rows.
+      - name: Load the seed referential
+        env:
+          PGDATABASE: vitola_seed
+        run: |
+          createdb vitola_seed
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/00_supabase_stubs.sql
+          psql -v ON_ERROR_STOP=1 -f docs/phase-0/03-schema-p1.sql
+          cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql
+
+      - name: Seed integrity
+        env:
+          PGDATABASE: vitola_seed
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/01_seed_integrity.sql
+
+      # Idempotence is not a nice-to-have: the seed will be re-run on every
+      # correction to the CSVs, and it must never duplicate a row.
+      - name: Seed is idempotent
+        env:
+          PGDATABASE: vitola_seed
+        run: |
+          before=$(psql -tAc "select count(*) from ref.cigars")
+          (cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed.sql > /dev/null)
+          after=$(psql -tAc "select count(*) from ref.cigars")
+          if [ "$before" != "$after" ]; then
+            echo "Le rejeu du seed a changé le nombre de fiches : $before -> $after"; exit 1
+          fi
+          echo "Rejeu sans duplication : $after fiches"
+
+      - name: Seed paths must not reference third-party sources
+        run: |
+          # Scans the DATA only. PROVENANCE.md names those sites on purpose, to
+          # record that they were not used — matching it would be backwards.
+          if grep -niE 'halfwheel|cigaraficionado|cigardojo|cubancigarwebsite|scrape|crawler' \
+               supabase/seed/*.csv supabase/seed/seed.sql; then
+            echo "Une source tierce est referencee dans les donnees (§2 du brief, art. L341-1 CPI)."
+            exit 1
+          fi
+          echo "Aucune source tierce referencee dans les donnees."

@@ -37,17 +37,26 @@ prévisualisations à l'approche de la mise en ligne.
 Procédure détaillée : [`docs/setup/supabase.md`](../setup/supabase.md).
 **Nécessaire avant :** la première migration appliquée sur un projet réel — donc avant P1.
 
-### Q3 · Qui saisit le référentiel d'amorçage ?
-**C'est la question la plus sous-estimée du brief.** Le §5.3 demande ~120 marques et le vitolario
-Habanos, saisis à la main, scraping formellement interdit. Ce n'est pas du développement : c'est un
-travail documentaire que j'évalue à **15 à 25 heures de saisie humaine**, indépendamment du code.
-Sans lui, P1 se termine avec une recherche facettée qui ne renvoie rien, et le critère de sortie
-(« < 300 ms sur 5 000 cigares ») n'est pas mesurable.
-**Défaut :** je livre les schémas CSV, le script d'import idempotent, le contrôle de cohérence et un
-échantillon d'amorçage d'environ 150 fiches sur une dizaine de marques emblématiques, saisi
-manuellement à partir de connaissances factuelles publiques et documenté dans `PROVENANCE.md`. Le
-reste attend une décision : vous, un contributeur rémunéré, ou une ouverture anticipée du wiki.
-**Nécessaire avant :** la fin de P1.
+### Q3 · Qui **relit** le référentiel d'amorçage ? *(partiellement traitée)*
+La question posée en Phase 0 était « qui saisit ». Elle a changé de nature : **la saisie est faite**.
+30 manufactures, 114 marques, 50 vitoles, 123 fiches et 18 codes de boîte sont dans
+`supabase/seed/`, chargés par un script idempotent et vérifiés en CI.
+
+**Ce qui reste n'est plus de la saisie, c'est de la relecture** — et elle ne peut pas être faite
+par moi. Ces données ont été produites à partir de mes connaissances propres, sans consulter
+aucune base tierce (le §2 l'interdit ; voir `supabase/seed/PROVENANCE.md`). Un modèle de langage
+approxime et invente parfois : ces fichiers sont un point de départ, pas un référentiel vérifié.
+
+Le chargement en tient compte : **rien n'est publié**. Les 123 fiches arrivent en `draft`, donc
+invisibles d'un visiteur anonyme — la RLS l'impose, la CI le vérifie. 15 vitoles portent la mention
+`Dimensions à vérifier`. 45 fiches non cubaines n'ont volontairement aucune vitole, parce que je ne
+connais pas leurs cotes exactes et que les rattacher au format cubain le plus proche aurait
+introduit une donnée fausse dans un référentiel dont la promesse est d'être vérifié.
+
+**Ce que j'estime maintenant :** 4 à 7 heures de relecture humaine, contre les 15 à 25 heures de
+saisie initialement prévues. L'ordre de relecture le plus rentable est dans `PROVENANCE.md` §5 —
+les 15 vitoles d'abord, une dimension fausse contaminant toutes les fiches qui la référencent.
+**Nécessaire avant :** la publication de la première fiche, pas avant.
 
 ### Q4 · Peut-on héberger les logos de marques (`brands.logo_path`) ?
 Reproduire une marque figurative dans un contexte encyclopédique se défend, mais c'est un

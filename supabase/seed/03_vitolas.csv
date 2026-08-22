@@ -1,0 +1,51 @@
+name_galera,name_salida,slug,length_mm,ring_gauge,shape,notes
+Laguito No. 1,Lancero,laguito-no-1,192,38,parejo,
+Laguito No. 2,Lancero corto,laguito-no-2,152,38,parejo,
+Laguito No. 3,Panetela,laguito-no-3,115,26,parejo,
+Julieta No. 2,Churchill,julieta-no-2,178,47,parejo,
+Prominentes,Double Corona,prominentes,194,49,parejo,
+Cervantes,Lonsdale,cervantes,165,42,parejo,
+Dalias,Corona Grande,dalias,170,43,parejo,
+Corona,Corona,corona,142,42,parejo,
+Coronas Grandes,Corona Grande,coronas-grandes,155,42,parejo,
+Mareva,Petit Corona,mareva,129,42,parejo,
+Hermosos No. 4,Corona Gorda,hermosos-no-4,143,48,parejo,
+Robustos,Robusto,robustos,124,50,parejo,
+Petit Robustos,Petit Robusto,petit-robustos,102,50,parejo,
+Cañonazo,Robusto Extra,canonazo,150,52,parejo,
+Genios,Genios,genios,140,52,parejo,
+Duke,Duke,duke,140,54,parejo,
+Sublimes,Sublime,sublimes,164,54,parejo,
+Gordito,Gordito,gordito,141,50,parejo,
+Magicos,Magico,magicos,115,52,parejo,
+Edmundo,Edmundo,edmundo,135,52,parejo,
+Petit Edmundo,Petit Edmundo,petit-edmundo,110,52,parejo,
+Pirámides,Torpedo,piramides,156,52,piramide,
+Campanas,Belicoso,campanas,140,52,belicoso,
+Perlas,Perla,perlas,102,40,parejo,
+Franciscano,Franciscano,franciscano,116,40,parejo,
+Carolinas,Carolina,carolinas,121,26,parejo,
+Seoane,Seoane,seoane,125,36,parejo,
+Vegueritos,Vegueritos,vegueritos,127,36,parejo,
+Ninfas,Ninfa,ninfas,178,33,parejo,
+Salomones,Salomon,salomones,184,57,perfecto,
+Gran Corona,Gran Corona,gran-corona,235,47,parejo,
+Petit Cetros,Petit Cetro,petit-cetros,129,40,parejo,Dimensions à vérifier avant publication.
+Cremas,Crema,cremas,140,40,parejo,Dimensions à vérifier avant publication.
+Standard,Standard,standard,123,40,parejo,Dimensions à vérifier avant publication.
+Conservas,Conserva,conservas,145,43,parejo,Dimensions à vérifier avant publication.
+Britanicas,Britanica,britanicas,137,48,parejo,Dimensions à vérifier avant publication.
+Eminentes,Eminente,eminentes,132,44,parejo,Dimensions à vérifier avant publication.
+Pirámides Extra,Torpedo Extra,piramides-extra,160,54,piramide,Dimensions à vérifier avant publication.
+Trabucos,Trabuco,trabucos,110,38,parejo,Dimensions à vérifier avant publication.
+Deliciosos,Delicioso,deliciosos,159,33,parejo,Dimensions à vérifier avant publication.
+Cazadores,Cazadore,cazadores,162,43,parejo,Dimensions à vérifier avant publication.
+Coronas Gordas,Corona Gorda,coronas-gordas,143,46,parejo,
+Laguito No. 5,BHK 52,laguito-no-5,119,52,parejo,Dimensions à vérifier avant publication. Vitole propre à la gamme Behike.
+Laguito No. 6,BHK 54,laguito-no-6,144,54,parejo,Dimensions à vérifier avant publication. Vitole propre à la gamme Behike.
+Laguito No. 7,BHK 56,laguito-no-7,166,56,parejo,Dimensions à vérifier avant publication. Vitole propre à la gamme Behike.
+,Toro,toro,152,52,parejo,Format conventionnel non cubain ; les dimensions varient légèrement selon les manufactures.
+,Gordo,gordo,152,60,parejo,Format conventionnel non cubain ; les dimensions varient légèrement selon les manufactures.
+,Rothschild,rothschild,114,50,parejo,Format conventionnel non cubain ; les dimensions varient légèrement selon les manufactures.
+,Double Toro,double-toro,178,60,parejo,Dimensions à vérifier avant publication. Format conventionnel non cubain.
+,Corona Extra,corona-extra,143,46,parejo,Dimensions à vérifier avant publication. Format conventionnel non cubain.
