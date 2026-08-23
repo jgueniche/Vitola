@@ -13,14 +13,10 @@ Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BR
 `app/`, `lib/`, `supabase/` — les trois ont été enrichis par la dernière session et leurs nouveaux
 paragraphes sont exactement ceux qu'on regrette de ne pas avoir lus.
 
-**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. Une réserve, et elle
-compte : **`master` ne contient pas encore ce qui est décrit ici.** Les PR #1 à #8 y sont fusionnées,
-mais la cave, les statistiques et toute la fin de P1 vivent sur
-`claude/fichier-prompt-joint-3vtz60` — poussée, CI verte, **sans PR ouverte**, la session n'en ayant
-pas demandé. Deux chemins tiennent : ouvrir cette PR et repartir de `master` une fois fusionnée, ou
-partir de la branche elle-même. Ce qui ne tient pas, c'est de partir de `master` en croyant y
-trouver la cave. Vérifie d'un coup d'œil plutôt que de supposer :
-`git log --oneline origin/master -3`, et `/api/health` sert le commit réellement déployé.
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`, **qui contient tout le
+travail décrit ici** (PR #9 fusionnée le 23 août 2026). Vérifie d'un coup d'œil plutôt que de
+supposer : `git log --oneline origin/master -3` doit montrer la fusion de #9, et `/api/health` sert
+le commit réellement déployé.
 
 Le code du dépôt et l'état de la base concordent : **neuf migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet. Le carnet n'en a demandé aucune — la 0003
@@ -86,9 +82,9 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #8 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié). La cave, les
-statistiques et le reste de P1 sont sur `claude/fichier-prompt-joint-3vtz60`, poussée et verte en
-CI : la cave **ferme le critère de sortie de P2**, le reste **ferme P1**.
+PR #1 à #9 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la #9 a porté la
+cave, les statistiques et tout le reste de P1 — la cave **ferme le critère de sortie de P2**, le
+reste **ferme P1**.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
