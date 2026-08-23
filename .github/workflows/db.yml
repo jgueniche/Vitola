@@ -168,6 +168,12 @@ jobs:
       - name: Apply 0010 — le fil social
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0010_social.sql
 
+      # 0011 complète la 0010 : les deux clés de confidentialité qui décident
+      # d'un AFFICHAGE et non d'un droit se lisent par la même porte que celle
+      # qui décide d'un droit, pour que la clé n'ait qu'un interprète.
+      - name: Apply 0011 — les trois clés de confidentialité
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0011_profile_privacy.sql
+
       # Le seul endroit d'où se voit une régression de l'ADR 0007. Il n'accorde
       # rien. Même scrutin du journal qu'ailleurs — un `SET LOCAL ROLE` hors
       # transaction rend une assertion verte pour rien.

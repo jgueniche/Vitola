@@ -948,6 +948,7 @@ export type Database = {
         Returns: Json
       }
       owns_review: { Args: { target: string }; Returns: boolean }
+      profile_privacy: { Args: { owner: string }; Returns: Json }
       refresh_cigar_stats: { Args: never; Returns: undefined }
       shared_humidor_shelf: {
         Args: { owner: string }

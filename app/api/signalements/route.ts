@@ -184,6 +184,32 @@ async function isVisibleToCaller(kind: ReportableKind, id: string): Promise<bool
       return data !== null
     }
 
+    /* The three surfaces P3 opened. Each is one `maybeSingle()` and no
+       predicate: `posts` has five SELECT policies plus a RESTRICTIVE one for
+       blocks, `post_comments` derives its audience from the publication by an
+       EXISTS, and `profiles` honours `is_discoverable`. Writing any of that
+       here would be the visibility filter ADR 0004 forbids, and it would be
+       wrong within a phase — a policy changes, the copy in TypeScript does
+       not. Someone reporting what they cannot read gets the same 404 as
+       someone reporting what does not exist. */
+    case 'post': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('posts').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    case 'postComment': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('post_comments').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    case 'profile': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('profiles').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
     default: {
       // Adding a surface to REPORTABLE without a branch here stops compiling.
       const unhandled: never = kind

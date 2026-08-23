@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -30,6 +30,31 @@ const migration = (name: string) =>
 
 const M0004 = migration('0004_commentaires_moderation.sql')
 const M0006 = migration('0006_signalement_et_statistiques.sql')
+
+/**
+ * Every migration, in the order they apply.
+ *
+ * A CHECK is not written once. `reports_entity_known` was created by 0004 and
+ * replaced by 0010, which added the two surfaces the feed opened — so a test
+ * reading 0004 alone asserts against a constraint the database no longer has,
+ * and it fails for the right reason at the wrong place. What has to be checked
+ * is the constraint **as the migrations leave it**, which is the last
+ * definition, whichever file carries it.
+ */
+const MIGRATIONS = readdirSync(join(process.cwd(), 'supabase/migrations'))
+  .filter((name) => name.endsWith('.sql'))
+  .sort()
+  .map(migration)
+
+/** The last definition of a named CHECK across the whole migration history. */
+function lastCheck(name: string): string | null {
+  const pattern = new RegExp(`constraint ${name} check \\(([\\s\\S]*?)\\n *\\)`, 'g')
+  let found: string | null = null
+  for (const sql of MIGRATIONS) {
+    for (const hit of sql.matchAll(pattern)) found = hit[1] ?? found
+  }
+  return found
+}
 
 describe('the announced deadline', () => {
   it('is the value the feature flag was created holding', () => {
@@ -67,12 +92,28 @@ describe('the reasons offered', () => {
 
 describe('the surfaces that can be reported', () => {
   it('are all inside the CHECK that bounds the queue', () => {
-    const block = /constraint reports_entity_known check \(([\s\S]*?)\n  \)/.exec(M0004)
-    expect(block, 'reports_entity_known is no longer in migration 0004').not.toBeNull()
+    const block = lastCheck('reports_entity_known')
+    expect(block, 'reports_entity_known is in no migration at all').not.toBeNull()
 
     for (const { schema, table } of Object.values(REPORTABLE)) {
-      expect(block?.[1]).toContain(`'${schema}.${table}'`)
+      expect(block).toContain(`'${schema}.${table}'`)
     }
+  })
+
+  it('are the only ones the CHECK allows', () => {
+    /*
+     * The converse, and it is the half that catches the omission that matters.
+     * A surface added to the CHECK but not to `REPORTABLE` is a table the queue
+     * would accept notices about and no screen offers a button for — which is
+     * how `profiles` sat in the constraint from migration 0004 until P3 gave a
+     * profile a page. That was a deliberate wait, written down; the next one
+     * would be an oversight, and this is where it stops being silent.
+     */
+    const block = lastCheck('reports_entity_known') ?? ''
+    const allowed = [...block.matchAll(/'([a-z_]+\.[a-z_]+)'/g)].map((hit) => hit[1])
+    const offered = Object.values(REPORTABLE).map(({ schema, table }) => `${schema}.${table}`)
+
+    expect([...allowed].sort()).toEqual([...offered].sort())
   })
 })
 

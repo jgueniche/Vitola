@@ -197,8 +197,18 @@ export function PrivacyForm({ privacy }: { privacy: Privacy }) {
         hint={copy.showHumidorHint}
         defaultChecked={privacy.show_humidor}
       />
-      <Check name="showReviews" label={copy.showReviews} defaultChecked={privacy.show_reviews} />
-      <Check name="showCountry" label={copy.showCountry} defaultChecked={privacy.show_country} />
+      <Check
+        name="showReviews"
+        label={copy.showReviews}
+        hint={copy.showReviewsHint}
+        defaultChecked={privacy.show_reviews}
+      />
+      <Check
+        name="showCountry"
+        label={copy.showCountry}
+        hint={copy.showCountryHint}
+        defaultChecked={privacy.show_country}
+      />
 
       <Feedback state={state} />
       <div>

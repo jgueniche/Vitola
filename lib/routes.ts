@@ -28,6 +28,8 @@ export const SEGMENTS = {
   statistics: 'statistiques',
   scanner: 'scanner',
   feed: 'fil',
+  members: 'membres',
+  notifications: 'notifications',
   venues: 'lieux',
   journal: 'journal',
   shop: 'boutique',
@@ -84,6 +86,17 @@ export const routes = {
   humidorDetail: (id: string) => `/${SEGMENTS.humidor}/${id}`,
   humidorExport: () => `/${SEGMENTS.humidor}/export`,
   statistics: () => `/${SEGMENTS.statistics}`,
+
+  /* The feed is one page with two tabs, and the tab is a query parameter rather
+     than a segment: `/fil?onglet=decouverte` keeps the keyset cursor and the
+     tab in the same place, which is where interface state lives (app/CLAUDE.md).
+     A second segment would have meant two routes rendering the same list. */
+  feed: () => `/${SEGMENTS.feed}`,
+  post: (id: string) => `/${SEGMENTS.feed}/${id}`,
+  members: () => `/${SEGMENTS.members}`,
+  member: (handle: string) => `/${SEGMENTS.members}/${handle}`,
+  notifications: () => `/${SEGMENTS.notifications}`,
+
   journal: () => `/${SEGMENTS.journal}`,
   venues: () => `/${SEGMENTS.venues}`,
   shop: () => `/${SEGMENTS.shop}`,

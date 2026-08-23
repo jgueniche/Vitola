@@ -49,8 +49,14 @@ export type ReportReason = (typeof REPORT_REASONS)[number]
  * already stated: an entry here without a Signaler button is a promise nobody
  * can keep, and the converse holds too — a public notebook entry is a member's
  * text about tobacco, readable by any visitor past the age gate, which is the
- * exact situation ADR 0005 says obliges us. `profiles` stays out until P3 gives
- * a profile a page.
+ * exact situation ADR 0005 says obliges us.
+ *
+ * P3 adds three at once, and the same rule decides all three. A publication and
+ * a reply are members' text about tobacco on a page anyone past the gate can
+ * read — the situation ADR 0005 describes, arriving a phase later and more
+ * directly. `profiles` was in `reports_entity_known` from migration 0004 and
+ * stayed out of this map for one reason only: a profile had no page. It has one
+ * now, so it is offered.
  *
  * What is reportable is decided per *surface*, not per row: RLS decides whether
  * the reporter may see the entry at all, and the route asks it that question
@@ -60,6 +66,9 @@ export const REPORTABLE = {
   comment: { schema: 'public', table: 'comments' },
   cigar: { schema: 'ref', table: 'cigars' },
   review: { schema: 'public', table: 'reviews' },
+  post: { schema: 'public', table: 'posts' },
+  postComment: { schema: 'public', table: 'post_comments' },
+  profile: { schema: 'public', table: 'profiles' },
 } as const
 
 export type ReportableKind = keyof typeof REPORTABLE

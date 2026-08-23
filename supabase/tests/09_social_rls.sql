@@ -737,6 +737,83 @@ begin
   reset role;
 end $$;
 
+\echo '=== H5  LES DETTES 2 ET 3 : les trois cles se lisent chez autrui, par une seule porte'
+do $$
+declare v jsonb;
+begin
+  -- Défaut : humidor fermé, les deux autres ouvertes. C'est `DEFAULT_PRIVACY`
+  -- de `lib/settings/model.ts`, et l'asymétrie est la décision.
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  update public.profile_settings
+     set privacy = jsonb_build_object('show_humidor', false, 'show_reviews', true, 'show_country', true)
+   where id = 'a1000000-0000-4000-8000-000000000001';
+
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  v := public.profile_privacy('a1000000-0000-4000-8000-000000000001');
+  if v->>'show_humidor' <> 'false' then raise exception 'FAIL: show_humidor lu %', v; end if;
+  if v->>'show_reviews' <> 'true'  then raise exception 'FAIL: show_reviews lu %', v; end if;
+  if v->>'show_country' <> 'true'  then raise exception 'FAIL: show_country lu %', v; end if;
+
+  -- Et la même porte suit un changement.
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  update public.profile_settings
+     set privacy = privacy || '{"show_reviews": false, "show_country": false}'::jsonb
+   where id = 'a1000000-0000-4000-8000-000000000001';
+
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  v := public.profile_privacy('a1000000-0000-4000-8000-000000000001');
+  if v->>'show_reviews' <> 'false' then raise exception 'FAIL: show_reviews n a pas suivi'; end if;
+  if v->>'show_country' <> 'false' then raise exception 'FAIL: show_country n a pas suivi'; end if;
+  raise notice 'PASS';
+  reset role;
+end $$;
+
+\echo '=== H6  un membre sans ligne de reglages n a rien masque'
+do $$
+declare v jsonb;
+begin
+  -- Le repli reprend les défauts de colonne plutôt que de tout fermer. Fermer
+  -- serait plus prudent et serait faux : quelqu'un qui n'a rien décidé n'a pas
+  -- décidé de se cacher, et son profil serait vide sans qu'il l'ait demandé.
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  v := public.profile_privacy('00000000-0000-4000-8000-00000000dead');
+  if v->>'show_humidor' <> 'false' then raise exception 'FAIL: repli show_humidor ouvert'; end if;
+  if v->>'show_reviews' <> 'true'  then raise exception 'FAIL: repli show_reviews ferme'; end if;
+  if v->>'show_country' <> 'true'  then raise exception 'FAIL: repli show_country ferme'; end if;
+  raise notice 'PASS';
+  reset role;
+end $$;
+
+\echo '=== H7  le droit et l affichage lisent la meme cle'
+do $$
+begin
+  -- Deux fonctions qui interprètent la même clé finiraient par en dire deux
+  -- choses, et la divergence se lirait comme une cave montrée sur le profil et
+  -- refusée par la policy. Vérifié sur les deux valeurs, dans les deux sens.
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  update public.profile_settings set privacy = privacy || '{"show_humidor": true}'::jsonb
+   where id = 'a1000000-0000-4000-8000-000000000001';
+
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  if not public.shows_humidor('a1000000-0000-4000-8000-000000000001')
+     or (public.profile_privacy('a1000000-0000-4000-8000-000000000001')->>'show_humidor') <> 'true'
+  then raise exception 'FAIL: le droit et l affichage divergent, cle a true'; end if;
+
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  update public.profile_settings set privacy = privacy || '{"show_humidor": false}'::jsonb
+   where id = 'a1000000-0000-4000-8000-000000000001';
+
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  if public.shows_humidor('a1000000-0000-4000-8000-000000000001')
+     or (public.profile_privacy('a1000000-0000-4000-8000-000000000001')->>'show_humidor') <> 'false'
+  then raise exception 'FAIL: le droit et l affichage divergent, cle a false'; end if;
+  raise notice 'PASS';
+  reset role;
+end $$;
+
 -- ---------- Nettoyage : le fichier doit être rejouable -----------------------
 
 delete from public.posts where author_id in (
@@ -756,7 +833,7 @@ delete from public.notifications where user_id in (
   'b2000000-0000-4000-8000-000000000002',
   'c3000000-0000-4000-8000-000000000003');
 update public.profile_settings
-   set privacy = privacy || '{"show_humidor": false}'::jsonb
+   set privacy = jsonb_build_object('show_humidor', false, 'show_reviews', true, 'show_country', true)
  where id = 'a1000000-0000-4000-8000-000000000001';
 
 \echo '=== 09_social_rls : toutes les assertions ont passe'
