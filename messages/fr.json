@@ -1418,8 +1418,11 @@
       "lede": "Une publication au fil, à propos de ce cigare. Ce n'est pas une note : le carnet est en dessous, et il est privé par défaut.",
       "placeholder": "Facultatif — le moment, l'accord, ce que vous en attendez.",
       "submit": "Publier au fil",
-      "done": "Publié au fil."
-    }
+      "done": "Publié au fil.",
+      "atVenue": "Où ça",
+      "venueNone": "— sans lieu —"
+    },
+    "atVenue": "chez"
   },
   "members": {
     "eyebrow": "Membres",
@@ -1786,7 +1789,7 @@
     "inClub": "Avec le club",
     "open": "Ouvrir l'événement",
     "noPlace": "Lieu non précisé",
-    "placeNote": "Le lieu est écrit à la main : les lieux du référentiel arrivent en P5.",
+    "placeNote": "Choisissez un lieu du référentiel, ou écrivez-le en toutes lettres — les deux se lisent pareil sur l'annonce.",
     "attendeeCountOne": "1 personne vient",
     "attendeeCountMany": "{count} personnes viennent",
     "capacity": "{count} places",
@@ -1835,14 +1838,17 @@
       "badDate": "Cette date ne se lit pas.",
       "endsBeforeStart": "La fin ne peut pas précéder le début.",
       "membersOnly": "Seul un membre du club peut y annoncer un événement.",
-      "refused": "Annonce refusée."
+      "refused": "Annonce refusée.",
+      "venue": "Où (lieu du référentiel)",
+      "venueNone": "— aucun lieu du référentiel —"
     },
     "done": {
       "created": "Événement annoncé.",
       "answered": "Réponse enregistrée.",
       "withdrawn": "Réponse retirée.",
       "cancelled": "Événement annulé."
-    }
+    },
+    "atVenue": "au"
   },
   "messaging": {
     "eyebrow": "Les messages",

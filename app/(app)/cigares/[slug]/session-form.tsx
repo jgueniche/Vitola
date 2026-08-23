@@ -6,9 +6,10 @@ import { useActionState } from 'react'
 
 import { publishSession, type PostState } from '@/app/(app)/fil/actions'
 import { Button } from '@/components/ui/button'
-import { FieldError, FieldStatus, Label, Textarea } from '@/components/ui/field'
+import { FieldError, FieldStatus, Label, Select, Textarea } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 import { DEFAULT_POST_SCOPE, POST_LIMITS, POST_SCOPES } from '@/lib/social/model'
+import type { VenueOption } from '@/lib/venues/queries'
 
 const copy = m.feed.session
 const composeCopy = m.feed.compose
@@ -31,7 +32,15 @@ const SCOPE_LABELS: Record<(typeof POST_SCOPES)[number], string> = {
  * an object instead of saying something, and "je fume ce cigare" is exactly
  * that publication.
  */
-export function SessionForm({ cigarId, slug }: { cigarId: string; slug: string }) {
+export function SessionForm({
+  cigarId,
+  slug,
+  venueOptions = [],
+}: {
+  cigarId: string
+  slug: string
+  venueOptions?: readonly VenueOption[]
+}) {
   const [state, action, pending] = useActionState<PostState, FormData>(publishSession, {})
 
   return (
@@ -49,6 +58,23 @@ export function SessionForm({ cigarId, slug }: { cigarId: string; slug: string }
           aria-invalid={state.error ? true : undefined}
         />
       </div>
+
+      {venueOptions.length > 0 ? (
+        /* Where — a referential venue, optional (P5). The selector disappears
+           with the Q6 flag, and a session without a place stays the common
+           case: naming where you smoke is a disclosure, never a requirement. */
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="session-venue">{copy.atVenue}</Label>
+          <Select id="session-venue" name="venueId" defaultValue="">
+            <option value="">{copy.venueNone}</option>
+            {venueOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
+        </div>
+      ) : null}
 
       <fieldset className="flex flex-wrap items-center gap-x-6 gap-y-2">
         <legend className="eyebrow mb-1">{composeCopy.scopeLegend}</legend>

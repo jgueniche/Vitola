@@ -11,6 +11,8 @@ import { isUpcoming } from '@/lib/social/groups'
 import { currentUser } from '@/lib/supabase/server'
 
 import { EventCard } from './event-card'
+import { venueOptions } from '@/lib/venues/queries'
+
 import { EventForm } from './event-form'
 
 export const metadata: Metadata = { title: m.events.title }
@@ -64,7 +66,7 @@ export default async function EventsPage({
         </p>
       ) : null}
 
-      <EventForm />
+      <EventForm venueOptions={await venueOptions()} />
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-2xl">{copy.upcoming}</h2>

@@ -277,3 +277,38 @@ export async function upcomingEventsAtVenue(venueId: string): Promise<VenueEvent
   if (error) throw new Error(`Could not read the venue events: ${error.message}`)
   return (data ?? []) as VenueEventRow[]
 }
+
+export type VenueOption = { id: string; label: string }
+
+/**
+ * The published venues as a form offers them — « name — city », city first in
+ * the sort so the list reads like an address book. Empty when the flag is off:
+ * the selector disappears with the directory, and `location_text` stays.
+ */
+export async function venueOptions(): Promise<VenueOption[]> {
+  const flag = await venuesFlag()
+  if (!flag.enabled) return []
+
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .from('venues')
+    .select('id, name, city')
+    .eq('status', 'published')
+    .in('type', [...flag.types])
+    .order('city', { ascending: true })
+    .order('name', { ascending: true })
+    .limit(300)
+
+  if (error) return []
+  return (data ?? []).map((row) => ({ id: row.id, label: `${row.name} — ${row.city}` }))
+}
+
+/** Venue names and slugs behind a set of ids — the hydration step of a list. */
+export async function venuesByIds(
+  ids: readonly string[],
+): Promise<Map<string, { name: string; slug: string }>> {
+  if (ids.length === 0) return new Map()
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase.from('venues').select('id, name, slug').in('id', [...ids])
+  return new Map((data ?? []).map((row) => [row.id, { name: row.name, slug: row.slug }]))
+}

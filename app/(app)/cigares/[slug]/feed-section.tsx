@@ -4,6 +4,7 @@ import { Band } from '@/components/band/band'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
+import { venueOptions } from '@/lib/venues/queries'
 
 import { SessionForm } from './session-form'
 
@@ -32,7 +33,7 @@ export async function FeedSection({ cigarId, slug }: { cigarId: string; slug: st
       </div>
 
       {user ? (
-        <SessionForm cigarId={cigarId} slug={slug} />
+        <SessionForm cigarId={cigarId} slug={slug} venueOptions={await venueOptions()} />
       ) : (
         <p className="text-sm">
           <Link

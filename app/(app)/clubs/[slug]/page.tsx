@@ -12,6 +12,8 @@ import { getClubBySlug, listClubMembers, listEvents } from '@/lib/social/group-q
 import { type EventKind, isUpcoming } from '@/lib/social/groups'
 import { currentUser } from '@/lib/supabase/server'
 
+import { venueOptions } from '@/lib/venues/queries'
+
 import { EventForm } from '../../evenements/event-form'
 import { ClubControls, MemberRow } from './controls'
 
@@ -155,7 +157,7 @@ export default async function ClubPage({
           </ul>
         )}
 
-        {isMember ? <EventForm clubId={club.id} clubName={club.name} /> : null}
+        {isMember ? <EventForm clubId={club.id} clubName={club.name} venueOptions={await venueOptions()} /> : null}
       </section>
     </main>
   )

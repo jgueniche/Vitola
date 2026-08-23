@@ -26,6 +26,7 @@ import {
 import { hasMinRole } from '@/lib/settings/roles'
 import { relationConfirmation } from '@/lib/social/confirmations'
 import { createSupabaseServerClient, currentUser } from '@/lib/supabase/server'
+import { venuesByIds } from '@/lib/venues/queries'
 
 import { RelationForms } from './relation-forms'
 import { RolePanel } from './role-panel'
@@ -148,7 +149,7 @@ export default async function MemberPage({
   const { data: postRows } = await supabase
     .from('posts')
     .select(
-      'id, author_id, kind, visibility, body, cigar_id, review_id, ember_count, comment_count, created_at, updated_at',
+      'id, author_id, kind, visibility, body, cigar_id, review_id, venue_id, ember_count, comment_count, created_at, updated_at',
     )
     .eq('author_id', profile.id)
     .order('created_at', { ascending: false })
@@ -173,14 +174,18 @@ export default async function MemberPage({
   const cigarIds = [
     ...new Set((postRows ?? []).map((row) => row.cigar_id).filter((id): id is string => !!id)),
   ]
+  const venueIds = [
+    ...new Set((postRows ?? []).map((row) => row.venue_id).filter((id): id is string => !!id)),
+  ]
 
-  const [mine, cigars] = await Promise.all([
+  const [mine, cigars, venues] = await Promise.all([
     ids.length
       ? supabase.from('post_reactions').select('post_id').in('post_id', ids).eq('user_id', user.id)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     cigarIds.length
       ? supabase.schema('ref').from('cigars').select('id, slug, commercial_name, brands(name)').in('id', cigarIds)
       : Promise.resolve({ data: [] }),
+    venuesByIds(venueIds),
   ])
 
   const embered = new Set((mine.data ?? []).map((row) => row.post_id))
@@ -195,6 +200,7 @@ export default async function MemberPage({
 
   const posts = (postRows ?? []).map((row) => {
     const cigar = row.cigar_id ? cigarById.get(row.cigar_id) : undefined
+    const venue = row.venue_id ? venues.get(row.venue_id) : undefined
     return {
       ...row,
       viewer_embered: embered.has(row.id),
@@ -203,6 +209,8 @@ export default async function MemberPage({
       cigar_slug: cigar?.slug ?? null,
       cigar_name: cigar?.commercial_name ?? null,
       brand_name: cigar?.brands?.name ?? null,
+      venue_name: venue?.name ?? null,
+      venue_slug: venue?.slug ?? null,
     }
   })
 
