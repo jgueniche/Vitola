@@ -5,8 +5,8 @@
 `'use client'` est l'exception et doit être justifié par un commentaire d'une ligne juste au-dessus.
 La recherche facettée n'en est pas un : ses facettes sont des liens et son champ un
 `<form method="get">`, donc zéro JavaScript. La recherche de la cave non plus, pour la même
-raison — ni celle des lieux, dont le seul code client est le bouton de géolocalisation.
-Trente-quatre existent :
+raison — ni celle des lieux, dont le seul code client est le bouton de géolocalisation, ni la
+liste du journal, qui n'en charge aucun. Trente-six existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -44,6 +44,8 @@ Trente-quatre existent :
 | `lieux/proposer/propose-form.tsx` | `useActionState`, plus « Utiliser ma position » qui remplit deux champs visibles |
 | `lieux/[slug]/review-form.tsx` | `useActionState` — un critère manquant se relit sans perdre le texte |
 | `lieux/[slug]/controls.tsx` | `window.confirm` avant de retirer une proposition ou un avis |
+| `journal/ecrire/compose-form.tsx` | `useActionState` — un refus se relit sans perdre l'article en cours |
+| `journal/ecrire/controls.tsx` | `window.confirm` avant de supprimer un article |
 
 Les règles apprises en les écrivant :
 

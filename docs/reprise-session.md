@@ -2,12 +2,14 @@
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
 > **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026 en fin de
-> journée, après la livraison de P5 sur la branche `claude/vitola-v1-p5-lieux-ejti1n`. **P1, P2,
-> P3 et P5 sont fermées** — P5 par l'ADR 0011, la migration 0016, 200 lieux seedés du registre
-> DGDDI et 36 assertions de parcours. **P4 reste bloquée** (clés et corpus, voir plus bas) ; la
-> prochaine dans l'ordre du §9 est donc **P6 (éditorial + SEO + newsletter)** — sachant que la
-> newsletter attend une clé Resend qui n'est pas dans l'environnement, même famille de blocage
-> que P4.
+> journée, après la livraison de **P5 puis P6** sur la branche
+> `claude/vitola-v1-p5-lieux-ejti1n`. **P1, P2, P3, P5 et P6 sont fermées** — P5 par l'ADR 0011
+> (200 lieux du registre DGDDI, recherche 25 km en 0,6 ms), P6 par l'ADR 0012 (le journal,
+> Lighthouse SEO = 100 levier ouvert). **P4 reste bloquée** (clés et corpus) et **la newsletter
+> de P6 est différée** (pas de clé Resend, pas de domaine — ADR 0012, D5). La prochaine dans
+> l'ordre du §9 est **P7 (boutique + Stripe)** — vérifier d'abord si des clés Stripe existent
+> dans l'environnement : sans elles, P7 est un P4 de plus, et P8 (modération, RGPD, a11y) est
+> le travail suivant qui n'attend personne.
 
 ---
 
@@ -187,7 +189,7 @@ bornait pas à P3. Elle referme aussi les trois dettes que P3 attendait.
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Seize migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Dix-sept migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -208,10 +210,11 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0014` | `clubs_evenements_messagerie` | `supabase/migrations/0014_clubs_evenements_messagerie.sql` |
 | `0015` | `conversation_inbox` | `supabase/migrations/0015_conversation_inbox.sql` |
 | `0016` | `lieux` | `supabase/migrations/0016_lieux.sql` |
+| `0017` | `editorial` | `supabase/migrations/0017_editorial.sql` |
 
-**Quatre sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009`, `0015` et `0016` : `20260822222420`, `20260822232400`, `20260823083729` et
-`20260823103622`. C'est l'outil
+**Cinq sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015`, `0016` et `0017` : `20260822222420`, `20260822232400`, `20260823083729`,
+`20260823103622` et `20260823115404`. C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
@@ -258,6 +261,8 @@ ref.cigar_revisions         0      public.cigar_stats     2 lignes (vue matéria
                                    public.messages             0
                                    public.venues             200  ← seed DGDDI (0016)
                                    public.venue_reviews        0
+                                   public.articles             2  ← brouillons d'amorçage (0017)
+                                   public.article_links        1  ← le guide gated → une fiche
 ```
 
 **`public.reviews` contient DEUX lignes, et aucune n'est de moi.** Deux entrées publiques de
@@ -459,7 +464,7 @@ public.event_kind          degustation | rencontre | visite | autre
 public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 176 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 184 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -498,6 +503,10 @@ public.venues            7  select_public (published+closed, y compris anon), se
 public.venue_reviews     8  select_visible, select_own, select_moderator, insert_own
                             (lieu publié), update_own, delete_own, delete_moderator,
                             + 1 restrictive de blocage
+public.articles          5  select_published (anon compris), select_editor,
+                            insert_editor, update_editor, delete_editor
+public.article_links     3  select_visible (EXISTS sous la RLS d'articles),
+                            insert_editor, delete_editor
 ```
 
 **Huit policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments`,
@@ -841,24 +850,55 @@ une requête — et `posts.venue_id` non plus, pour la même raison.
 > **Restent voulus** : pas de carte (le fournisseur de tuiles est un arbitrage de sous-traitance,
 > question ouverte de l'ADR) et pas de revendication en un clic (attend un canal de contact, Q7).
 
-### 9. P6 — l'éditorial, le SEO, la newsletter. **La prochaine, avec un blocage partiel à signaler**
+### ~~9. P6 — l'éditorial, le SEO~~ — **livrée le 23 août 2026, ADR 0012 ; la newsletter est différée**
 
-Critère de sortie du §9 : « Lighthouse SEO ≥ 95 ». Trois choses à savoir avant de commencer :
+> **Livrée.** L'ADR 0012 tranche : un article vit dans `public.articles` (`body_md`, **jamais de
+> MDX** — du code en base), le rendu passe par le sous-ensemble Markdown maison de
+> `lib/journal/markdown.ts` (arbre typé, cas d'injection testés et parcourus) ; `/journal` est le
+> **seul préfixe public** du site, un article `gated` se défend lui-même (cookie du portail exigé
+> par sa page, `noindex`, absent du sitemap et du flux RSS) ; pas de fiche liée sur un article
+> public (deux triggers) ; les `editor` écrivent et publient. **Lighthouse SEO = 100** sur `/`,
+> `/journal` et un article public, mesuré levier d'indexation ouvert (`SITE_INDEXABLE=1`, fermé
+> par défaut tant que Q1 n'est pas tranchée). **La newsletter n'existe pas** (D5) : pas de clé
+> Resend, pas de domaine (Q7), et collecter des adresses sans envoyeur serait une table de
+> données personnelles au service de rien — le flux RSS est l'abonnement de v1.
+> **Deux brouillons d'amorçage** signés `jeremy` attendent sa relecture au composeur.
 
-1. **La newsletter demande Resend** (§3) et aucune clé `RESEND_*` n'est dans l'environnement —
-   même famille de blocage que P4. Le reste de F9 (MDX, catégories, auteurs, liens vers les
-   fiches, RSS, sitemap) n'en dépend pas.
-2. **Q13 borne le journal public** : ce qui est indexable vit dans `app/(public)/` et ne nomme
-   aucun produit ; le score Lighthouse se mesure sur ces routes-là. Un article qui parle d'un
-   cigare nommé vit derrière le portail. C'est une contrainte éditoriale forte, à trancher par
-   ADR (où vivent les articles, qui les écrit, comment un même texte se coupe en deux).
-3. **Le contenu est un geste humain.** Écrire des articles n'est pas au pouvoir d'une session ;
-   ce qui l'est : le schéma, les gabarits MDX, le flux RSS, la mesure Lighthouse.
+### 10. P7 — la boutique et Stripe. **À vérifier avant de commencer : les clés**
+
+Le §9 lui donne « commande test bout en bout + webhook idempotent ». Le §3 prévoit Stripe
+Checkout (ADR 0003, encore Proposée). Aucune variable `STRIPE_*` n'a été vue dans
+l'environnement de cette session — **vérifier avant d'écrire une ligne** : sans clés, P7 est un
+P4 de plus (l'écran d'un paiement qui ne peut pas s'exercer), et il faut le dire plutôt que de
+livrer un panier qui ne se vide jamais. Ce qui reste faisable sans clés : le schéma `shop` (le
+`CHECK` anti-tabac du §5.8, le trigger de refus lexical — `lib/compliance/tobacco-terms.ts`
+existe pour lui), le catalogue et le panier. Le critère de sortie, lui, exige Stripe.
+
+### 11. P8 — modération, RGPD, i18n, PWA, perf, a11y. **Le travail qui n'attend personne**
+
+Critère : « audit axe-core 0 violation critique ». C'est aussi la phase du back-office de
+modération — la Q12 y prend sa réponse d'écran — et des dettes listées sous « À me signaler »
+qui attendent l'ouverture.
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
-- **Un abonnement `jeremy` → `test_un` est en base et n'est pas d'un parcours** (23 août, 10 h 15,
-  fait à la main depuis le site). Laissé en place, comme les entrées de `test_deux`.
+- **Vous avez utilisé le site pendant la session, et rien de ce que vous avez écrit n'a été
+  touché** : un abonnement `jeremy` → `test_un` (10 h 15), deux entrées de carnet de plus chez
+  `test_deux` (les nouvelles fiches Macanudo, vers 12 h), et une publication « Publier au fil »
+  de `test_deux` sur l'une d'elles. `public.reviews` compte donc **4** lignes et `public.posts`
+  **1**, aucune des cinq n'étant d'un parcours.
+- **Les deux brouillons d'amorçage du journal sont à vous** : `vitole-cepo-module…` (public,
+  lexique) et `la-cape-du-claro-a-l-oscuro` (gated, lié à une fiche), signés de votre compte,
+  relus par personne. **Les publier est votre geste** — depuis `/journal/ecrire` — et l'ADR 0012
+  le dit en toutes lettres. La ligne éditoriale (sujets, rythme, signatures) est sa question
+  ouverte.
+- **La newsletter promise par F9 n'existe pas** (ADR 0012, D5) : pas de clé Resend, pas de
+  domaine (Q7). Le flux RSS tient lieu d'abonnement. **À me dire si la newsletter doit précéder
+  l'ouverture** — elle demande une clé, un domaine, un double opt-in et une ligne au registre
+  des consentements.
+- **Le levier `SITE_INDEXABLE` existe et reste fermé.** Le jour où Q1 tranche, l'ouverture de
+  l'indexation est une variable d'environnement sur le déploiement — robots.txt et la méta
+  passent ensemble à la frontière Q13, gated toujours exclu.
 - **Le seed des lieux date de 2018 et sous-représente certaines villes.** Lyon n'a que 3 lieux
   nommés au registre (sur 157), Montpellier 4, Strasbourg 4 — le registre ne donne pas d'enseigne
   à la plupart de leurs débits, et l'ADR 0011 refuse d'en inventer une. La règle de sélection est
@@ -1307,6 +1347,25 @@ pas un reste de parcours.
 | Fiche cigare, « Je fume ce cigare » + « Où ça » | La publication du fil porte « chez <le lieu> », en lien. Sans lieu choisi, rien — dire où l'on fume est une confidence, jamais une exigence. |
 | **En `jeremy`** : « Marquer fermé » sur une fiche | « Fiche marquée fermée. » La fiche reste lisible avec son bandeau (« pour qu'on ne le re-propose pas ») ; elle sort de la liste et de la recherche. |
 | `/lieux` avec `venues_enabled=false` (UPDATE du drapeau) | 404 sur toute la section, nav comprise. Le remettre à true rallume tout. |
+
+---
+
+## LES URL À OUVRIR POUR RECETTER LE JOURNAL (livré le 23 août au soir)
+
+Un onglet en **navigation privée sans passer le portail** (c'est lui qui prouve la frontière), un
+onglet `jeremy` (seul compte `editor`). Les deux brouillons d'amorçage sont en base, à vous.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/journal` en navigation privée | Le journal se lit **sans portail**. Vide tant que rien n'est publié : l'invitation, et le lien « Flux RSS ». La phrase du bas dit que d'autres articles vivent derrière le portail, avec le lien qui y mène. |
+| `/journal/flux.xml` | Du RSS. Il ne portera **que** les articles publics — jamais un gated, jamais un brouillon. |
+| **En `jeremy`** : `/journal/ecrire` | Les deux brouillons d'amorçage (« Vitole, cepo, module… », « La cape… »), chacun avec « Reprendre ». La page blanche en dessous. En `test_un` : « réservé aux relecteurs », et pourquoi. |
+| ⟶ reprendre « Vitole, cepo, module », **Publier** | « Article publié. » (`role=status`). En navigation privée, `/journal` le montre ; le sitemap et le flux le portent. |
+| ⟶ l'article publié | Titres `##` rendus, listes, temps de lecture calculé. Le corps est du texte : collez `<script>` dans un brouillon d'essai, il s'affichera en toutes lettres. |
+| ⟶ reprendre « La cape » (gated, lié à une fiche), **Publier** | En navigation privée **sans portail**, son URL renvoie à `/majorite` — et le portail **ramène à l'article**. Le flux et le sitemap l'ignorent. Sous l'article : « Les fiches dont il est question », en lien. |
+| ⟶ passer « La cape » en audience publique | **Refusé en toutes lettres** : « Retirez d'abord les fiches liées ». C'est le garde-fou Q13, structurel (deux triggers). |
+| ⟶ **Dépublier** un article | « Article dépublié. » Son URL redevient 404 — jamais « accès refusé ». |
+| `robots.txt` | `Disallow: /` — le levier `SITE_INDEXABLE` est fermé tant que Q1 n'est pas tranchée. Ouvert (`SITE_INDEXABLE=1` sur le déploiement), il n'autorise que les routes publiques et `/journal`. |
 
 ---
 

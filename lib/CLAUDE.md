@@ -35,6 +35,8 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `social/confirmations.ts` | Ce qu'un `?fait=…` veut dire, pour les pages qui en reçoivent un. |
 | `social/groups.ts` | Les bornes d'un club, d'un événement et d'un message, le vocabulaire des deux enums, et **le slug d'un club**. |
 | `venues/model.ts` | Les bornes d'un lieu et d'un avis, les trois critères du §5.7, la forme de `hours`, le slug d'un lieu. |
+| `journal/model.ts` | Les bornes d'un article, les six catégories, le temps de lecture calculé. |
+| `journal/markdown.ts` | **Le sous-ensemble Markdown de l'ADR 0012**, parsé en arbre typé — jamais en HTML. Ses tests portent les cas d'injection. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 

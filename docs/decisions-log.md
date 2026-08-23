@@ -2,6 +2,49 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## P6 — le journal, et un parseur qui refuse en ne connaissant pas
+
+### Ce qui est livré
+
+L'ADR 0012 avant la première ligne de SQL, la migration `0017` (`articles`, `article_links`,
+huit assertions SQL), quatre écrans, le flux RSS, le sitemap élargi aux articles publics, le levier
+d'indexation d'ouverture (`SITE_INDEXABLE`, fermé par défaut — Q1), dix-sept tests unitaires sur le
+parseur et les bornes, **24 assertions de parcours** sur trois contextes — dont un visiteur sans
+cookie de portail, qui est celui qui prouve la frontière de Q13.
+
+**Le critère de sortie du §9 est mesuré : Lighthouse SEO = 100** sur `/`, `/journal` et un article
+public, levier ouvert, en local (`npx lighthouse@12`, chromium du conteneur). La production reste
+`noindex` partout tant que Q1 n'est pas tranchée — le chiffre décrit la configuration d'ouverture,
+et le levier qui la produit tient en une variable d'environnement.
+
+### Trois décisions qui ne méritaient pas d'ADR
+
+**Le parseur refuse en ne connaissant pas.** Le sous-ensemble Markdown de l'ADR 0012 rend
+littéralement tout ce qu'il ne reconnaît pas : `<script>` s'affiche en toutes lettres, un lien
+`javascript:` ou relatif reste du texte. Il n'y a pas de liste noire à maintenir — la surface
+d'attaque est la grammaire, et la grammaire est petite. Le parcours le prouve depuis un navigateur,
+sur un article réellement publié portant l'injection.
+
+**`safeSuite` a appris une exception, et une seule.** Le garde-fou d'open-redirect refusait tout
+chemin public — un retour vers une page qui n'exige pas le portail est un rebond pour rien. Un
+article `gated` vit sous un chemin public ET exige le portail : le préfixe `/journal` est donc la
+seule exception, et le parcours traverse la frontière dans les deux sens — renvoyé au portail sans
+cookie, ramené à l'article après.
+
+**Les deux brouillons d'amorçage sont signés du compte du porteur et restent des brouillons.**
+Écrits pour montrer la forme (un lexique public, un guide gated lié à une fiche), relus par
+personne : les publier est son geste, pas celui d'une session. Le nettoyage du parcours les
+distingue explicitement de ses propres écritures.
+
+### Un piège d'outillage, pour la prochaine fois
+
+**`pnpm tsx -e "import('…')"` EXÉCUTE le module.** Un parcours s'importe pour se vérifier, et son
+`main()` se lance au chargement : la « vérification de types » a démarré un vrai navigateur contre
+la vraie base. Tué avant d'écrire quoi que ce soit — vérifié en base, pas supposé. Un parcours se
+vérifie par `tsc --noEmit`, jamais par un import.
+
+---
+
 ## P5 — les lieux, et un drapeau qui ralentissait toutes les pages
 
 ### Ce qui est livré

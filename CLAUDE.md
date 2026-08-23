@@ -210,6 +210,37 @@ question ouverte de l'ADR) et la **revendication en un clic** (rien ne se revend
 déclaration). Le seed date de 2018 et le dit sur chaque fiche ; une fermeture se signale
 (`inaccurate`) et se consigne en `closed`, que le rejeu du seed ne rouvre jamais.
 
+## P6 — le journal, livré le 23 août 2026
+
+ADR 0012 avant le SQL, migration `0017` (`articles`, `article_links`), quatre écrans
+(`/journal`, `/journal/[slug]`, `/journal/ecrire`, `/journal/flux.xml`), 8 assertions SQL,
+24 assertions de parcours sur trois contextes — dont un visiteur **sans** cookie de portail, qui
+est celui qui prouve la frontière. Critère de sortie mesuré : **Lighthouse SEO = 100** sur `/`,
+`/journal` et un article public, levier d'indexation ouvert.
+
+**Cinq règles qui ne se contournent pas, héritées de l'ADR 0012 :**
+
+1. **Un article est du contenu, jamais du code.** La colonne est `body_md`, le rendu passe par le
+   sous-ensemble Markdown de `lib/journal/markdown.ts` — arbre typé, éléments React, jamais
+   `dangerouslySetInnerHTML`, jamais de MDX. L'auto-contrôle de 0017 échoue si une colonne `*mdx*`
+   apparaît, et les tests du parseur portent les cas d'injection.
+2. **Une adresse, deux audiences (Q13).** `/journal` est le seul préfixe public du site ; un
+   article `gated` se défend lui-même — cookie du portail exigé par sa page, `noindex`, absent du
+   sitemap et du flux RSS. `safeSuite` connaît l'exception du préfixe pour ramener le lecteur
+   après le portail.
+3. **Pas de fiche liée sur un article public** — le lien EST la mention de produit que Q13
+   interdit. Deux triggers tiennent la règle dans les deux sens.
+4. **Le journal s'écrit par les `editor`, qui publient eux-mêmes** — écrire est le privilège,
+   contrairement au wiki où l'auteur ne publie pas.
+5. **Pas de newsletter en v1** : pas de clé Resend, pas de domaine (Q7), et collecter des adresses
+   sans pouvoir ni envoyer ni confirmer serait une table de données personnelles au service de
+   rien. **Le flux RSS est l'abonnement.**
+
+**Le levier d'ouverture existe** : `SITE_INDEXABLE=1` fait passer `robots.txt` et la méta robots
+du tout-interdit à exactement la frontière Q13. Il reste fermé tant que Q1 n'est pas tranchée.
+Deux **brouillons d'amorçage** signés du compte du porteur attendent sa relecture — les publier
+est son geste (question ouverte de l'ADR 0012).
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent
