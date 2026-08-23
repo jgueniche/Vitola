@@ -1,8 +1,9 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Réécrit dans la nuit du 22 au 23 août 2026,
-> après la cave et le reste de P1. **P2 est fermée, P1 aussi ; la prochaine est P3.**
+> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 23 août 2026 au matin, après le
+> social. **P1, P2 et P3 sont fermées ; la prochaine est P4 — et elle est bloquée, voir tout en
+> bas.**
 
 ---
 
@@ -13,12 +14,15 @@ Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BR
 `app/`, `lib/`, `supabase/` — les trois ont été enrichis par la dernière session et leurs nouveaux
 paragraphes sont exactement ceux qu'on regrette de ne pas avoir lus.
 
-**Branche de travail** : celle qui t'est assignée, à créer depuis `master`, **qui contient tout le
-travail décrit ici** (PR #9 fusionnée le 23 août 2026). Vérifie d'un coup d'œil plutôt que de
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. Attention : au moment
+d'écrire ceci, `master` s'arrête à la PR #9 et **tout P3 est sur `claude/vitola-p3-social-kxl9pd`**,
+poussée mais pas encore fusionnée. Vérifie où en est `master` avant de partir de lui — si #9 est
+toujours le dernier commit, c'est de la branche P3 qu'il faut repartir, sans quoi tu réécriras le
+social. Vérifie d'un coup d'œil plutôt que de
 supposer : `git log --oneline origin/master -3` doit montrer la fusion de #9, et `/api/health` sert
 le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **neuf migrations**, toutes dans
+Le code du dépôt et l'état de la base concordent : **treize migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet. Le carnet n'en a demandé aucune — la 0003
 avait tout prévu, ce qui est la meilleure chose qu'on puisse dire d'une ADR écrite avant le SQL. La
 cave en a demandé une, la 0008, et ses six empreintes de schéma ont été comparées entre le fichier
@@ -43,13 +47,13 @@ pardonné.
 
 ## OBJECTIF : AMENER LE SITE À SA VERSION DÉFINITIVE
 
-**La v1 du brief, phases P2 à P8 comprises.** C'est plusieurs sessions ; l'ordre est donné plus bas.
+**La v1 du brief, phases P4 à P8 comprises** — P1, P2 et P3 sont fermées. C'est plusieurs sessions ; l'ordre est donné plus bas.
 Il n'est pas négociable sans me le dire, parce que chaque phase ouvre la suivante et qu'une phase
 qu'on quitte avant son critère de sortie est une dette qu'on ne retrouve qu'en production.
 
 **Le rythme attendu : enchaîne.** Ne t'arrête pas au premier item livré pour me demander la suite.
-Prends l'item 4, livre-le en entier — écrans compris, parcourus, nettoyés derrière —, puis passe au
-5, puis au 6, jusqu'à ce que la session soit pleine. Un item est fini quand il est **parcourable et
+Prends l'item suivant, livre-le en entier — écrans compris, parcourus, nettoyés derrière —, puis le
+suivant, jusqu'à ce que la session soit pleine. Un item est fini quand il est **parcourable et
 parcouru**, pas quand il compile. Commite par item, avec `pnpm check` dans la même commande, pour
 que ce qui est fait reste acquis même si la session s'arrête au milieu du suivant.
 
@@ -68,7 +72,9 @@ Tout le reste : applique le défaut documenté et signale-le dans ton compte ren
 - **Un droit, une obligation légale ou un écran qui écrit se parcourt une fois avec un vrai compte
   avant d'être déclaré livré.** Compiler ne prouve rien, et deux sessions de suite l'ont payé : sept
   bugs sont passés à travers un `pnpm check` vert, 247 tests unitaires, 56 e2e et toutes les
-  assertions SQL du dépôt.
+  assertions SQL du dépôt. P3 en a ajouté cinq de plus, dont **quatre étaient verts** — et l'un
+  d'eux n'a été trouvé ni par une page ni par une assertion, mais en **comptant les lignes laissées
+  en base** après un parcours qui se déclarait vert.
   Aucun n'était visible d'un compilateur ; la plupart ne se voient pas non plus en relisant le code.
   Le pire des sept — **aucun membre ne pouvait modifier son profil** — dormait depuis la migration
   0002, et il a suffi d'ouvrir `/parametres` avec un vrai compte pour le voir en dix secondes.
@@ -143,6 +149,22 @@ reste **ferme P1**.
   réel : `200`, `Cache-Control: no-store, private`, 22 sources rendues.
 - Critère de sortie P1 mesuré : 0,14 à 0,97 ms sur données réelles, 27,5 ms sur 50 000 lignes
   synthétiques. Le §9 demandait « < 300 ms sur 5 000 cigares » : tenu.
+- **Le social (P3)** — **66 assertions de parcours, deux comptes, contre la vraie base, 0 échec** :
+  - `/fil` — deux onglets (abonnements, découverte), **pagination keyset par lien**, composeur
+    (note ou question) avec ses deux portées et la phrase qui dit pourquoi il n'y en a que deux ;
+  - `/fil/[id]` — la publication, ses braises, ses commentaires, « Signaler », « Supprimer » ;
+  - « Je fume ce cigare » depuis la fiche cigare ; « Publier au fil » depuis une entrée de carnet,
+    dont la publication **suit la portée de l'entrée** et disparaît si on la referme ;
+  - `/membres` — l'annuaire, `<form method="get">`, zéro JavaScript ;
+  - `/membres/[handle]` — profil public honorant **les trois clés de confidentialité**, abonnés,
+    abonnements, publications, entrées publiques, cave montrée, s'abonner, se désabonner,
+    **retirer un abonné**, bloquer, débloquer, signaler ;
+  - `/notifications` — abonnement, braise, commentaire, partage de carnet ; compteur dans la nav ;
+  - `/parametres` — une section « Personnes bloquées », parce qu'un déblocage doit être trouvable.
+- **Critère de sortie P3 mesuré** : keyset sur `(created_at, id)`, **un seul appel par page**,
+  2,5 ms en découverte et 4 ms en abonnements sur 50 000 publications, **1,4 ms pour une page située
+  10 000 lignes plus loin**. Et parcouru : 21 publications, 20 sur la première page, une seconde
+  page qui ne partage aucune ligne avec la première.
 
 ### Comptes de QA — mot de passe `cigardeur` pour les trois
 
@@ -156,7 +178,7 @@ reste **ferme P1**.
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Neuf migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Treize migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -170,6 +192,10 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0007` | `ref_service_role_grants` | `supabase/migrations/0007_ref_service_role_grants.sql` |
 | `0008` | `cave` | `supabase/migrations/0008_cave.sql` |
 | `0009` | `profile_guard` | `supabase/migrations/0009_profile_guard.sql` |
+| `0010` | `social` | `supabase/migrations/0010_social.sql` |
+| `0011` | `profile_privacy` | `supabase/migrations/0011_profile_privacy.sql` |
+| `0012` | `unblock_is_reachable` | `supabase/migrations/0012_unblock_is_reachable.sql` |
+| `0013` | `post_card` | `supabase/migrations/0013_post_card.sql` |
 
 **Les deux dernières sont enregistrées sous un horodatage**, pas sous `0008` / `0009` :
 `20260822222420` et `20260822232400`. C'est l'outil d'application qui numérote, pas le fichier.
@@ -186,7 +212,7 @@ cinq minutes, `select public.refresh_cigar_stats()`.
 
 ```
 ref.manufacturers          30      public.profiles             3
-ref.brands                114      public.reviews              0
+ref.brands                114      public.reviews              1  ← pas de moi
 ref.lines                   0  ←   public.review_shares        0
 ref.vitolas                51      public.review_thirds        0
 ref.cigars                940      public.comments             1
@@ -197,16 +223,30 @@ ref.cigars                940      public.comments             1
   verified_by non nul       0  ←   public.feature_flags        5
 ref.box_codes              18      mod.reports                 0
 ref.cigar_images            0      mod.moderation_actions      0
-ref.cigar_revisions         0      public.cigar_stats     0 ligne (vue matérialisée)
+ref.cigar_revisions         0      public.cigar_stats     1 ligne (vue matérialisée)
                                    public.humidors             0
                                    public.humidor_items        0
                                    public.humidor_events       0
                                    public.humidor_readings     0
+                                   public.follows              0  ← P3
+                                   public.blocks               0
+                                   public.posts                0
+                                   public.post_reactions       0
+                                   public.post_comments        0
+                                   public.notifications        0
 ```
 
-`reviews` est à zéro et c'est **normal cette fois** : les entrées écrites en parcourant le carnet ont
-été effacées derrière la vérification, comme le demande « Nettoie derrière une vérification » plus
-bas. La table a ses écrans, elle attend des membres. `ref.lines` à zéro est une **décision de v1**,
+**`public.reviews` contient UNE ligne, et elle n'est pas de moi.** Une entrée publique de
+`test_deux` sur `macanudo-inspirado-white-toro`, notée 90, écrite le 23 août à 06 h 17 — pendant ma
+session mais sur un cigare qu'aucun de mes parcours ne touche, avec un texte qu'aucun n'écrit. Je
+l'ai donc laissée, comme la ligne pré-existante de `public.comments`, et c'est pour cela que
+`cigar_stats` a une ligne. **À me dire si elle peut partir.**
+
+Les six tables de P3 sont à zéro : les parcours effacent ce qu'ils écrivent, et l'état final a été
+vérifié table par table plutôt que supposé.
+
+Les entrées écrites en parcourant sont effacées derrière la vérification, comme le demande
+« Nettoie derrière une vérification » plus bas. `ref.lines` à zéro est une **décision de v1**,
 écrite dans `CLAUDE.md` avec son déclencheur — ne la rouvre pas sans la lire. `verified_by` à zéro
 est une dette de relecture, voir « À me signaler ».
 
@@ -297,10 +337,55 @@ la clé de service, y compris pour un modérateur connecté.
 `supabase/tests/01_seed_integrity.sql` échoue si un troisième niveau apparaît, si une famille est
 vide, ou si le nombre de familles cesse d'égaler le nombre de valeurs de l'enum.
 
+**`public.follows`** — ADR 0007, D1. `follower_id!`, `followee_id!`, `created_at!`.
+PK `(follower_id, followee_id)`, `follower_id <> followee_id`. **Aucun état** : un abonnement est
+libre, asymétrique, immédiat. Deux policies DELETE et non une — se désabonner, et **retirer un
+abonné** : c'est le contrepoids de l'abonnement libre, et il est exerçable quand une approbation,
+elle, vieillit.
+
+**`public.blocks`** — `blocker_id!`, `blocked_id!`, `created_at!`. PK `(blocker_id, blocked_id)`.
+Volontairement pauvre : un blocage n'a pas de motif à donner à celui qui le subit. Lu par
+`blocked_user_ids()` et `blockers_of_me()`, pas en direct. Un trigger supprime tout abonnement dans
+les deux sens à l'insertion, et la policy INSERT de `follows` ferme l'autre côté : **aucune ligne
+d'abonnement ne peut exister entre deux personnes bloquées**, ce qui évite un prédicat de blocage
+sur le chemin chaud de la lecture du fil.
+
+**`public.posts`** — le fil (ADR 0007, D2). `id!`, `author_id!(→auth.users, cascade)`,
+`kind!(post_kind)`, `visibility!(review_visibility, défaut followers)`, `body`,
+`cigar_id(→ref.cigars, set null)`, `review_id(→reviews, cascade)`, `ember_count!`,
+`comment_count!`, `hidden_at/by/reason`, `created_at!`, `updated_at!`.
+
+Contraintes qui refuseront tes insertions :
+
+- `visibility in ('followers','public')` — **une publication ne peut être ni privée ni partagée**.
+  Écrire pour soi, c'est le carnet.
+- `(kind = 'review_share') = (review_id is not null)` — le discriminant tient dans les deux sens.
+- `kind = 'session'` ⇒ `cigar_id not null`.
+- Au moins un texte, un cigare ou une entrée (`posts_has_substance`). `body` ≤ 4000.
+- `ember_count`, `comment_count`, `updated_at`, `hidden_*` : **hors de tout grant client**. Les
+  compteurs sont recalculés par un `count()`, jamais par un delta (règle de `humidor_items.qty`).
+- `GRANT INSERT` est **colonne par colonne** ; `GRANT UPDATE` ne porte que `(body, visibility)`.
+
+**`public.post_reactions`** — la braise (§5.6). `post_id!`, `user_id!`, `kind!(reaction_kind)`,
+`created_at!`. PK `(post_id, user_id, kind)`. Aucun UPDATE : on braise ou on retire.
+
+**`public.post_comments`** — `id!`, `post_id!`, `author_id!`, `body!` (1–2000), `hidden_*`,
+`created_at!`, `updated_at!`. L'audience se déduit de la publication par un `EXISTS`. L'auteur de la
+publication peut retirer un commentaire chez lui (`post_comments_delete_host`).
+
+**`public.notifications`** — `id!`, `user_id!`, `kind!(notification_kind)`, `actor_id`, `post_id`,
+`review_id`, `created_at!`, `read_at`. **Aucun grant INSERT, à personne, et aucune policy INSERT** :
+elles naissent de triggers `SECURITY DEFINER` sur `follows`, `post_reactions`, `post_comments` et
+`review_shares`. Seule `read_at` est écrivable.
+
 **`mod.reports`** — file DSA. `id!`, `reporter_id`, `entity_schema!`, `entity_table!`, `entity_id!`,
 `reason!(report_reason)`, `detail` (≤2000), `status!(report_status)`, `created_at!`,
 `acknowledged_at`, `decided_at`, `decided_by`, `decision_note`.
-`entity_schema.entity_table` ∈ `{public.comments, public.reviews, ref.cigars, public.profiles}`.
+`entity_schema.entity_table` ∈ `{public.comments, public.reviews, ref.cigars, public.profiles,
+public.posts, public.post_comments}` — la 0010 a remplacé le CHECK de la 0004 pour ajouter les deux
+dernières. `tests/compliance/dsa.test.ts` lit désormais la **dernière** définition à travers toutes
+les migrations, et asserte les deux sens : une surface dans le CHECK sans bouton est un oubli autant
+qu'un bouton sans CHECK.
 Une décision (`upheld`/`dismissed`) exige `decided_at` **et** `decided_by`.
 
 **`mod.moderation_actions`** — `id!`, `report_id`, `moderator_id`, `verb!(moderation_verb)`,
@@ -334,9 +419,13 @@ mod.report_reason          illegal_content | tobacco_promotion | inaccurate |
                            spam | harassment | other
 mod.report_status          open | reviewing | upheld | dismissed
 mod.moderation_verb        hide | restore | warn | suspend | delete
+public.post_kind           post | session | review_share | question
+public.reaction_kind       ember
+public.notification_kind   follow | ember | post_comment | review_share
+public.feed_scope          following | discover
 ```
 
-### Policies RLS — 88 au total, toutes les tables couvertes
+### Policies RLS — 127 au total (dont 8 RESTRICTIVE), toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -352,26 +441,50 @@ mod.reports              3  select_own, select_moderator, update_moderator
 mod.moderation_actions   1  select_moderator
 ref.cigars               5  · ref.cigar_revisions 7 · ref.cigar_images 5
 ref.brands / lines / vitolas / manufacturers / box_codes  3 chacune
-public.humidors          4  select_own, insert_own, update_own, delete_own
-public.humidor_items     4  · public.humidor_events 2 (ajout seul) · public.humidor_readings 3
+public.humidors          5  select_own, select_shown (P3), insert/update/delete_own
+public.humidor_items     5  · public.humidor_events 3 · public.humidor_readings 4
+                            — dont UNE RESTRICTIVE chacune, voir plus bas
+public.follows           4  select_all, insert_own, delete_own, delete_followee
+public.blocks            3  select_own, insert_own, delete_own
+public.posts             9  select_public/own/followers/moderator, insert_own, update_own,
+                            delete_own, delete_moderator, + 1 restrictive de blocage
+public.post_reactions    3  · public.post_comments 8 (dont 1 restrictive)
+public.notifications     3  select_own, update_own, delete_own — AUCUNE insert
 ```
 
-**La cave est strictement propriétaire en v1.** Les trois tables filles rejoignent `humidors` par
-un `EXISTS`, et P3 **ajoutera** une policy pour `privacy.show_humidor` plutôt que d'en modifier une
-— comme pour `reviews`. Piège consigné d'avance dans l'ADR 0006 : `profile_settings` n'est lisible
-que de son propriétaire, donc lire `privacy->>'show_humidor'` chez quelqu'un d'autre ne renverra
-jamais rien. Ce sera un troisième accesseur `SECURITY DEFINER`, après `current_app_role()` et
-`owns_review()`.
+**Cinq policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments` et
+`profiles`. C'est la seule sémantique qui puisse **retirer** une ligne : les permissives sont
+OR-ées, donc en ajouter une ne peut jamais restreindre. Chacune épargne ses propres lignes.
+
+Les quatre premières lisent `blocked_user_ids()` — **les deux sens**. `profiles` lit
+`blockers_of_me()` — **un seul**, et la différence est la correction de la 0012 : cacher le profil
+dans les deux sens rendait le seul écran portant « Débloquer » introuvable, donc un blocage était
+définitif. Celui qui bloque voit désormais le profil de sa cible, jamais son contenu.
+
+**Trois policies `RESTRICTIVE` propriétaires** sur `humidor_items`, `humidor_events` et
+`humidor_readings`. Sans elles, `humidors_select_shown` cascade : les tables filles rejoignent le
+parent par un `EXISTS` soumis à sa RLS, donc ouvrir une cave ouvrait **le grand livre**, c'est-à-dire
+quand la personne a fumé quoi. Rien ne casse si elles disparaissent — une lecture rend simplement
+plus. C'est l'invariant le plus facile à défaire sans le voir, et l'auto-contrôle de 0010 le
+vérifie.
+
+**La cave s'ouvre à un tiers depuis la 0010, et seulement à moitié.** `humidors_select_shown` est
+une policy de **plus**, comme l'ADR 0006 D4 l'avait prévu, et l'accesseur `SECURITY DEFINER` qu'elle
+annonçait existe. Ce que l'ADR n'avait pas prévu, c'est que l'ouverture **cascade** vers les trois
+tables filles — voir les policies restrictives ci-dessus. Et le prix ne traverse pas du tout : une
+policy filtre des lignes, elle ne sait pas cacher une colonne, donc la lecture d'un tiers passe par
+`shared_humidor_shelf()`, qui projette `cigar_id, qty, aging_start_date` et rien d'autre.
 
 **Les policies SELECT de `reviews` sont découpées par rôle, et ce n'est pas du style.** Une seule
 policy `to anon, authenticated` faisait évaluer la sous-requête sur `review_shares` par un visiteur
 anonyme, qui n'a aucun grant dessus : `permission denied for table review_shares` sur un simple
 `select from reviews`. Ne les recolle pas.
 
-**La branche `followers` de la policy SELECT n'existe pas encore** — `public.follows` arrive en P3.
-Une entrée `followers` est donc aujourd'hui lisible de son seul auteur, et l'interface le **dit**.
-`tests/unit/reviews-model.test.ts` échoue le jour où cette branche apparaît : l'avertissement devra
-être retiré en même temps. C'est voulu.
+**La branche `followers` de la policy SELECT existe depuis la 0010**, ajoutée comme une policy de
+**plus** — les quatre autres ne sont pas touchées, parce qu'elles sont découpées par rôle et que les
+recoller casserait la lecture publique. `tests/unit/reviews-model.test.ts` a retourné son assertion
+le même jour : elle exige maintenant que la branche existe **et** que l'avertissement
+« l'abonnement n'existe pas encore » ait quitté `messages/fr.json`.
 
 ### Fonctions appelables
 
@@ -387,6 +500,35 @@ Une entrée `followers` est donc aujourd'hui lisible de son seul auteur, et l'in
 | `public.moderation_records_for_subject(uuid)` | **oui** | ✗ | ✗ | **✓** |
 | `public.humidor_event_delta(type,int)` | non | ✗ | ✓ | ✓ |
 | `public.smoke_from_humidor(uuid,int,date,visibility,numeric,text)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+| `public.feed_page(feed_scope,timestamptz,uuid,int)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+| `public.post_card(uuid)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+| `public.blocked_user_ids()` | **oui** | ✗ | ✓ | ✓ |
+| `public.blockers_of_me()` | **oui** | ✗ | ✓ | ✓ |
+| `public.blocks_between(uuid)` | non — délègue | ✗ | ✓ | ✓ |
+| `public.profile_privacy(uuid)` | **oui** | ✗ | ✓ | ✓ |
+| `public.shows_humidor(uuid)` | **oui** — délègue | ✗ | ✓ | ✓ |
+| `public.shared_humidor_shelf(uuid)` | **oui** | ✗ | ✓ | ✓ |
+
+**`feed_page()` et `post_card()` sont en droits d'appelant, et l'auto-contrôle de leur migration
+échoue si elles passent un jour en `DEFINER`.** C'est la décision D1 de l'ADR 0006 réappliquée : un
+appel PostgREST est une transaction, pas un privilège. Sur `post_card()` c'est plus visible encore —
+elle n'a **aucun** prédicat d'audience dans son corps, donc la RLS est littéralement la seule chose
+qui décide.
+
+**`feed_page()` filtre par ONGLET, jamais par audience**, et confondre les deux a coûté un bug :
+`discover` filtre `visibility = 'public'` dans son corps, ce qui dit de quoi la page parle. S'en
+servir pour lire *une* publication rendait toute publication réservée introuvable à son adresse.
+`post_card()` est la fonction de l'autre geste.
+
+**`blocked_user_ids()` rend un TABLEAU et pas un prédicat**, et c'est une mesure : un prédicat dans
+une policy s'évalue une fois **par ligne examinée** — 2 420 appels pour rendre vingt lignes de fil.
+Enveloppé dans un `(select …)`, le tableau s'évalue une fois par requête, en InitPlan. 29 ms → 2 ms.
+Écrire `x = any ((select f())::uuid[])` : sans le cast, PostgreSQL lit la forme ensembliste et
+refuse `uuid = uuid[]`.
+
+**`shows_humidor()` délègue à `profile_privacy()`** depuis la 0011, et l'auto-contrôle vérifie
+qu'elle le fait toujours. Deux fonctions qui interprètent la même clé finissent par en dire deux
+choses, et la divergence se lirait comme une cave montrée sur un profil et refusée par la policy.
 
 **`public.is_privileged_context()` a été supprimée par la 0009, et c'est le bug le plus cher de la
 session.** Elle était `SECURITY INVOKER` et n'était accordée à personne — la 0002 le voulait ainsi,
@@ -511,41 +653,60 @@ faites** :
   `msrp_eur` est en base sur 900 fiches, et aucun écran ne l'affiche. C'est la Q19, et c'est un
   drapeau qui attend une réponse, pas un branchement oublié.
 
-### 6. Les phases, dans l'ordre du §9 — **commence par là, à P3**
+### ~~6. P3, le social~~ — **livrée le 23 août 2026 au matin**
 
-P3 social (`follows`, feed keyset, braises, clubs, événements, messagerie, profils publics) → P4
-scan → P5 lieux → P6 éditorial/SEO → P7 boutique → P8 modération, i18n, PWA, perf, accessibilité.
+ADR 0007 avant le SQL, migrations `0010` à `0013`, 32 assertions SQL, 20 tests unitaires,
+**66 assertions de parcours** contre la vraie base avec deux comptes, nettoyage vérifié à zéro
+ligne. Le détail de ce qu'elle a tranché et des cinq bugs qu'elle a trouvés est dans
+`docs/decisions-log.md`, section « P3 ». Les URL à ouvrir sont plus bas.
 
-**P3 a trois dettes qui l'attendent, toutes nommées et toutes prêtes**, et c'est la raison pour
-laquelle elle vient maintenant plutôt que plus tard :
+**Les trois dettes sont refermées** : la branche `followers` de `reviews` existe et l'avertissement
+d'interface est parti avec elle ; `show_humidor` ouvre une cave **sans ouvrir son grand livre ni son
+prix** ; `show_reviews` et `show_country` sont lus par un écran de profil.
 
-1. **La branche `followers` de la policy SELECT de `reviews` n'existe pas** — elle attend
-   `public.follows`. Une entrée « Mes abonnés » n'est donc lisible aujourd'hui que de son auteur, et
-   l'interface le **dit** en toutes lettres. `tests/unit/reviews-model.test.ts` échoue le jour où la
-   branche apparaît : l'avertissement doit partir dans le même commit. C'est voulu.
-2. **`privacy.show_humidor` est écrit, réglable dans `/parametres`, et rien ne le lit.** La cave est
-   strictement propriétaire ; le drapeau attend sa policy. Le piège est consigné d'avance dans
-   l'ADR 0006 : `profile_settings` n'est lisible que de son propriétaire, donc lire
-   `privacy->>'show_humidor'` chez autrui ne renverra **jamais** rien. Il faudra un troisième
-   accesseur `SECURITY DEFINER`, après `current_app_role()` et `owns_review()`. On **ajoute** une
-   policy, on n'en modifie aucune.
-3. **`privacy.show_reviews` et `show_country` ont le même statut** : réglables, honorés nulle part,
-   parce que rien ne lit encore le profil d'autrui. Le jour où un profil public existe, ce sont ces
-   trois clés qui décident de ce qu'il montre — et `is_discoverable`, lui, est déjà honoré.
+Le critère de sortie du §9 est **mesuré** : keyset sur `(created_at, id)`, un seul appel par page,
+2,5 ms en découverte et 4 ms en abonnements sur 50 000 publications synthétiques, et **1,4 ms pour
+une page située 10 000 lignes plus loin** — un keyset est plat en profondeur, c'est toute sa raison
+d'être. Parcouru aussi dans un navigateur : vingt-et-une publications, vingt sur la première page,
+un lien « suite » dont le curseur est une date **et** un identifiant, une seconde page qui ne
+partage aucune ligne avec la première.
 
-Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
+**Trois choses de P3 ont été délibérément laissées de côté**, et il faut les savoir avant de les
+croire faites :
 
-| Phase | Critère |
-|---|---|
-| P2 | Créer une dégustation et décrémenter la cave de bout en bout |
-| P3 | Feed paginé keyset, 0 requête N+1 |
-| P4 | Benchmark top-3 ≥ 85 % publié |
-| P5 | 200 lieux seedés, recherche 25 km < 200 ms |
-| P6 | Lighthouse SEO ≥ 95 |
-| P7 | Commande test bout en bout + webhook idempotent |
-| P8 | Audit axe-core 0 violation critique |
+- **Clubs, événements et messagerie** (§5.6, F7) ne sont pas créés. Le §9 borne P3 à « profils,
+  follows, feed, publications, braises, commentaires » et son critère ne parle que du fil. Chacun
+  est une table et des écrans à part entière ; la messagerie est en outre un régime de données
+  différent — un message privé sur une donnée art. 9 n'est pas une publication, et il vaut sa propre
+  ADR. C'est la question ouverte de l'ADR 0007.
+- **Les réactions autres que la braise.** `reaction_kind` a une seule valeur. En ajouter une est
+  bon marché : elle n'apparaît dans aucune policy, donc pas de migration en deux temps comme pour
+  `review_visibility`.
+- **`posts.venue_id`** (§5.6) n'existe pas. Il arrivera avec P5 ; l'ajouter maintenant aurait été
+  une colonne que rien ne remplit et qu'aucune policy ne lit.
 
----
+### 7. P4 — le scan de bague. **BLOQUÉE, et c'est à toi de le dire**
+
+C'est la phase suivante dans l'ordre du §9, et elle **ne peut pas être livrée depuis une session
+distante en l'état**. Deux raisons indépendantes, aucune contournable par du code :
+
+1. **Aucune clé.** Le §6 demande un VLM (Claude vision) et un endpoint d'embeddings image
+   (SigLIP/CLIP via Replicate ou HF), plus Upstash pour le quota. Ni `ANTHROPIC_API_KEY`, ni
+   `REPLICATE_API_TOKEN`, ni `UPSTASH_*` ne sont dans l'environnement. Sans le VLM et sans les
+   embeddings, un scan ne reconnaît rien : l'écran serait un appareil photo qui répond « je ne sais
+   pas ».
+2. **Aucun jeu de test, et il ne peut pas être fabriqué ici.** Le §6 exige **200 photos de bagues
+   annotées à la main** dans `tests/fixtures/bands/` et un top-3 publié dans
+   `docs/recognition-benchmark.md`, avec la phrase « Ne pas passer à la phase suivante sans ce
+   chiffre mesuré ». Le bucket `cigar-images` contient **0 objet**. Récupérer 200 photos de bagues
+   ailleurs, c'est exactement ce que le §2 interdit (art. L341-1 CPI) — et les annoter est un geste
+   humain.
+
+Ce qui **est** faisable sans clé, si le porteur du produit le demande : le schéma (`band_scans`,
+`band_embeddings` avec `pgvector`), la capture et le pHash côté client, la moitié lexicale de la
+recherche hybride (trigram + unaccent, déjà en base depuis P1), le quota adossé à Postgres plutôt
+qu'à Upstash, et l'écran avec sa dégradation gracieuse vers la recherche manuelle. Cela ne ferme
+**pas** le critère de sortie, et le brief interdit explicitement d'avancer sans lui.
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
@@ -567,11 +728,35 @@ Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
 - **`show_indicative_prices` est réglable et rien ne le lit** (Q19). Les 900 prix sont en base,
   `lib/flags.ts` sait interroger le drapeau, aucun écran n'affiche `msrp_eur`. Afficher un prix de
   tabac est exactement le genre de geste que le §2 regarde de près : je ne l'ai pas branché seul.
-- **Trois clés de confidentialité sont réglables et honorées nulle part** — `show_humidor`,
-  `show_reviews`, `show_country`. Ce n'est pas un oubli, c'est P3 : rien ne lit encore le profil de
-  quelqu'un d'autre. Mais **l'écran promet aujourd'hui quelque chose que le code ne tient pas
-  encore**, et si cela devait déranger, la réponse est de retirer les interrupteurs, pas d'attendre.
-  `is_discoverable`, lui, est bien honoré depuis P1.
+- **Les trois clés de confidentialité sont honorées, et deux ne sont pas ce qu'on croit.**
+  `show_humidor` est un **droit** : sans lui, la cave d'un tiers est illisible par n'importe quel
+  chemin. `show_reviews` et `show_country` sont des **affichages** : une entrée publique reste
+  publique sur la fiche du cigare quoi qu'en dise la première, et `profiles` est un annuaire public,
+  donc la seconde retire un pays d'une page sans en faire un secret. Les paramètres le disent
+  maintenant sous chaque interrupteur, et `PRIVACY_GOVERNANCE` porte la distinction en code.
+  **À me dire si « affichage » ne suffit pas** pour le pays : le rendre inaccessible demande de
+  sortir la colonne de `profiles`, donc une ADR.
+- **L'abonnement est LIBRE, et c'est la question ouverte de l'ADR 0007.** N'importe qui peut entrer
+  dans l'audience d'une entrée « Mes abonnés » **déjà écrite**, sans rien demander. Le contrepoids
+  est le retrait — une policy et un bouton, exerçables quand une approbation, elle, vieillit — et
+  l'écran l'annonce désormais au moment de choisir la portée. Sur une donnée que le §2 range
+  possiblement à l'art. 9, c'est la décision que je défends le moins bien, et l'ADR propose une
+  troisième voie : garder `followers` pour les **publications**, qu'on écrit pour être lues, et la
+  retirer des portées offertes au **carnet**. Cela coûte un `CHECK` et un choix de moins à l'écran.
+- **Clubs, événements et messagerie ne sont pas livrés**, et le §9 ne les demandait pas dans P3.
+  **À me dire si l'un des trois est attendu en v1** — la messagerie plus que les deux autres, parce
+  qu'un message privé sur une donnée art. 9 n'a pas le régime d'une publication, et qu'elle vaut sa
+  propre ADR.
+- **Une entrée de carnet dans la base n'est pas de moi.** `test_deux`, publique, 90/100, sur
+  `macanudo-inspirado-white-toro`, écrite le 23 août à 06 h 17. Aucun de mes parcours ne touche ce
+  cigare ni n'écrit ce texte. Laissée en place, comme la ligne de `public.comments`. **À me dire si
+  elle peut partir** — elle est la seule ligne de `cigar_stats`.
+- **`api.supabase.com` répond, dans cette session.** Le fichier disait le contraire, et c'était vrai
+  à l'époque. Conséquence : la **clé de service** est récupérable
+  (`GET /v1/projects/{ref}/api-keys?reveal=true`), donc le rafraîchissement de `cigar_stats`, l'écriture
+  d'un signalement et l'export RGPD fonctionnent en local. C'est aussi par là que les migrations de
+  P3 ont été appliquées, le MCP plafonnant sur un payload de 58 Ko. **Ne suppose ni l'un ni l'autre :
+  teste.**
 - **La cave est livrée mais n'a jamais servi d'un déploiement.** Tout ce qui est décrit plus haut a
   été parcouru **en local**, contre la vraie base : c'est le seul moyen dont dispose une session
   distante, Chromium ne joignant aucun hôte externe depuis ce conteneur. Ce qui reste à vérifier
@@ -638,13 +823,13 @@ toujours validation ; 0004 et 0005 sont acceptées.
 
 ## PIÈGES DE CET ENVIRONNEMENT, APPRIS À NOS DÉPENS
 
-- **`api.supabase.com` est refusé par la politique de sortie** de cette session : impossible de
-  récupérer une clé de service (`SUPABASE_SECRET_KEY`). Conséquence pratique : en local, tout ce qui
-  passe par la clé de service échoue — rafraîchissement de `cigar_stats`, écriture d'un signalement,
-  export RGPD. Le MCP Supabase, lui, fonctionne : il sert à vérifier l'état de la base et à jouer une
-  fonction privilégiée à la main. `/api/signalements` répond alors **500 là où la production répond
-  201** ; un **404** au même endroit veut dire tout autre chose — que la RLS a refusé de montrer la
-  cible — et les deux ne doivent jamais être confondus.
+- **`api.supabase.com` était refusé par la politique de sortie ; il ne l'est plus** — vérifié le
+  23 août. **Teste plutôt que de supposer**, dans un sens comme dans l'autre : un `curl` sur
+  `/v1/projects` qui rend `401` veut dire joignable. Quand il l'est, la clé de service se récupère
+  (`/v1/projects/{ref}/api-keys?reveal=true`) et tout ce qui en dépend marche en local. Quand il ne
+  l'est pas, `/api/signalements` répond **500 là où la production répond 201** ; un **404** au même
+  endroit veut dire tout autre chose — que la RLS a refusé de montrer la cible — et les deux ne
+  doivent jamais être confondus.
 - **La CI n'a pas de base de données.** Elle construit avec une URL Supabase de remplacement, donc
   `/cigares`, `/marques` et `/vitoles` y lèvent une exception. Conséquence non évidente : quand une
   Server Action redirige vers une page dont le fetch RSC échoue, la navigation côté client avorte et
@@ -690,8 +875,10 @@ toujours validation ; 0004 et 0005 sont acceptées.
   Python qui écrit le fichier.
 - **`tg_handle_new_user()` dérive le pseudo des 12 premiers caractères hexadécimaux de l'UUID.**
   Deux comptes de test dont les UUID partagent ce préfixe se heurtent sur `profiles_handle_key`.
-- **`pkill -f "next"` tue le shell.** Ferme le serveur par son port : `ss -lptn 'sport = :3100'`,
-  ou par `ps aux | grep next-server`.
+- **`pkill -f "next"` tue le shell**, et pas seulement le serveur : la commande **entière** s'arrête
+  là, y compris ce qui suit le `;`. Un `cp .env.local sauvegarde` placé juste après n'a jamais tourné,
+  et la vérification « e2e avec identifiants bidon » qui suivait s'est faite avec les vraies clés —
+  verte, et pour rien. Ferme le serveur par son pid : `ps -eo pid,args | grep '[n]ext-server'`.
 - **`page.request` de Playwright ne porte pas les cookies du contexte.** Mesuré : il prend un 307
   vers le portail même sur `/cave`, alors que la page rend parfaitement. Une route qui répond un
   fichier se teste donc **en cliquant** — `page.waitForEvent('download')` — et pas en la requêtant.
@@ -722,6 +909,22 @@ toujours validation ; 0004 et 0005 sont acceptées.
   laissait une cave derrière elle une fois sur trois, donc le nettoyage n'était pas fiable — et un
   nettoyage qui échoue en silence est pire que pas de nettoyage. `page.on('dialog')`, persistant,
   plus un `waitForURL` sur la page d'arrivée.
+- **Une exception n'est pas un échec, sauf si on l'écrit.** Un parcours dont le `try` lève et dont le
+  `finally` compte les assertions cochées rend « 29 assertions, 0 échec » sur une exécution
+  interrompue à l'étape 8. C'est le pire compte rendu possible : il rassure. Un `catch` qui pousse
+  l'exception dans la liste des échecs, toujours.
+- **Une boucle d'écriture ne fait pas confiance à un délai.** 700 ms entre deux publications en a
+  perdu six sur vingt-et-une, et quinze publications sur une page qui en montre vingt ressemblent à
+  une page pleine. Le signal exact que l'écriture a eu lieu est que **React a réinitialisé le
+  champ** — donc on attend que le `textarea` soit vide, et on **compte** ce qu'on a écrit avant d'en
+  déduire quoi que ce soit.
+- **Un clic sur un `<Link>` navigue côté client.** Lire `page.url()` après une attente fixe interroge
+  la page qu'on vient de quitter, et l'assertion échoue sur un produit qui marche. Lis le `href` et
+  fais un `goto`.
+- **Le nettoyage d'un parcours est une assertion déguisée.** Trois publications réservées aux abonnés
+  ont survécu à chaque exécution parce que leur page répondait 404 — donc leur bouton « Supprimer »
+  était inatteignable. Le parcours était vert ; seul un `count(*)` en base l'a dit. **Compte les
+  lignes après un parcours**, ce n'est pas de la paranoïa.
 - **Un `<input type="number" max=…>` empêche le submit**, donc le message d'erreur du serveur
   n'apparaît jamais par le chemin normal. Pour tester un refus serveur, il faut le rendre **périmé**
   — ouvrir un panneau, changer l'état ailleurs, puis valider — et c'est le seul chemin qu'aucun test
@@ -836,6 +1039,37 @@ Connecté avec `test_un`. La file de validation demande `jeremy`, seul compte au
 
 ---
 
+## LES URL À OUVRIR POUR RECETTER LE SOCIAL (livré le 23 août au matin)
+
+Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un second onglet avec `test_deux`.
+**Tout est vide au départ** : le parcours a nettoyé derrière lui, donc chaque écran commence par son
+état vide — qui est un écran, pas une erreur.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/fil` | « Votre fil est encore vide », en invitation, et le bouton vers la découverte. Au-dessus, le composeur : « Une note » / « Une question », et **deux** portées seulement, avec la phrase qui dit pourquoi — écrire pour soi, c'est le carnet. |
+| ⟶ publier « Tout le monde » | **« Publié. »** (`role="status"`), la publication apparaît, avec son badge de portée — visible **seulement chez son auteur**. |
+| ⟶ publier « Mes abonnés » | Elle apparaît aussi. **En `test_deux`, elle n'est nulle part** — ni en découverte, ni au fil. |
+| **En `test_deux`** : `/membres` | L'annuaire, `test_un` dedans. La recherche est un `<form method="get">` : la page ne charge aucun JavaScript. |
+| ⟶ `/membres/test_un`, « S'abonner » | **« Abonné. »** Puis `/fil` montre la publication réservée. Personne n'a rien approuvé : c'est la décision D1 de l'ADR 0007. |
+| **En `test_un`** : une fiche cigare, portée « Mes abonnés » | Deux phrases sous le choix : l'audience est vivante, **et l'abonnement est libre — on peut retirer un abonné, sa lecture à venir se referme, ce qu'il a déjà lu reste lu**. L'ancienne phrase « l'abonnement n'existe pas encore » a disparu ; c'était la dette n° 1. |
+| ⟶ enregistrer, puis `/carnet/<id>` | Un panneau « Publier au fil ». Aucun choix de portée : la publication prend celle de l'entrée. |
+| ⟶ publier, puis repasser l'entrée en « Moi seul » | **La publication disparaît du fil**, et l'entrée redevient illisible de l'abonné. La cascade est un trigger, pas une convention. |
+| ⟶ une entrée « Moi seul » ou « Des personnes que je nomme » | Le panneau refuse, et **nomme les deux portées qui marchent** plutôt que de griser un bouton. |
+| **En `test_deux`** : `/fil/<id>` d'une publication | « Braise » → le compte passe à 1 et le bouton dit « Retirer ma braise ». Répondre → **« Réponse publiée. »** |
+| **En `test_un`** : `/notifications` | Trois lignes : abonnement, braise, commentaire. Le compteur est dans la navigation. « Tout marquer comme lu » **navigue**, et la confirmation est sur la page d'arrivée. |
+| `/parametres`, cocher « Montrer ma cave » | **En `test_deux`**, `/membres/test_un` montre la cave : quels cigares, combien, depuis quand. **Jamais le prix** — et la page le dit. Le grand livre reste invisible. |
+| ⟶ décocher « Montrer mes entrées publiques » | Le profil dit « Ce membre ne montre pas ses entrées de carnet ». L'entrée reste publique sur la fiche du cigare : c'est un affichage, pas un droit, et les paramètres le disent sous chaque interrupteur. |
+| `/fil?onglet=decouverte` avec plus de 20 publications | « Publications plus anciennes ». **Le curseur est dans l'URL** (`?avant=<date>~<uuid>`), jamais un numéro de page — et la seconde page ne répète aucune ligne de la première. |
+| **En `test_deux`** : `/membres/test_un`, « Bloquer » | **« Personne bloquée. »** Le profil reste lisible — sinon on ne pourrait plus débloquer — mais **vide** : ni publications, ni entrées, plus rien. Le bandeau explique. |
+| ⟶ `/fil?onglet=decouverte` | Ses publications ont disparu. Son adresse directe aussi. C'est une policy `RESTRICTIVE`, donc cela vaut sur **toutes** les pages, y compris celles où l'on arrive par un lien. |
+| ⟶ `/parametres` | Section « Personnes bloquées », avec « Débloquer ». Il faut qu'elle existe : retrouver le profil demande de se souvenir d'un pseudo. |
+| ⟶ débloquer | Le contenu revient. **L'abonnement, non** : le blocage l'avait supprimé, dans les deux sens, et rien ne le ressuscite. |
+| Une publication réservée, par son adresse, en non-abonné | 404 — jamais « accès refusé », qui confirmerait qu'elle existe. |
+| `/fil` en navigation privée | Renvoie vers `/connexion`. |
+
+---
+
 ## REJOUER TOUS LES PARCOURS
 
 Chacun se rejoue d'une commande, contre la vraie base, et **nettoie derrière lui** :
@@ -846,6 +1080,7 @@ pnpm tsx tooling/parcours/cave.ts            # 42 assertions
 pnpm tsx tooling/parcours/parametres.ts      # 25 assertions
 pnpm tsx tooling/parcours/reference.ts       # 24 assertions
 pnpm tsx tooling/parcours/contributions.ts   # 26 assertions
+pnpm tsx tooling/parcours/social.ts          # 66 assertions
 ```
 
 Le mot de passe se surcharge par `PARCOURS_PASSWORD`. Ces parcours **écrivent dans la vraie base** :
