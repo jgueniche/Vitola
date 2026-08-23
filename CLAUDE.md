@@ -127,6 +127,32 @@ formulaire de dégustation, et `/statistiques` (F11).
 l'inventaire ; `reviews.visibility` gouverne qui lit l'entrée. Une entrée publique écrite depuis une
 cave privée est normale : elle dit qu'on a fumé ce cigare, jamais qu'on en a sept autres.
 
+## Fin de P1 — livrée le 22 août 2026 au soir
+
+`/parametres` (profil, préférences, confidentialité, registre de consentements, RGPD),
+`/cigares/comparer` (2 à 4 fiches), `/codes-de-boite` (décodeur), la contribution wiki
+(`/cigares/[slug]/proposer`, `/cigares/[slug]/historique`, `/contributions`), le sitemap, la carte
+OG et le contrôle de dérive des types.
+
+**Trois refus valent d'être retrouvés, parce qu'ils se rediscuteront :**
+
+1. **Le registre de consentements n'offre aucune case.** Trois des six types ne sont pas fondés sur
+   le consentement (contrat, obligation légale — art. 6.1.b et 6.1.c), et l'art. 7.4 dit qu'un
+   consentement qu'on ne peut pas refuser n'en est pas un. Les trois autres gouvernent des
+   traitements **qui n'ont pas lieu**. Demander la permission de ce qu'on ne fait pas fabrique un
+   enregistrement, pas une permission — et un registre plein de consentements à rien est pire qu'un
+   registre vide, parce qu'il ressemble à de la conformité.
+2. **Le comparateur n'affirme aucune relecture.** `ref.cigars.verified_at` est renseigné sur les
+   940 fiches et `verified_by` sur aucune : l'horodatage vient de la publication, pas d'une lecture.
+   Aucun écran ne montrait cette colonne ; le comparateur aurait été le premier.
+3. **Proposer une fiche entièrement nouvelle n'est pas construit**, et l'écran dit pourquoi :
+   `created_by` s'écrit à l'insertion et ne se modifie plus, donc une fiche créée par un relecteur
+   porterait son nom et non celui du proposeur. Dans un référentiel dont toute la valeur est la
+   provenance, cela demande une migration et une décision.
+
+**Ce qui rouvre `ref.lines` existe désormais** — la file de contribution — mais proposer une *gamme*
+n'est pas offert : il faut d'abord que des gammes existent. La décision de v1 ci-dessous tient.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent
@@ -185,6 +211,17 @@ pnpm storybook      # galerie des primitives
 - **Un état d'interface dans un composant client se referme à chaque écriture.** Une Server Action
   qui appelle `revalidatePath` provoque un nouveau rendu serveur, et le panneau qu'on venait
   d'ouvrir disparaît sous les doigts. Dans l'URL, il reste, se partage et survit au retour arrière.
+- **Un garde-fou en droits d'appelant se referme sur lui-même.** Le trigger qui protège
+  `profiles` appelait une fonction que la 0002 avait fermée aux clients : **aucun membre n'a pu
+  modifier son profil depuis P1**, et rien ne l'a vu parce qu'aucun écran n'écrivait dans cette
+  table. Trouvé en tapant une ville dans un formulaire. Voir `supabase/CLAUDE.md`.
+- **Ce qui part vers l'extérieur doit être relu depuis l'extérieur.** `og:image` pointait sur
+  `http://localhost:3000` dans un build de production — `metadataBase` n'était pas posé — et la
+  carte OG elle-même était derrière le portail, donc ne s'affichait jamais. Les deux se voient en
+  lisant le HTML rendu, aucun des deux en lisant le code.
+- **Rien de ce qui est derrière le portail ne se nomme dans un fichier qui est devant.** Sitemap,
+  robots, carte OG : ils sont lus par des gens qui n'ont pas franchi la porte et ne le peuvent pas.
+  Le sitemap se construit donc depuis `PUBLIC_PATHS`, la carte OG est unique et neutre.
 - **Les commentaires ne sont pas du code.** Les scans de conformité masquent les commentaires avant
   d'analyser : sans cela, une phrase expliquant pourquoi une chose est absente déclenche
   l'alerte que cette chose est présente.

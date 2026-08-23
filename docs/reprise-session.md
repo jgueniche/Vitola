@@ -1,28 +1,38 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 22 août 2026 au soir, après la
-> cave — qui ferme P2.
+> **aucune requête n'est nécessaire pour la découvrir**. Réécrit dans la nuit du 22 au 23 août 2026,
+> après la cave et le reste de P1. **P2 est fermée, P1 aussi ; la prochaine est P3.**
 
 ---
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
-`docs/decisions-log.md` (les huit sections — la première est de la session précédente),
+`docs/decisions-log.md` (les dix sections — la première est de la session précédente),
 `docs/adr/` (0004, 0005 et 0006 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`. Un `CLAUDE.md` par domaine complète le racine :
 `app/`, `lib/`, `supabase/` — les trois ont été enrichis par la dernière session et leurs nouveaux
 paragraphes sont exactement ceux qu'on regrette de ne pas avoir lus.
 
-**Branche de travail** : celle qui t'est assignée, à créer depuis `master`, qui contient tout le
-travail décrit ici (PR #7 fusionnée le 22 août 2026). Vérifie d'un coup d'œil plutôt que de
-supposer : `git log --oneline origin/master -3` doit montrer la fusion de #7, et `/api/health` sert
-le commit réellement déployé.
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. Une réserve, et elle
+compte : **`master` ne contient pas encore ce qui est décrit ici.** Les PR #1 à #8 y sont fusionnées,
+mais la cave, les statistiques et toute la fin de P1 vivent sur
+`claude/fichier-prompt-joint-3vtz60` — poussée, CI verte, **sans PR ouverte**, la session n'en ayant
+pas demandé. Deux chemins tiennent : ouvrir cette PR et repartir de `master` une fois fusionnée, ou
+partir de la branche elle-même. Ce qui ne tient pas, c'est de partir de `master` en croyant y
+trouver la cave. Vérifie d'un coup d'œil plutôt que de supposer :
+`git log --oneline origin/master -3`, et `/api/health` sert le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **huit migrations**, toutes dans
+Le code du dépôt et l'état de la base concordent : **neuf migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet. Le carnet n'en a demandé aucune — la 0003
 avait tout prévu, ce qui est la meilleure chose qu'on puisse dire d'une ADR écrite avant le SQL. La
 cave en a demandé une, la 0008, et ses six empreintes de schéma ont été comparées entre le fichier
-et le projet plutôt que supposées égales.
+et le projet plutôt que supposées égales. La 0009 n'était prévue nulle part : elle répare un
+garde-fou qui, depuis la 0002, interdisait à **tout** membre de modifier son propre profil.
+
+Et cette concordance n'est plus une promesse : `tooling/scripts/check-types-drift.ts` compare, à
+chaque CI, l'inventaire des objets exposés à `lib/supabase/database.types.ts`, **dans les deux
+sens** — une table absente des types échoue, un type décrivant une table disparue aussi. La dérive
+s'est produite deux fois en une soirée avant d'être outillée.
 
 **Vérifie la branche plutôt que de la supposer.** La branche assignée à la session précédente
 pointait sur un commit vieux de deux PR : `git log --oneline -3` affichait la fusion de #2 là où
@@ -60,9 +70,12 @@ Tout le reste : applique le défaut documenté et signale-le dans ton compte ren
 - Un état vide est un écran, pas une erreur : le §4.6 en fait une invitation.
 - Ne me demande pas de vérifier la base. Je vérifie par le site.
 - **Un droit, une obligation légale ou un écran qui écrit se parcourt une fois avec un vrai compte
-  avant d'être déclaré livré.** Compiler ne prouve rien, et la dernière session l'a payé trois fois
-  en une soirée : trois bugs sont passés à travers `pnpm check` vert, 165 tests unitaires et 56 e2e.
-  Aucun n'était visible d'un compilateur. Deux ne se voient même pas en relisant le code.
+  avant d'être déclaré livré.** Compiler ne prouve rien, et deux sessions de suite l'ont payé : sept
+  bugs sont passés à travers un `pnpm check` vert, 247 tests unitaires, 56 e2e et toutes les
+  assertions SQL du dépôt.
+  Aucun n'était visible d'un compilateur ; la plupart ne se voient pas non plus en relisant le code.
+  Le pire des sept — **aucun membre ne pouvait modifier son profil** — dormait depuis la migration
+  0002, et il a suffi d'ouvrir `/parametres` avec un vrai compte pour le voir en dix secondes.
 
 ---
 
@@ -73,8 +86,9 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #8 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la cave et les
-statistiques sont sur la branche de session en cours et **ferment le critère de sortie de P2**.
+PR #1 à #8 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié). La cave, les
+statistiques et le reste de P1 sont sur `claude/fichier-prompt-joint-3vtz60`, poussée et verte en
+CI : la cave **ferme le critère de sortie de P2**, le reste **ferme P1**.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
@@ -113,6 +127,22 @@ statistiques sont sur la branche de session en cours et **ferment le critère de
     « pas encore décomptée de votre cave » avec le bouton qui ferme l'écart ;
   - **`/statistiques` (F11)** : entrées, cigares fumés, note moyenne, rythme sur douze mois, les
     cigares qui reviennent, ce qui reste en cave.
+- **Le reste de P1** — **75 assertions de parcours sur trois fichiers, deux comptes, 0 échec** :
+  - **`/parametres`** — profil (pseudo, nom affiché, pays, ville, bio, découvrabilité), préférences
+    (échelle /100 ↔ /20 **déménagée depuis `/carnet`**, unité de longueur, résumé courriel),
+    confidentialité (cave, entrées, pays), consentements datés, export et effacement RGPD derrière
+    une confirmation écrite. C'est aussi cet écran qui a révélé la 0009 : **personne ne pouvait
+    enregistrer son profil**, et rien dans le dépôt ne le disait.
+  - **La contribution wiki** — `/cigares/[slug]/proposer` part des valeurs de la fiche et n'envoie
+    que le **diff** ; `/contributions` est la file, ouverte aux `editor` et au-dessus, avec le
+    garde-fou qu'un wiki demande vraiment : une proposition dont la fiche a bougé depuis est
+    signalée **champ par champ** plutôt qu'appliquée par-dessus ; `/cigares/[slug]/historique`
+    montre les propositions et leur sort.
+  - **`/cigares/comparer`** — 2 à 4 cigares côte à côte, la sélection dans l'URL donc partageable.
+  - **`/codes-de-boite`** — le décodeur, qui **refuse de deviner** : deux chiffres d'année sont
+    rendus ambigus (1998 ou 2018 ?) et le disent, une lettre d'usine inconnue est dite inconnue.
+  - **`sitemap.ts` et une carte OG unique**, à la racine, **toutes deux devant le portail et sans un
+    seul nom de marque** — `tests/compliance/seo.test.ts` échoue si l'une d'elles en nomme un.
 - `/api/gdpr/export` et `/api/gdpr/delete`. L'export a été exercé avec `test_un` contre le projet
   réel : `200`, `Cache-Control: no-store, private`, 22 sources rendues.
 - Critère de sortie P1 mesuré : 0,14 à 0,97 ms sur données réelles, 27,5 ms sur 50 000 lignes
@@ -130,7 +160,7 @@ statistiques sont sur la branche de session en cours et **ferment le critère de
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Sept migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Neuf migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -143,6 +173,12 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0006` | `signalement_et_statistiques` | `supabase/migrations/0006_signalement_et_statistiques.sql` |
 | `0007` | `ref_service_role_grants` | `supabase/migrations/0007_ref_service_role_grants.sql` |
 | `0008` | `cave` | `supabase/migrations/0008_cave.sql` |
+| `0009` | `profile_guard` | `supabase/migrations/0009_profile_guard.sql` |
+
+**Les deux dernières sont enregistrées sous un horodatage**, pas sous `0008` / `0009` :
+`20260822222420` et `20260822232400`. C'est l'outil d'application qui numérote, pas le fichier.
+`list_migrations` affiche donc des versions qui ne ressemblent pas au dépôt, et c'est normal —
+l'ordre et le contenu sont les bons.
 
 Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref`.
 `mod` en est délibérément **absent**.
@@ -353,9 +389,20 @@ Une entrée `followers` est donc aujourd'hui lisible de son seul auteur, et l'in
 | `public.refresh_cigar_stats()` | **oui** | ✗ | ✗ | ✓ |
 | `public.file_report(uuid,text,text,text,text,text)` | **oui** | ✗ | ✗ | **✓** |
 | `public.moderation_records_for_subject(uuid)` | **oui** | ✗ | ✗ | **✓** |
-| `public.is_privileged_context()` | non | ✗ | ✗ | ✗ |
 | `public.humidor_event_delta(type,int)` | non | ✗ | ✓ | ✓ |
 | `public.smoke_from_humidor(uuid,int,date,visibility,numeric,text)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+
+**`public.is_privileged_context()` a été supprimée par la 0009, et c'est le bug le plus cher de la
+session.** Elle était `SECURITY INVOKER` et n'était accordée à personne — la 0002 le voulait ainsi,
+puisqu'elle sert à savoir si l'on tourne en `postgres`. Mais un trigger `INVOKER` sur `profiles`
+l'appelait, donc **tout `update` sur son propre profil rendait `permission denied for function
+is_privileged_context`**. Aucun test ne le voyait : les tests SQL tournent en `postgres`, qui a le
+droit. Il a fallu ouvrir `/parametres` dans un navigateur avec un vrai compte. La 0009 inline le
+prédicat dans le trigger et supprime la fonction ; les deux réparations plus faciles ont été
+refusées et l'auto-contrôle de la migration interdit qu'elles reviennent — lui accorder `EXECUTE`
+défaisait la décision de la 0002, la passer en `DEFINER` mettait `current_user` à `postgres` et
+**désarmait le garde-fou entièrement**. `supabase/tests/08_profile_guard.sql` (6 assertions) échoue
+sur le schéma non réparé, avec l'erreur exacte de la production.
 
 `smoke_from_humidor()` est la seule fonction du dépôt qui écrive deux tables, et **elle n'a aucun
 privilège**. C'est la décision D1 de l'ADR 0006 : un appel PostgREST est une transaction, donc les
@@ -426,7 +473,8 @@ reconstruit.
 
 ## CE QU'IL FAUT CONSTRUIRE, PAR ORDRE
 
-Les items 0 à 3 sont livrés. La numérotation reprend là où elle s'est arrêtée.
+**Les items 0 à 5 sont livrés.** Ils restent ci-dessous, barrés, parce que ce qu'ils ont tranché en
+chemin ne se retrouve nulle part ailleurs. La suite commence à l'item 6.
 
 ### ~~4. La cave, et ce qu'elle referme~~ — **livrée le 22 août 2026 au soir**
 
@@ -446,19 +494,48 @@ Reste en dette, petit et nommé : `move` et `device` existent dans leurs enums s
 déplacer un lot est un `update` de `humidor_id` que le trigger consigne, et un capteur n'a pas de
 session, donc pas de porte (c'est l'ADR de l'authentification d'un appareil, pas celle de la cave).
 
-### 5. Le reste de P1 — **commence par là**
+### ~~5. Le reste de P1~~ — **livré dans la nuit du 22 au 23 août 2026**
 
-Contribution wiki (proposer, historique, nouveau, file de validation — `cigar_revisions` est prête
-et vide), comparateur 2–4 cigares, décodeur de codes de boîte, `/parametres` (profil, préférences,
-confidentialité, consentements, RGPD — la bascule /100 ↔ /20 y déménagera depuis `/carnet`), images
-OG, `sitemap.ts`, `types-drift.yml`. **La file wiki est aussi ce qui rouvre `ref.lines`** — voir
-`CLAUDE.md`.
+`/parametres`, la contribution wiki (proposer, historique, file de validation), le comparateur, le
+décodeur de codes de boîte, la carte OG, `sitemap.ts` et le contrôle de dérive des types — les
+détails sont plus haut, les URL à ouvrir plus bas. Migration `0009` en prime, non prévue.
 
-### 6. Puis les phases, dans l'ordre du §9 — **et continue tant qu'il reste de la session**
+**Trois choses ont été délibérément laissées de côté, et il faut les savoir avant de les croire
+faites** :
 
-P3 social (`follows`, feed keyset, braises, clubs, événements, messagerie, profils publics — et
-c'est là que la branche `followers` du carnet devient vraie) → P4 scan → P5 lieux → P6 éditorial/SEO
-→ P7 boutique → P8 modération, i18n, PWA, perf, accessibilité.
+- **Proposer une fiche entièrement nouvelle** n'existe pas. `cigar_revisions` porte un `cigar_id`
+  non nul : une proposition est un diff **sur une fiche**, jamais une fiche. Créer une fiche
+  ex nihilo demande soit une colonne nullable et une policy qui distingue les deux cas, soit une
+  table à part. C'est un choix de schéma, donc une ADR — pas une décision à prendre en passant un
+  vendredi soir.
+- **Proposer une ligne (`ref.lines`)** non plus, pour la même raison en pire : la table est vide par
+  **décision de v1**, avec son déclencheur écrit dans `CLAUDE.md`. La file wiki est bien ce qui la
+  rouvrira, mais la rouvrir est le geste qui annule une décision documentée. Elle se relit d'abord.
+- **`show_indicative_prices` reste à `false` et rien ne le lit.** `lib/flags.ts` sait l'interroger,
+  `msrp_eur` est en base sur 900 fiches, et aucun écran ne l'affiche. C'est la Q19, et c'est un
+  drapeau qui attend une réponse, pas un branchement oublié.
+
+### 6. Les phases, dans l'ordre du §9 — **commence par là, à P3**
+
+P3 social (`follows`, feed keyset, braises, clubs, événements, messagerie, profils publics) → P4
+scan → P5 lieux → P6 éditorial/SEO → P7 boutique → P8 modération, i18n, PWA, perf, accessibilité.
+
+**P3 a trois dettes qui l'attendent, toutes nommées et toutes prêtes**, et c'est la raison pour
+laquelle elle vient maintenant plutôt que plus tard :
+
+1. **La branche `followers` de la policy SELECT de `reviews` n'existe pas** — elle attend
+   `public.follows`. Une entrée « Mes abonnés » n'est donc lisible aujourd'hui que de son auteur, et
+   l'interface le **dit** en toutes lettres. `tests/unit/reviews-model.test.ts` échoue le jour où la
+   branche apparaît : l'avertissement doit partir dans le même commit. C'est voulu.
+2. **`privacy.show_humidor` est écrit, réglable dans `/parametres`, et rien ne le lit.** La cave est
+   strictement propriétaire ; le drapeau attend sa policy. Le piège est consigné d'avance dans
+   l'ADR 0006 : `profile_settings` n'est lisible que de son propriétaire, donc lire
+   `privacy->>'show_humidor'` chez autrui ne renverra **jamais** rien. Il faudra un troisième
+   accesseur `SECURITY DEFINER`, après `current_app_role()` et `owns_review()`. On **ajoute** une
+   policy, on n'en modifie aucune.
+3. **`privacy.show_reviews` et `show_country` ont le même statut** : réglables, honorés nulle part,
+   parce que rien ne lit encore le profil d'autrui. Le jour où un profil public existe, ce sont ces
+   trois clés qui décident de ce qu'il montre — et `is_discoverable`, lui, est déjà honoré.
 
 Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
 
@@ -476,6 +553,29 @@ Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
+- **Un membre ne pouvait pas modifier son profil, et personne ne l'avait vu.** Réparé par la 0009 ;
+  le détail est dans « Fonctions appelables ». Ce qu'il faut en retenir n'est pas le correctif, c'est
+  la façon dont il a été trouvé : en ouvrant un écran. Le dépôt avait `pnpm check` vert, 247 tests
+  unitaires, 56 e2e et toutes ses assertions SQL, et **aucun ne pouvait le voir** : les tests SQL
+  tournent en `postgres`, qui a le droit que personne d'autre n'a. **Il n'existe pas d'autre méthode
+  que d'ouvrir la page avec un vrai compte.**
+- **Qui peut valider une contribution wiki ?** J'ai appliqué le §6 du brief — `editor` et au-dessus —
+  et il n'existe aujourd'hui **aucun compte `editor`** : `jeremy` est `admin` (donc il passe),
+  `test_un` et `test_deux` sont `member`. La file est donc réservée à un seul compte. C'est le bon
+  défaut pour un dépôt fermé et une impasse le jour où quelqu'un contribue. **À trancher avant
+  l'ouverture** : qui promeut, sur quel critère, et par quel écran — parce qu'il n'y en a aucun,
+  passer quelqu'un `editor` est aujourd'hui un `update` à la main.
+- **Proposer une fiche entièrement nouvelle n'existe pas**, et rouvrir `ref.lines` non plus. Les
+  deux raisons sont sous l'item 5 : ce sont des décisions de schéma, pas des écrans manquants.
+  **À me dire si l'une des deux est attendue en v1**, parce que chacune vaut une ADR.
+- **`show_indicative_prices` est réglable et rien ne le lit** (Q19). Les 900 prix sont en base,
+  `lib/flags.ts` sait interroger le drapeau, aucun écran n'affiche `msrp_eur`. Afficher un prix de
+  tabac est exactement le genre de geste que le §2 regarde de près : je ne l'ai pas branché seul.
+- **Trois clés de confidentialité sont réglables et honorées nulle part** — `show_humidor`,
+  `show_reviews`, `show_country`. Ce n'est pas un oubli, c'est P3 : rien ne lit encore le profil de
+  quelqu'un d'autre. Mais **l'écran promet aujourd'hui quelque chose que le code ne tient pas
+  encore**, et si cela devait déranger, la réponse est de retirer les interrupteurs, pas d'attendre.
+  `is_discoverable`, lui, est bien honoré depuis P1.
 - **La cave est livrée mais n'a jamais servi d'un déploiement.** Tout ce qui est décrit plus haut a
   été parcouru **en local**, contre la vraie base : c'est le seul moyen dont dispose une session
   distante, Chromium ne joignant aucun hôte externe depuis ce conteneur. Ce qui reste à vérifier
@@ -487,8 +587,8 @@ Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
   boîtes d'âges très différents voudra peut-être choisir. La cave, elle, le permet déjà. **À me
   dire si le défaut ne convient pas.**
 - **Le mot de passe des comptes de QA est dans le dépôt**, dans ce fichier et comme valeur par
-  défaut de `tooling/parcours/cave.ts` (surchargeable par `PARCOURS_PASSWORD`). Tenable tant que
-  rien n'est ouvert et que le projet n'est pas en production réelle. **À changer avant
+  défaut des quatre fichiers de `tooling/parcours/` (surchargeable par `PARCOURS_PASSWORD`). Tenable
+  tant que rien n'est ouvert et que le projet n'est pas en production réelle. **À changer avant
   l'ouverture**, en même temps que les 862 fiches non relues.
 - **Le rafraîchissement de `cigar_stats` à l'écriture n'a jamais tourné pour de vrai.** Il est écrit
   et correctement gaté — mesuré : une tentative d'appel par écriture susceptible de bouger une
@@ -510,8 +610,13 @@ Chaque phase a son critère de sortie au §9, **mesuré et non supposé** :
   commentables, notables et signalables** : à rouvrir avant toute mise en ligne réelle.
 - **`verified_by` est NULL sur les 940 fiches** : elles ont été publiées avant que les comptes
   n'existent. La traçabilité est dans `public.audit_log`.
-- **La page confidentialité n'a pas été relue depuis que le carnet existe**, et **la cave n'a fait
-  qu'allonger la liste** : elle enregistre ce qu'on possède, ce qu'on a payé et quand on l'a fumé.
+- **La page confidentialité n'a pas été relue depuis que le carnet existe**, et **la cave puis les
+  paramètres n'ont fait qu'allonger la liste** : la cave enregistre ce qu'on possède, ce qu'on a payé
+  et quand on l'a fumé. `/parametres` affiche en outre le **registre des consentements** et la base
+  légale de chacun des six `consent_kind` — et il est vide, délibérément : trois d'entre eux ne
+  relèvent pas du consentement (art. 6.1.b et 6.1.c), les trois autres sont facultatifs et **n'ont
+  pas lieu**. La page l'écrit. Mais elle **renvoie** à une politique de confidentialité qui, elle,
+  ne décrit toujours ni le carnet, ni la cave, ni ces bases légales.
   Les quatre tables sont bien dans l'export RGPD — vérifié par le test d'inventaire, qui a d'ailleurs
   cassé le build jusqu'à ce qu'elles y soient — mais la page ne les décrit pas. Elle doit décrire
   les droits d'export et d'effacement, comment les exercer, **et ce que le carnet
@@ -599,6 +704,28 @@ toujours validation ; 0004 et 0005 sont acceptées.
   pas. `tooling/parcours/cave.ts` a un helper `seen()` qui **attend** le texte ; deux assertions ont
   échoué sur un produit qui marchait, et une troisième a réussi pour rien (`contains(texte, '5')`
   trouvait « 0 / 50 »).
+- **Une assertion qui cherche un mot dans la page trouve la prose de la page.** `contains(texte,
+  'Enregistré')` réussissait sur la phrase « ne change ce qui est enregistré », donc **trois
+  écritures refusées ont été lues comme des succès**. La réparation n'est pas une expression
+  régulière plus fine : c'est `FieldStatus`, un `role="status"` que les confirmations portent
+  désormais toutes. Un parcours attend un **rôle**, jamais un mot. Effet de bord, et il est la vraie
+  raison de le faire : un lecteur d'écran annonce enfin « Enregistré ».
+- **Une action qui fait disparaître son propre formulaire ne peut rendre aucune confirmation.**
+  Accepter une proposition la retire de la file, donc le composant qui tenait l'état de retour est
+  démonté dans le même rendu : le relecteur ne voyait **rien**. Mesuré, pas supposé. La décision
+  navigue maintenant (`redirect('?decidee=…')`) et la confirmation est sur la page d'arrivée.
+- **Sans `metadataBase`, Next résout `og:image` contre `localhost:3000`** — y compris dans un build
+  de production. Toute carte partagée pointait donc vers une machine qui n'existe pas. L'origine se
+  décide dans `lib/site.ts`, qui **refuse délibérément `VERCEL_URL`** (l'URL unique d'un
+  déploiement, qui change à chaque poussée) et n'écoute jamais un en-tête de requête.
+- **Le `matcher` du middleware gate aussi ce qu'aucun humain ne demande.** `/opengraph-image`
+  répondait 307 vers le portail : un aperçu de lien ne franchit pas un age gate, donc chaque
+  partage ne montrait rien. Trois fichiers doivent en sortir — `robots.txt`, `sitemap.xml`,
+  `opengraph-image` — et **seulement** parce qu'aucun ne nomme de marque.
+- **`page.once('dialog')` rate le dialogue qui suit.** Une suppression confirmée par `window.confirm`
+  laissait une cave derrière elle une fois sur trois, donc le nettoyage n'était pas fiable — et un
+  nettoyage qui échoue en silence est pire que pas de nettoyage. `page.on('dialog')`, persistant,
+  plus un `waitForURL` sur la page d'arrivée.
 - **Un `<input type="number" max=…>` empêche le submit**, donc le message d'erreur du serveur
   n'apparaît jamais par le chemin normal. Pour tester un refus serveur, il faut le rendre **périmé**
   — ouvrir un panneau, changer l'état ailleurs, puis valider — et c'est le seul chemin qu'aucun test
@@ -680,12 +807,57 @@ parcours a nettoyé derrière lui, donc tout commence par un état vide, qui est
 | `/statistiques` | Entrées, cigares fumés (**plus grand** que les entrées, et la page dit pourquoi), note moyenne, rythme sur douze mois, ce qui reste en cave. |
 | La cave d'autrui, par son URL | 404 — jamais « accès refusé », qui confirmerait qu'elle existe. |
 
-Le parcours complet se rejoue d'une commande, contre la vraie base, et nettoie derrière lui :
+---
+
+## LES URL À OUVRIR POUR RECETTER LA FIN DE P1 (livrée dans la nuit du 22 au 23 août)
+
+Connecté avec `test_un`. La file de validation demande `jeremy`, seul compte au-dessus de `member`.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/parametres` | Quatre sections : profil, préférences, confidentialité, consentements. Puis « Vos données » : export et effacement. |
+| ⟶ changer le nom affiché, enregistrer | **« Enregistré. »** C'est l'assertion qui comptait le plus de la soirée : avant la 0009, ce bouton renvoyait `permission denied for function is_privileged_context`. |
+| ⟶ mettre le pseudo `TEST_UN` | Refus : le pseudo est en minuscules, underscore permis, tiret non. Le refus se lit **sous le champ**. |
+| ⟶ décocher « Apparaître dans les recherches » | Enregistré. Le profil disparaît alors des recherches de destinataires du carnet — c'est le seul des quatre interrupteurs de confidentialité qui **soit honoré aujourd'hui**, et la page ne prétend pas le contraire pour les autres. |
+| ⟶ passer l'échelle sur 20 | Enregistré ici, et `/carnet` affiche désormais /20 — c'est le même réglage, déménagé. `/carnet` garde une ligne qui dit laquelle est en vigueur, avec le lien qui revient ici. |
+| ⟶ la section Consentements | « Le registre est vide », et pour chaque type sa base légale. Trois disent « Ce traitement n'a pas lieu aujourd'hui. La case arrivera avec lui. » **Aucune case à cocher, et c'est la décision.** |
+| ⟶ « Télécharger mes données » | Un JSON, `Cache-Control: no-store, private`, 22 sources. |
+| ⟶ « Supprimer mon compte » | Le bouton reste inerte tant que le mot demandé n'est pas saisi **exactement**. Ne pas aller au bout avec un compte de QA qu'on veut garder. |
+| `/cigares/undercrown-10-robusto` | En bas de fiche, « Proposer une correction ». |
+| `/cigares/undercrown-10-robusto/proposer` | Les champs **pré-remplis avec les valeurs actuelles**. Changer la longueur, laisser le reste. |
+| ⟶ envoyer | « Proposition envoyée. » Elle ne porte **que** le champ changé : c'est un diff, pas une copie de la fiche. |
+| `/cigares/undercrown-10-robusto/historique` | La proposition, « En attente », son auteur, sa date, et le détail avant → après. |
+| **En `jeremy`** : `/contributions` | La file, la plus ancienne en tête, avec le diff et les deux boutons. |
+| ⟶ Accepter | On **navigue** vers `/contributions?decidee=…` et une bande `role="status"` dit ce qui vient d'être fait — la confirmation ne peut pas vivre dans un formulaire qui vient de disparaître. La fiche porte la nouvelle valeur. |
+| ⟶ proposer, puis changer la fiche, puis ouvrir la file | **« La fiche a changé depuis »**, champ par champ. Le garde-fou d'un wiki : on n'écrase pas une modification qu'on n'a pas vue. |
+| **En `test_un`** : `/contributions` | Ses propres propositions, oui. La file, non : à sa place, « La file est réservée aux relecteurs » et comment on le devient. **Cacher la section aurait fait ressembler la contribution à une impasse** — c'est l'inverse de ce que veut un wiki. |
+| `/cigares/comparer?c=<slug>&c=<slug>` | Deux colonnes alignées ligne à ligne. Ajouter jusqu'à quatre ; la sélection est **dans l'URL**, donc partageable. |
+| `/codes-de-boite` | Le décodeur. `EL OCT 18` → **El Laguito**, octobre, et l'année **marquée ambiguë** : deux chiffres ne disent pas 1998 plutôt que 2018. |
+| ⟶ `MSU OCT 18` | « Usine inconnue » — pas une hypothèse. Les six sigles connus sont en base (`BM`, `EL`, `FPG`, `FR`, `HM`, `JM`), chacun avec la réserve que les codes cubains ont été volontairement modifiés. Deviner une manufacture à partir de trois lettres est exactement ce qu'un référentiel ne doit pas faire. |
+| `/sitemap.xml` | Six URL, **toutes publiques et toutes des pages**, aucune fiche, aucune marque, et l'origine est le vrai domaine — jamais `localhost`. |
+| `/robots.txt` | `Disallow: /` partout. Tant que la Q1 n'est pas tranchée, rien n'est indexable. |
+| `/opengraph-image` | Une carte neutre : le nom du site, sa promesse, l'avertissement sanitaire. **Aucun cigare, aucune marque** — elle voyage plus loin que la page. |
+
+---
+
+## REJOUER TOUS LES PARCOURS
+
+Chacun se rejoue d'une commande, contre la vraie base, et **nettoie derrière lui** :
 
 ```bash
 pnpm build && pnpm start --port 3100
-pnpm tsx tooling/parcours/cave.ts        # 42 assertions
+pnpm tsx tooling/parcours/cave.ts            # 42 assertions
+pnpm tsx tooling/parcours/parametres.ts      # 25 assertions
+pnpm tsx tooling/parcours/reference.ts       # 24 assertions
+pnpm tsx tooling/parcours/contributions.ts   # 26 assertions
 ```
+
+Le mot de passe se surcharge par `PARCOURS_PASSWORD`. Ces parcours **écrivent dans la vraie base** :
+caves, lots, événements, propositions de révision. Ils effacent ce qu'ils écrivent, et l'état final
+a été vérifié à zéro. `audit_log` ne s'efface jamais.
+
+Les pièges d'écriture de ces parcours sont dans « PIÈGES DE CET ENVIRONNEMENT » — lis-les **avant**
+d'en écrire un cinquième, ils coûtent une heure chacun la première fois.
 
 ---
 
@@ -711,8 +883,15 @@ psql -f supabase/tests/06_service_role_reads.sql   # 3 assertions
 psql -f supabase/tests/02_function_grants.sql
 psql -f supabase/migrations/0008_cave.sql
 psql -f supabase/tests/07_cave_rls.sql            # 17 assertions
+psql -f supabase/migrations/0009_profile_guard.sql
+psql -f supabase/tests/08_profile_guard.sql        # 6 assertions
 psql -f supabase/tests/00_rls_coverage.sql
 ```
+
+**Joue la 08 *avant* la 0009 une fois, pour voir.** Elle échoue sur `permission denied for function
+is_privileged_context` — l'erreur exacte que voyait un membre en enregistrant son profil. Un test de
+régression qui ne casse pas sur le schéma d'avant ne teste rien, et celui-là a été écrit dans cet
+ordre pour cette raison.
 
 Le §3 de la 0006 se déclare absent par un `NOTICE` sur une base nue : `pg_cron` n'existe ni en local
 ni sur l'image de la CI. C'est attendu, ce n'est pas un échec.

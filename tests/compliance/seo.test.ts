@@ -44,13 +44,22 @@ describe('the sitemap stays in front of the gate', () => {
     }
   })
 
-  it('omits the gate itself and the auth callback', () => {
-    // Mechanisms, not pages: one is the gate, the other answers 307 to anybody
-    // without a token.
+  it('omits the gate, the auth callback and the health probe', () => {
+    // Mechanisms, not pages: one is the gate, one answers 307 to anybody
+    // without a token, and one returns JSON to a monitor. A sitemap answers
+    // "what would somebody want to land on", and none of the three qualifies.
     const paths = entries.map((entry) => new URL(entry.url).pathname)
     expect(paths).not.toContain('/majorite')
     expect(paths).not.toContain('/auth/callback')
+    expect(paths).not.toContain('/api/health')
     expect(PUBLIC_PATHS).toContain('/majorite')
+  })
+
+  it('lists no route that answers in JSON', () => {
+    // The general form of the rule above: /api/ is a dialect, not a page.
+    for (const entry of entries) {
+      expect(new URL(entry.url).pathname.startsWith('/api/')).toBe(false)
+    }
   })
 
   it('resolves against a real origin, never localhost', () => {

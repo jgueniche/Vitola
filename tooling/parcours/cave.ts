@@ -106,6 +106,16 @@ async function main(): Promise<void> {
   const page = await one.newPage()
   const other = await two.newPage()
 
+  /*
+   * Un seul gestionnaire de dialogue, permanent, plutôt qu'un `page.once` posé
+   * avant chaque clic. Un `once` que rien ne consomme — parce que le bouton
+   * n'était pas là, par exemple — reste armé et vient répondre au dialogue
+   * suivant : le nettoyage a laissé une cave derrière lui une fois pour cette
+   * raison, et une seule fois, ce qui est la pire fréquence.
+   */
+  page.on('dialog', (dialog) => void dialog.accept())
+  other.on('dialog', (dialog) => void dialog.accept())
+
   let humidorUrl = ''
   const createdEntries: string[] = []
 
@@ -376,7 +386,6 @@ async function main(): Promise<void> {
       for (const id of createdEntries.filter(Boolean)) {
         await page.goto(`${BASE}/carnet/${id}`)
         await settle(page)
-        page.once('dialog', (dialog) => void dialog.accept())
         const del = page.getByRole('button', { name: /Supprimer/i }).first()
         if (await del.isVisible()) {
           await del.click()
@@ -385,18 +394,24 @@ async function main(): Promise<void> {
       }
 
       if (humidorUrl) {
-        await page.goto(humidorUrl)
-        await settle(page)
-        page.once('dialog', (dialog) => void dialog.accept())
-        const del = page.getByRole('button', { name: 'Supprimer cette cave' })
-        if (await del.isVisible()) {
+        // Deux tentatives, parce qu'une suppression qui échoue en silence
+        // laisse la recette humaine devant une cave qui n'est pas la sienne.
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          await page.goto(humidorUrl)
+          await settle(page)
+          const del = page.getByRole('button', { name: 'Supprimer cette cave' })
+          if (!(await del.isVisible())) break
           await del.click()
+          // `waitForURL` et non `settle` : la suppression **navigue**, et lire
+          // la page pendant la navigation renvoie ce qu'on trouve.
+          await page.waitForURL(/\/cave$/, { timeout: 15000 }).catch(() => undefined)
           await settle(page)
         }
+
         await page.goto(`${BASE}/cave`)
         await settle(page)
         const left = await page.locator('main').innerText()
-        check('la cave de parcours a bien été effacée', !contains(left, CAVE_NAME))
+        check('la cave de parcours a bien été effacée', !contains(left, CAVE_NAME), left.slice(0, 200))
       }
     } catch (cause) {
       console.log(`  nettoyage incomplet : ${String(cause)}`)

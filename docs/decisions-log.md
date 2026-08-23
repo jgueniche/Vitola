@@ -2,6 +2,55 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La fin de P1, et un garde-fou qui se gardait lui-même
+
+22 août 2026 au soir. `/parametres`, le comparateur, le décodeur, la contribution wiki, le sitemap,
+la carte OG, le contrôle de dérive des types. Ce qui vaut d'être retrouvé tient en six points, et
+quatre d'entre eux sont des refus.
+
+**Aucun membre n'a jamais pu modifier son profil.** Le trigger `tg_protect_profile_privileges()`
+tourne en droits d'appelant — c'est ce qui lui permet de savoir qui écrit — et il commençait par
+appeler `is_privileged_context()`, que la 0002 avait fermée aux clients délibérément. Un trigger en
+droits d'appelant ne peut appeler que ce que l'appelant peut appeler : le garde-fou fermait la
+porte qu'il surveillait. Six mois, `pnpm check` vert, 165 tests unitaires, 56 e2e. Il a fallu taper
+une ville dans un formulaire. La 0009 descend le prédicat dans le trigger et retire l'auxiliaire ;
+la garde générale (`tests/02_function_grants.sql`) lit désormais les **corps** des triggers, parce
+que plpgsql ne déclare aucune dépendance — c'est ce qui a rendu ce bug invisible aux outils. Elle a
+été vérifiée en échouant sur la base d'avant.
+
+**Le registre de consentements n'offre aucune case, et c'est la décision.** Trois des six types ne
+relèvent pas du consentement (art. 6.1.b et 6.1.c) ; l'art. 7.4 dit qu'un consentement qu'on ne
+peut pas refuser n'en est pas un. Les trois autres gouvernent des traitements qui n'ont pas lieu :
+demander la permission de ce qu'on ne fait pas fabrique un enregistrement, pas une permission. Un
+registre plein de consentements à rien est pire qu'un registre vide, parce qu'il ressemble à de la
+conformité. Ce qui est offert à la place est le retrait réel et immédiat : l'effacement.
+
+**Le comparateur n'affiche pas « relue le ».** `verified_at` est renseigné sur les 940 fiches,
+`verified_by` sur aucune : l'horodatage vient de la publication. 862 de ces fiches n'ont jamais été
+lues. Aucun écran ne montrait cette colonne ; celui-ci aurait été le premier à affirmer une
+relecture qui n'a pas eu lieu. La colonne est laissée telle quelle — dépublier est une décision du
+propriétaire — mais elle n'est pas répétée.
+
+**Le décodeur ne devine pas une usine.** Trois lettres inconnues sont dites inconnues. Les sigles
+cubains ont été modifiés à dessein plusieurs fois et `PROVENANCE.md` les donne en confiance faible ;
+habiller une supposition de la même typographie qu'un fait est ce qui fait cesser un référentiel
+d'en être un.
+
+**`og:image` pointait sur `http://localhost:3000`**, dans un build de production, sur toutes les
+pages : `metadataBase` n'était pas posé. Et la carte elle-même était derrière le portail, donc ne
+s'affichait jamais — un 307 vers `/majorite`. Les deux se voient en lisant le HTML rendu ; aucun des
+deux ne se voit en lisant le code. La carte est unique, posée à la racine, et ne nomme jamais un
+cigare : une carte par fiche aurait publié une marque à tous ceux qui n'ont pas franchi le portail.
+
+**Une action qui fait disparaître son formulaire ne peut pas rendre de confirmation.** Accepter une
+proposition la retire de la file, donc le composant qui tenait l'état de retour est démonté dans le
+même rendu : l'écriture aboutissait et le relecteur ne voyait rien. Une décision navigue désormais,
+et la confirmation vit dans l'URL. Corollaire adopté partout : une confirmation porte
+`role="status"` — ce qu'elle doit être de toute façon pour un lecteur d'écran, et ce qui donne enfin
+aux parcours quelque chose d'univoque à attendre. Ils attendaient le mot « enregistré » dans le
+texte de la page et le trouvaient dans sa prose ; trois écritures refusées ont été lues comme des
+succès.
+
 ## La cave, et le geste qui ferme P2
 
 22 août 2026, seconde moitié de P2. La dégustation existait depuis la PR #7 ; le critère de sortie

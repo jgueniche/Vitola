@@ -19,9 +19,12 @@ import { SITE_ORIGIN } from '@/lib/site'
  * sitemap cannot drift from the boundary it is describing: a route that becomes
  * gated leaves this file the moment it leaves that one.
  *
- * Two entries are dropped even from that list, because they are mechanisms
- * rather than pages: `/majorite` is the gate itself, and `/auth/callback` is a
- * one-time redirect that answers with a 307 to anybody without a token.
+ * Three entries are dropped even from that list, because they are mechanisms
+ * rather than pages: `/majorite` is the gate itself, `/auth/callback` is a
+ * one-time redirect that answers with a 307 to anybody without a token, and
+ * `/api/health` returns JSON to a monitor. None of the three is a page anybody
+ * would want to land on from a search result, which is the only question a
+ * sitemap answers.
  *
  * **`robots.ts` currently disallows everything**, so nothing here is crawled at
  * all today (Q1). That is not a reason to leave the file empty or to list more
@@ -29,7 +32,7 @@ import { SITE_ORIGIN } from '@/lib/site'
  * changes in one place and this file is already correct.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const MECHANISMS = ['/majorite', '/auth/callback']
+  const MECHANISMS = ['/majorite', '/auth/callback', '/api/health']
 
   return PUBLIC_PATHS.filter((path) => !MECHANISMS.includes(path)).map((path) => ({
     url: new URL(path, SITE_ORIGIN).toString(),

@@ -77,6 +77,18 @@ partagées → tables → recherche → index → grants → RLS → storage →
   `if pg_cron existe and cron.job ne contient rien`, l'auto-contrôle de 0006 échouait sur
   « relation "cron.job" does not exist » là où la garde devait précisément l'éviter. La branche
   non évaluée est quand même **analysée**. Un `if` imbriqué, ou un `execute`, diffère l'analyse.
+- **Un trigger en droits d'appelant ne peut appeler que ce que l'appelant peut appeler.**
+  `tg_protect_profile_privileges()` appelait `is_privileged_context()`, que la 0002 avait fermée aux
+  clients — délibérément et avec raison. Résultat : **aucun membre n'a pu modifier son profil depuis
+  P1**, et rien ne l'a vu parce qu'aucun écran n'écrivait dans `profiles`. Le prédicat est descendu
+  dans le trigger (0009) et l'auxiliaire a été retiré : une fonction qu'aucun trigger en droits
+  d'appelant ne peut appeler n'est pas un auxiliaire, c'est un piège tendu au prochain garde-fou.
+  La garde générale vit dans `tests/02_function_grants.sql` et lit les **corps**, parce que plpgsql
+  ne déclare aucune dépendance — c'est exactement ce qui a rendu ce bug invisible aux outils.
+- **La correction la plus tentante est parfois celle qui désarme le test.** Passer ce trigger en
+  `SECURITY DEFINER` l'aurait fait tourner en tant que `postgres`, donc `current_user in
+  ('postgres', …)` aurait été **vrai**, donc le garde-fou aurait été sauté pour tout le monde. Vert,
+  et ouvert.
 - **Une transaction ne demande pas un privilège.** `SECURITY DEFINER` est le réflexe quand deux
   tables doivent s'écrire ensemble ; il est presque toujours de trop. Un appel PostgREST **est**
   une transaction, donc une fonction `SECURITY INVOKER` en `plpgsql` écrit les deux lignes sous la
