@@ -867,9 +867,9 @@ une requête — et `posts.venue_id` non plus, pour la même raison.
 ### 10. P7 — la boutique et Stripe. **À vérifier avant de commencer : les clés**
 
 Le §9 lui donne « commande test bout en bout + webhook idempotent ». Le §3 prévoit Stripe
-Checkout (ADR 0003, encore Proposée). Aucune variable `STRIPE_*` n'a été vue dans
-l'environnement de cette session — **vérifier avant d'écrire une ligne** : sans clés, P7 est un
-P4 de plus (l'écran d'un paiement qui ne peut pas s'exercer), et il faut le dire plutôt que de
+Checkout (ADR 0003, encore Proposée). **Vérifié en fin de session : aucune variable `STRIPE_*`
+dans l'environnement** (ni Resend, ni Anthropic, ni Replicate, ni Upstash — seul Supabase a ses
+clés). Sans clés, P7 est un P4 de plus (l'écran d'un paiement qui ne peut pas s'exercer), et il faut le dire plutôt que de
 livrer un panier qui ne se vide jamais. Ce qui reste faisable sans clés : le schéma `shop` (le
 `CHECK` anti-tabac du §5.8, le trigger de refus lexical — `lib/compliance/tobacco-terms.ts`
 existe pour lui), le catalogue et le panier. Le critère de sortie, lui, exige Stripe.
