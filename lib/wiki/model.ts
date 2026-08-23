@@ -18,17 +18,23 @@
  *     decree (arrêté du 5 août 2026), not from anybody's memory, and the schema
  *     refuses a price without a source and a date. A contributor correcting a
  *     price from recollection would be replacing a legal figure with a guess.
- *   - `brand_id` and `line_id` — a sheet that changes brand is a different
- *     sheet, and `ref.lines` is deliberately empty in v1 (see CLAUDE.md).
+ *   - `brand_id` — a sheet that changes brand is a different sheet.
  *
  * `vitola_id` **is** in the list, and it is the most valuable thing here: 862
  * of the 940 seeded sheets have no vitola, which is the referential's largest
  * hole and exactly the kind of fact a contributor knows and a reviewer checks.
+ *
+ * `line_id` joined it with ADR 0009 (piece 2): attaching a sheet to a line is
+ * the same kind of fact. The form only offers **published** lines of the
+ * sheet's own brand, and the action re-checks both on proposal and on apply —
+ * no database constraint says a line and a sheet share a brand, so the
+ * allowlist's shape is the only guard. Creating a line stays out (piece 3,
+ * deferred): a line is born from an editor, draft by default.
  */
 
 import { Constants } from '@/lib/supabase/database.types'
 
-export type FieldKind = 'text' | 'enum' | 'country' | 'countryList' | 'year' | 'vitola'
+export type FieldKind = 'text' | 'enum' | 'country' | 'countryList' | 'year' | 'vitola' | 'line'
 
 export type EditableField = {
   /** The column, which is also the diff key. */
@@ -42,6 +48,7 @@ export type EditableField = {
 export const EDITABLE_FIELDS = [
   { column: 'commercial_name', kind: 'text', maxLength: 120 },
   { column: 'vitola_id', kind: 'vitola' },
+  { column: 'line_id', kind: 'line' },
   { column: 'origin_country', kind: 'country' },
   { column: 'wrapper_origin', kind: 'country' },
   { column: 'binder_origin', kind: 'country' },

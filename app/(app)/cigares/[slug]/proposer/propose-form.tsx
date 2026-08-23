@@ -21,6 +21,7 @@ const copy = m.contributions
 export type Current = {
   commercial_name: string
   vitola_id: string | null
+  line_id: string | null
   origin_country: string | null
   wrapper_origin: string | null
   binder_origin: string | null
@@ -51,13 +52,23 @@ export function ProposeForm({
   slug,
   current,
   vitolas,
+  lines,
 }: {
   cigarId: string
   slug: string
   current: Current
   vitolas: { id: string; name_salida: string; length_mm: number; ring_gauge: number }[]
+  lines: { id: string; name: string }[]
 }) {
   const [state, action, pending] = useActionState<WikiState, FormData>(proposeRevision, {})
+
+  /* A `<select>` always submits, so it only renders when every choice it
+     offers is real: published lines of this brand, plus the sheet's current
+     line when it is one of them. A sheet pointing at a line the list cannot
+     name (unpublished since) gets the sentence instead — an untouched submit
+     would otherwise propose CLEARING the line, silently. */
+  const canProposeLine =
+    lines.length > 0 && (current.line_id === null || lines.some((l) => l.id === current.line_id))
 
   return (
     <form action={action} className="flex flex-col gap-5">
@@ -89,6 +100,33 @@ export function ProposeForm({
             </option>
           ))}
         </Select>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        {/* A <label> without a control is not a label — the sentence branch
+            titles itself with a plain element. */}
+        {canProposeLine ? (
+          <Label htmlFor="line_id">{copy.fieldLineId}</Label>
+        ) : (
+          <p className="eyebrow">{copy.fieldLineId}</p>
+        )}
+        {canProposeLine ? (
+          <Select
+            id="line_id"
+            name="line_id"
+            defaultValue={current.line_id ?? ''}
+            key={`line-${current.line_id ?? 'none'}`}
+          >
+            <option value="">{copy.noLine}</option>
+            {lines.map((line) => (
+              <option key={line.id} value={line.id}>
+                {line.name}
+              </option>
+            ))}
+          </Select>
+        ) : (
+          <p className="text-ink-muted text-xs leading-relaxed">{copy.noLinePublished}</p>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

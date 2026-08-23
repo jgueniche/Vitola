@@ -14,6 +14,7 @@ import { getAccount } from '@/lib/settings/queries'
 import { hasMinRole, REVIEWER_ROLE } from '@/lib/settings/roles'
 import { currentUser } from '@/lib/supabase/server'
 import {
+  listLineNames,
   listMine,
   listPending,
   listVitolaOptions,
@@ -57,10 +58,11 @@ export default async function ContributionsPage({ searchParams }: Props) {
   const account = await getAccount(user.id)
   const isEditor = hasMinRole(account?.role ?? 'member', REVIEWER_ROLE)
 
-  const [mine, pending, vitolas] = await Promise.all([
+  const [mine, pending, vitolas, lineNames] = await Promise.all([
     listMine(user.id),
     isEditor ? listPending() : Promise.resolve([]),
     listVitolaOptions(),
+    listLineNames(),
   ])
 
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
@@ -105,7 +107,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
             {mine.map((revision) => (
               <li key={revision.id} className="border-rule bg-surface rounded-[3px] border p-4">
                 <Header revision={revision} />
-                <DiffView diff={revision.diff} vitolaNames={vitolaNames} />
+                <DiffView diff={revision.diff} vitolaNames={vitolaNames} lineNames={lineNames} />
                 {revision.comment ? (
                   <p className="text-ink-muted measure mt-3 text-sm leading-relaxed">
                     {revision.comment}
@@ -152,7 +154,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
               {pending.map((revision) => (
                 <li key={revision.id} className="border-rule bg-surface rounded-[3px] border p-4">
                   <Header revision={revision} />
-                  <DiffView diff={revision.diff} vitolaNames={vitolaNames} />
+                  <DiffView diff={revision.diff} vitolaNames={vitolaNames} lineNames={lineNames} />
                   {revision.comment ? (
                     <p className="text-ink-muted measure mt-3 text-sm leading-relaxed">
                       {revision.comment}

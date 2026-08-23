@@ -1,6 +1,6 @@
 # 0008 — Proposer une fiche entièrement nouvelle : une file à part, et une paternité qui survit à sa validation
 
-- **Statut** : **Proposée** — attend arbitrage
+- **Statut** : **Acceptée** le 23 août 2026 — par délégation, construction différée ; voir l'arbitrage en fin de document
 - **Date** : 2026-08-23
 - **Décideur** : @jgueniche
 - **Concerne** : P1 (contribution wiki, F3) · `ref.cigars` · `ref.cigar_revisions` · `/contributions`
@@ -151,3 +151,13 @@ seront probablement mieux sourcées que les 862.
 
 Les deux tiennent. Ce qui les départage n'est pas technique : c'est de savoir si le site s'ouvre à
 des contributeurs avant ou après la relecture, et cela vous appartient.
+
+### Arbitrage rendu — 23 août 2026
+
+**Acceptée par délégation, et l'ouverture attend.** Même délégation que la 0009 (« fais comme tu le
+sens pour cette session, je te laisse maître à bord ») ; la session suit la proposition du
+document : la décision — option B, une fiche nouvelle est un brouillon de `ref.cigars` inséré par
+son proposeur et publié par un relecteur — est actée, et **rien ne se construit avant la relecture
+des 862 fiches**, parce qu'ajouter un flux entrant à un stock non traité transforme une dette en
+file d'attente. Le déclencheur de construction est la résorption du stock, pas cette note ; et
+comme pour la 0009, la délégation se rouvre d'un mot du porteur.

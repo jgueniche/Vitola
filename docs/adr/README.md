@@ -13,8 +13,8 @@ dans `docs/decisions-log.md`, pas ici.
 | [0005](./0005-cible-des-commentaires.md) | Les commentaires s'accrochent à la fiche cigare | **Acceptée** | 2026-08-22 |
 | [0006](./0006-atomicite-de-la-cave.md) | Fumer depuis la cave est un seul geste ; le stock est une somme d'événements | **Acceptée** | 2026-08-22 |
 | [0007](./0007-le-fil-social-et-ce-qui-le-lit.md) | Un fil en une table, un abonnement libre et révocable, un blocage restrictif | **Acceptée** | 2026-08-23 |
-| [0008](./0008-proposer-une-fiche-nouvelle.md) | Une fiche nouvelle est un brouillon de `ref.cigars`, créé par son proposeur | **Proposée** — attend arbitrage | 2026-08-23 |
-| [0009](./0009-rouvrir-ref-lines.md) | Rouvrir `ref.lines` par la contribution, avec le `status` qui lui manque | **Proposée** — attend arbitrage | 2026-08-23 |
+| [0008](./0008-proposer-une-fiche-nouvelle.md) | Une fiche nouvelle est un brouillon de `ref.cigars`, créé par son proposeur | **Acceptée** (délégation) — construction différée après la relecture des 862 fiches | 2026-08-23 |
+| [0009](./0009-rouvrir-ref-lines.md) | Rouvrir `ref.lines` par la contribution, avec le `status` qui lui manque | **Acceptée** (délégation) — pièces 1 et 2 appliquées, la création de gamme attend | 2026-08-23 |
 | [0010](./0010-clubs-evenements-messagerie.md) | Un club est un groupe et un calendrier ; une conversation a exactement deux personnes | **Acceptée** | 2026-08-23 |
 | [0011](./0011-les-lieux.md) | Les lieux : seed depuis le registre officiel des buralistes, avis à trois critères structurels | **Acceptée** | 2026-08-23 |
 | [0012](./0012-le-journal.md) | Un article est du contenu, jamais du code ; la frontière passe entre deux audiences | **Acceptée** | 2026-08-23 |
