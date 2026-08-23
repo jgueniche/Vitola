@@ -37,6 +37,7 @@ export const SEGMENTS = {
   journal: 'journal',
   shop: 'boutique',
   settings: 'parametres',
+  moderation: 'moderation',
   compare: 'comparer',
   history: 'historique',
   legalNotice: 'mentions-legales',
@@ -130,6 +131,8 @@ export const routes = {
   venuePropose: () => `/${SEGMENTS.venues}/proposer`,
   shop: () => `/${SEGMENTS.shop}`,
   settings: () => `/${SEGMENTS.settings}`,
+  moderation: () => `/${SEGMENTS.moderation}`,
+  moderationReport: (id: string) => `/${SEGMENTS.moderation}/${id}`,
 
   legalNotice: () => `/${SEGMENTS.legalNotice}`,
   privacy: () => `/${SEGMENTS.privacy}`,

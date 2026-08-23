@@ -1402,6 +1402,51 @@ export type Database = {
         Returns: number
       }
       immutable_unaccent: { Args: { value: string }; Returns: string }
+      mod_acknowledge: { Args: { p_id: string }; Returns: Json }
+      mod_decide: {
+        Args: {
+          p_act_reason?: string
+          p_decision: string
+          p_note: string
+          p_report: string
+          p_verb?: string
+        }
+        Returns: Json
+      }
+      mod_queue: {
+        Args: { p_limit?: number; p_scope?: string }
+        Returns: {
+          acknowledged_at: string
+          created_at: string
+          decided_at: string
+          decided_by: string
+          decision_note: string
+          detail: string
+          entity_id: string
+          entity_schema: string
+          entity_table: string
+          id: string
+          reason: string
+          status: string
+        }[]
+      }
+      mod_report: {
+        Args: { p_id: string }
+        Returns: {
+          acknowledged_at: string
+          created_at: string
+          decided_at: string
+          decided_by: string
+          decision_note: string
+          detail: string
+          entity_id: string
+          entity_schema: string
+          entity_table: string
+          id: string
+          reason: string
+          status: string
+        }[]
+      }
       moderation_records_for_subject: {
         Args: { p_subject: string }
         Returns: Json

@@ -854,6 +854,84 @@
         "inaccurate": "Information inexacte",
         "other": "Autre"
       }
+    },
+    "desk": {
+      "eyebrow": "Modération",
+      "title": "La file des signalements",
+      "lede": "Chaque signalement s'examine sous {hours} heures — c'est le délai publié dans les mentions légales, et la file se relève du plus ancien au plus récent.",
+      "restrictedTitle": "Réservé aux modérateurs",
+      "restrictedBody": "Cette file est relevée par les comptes modérateurs. Si un contenu vous semble poser problème, le bouton « Signaler » existe sur chaque fiche, entrée, publication et avis — c'est lui qui alimente cette file.",
+      "tabOpen": "À traiter",
+      "tabDecided": "Tranchés",
+      "emptyOpenTitle": "Aucun signalement en attente",
+      "emptyOpenBody": "La file est vide. Les signalements arrivent ici dès qu'une personne utilise « Signaler ».",
+      "emptyDecidedTitle": "Rien n'a encore été tranché",
+      "emptyDecidedBody": "Les décisions et leurs motifs se retrouveront ici.",
+      "ageHours": "il y a {hours} h",
+      "overdue": "Délai dépassé",
+      "openCase": "Ouvrir le dossier",
+      "status": {
+        "open": "Ouvert",
+        "reviewing": "En cours",
+        "upheld": "Retenu",
+        "dismissed": "Rejeté"
+      },
+      "surfaces": {
+        "public.comments": "Commentaire de fiche",
+        "ref.cigars": "Fiche cigare",
+        "public.reviews": "Entrée de carnet",
+        "public.posts": "Publication au fil",
+        "public.post_comments": "Réponse au fil",
+        "public.profiles": "Profil",
+        "public.messages": "Message privé",
+        "public.venues": "Lieu",
+        "public.venue_reviews": "Avis de lieu"
+      },
+      "case": {
+        "eyebrow": "Dossier",
+        "receivedOn": "Reçu le {date}",
+        "reasonLabel": "Motif",
+        "detailLabel": "Précisions du signalant",
+        "noDetail": "Sans précisions.",
+        "targetTitle": "Le contenu visé",
+        "targetGone": "Introuvable ou retiré — supprimé par son auteur, ou hors de portée de lecture.",
+        "targetHidden": "Actuellement masqué",
+        "viewInSitu": "Voir en situation",
+        "acknowledge": "Prendre le dossier",
+        "acknowledgedAt": "Pris en examen le {date}",
+        "decideTitle": "Trancher",
+        "decideLede": "La décision est définitive sur ce dossier : une contestation passe par un nouveau signalement, qui peut rétablir un contenu masqué.",
+        "decisionLabel": "Décision",
+        "uphold": "Retenu — le signalement est fondé",
+        "dismiss": "Rejeté — rien à reprocher au contenu",
+        "noteLabel": "Motivation",
+        "noteHint": "Obligatoire : une décision non motivée n'est pas contestable (DSA, art. 17). 2 000 caractères au plus.",
+        "actLabel": "Acte",
+        "actNone": "Aucun — la décision suffit",
+        "actHide": "Masquer le contenu",
+        "actRestore": "Rétablir le contenu",
+        "actUnavailable": "Cette surface n'a pas de colonnes de masquage : la décision s'enregistre ici, l'acte éventuel passe par son propre chemin (révision wiki, statut du lieu…).",
+        "actReasonLabel": "Motif du masquage",
+        "actReasonHint": "Écrit sur le contenu masqué et dans le journal de modération. Obligatoire pour masquer.",
+        "submit": "Enregistrer la décision",
+        "confirm": "Trancher ce dossier ? La décision ne se modifie plus.",
+        "decidedOn": "Tranché le {date}",
+        "decisionNote": "Motivation de la décision"
+      },
+      "done": {
+        "acknowledged": "Dossier pris — il passe en cours d'examen.",
+        "decided": "Dossier tranché. La décision et son motif sont au journal de modération."
+      },
+      "errors": {
+        "noteRequired": "La motivation est obligatoire : une décision non motivée n'est pas contestable.",
+        "actReasonRequired": "Masquer demande un motif.",
+        "alreadyDecided": "Ce dossier a déjà été tranché — une contestation passe par un nouveau signalement.",
+        "targetGone": "Le contenu visé n'existe plus. Tranchez sans acte.",
+        "notHideable": "Cette surface ne se masque pas. Tranchez sans acte.",
+        "generic": "La décision n'a pas pu être enregistrée. Réessayez."
+      },
+      "settingsLink": "Relever la file de modération",
+      "settingsLede": "La file DSA de /moderation, réservée aux comptes modérateurs."
     }
   },
   "aromas": {
