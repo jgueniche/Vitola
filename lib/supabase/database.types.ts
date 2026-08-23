@@ -52,6 +52,99 @@ export type Database = {
           },
         ]
       }
+      article_links: {
+        Row: {
+          article_id: string
+          cigar_id: string | null
+          created_at: string
+          id: string
+          venue_id: string | null
+        }
+        Insert: {
+          article_id: string
+          cigar_id?: string | null
+          created_at?: string
+          id?: string
+          venue_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          cigar_id?: string | null
+          created_at?: string
+          id?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_links_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_links_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      articles: {
+        Row: {
+          audience: Database["public"]["Enums"]["article_audience"]
+          author_id: string | null
+          body_md: string
+          category: Database["public"]["Enums"]["article_category"]
+          created_at: string
+          excerpt: string | null
+          id: string
+          published_at: string | null
+          reading_time_min: number | null
+          seo: Json
+          slug: string
+          status: Database["public"]["Enums"]["article_status"]
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Database["public"]["Enums"]["article_audience"]
+          author_id?: string | null
+          body_md: string
+          category: Database["public"]["Enums"]["article_category"]
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time_min?: number | null
+          seo?: Json
+          slug: string
+          status?: Database["public"]["Enums"]["article_status"]
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["article_audience"]
+          author_id?: string | null
+          body_md?: string
+          category?: Database["public"]["Enums"]["article_category"]
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time_min?: number | null
+          seo?: Json
+          slug?: string
+          status?: Database["public"]["Enums"]["article_status"]
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -1397,6 +1490,15 @@ export type Database = {
         | "vegetal"
         | "mineral"
         | "defaut"
+      article_audience: "public" | "gated"
+      article_category:
+        | "guide"
+        | "interview"
+        | "reportage"
+        | "lexique"
+        | "actualite"
+        | "accord"
+      article_status: "draft" | "published"
       attendee_status: "going" | "maybe" | "declined"
       consent_kind:
         | "terms"
@@ -2039,6 +2141,16 @@ export const Constants = {
         "mineral",
         "defaut",
       ],
+      article_audience: ["public", "gated"],
+      article_category: [
+        "guide",
+        "interview",
+        "reportage",
+        "lexique",
+        "actualite",
+        "accord",
+      ],
+      article_status: ["draft", "published"],
       attendee_status: ["going", "maybe", "declined"],
       consent_kind: [
         "terms",

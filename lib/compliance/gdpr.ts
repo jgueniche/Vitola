@@ -456,6 +456,16 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'anonymised',
   },
 
+  /* The journal (migration 0017, ADR 0012). An article is the house's text,
+     not the member's: it survives its author anonymised, like a wiki review. */
+  {
+    key: 'articlesAuthored',
+    schema: 'public',
+    table: 'articles',
+    column: 'author_id',
+    erasure: 'anonymised',
+  },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */
