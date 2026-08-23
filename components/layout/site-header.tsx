@@ -20,12 +20,19 @@ const NAV = [
   { label: 'Marques', href: routes.brands() },
   { label: 'Vitoles', href: routes.vitolas() },
   { label: 'Arômes', href: routes.aromas() },
+  { label: 'Codes de boîte', href: routes.boxCodes() },
 ] as const
 
 /* Shown only to a signed-in member, because that is the only person it is a
    destination for: /carnet redirects a visitor to the sign-in page, and a nav
    entry whose one behaviour is to bounce you is a promise it cannot keep. */
-const MEMBER_NAV = [{ label: m.notebook.title, href: routes.notebook() }] as const
+const MEMBER_NAV = [
+  { label: m.notebook.title, href: routes.notebook() },
+  { label: m.humidor.title, href: routes.humidor() },
+  { label: m.statistics.title, href: routes.statistics() },
+  { label: m.contributions.eyebrow, href: routes.contributions() },
+  { label: m.settings.title, href: routes.settings() },
+] as const
 
 /**
  * Rendered only inside app/(app)/, never on the public side — which is why

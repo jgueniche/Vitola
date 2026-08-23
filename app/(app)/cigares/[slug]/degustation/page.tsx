@@ -5,6 +5,7 @@ import { notFound, redirect } from 'next/navigation'
 import { Band } from '@/components/band/band'
 import { listAromaWheel } from '@/lib/aromas/queries'
 import { todayInBrandZone } from '@/lib/format'
+import { lotsForCigar } from '@/lib/humidor/queries'
 import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
@@ -43,7 +44,10 @@ export default async function TastingPage({ params }: Params) {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.cigarTasting(slug))}`)
   }
 
-  const families = await listAromaWheel()
+  /* The lots read alongside the wheel, so the form can offer to take the cigar
+     out of the humidor in the same gesture (ADR 0006, D1). Empty for a member
+     who keeps none, and the section then does not render. */
+  const [families, lots] = await Promise.all([listAromaWheel(), lotsForCigar(cigar.id)])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -67,6 +71,11 @@ export default async function TastingPage({ params }: Params) {
         slug={cigar.slug}
         families={families}
         today={todayInBrandZone()}
+        lots={lots.map((lot) => ({
+          id: lot.id,
+          qty: lot.qty,
+          label: lot.purchase_date ?? m.humidor.ageUnknown,
+        }))}
       />
     </main>
   )

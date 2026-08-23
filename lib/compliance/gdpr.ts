@@ -91,9 +91,41 @@ type UnreachableSource = {
   unreachable: string
 }
 
+/**
+ * A table whose link to the person is one hop away.
+ *
+ * The humidor is the first of these (migration 0008). A lot, a ledger entry and
+ * a hygrometry reading are unmistakably personal data — what one owns, what one
+ * smoked and when — yet none of them carries a `user_id`: they hang off
+ * `humidors`, which does. Denormalising the column to make the export simpler
+ * would put a second copy of the ownership fact in the schema, and ADR 0006
+ * spends its length arguing against exactly that kind of second source.
+ *
+ * So the link is expressed the way PostgREST expresses it: an inner embed, and
+ * a filter on the embedded column. `column` is then a path rather than a name,
+ * which is why these entries cannot use `SourceIn` — the mapped type checks
+ * `column` against the row's own keys, and it is right to.
+ *
+ * The collector needs no branch for them: it already reads `column` and now
+ * reads `select`. One shape, two ways of naming the same subject.
+ */
+type EmbeddedSourceIn<S extends 'public'> = {
+  [T in keyof Database[S]['Tables']]: {
+    key: string
+    schema: S
+    table: T & string
+    /** PostgREST filter path through the embed, e.g. `humidors.user_id`. */
+    column: `${string}.${string}`
+    /** The `select` that makes the embed an inner join, so the filter bites. */
+    select: string
+    erasure: Erasure
+  }
+}[keyof Database[S]['Tables']]
+
 export type PersonalDataSource =
   | SourceIn<'public'>
   | SourceIn<'ref'>
+  | EmbeddedSourceIn<'public'>
   | RpcSource
   | UnreachableSource
 
@@ -221,6 +253,38 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'anonymised',
   },
 
+  /* The humidor (migration 0008, ADR 0006). Everything here goes with the
+     account: `humidors.user_id` cascades, and the other three cascade behind it
+     through their parent. Only the first is a direct link, so only the first is
+     what the schema parser in tests/compliance can see — the other three are
+     declared because an export that returned a member's caves without their
+     contents would answer art. 15 with a list of empty boxes. */
+  { key: 'humidors', schema: 'public', table: 'humidors', column: 'user_id', erasure: 'erased' },
+  {
+    key: 'humidorItems',
+    schema: 'public',
+    table: 'humidor_items',
+    column: 'humidors.user_id',
+    select: '*, humidors!inner(user_id)',
+    erasure: 'erased',
+  },
+  {
+    key: 'humidorEvents',
+    schema: 'public',
+    table: 'humidor_events',
+    column: 'humidor_items.humidors.user_id',
+    select: '*, humidor_items!inner(humidors!inner(user_id))',
+    erasure: 'erased',
+  },
+  {
+    key: 'humidorReadings',
+    schema: 'public',
+    table: 'humidor_readings',
+    column: 'humidors.user_id',
+    select: '*, humidors!inner(user_id)',
+    erasure: 'erased',
+  },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */
@@ -319,7 +383,7 @@ export async function collectPersonalData(
       const { data, error } = await reader
         .schema(source.schema)
         .from(source.table)
-        .select('*')
+        .select('select' in source ? source.select : '*')
         .eq(source.column, subjectId)
 
       if (error) {

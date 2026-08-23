@@ -208,6 +208,9 @@ const tastingSchema = z.object({
   ),
   thirds: z.array(optionalText(REVIEW_LIMITS.thirdNotesMax, m.notebook.errors.thirdTooLong)).length(3),
   scores: z.record(z.string(), subScoreSchema),
+  /* The lot this cigar came out of, when it came out of one. Optional, and the
+     tasting is saved either way — see the note on the write below. */
+  humidorItemId: z.preprocess(blank, z.uuid().nullable()),
 })
 
 /**
@@ -253,6 +256,7 @@ export async function saveTasting(formData: FormData): Promise<EntryState> {
     aromaTags: formData.getAll('aromaTags'),
     thirds: [formData.get('third_1'), formData.get('third_2'), formData.get('third_3')],
     scores,
+    humidorItemId: formData.get('humidorItemId'),
   })
 
   if (!parsed.success) return { error: firstMessage(parsed.error) }
@@ -298,6 +302,35 @@ export async function saveTasting(formData: FormData): Promise<EntryState> {
   if (thirds.length > 0) {
     const { error: thirdsError } = await supabase.from('review_thirds').insert(thirds)
     if (thirdsError) return { error: refusalMessage(thirdsError.code), id: data.id }
+  }
+
+  /*
+   * The humidor, when the cigar came out of one — ADR 0006, D1, second path.
+   *
+   * Two writes rather than the one transaction `smoke_from_humidor()` gives the
+   * daily gesture, and the ADR argues at length for why: a function taking this
+   * form's twenty-four fields would be a second copy of `reviews`' column list,
+   * which drifts at the first `alter table`.
+   *
+   * The order is the mitigation. The tasting is written first because it is the
+   * commitment; a failure here leaves an entry that exists and a stock that has
+   * not moved, which `HumidorLink` shows on the entry with the one click that
+   * fixes it. The reverse order would take a cigar off a shelf with nothing to
+   * say where it went, and nothing to notice.
+   *
+   * The error is deliberately not returned: the tasting *was* saved, and telling
+   * someone their tasting failed because a stock did not move would send them
+   * to write it again.
+   */
+  if (parsed.data.humidorItemId) {
+    const { error: eventError } = await supabase.from('humidor_events').insert({
+      item_id: parsed.data.humidorItemId,
+      type: 'smoke',
+      qty: 1,
+      occurred_at: parsed.data.smokedOn,
+      review_id: data.id,
+    })
+    if (eventError) console.error('[carnet] humidor event not written:', eventError.message)
   }
 
   await settle(parsed.data.slug, null, parsed.data.visibility)
@@ -477,70 +510,21 @@ export async function removeShare(formData: FormData): Promise<void> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Display preference                                                          */
+/* Display preference — moved out                                              */
 /* -------------------------------------------------------------------------- */
-
-const scaleSchema = z.object({ scale: z.enum(['100', '20']) })
-
-/**
- * Flips the notebook between /100 and /20 (§5.4).
+/*
+ * `setScoreScale` lived here and now lives in `app/(app)/parametres/actions.ts`
+ * as one field of `savePreferences`. Two writers of the same jsonb column is
+ * how one of them starts dropping a key the other set: PostgREST has no partial
+ * jsonb update, so every writer read-modify-writes the whole object.
  *
- * A display preference, so it changes nothing stored: scores stay on 100, and
- * `formatScore()` divides at the last moment. Converting at write time would
- * put two scales in one column and lose which is which.
- *
- * The row always exists — `tg_handle_new_user()` creates it with the profile —
- * so this is an UPDATE and a missing row means the trigger did not run, which
- * is worth surfacing rather than papering over with an upsert.
- *
- * **This function throws, and the ones above return an error instead.** The
- * difference is who the failure belongs to. A refused review write is something
- * a member did — too long, out of range, not yours — and it deserves a sentence
- * in French. A refused preference write is something *we* did, and there is no
- * sentence to write: the member asked for /20 and we owe them /20.
- *
- * It is written this way because the first version swallowed the error and was
- * wrong for it. `updated_at` is not in the UPDATE grant of `profile_settings` —
- * the grant is `(birth_date, locale, preferences, privacy)`, and a trigger
- * stamps the rest — so setting it raised `42501`, the result went unchecked, and
- * the button did nothing at all, quietly, forever. Found by clicking it.
+ * The lesson that made this function famous moved with it, and is worth leaving
+ * a marker for: `updated_at` is **not** in the UPDATE grant of
+ * `profile_settings` — the grant is `(birth_date, locale, preferences, privacy)`
+ * — so writing it raises `42501`, and a `42501` on an UPDATE is silent. The
+ * button did nothing at all, quietly, for a day. Every update in the settings
+ * actions reads its result for that reason.
  */
-export async function setScoreScale(formData: FormData): Promise<void> {
-  const parsed = scaleSchema.safeParse({ scale: formData.get('scale') })
-  if (!parsed.success) return
-
-  const supabase = await createSupabaseServerClient()
-  const { data: session } = await supabase.auth.getUser()
-  if (!session.user) return
-
-  const { data: current } = await supabase
-    .from('profile_settings')
-    .select('preferences')
-    .eq('id', session.user.id)
-    .maybeSingle()
-
-  const preferences =
-    current?.preferences && typeof current.preferences === 'object'
-      ? (current.preferences as Record<string, unknown>)
-      : {}
-
-  const { data, error } = await supabase
-    .from('profile_settings')
-    .update({
-      // The CHECK reads `preferences ->> 'score_scale'`, which is text either
-      // way; a number is written because that is what the column default holds.
-      preferences: { ...preferences, score_scale: Number(parsed.data.scale) },
-    })
-    .eq('id', session.user.id)
-    .select('id')
-
-  if (error) throw new Error(`Could not store the score scale: ${error.message}`)
-  // Zero rows is the quiet failure this whole comment is about: a policy that
-  // declines an UPDATE does not raise, it matches nothing and reports nothing.
-  if (!data || data.length === 0) throw new Error('The score scale was not stored.')
-
-  revalidatePath(routes.notebook())
-}
 
 /* -------------------------------------------------------------------------- */
 /* Plumbing                                                                    */

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { HealthNotice } from '@/components/compliance/health-notice'
 import { SkipLink } from '@/components/layout/skip-link'
 import { BRAND } from '@/lib/brand'
+import { SITE_ORIGIN } from '@/lib/site'
 import { THEME_COLOR_DARK } from '@/lib/theme'
 
 import './globals.css'
@@ -41,6 +42,12 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  /*
+   * Without this, Next resolves `og:image` against `http://localhost:3000` in a
+   * production build — measured by reading the rendered HTML, not guessed — and
+   * every link preview would point at a machine that is not the internet.
+   */
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: `${BRAND.name} — ${BRAND.tagline}`,
     template: `%s — ${BRAND.name}`,

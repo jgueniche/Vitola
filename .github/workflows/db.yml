@@ -97,9 +97,6 @@ jobs:
       - name: Apply 0005 — droits d'appel sur ref et mod
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0005_ref_function_grants.sql
 
-      - name: Function grants, sur les trois schémas
-        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
-
       # 0006 ouvre la seule porte d'écriture vers `mod` — une fonction SECURITY
       # DEFINER dans `public`, accordée à la clé de service et à personne
       # d'autre. Son §3 (pg_cron) se déclare absent sur une base nue : c'est
@@ -128,10 +125,60 @@ jobs:
       - name: La clé de service lit tout ce que l'export doit rendre
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/06_service_role_reads.sql
 
+      # 0008 pose la cave. Son geste central — fumer un cigare — écrit deux
+      # tables dans la même transaction par une fonction SECURITY **INVOKER** :
+      # l'atomicité sans le privilège (ADR 0006, D1).
+      - name: Apply 0008 — la cave
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0008_cave.sql
+
+      # Le seul endroit d'où se voit une régression des décisions de l'ADR 0006 :
+      # ce fichier n'accorde rien, donc il peut échouer là où l'auto-contrôle de
+      # 0008 ne le peut pas. Même scrutin du journal qu'ailleurs — un
+      # `SET LOCAL ROLE` hors transaction rend une assertion verte pour rien.
+      - name: Cave — stock, grand livre et geste atomique
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/07_cave_rls.sql 2>&1 | tee "$RUNNER_TEMP/cave.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/cave.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0009 répare un garde-fou qui se gardait lui-même : le trigger de
+      # `profiles` appelait, en droits d'appelant, une fonction fermée aux
+      # clients. Aucun membre ne pouvait modifier son profil depuis P1.
+      - name: Apply 0009 — le garde-fou du profil
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0009_profile_guard.sql
+
+      # Le test des droits (02) vérifiait un droit ; celui-ci vérifie le
+      # comportement, et c'est ce que l'ancien ne pouvait pas voir.
+      - name: Profil — modifiable par son membre, role et reputation toujours fermés
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/08_profile_guard.sql 2>&1 | tee "$RUNNER_TEMP/profil.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/profil.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      - name: Function grants, sur les trois schémas
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
+
       # §0.5: a table without RLS breaks the build. Belt and braces — the
       # migration asserts this too, but a future migration might not.
       - name: RLS coverage
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/00_rls_coverage.sql
+
+      # Le contrôle de dérive des types, sur la base que les migrations viennent
+      # de construire — donc sur ce que le dépôt décrit, et pas sur ce qu'un
+      # projet contient par hasard. Il a été vérifié en retirant une table des
+      # types : il échoue, ce qui est le seul moyen de savoir qu'il mord.
+      - name: Types drift — database.types.ts décrit-il encore le schéma ?
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --silent
+          psql -tA -f tooling/scripts/schema-inventory.sql > "$RUNNER_TEMP/inventory.json"
+          pnpm tsx tooling/scripts/check-types-drift.ts "$RUNNER_TEMP/inventory.json"
 
       # The seed runs on its own database: the verification file above inserts
       # fixtures that would otherwise collide with real seed rows.

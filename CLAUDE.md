@@ -99,6 +99,60 @@ défaut de la Q12 ne tient plus.
 légales, lu depuis `feature_flags`). Il manque **qui modère** — pas de back-office avant P8, et
 personne n'est encore désigné pour relever la file.
 
+## La cave — livrée, et c'est elle qui ferme P2
+
+Le §9 donne à P2 un critère de sortie qui ne parle ni de schéma ni d'écran : « créer une dégustation
+et **décrémenter la cave** de bout en bout ». Tout tient dans une colonne que le §5.5 écrit en
+passant, `humidor_events.review_id`, et dans ce qui garantit que les deux lignes s'écrivent
+ensemble. L'[ADR 0006](docs/adr/0006-atomicite-de-la-cave.md) tranche les quatre points.
+
+**Ce qui est à l'écran** : `/cave` (plusieurs caves, ce qu'elles tiennent, ce qui est à faire
+tourner), `/cave/[id]` (inventaire, grand livre, hygrométrie, import et export CSV, réglages),
+« j'en fume un » sur la fiche cigare **et** sur la cave, un lot facultatif à décompter depuis le
+formulaire de dégustation, et `/statistiques` (F11).
+
+**Quatre règles qui ne se contournent pas :**
+
+1. **Un geste qui touche deux tables est une fonction `SECURITY INVOKER`.** Un appel PostgREST est
+   une transaction ; les droits d'appelant laissent la RLS décider. On n'achète pas un privilège
+   pour obtenir une transaction.
+2. **`qty` ne s'écrit pas à la main.** Dans le `GRANT INSERT` — l'inventaire d'ouverture — et dans
+   aucun `GRANT UPDATE`. Après la naissance du lot, seul le trigger de somme l'écrit.
+3. **Ce qui sort de la cave entre au carnet en `private`**, avec le sélecteur de portée du carnet
+   et pas une case « publier ». Et seulement si on a quelque chose à dire : exiger une note pour
+   décompter un stock produirait des notes inventées ou des cigares que la cave ignore.
+4. **Un lot par achat.** Deux boîtes du même cigare n'ont ni le même âge ni le même prix.
+
+**La cave est privée, et le carnet l'est séparément.** `privacy.show_humidor` gouverne qui voit
+l'inventaire ; `reviews.visibility` gouverne qui lit l'entrée. Une entrée publique écrite depuis une
+cave privée est normale : elle dit qu'on a fumé ce cigare, jamais qu'on en a sept autres.
+
+## Fin de P1 — livrée le 22 août 2026 au soir
+
+`/parametres` (profil, préférences, confidentialité, registre de consentements, RGPD),
+`/cigares/comparer` (2 à 4 fiches), `/codes-de-boite` (décodeur), la contribution wiki
+(`/cigares/[slug]/proposer`, `/cigares/[slug]/historique`, `/contributions`), le sitemap, la carte
+OG et le contrôle de dérive des types.
+
+**Trois refus valent d'être retrouvés, parce qu'ils se rediscuteront :**
+
+1. **Le registre de consentements n'offre aucune case.** Trois des six types ne sont pas fondés sur
+   le consentement (contrat, obligation légale — art. 6.1.b et 6.1.c), et l'art. 7.4 dit qu'un
+   consentement qu'on ne peut pas refuser n'en est pas un. Les trois autres gouvernent des
+   traitements **qui n'ont pas lieu**. Demander la permission de ce qu'on ne fait pas fabrique un
+   enregistrement, pas une permission — et un registre plein de consentements à rien est pire qu'un
+   registre vide, parce qu'il ressemble à de la conformité.
+2. **Le comparateur n'affirme aucune relecture.** `ref.cigars.verified_at` est renseigné sur les
+   940 fiches et `verified_by` sur aucune : l'horodatage vient de la publication, pas d'une lecture.
+   Aucun écran ne montrait cette colonne ; le comparateur aurait été le premier.
+3. **Proposer une fiche entièrement nouvelle n'est pas construit**, et l'écran dit pourquoi :
+   `created_by` s'écrit à l'insertion et ne se modifie plus, donc une fiche créée par un relecteur
+   porterait son nom et non celui du proposeur. Dans un référentiel dont toute la valeur est la
+   provenance, cela demande une migration et une décision.
+
+**Ce qui rouvre `ref.lines` existe désormais** — la file de contribution — mais proposer une *gamme*
+n'est pas offert : il faut d'abord que des gammes existent. La décision de v1 ci-dessous tient.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent
@@ -146,6 +200,28 @@ pnpm storybook      # galerie des primitives
   `/majorite`, au moment précis où l'on saisit sa date de naissance. La vérification est remontée
   dans `next.config.ts` et casse désormais le build. Vaut pour toute variable sans laquelle
   l'application ne peut pas fonctionner.
+- **Une transaction ne demande pas un privilège.** Deux tables à écrire ensemble font tendre la
+  main vers `SECURITY DEFINER` ; un appel PostgREST **est** une transaction, donc une fonction
+  `SECURITY INVOKER` suffit et laisse la RLS décider. L'atomicité de la cave a été achetée sans
+  acheter une frontière de sécurité. Voir `supabase/CLAUDE.md`.
+- **Une contrainte peut être cohérente et fausse.** `aging_start_date >= purchase_date` a passé son
+  auto-contrôle, ses dix-sept assertions et `pnpm check` avant qu'un navigateur ne montre ce qu'elle
+  interdisait : une boîte achetée vieillie se repose **avant** d'être achetée. Le SQL ne dit jamais
+  ce qu'une date signifie ; seul l'usage le dit.
+- **Un état d'interface dans un composant client se referme à chaque écriture.** Une Server Action
+  qui appelle `revalidatePath` provoque un nouveau rendu serveur, et le panneau qu'on venait
+  d'ouvrir disparaît sous les doigts. Dans l'URL, il reste, se partage et survit au retour arrière.
+- **Un garde-fou en droits d'appelant se referme sur lui-même.** Le trigger qui protège
+  `profiles` appelait une fonction que la 0002 avait fermée aux clients : **aucun membre n'a pu
+  modifier son profil depuis P1**, et rien ne l'a vu parce qu'aucun écran n'écrivait dans cette
+  table. Trouvé en tapant une ville dans un formulaire. Voir `supabase/CLAUDE.md`.
+- **Ce qui part vers l'extérieur doit être relu depuis l'extérieur.** `og:image` pointait sur
+  `http://localhost:3000` dans un build de production — `metadataBase` n'était pas posé — et la
+  carte OG elle-même était derrière le portail, donc ne s'affichait jamais. Les deux se voient en
+  lisant le HTML rendu, aucun des deux en lisant le code.
+- **Rien de ce qui est derrière le portail ne se nomme dans un fichier qui est devant.** Sitemap,
+  robots, carte OG : ils sont lus par des gens qui n'ont pas franchi la porte et ne le peuvent pas.
+  Le sitemap se construit donc depuis `PUBLIC_PATHS`, la carte OG est unique et neutre.
 - **Les commentaires ne sont pas du code.** Les scans de conformité masquent les commentaires avant
   d'analyser : sans cela, une phrase expliquant pourquoi une chose est absente déclenche
   l'alerte que cette chose est présente.

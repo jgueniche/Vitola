@@ -86,10 +86,20 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Everything except Next internals, static assets and the health probe.
+     * Everything except Next internals, static assets, the health probe and the
+     * three files a crawler or a chat client fetches without ever being able to
+     * clear a gate: robots, the sitemap, and the OG card.
+     *
      * Written as a negative lookahead so a new route is gated by default:
      * forgetting to add a path must fail closed, not open.
+     *
+     * `opengraph-image` is safe to exempt for a reason that lives in the file
+     * itself: there is exactly one card for the whole site, it names the site
+     * and its disclaimer, and it never names a cigar or a brand. Gated, it
+     * simply never rendered — measured, a 307 to /majorite — so every shared
+     * link showed nothing at all. Ungated **and** per-sheet would have been the
+     * §2 problem; ungated and neutral is the point of building it that way.
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api/health|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|api/health|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?)$).*)',
   ],
 }

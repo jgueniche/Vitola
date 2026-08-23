@@ -161,3 +161,43 @@ export async function publishedOriginCountries(): Promise<string[]> {
   }
   return [...codes].sort()
 }
+
+
+/* -------------------------------------------------------------------------- */
+/* Box codes                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export type BoxCode = {
+  kind: 'factory' | 'month' | 'year'
+  code: string
+  factory_code: string | null
+  month: number | null
+  year: number | null
+  notes: string | null
+}
+
+/**
+ * The whole box-code reference, eighteen rows.
+ *
+ * Read in one go rather than looked up per segment: it is eighteen rows, the
+ * page shows all of them below the decoder anyway, and a query per letter group
+ * would be three round trips to answer one question.
+ *
+ * `notes` comes back with the row and is rendered, because six of these
+ * eighteen are rated "faible" in `supabase/seed/PROVENANCE.md` — the Cuban
+ * factory codes were deliberately reshuffled more than once — and the note is
+ * where that uncertainty is written. Dropping it here would launder a doubt
+ * into a fact.
+ */
+export async function listBoxCodes(): Promise<BoxCode[]> {
+  const db = await referential()
+  const { data, error } = await db
+    .from('box_codes')
+    .select('kind, code, factory_code, month, year, notes')
+    .order('kind', { ascending: true })
+    .order('month', { ascending: true, nullsFirst: false })
+    .order('code', { ascending: true })
+
+  if (error) throw new Error(`Box codes lookup failed: ${error.message}`)
+  return (data ?? []) as BoxCode[]
+}

@@ -7,11 +7,13 @@ import { RingGauge } from '@/components/data/ring-gauge'
 import { StrengthMeter, type Strength } from '@/components/data/strength-meter'
 import { WrapperScale, type WrapperShade } from '@/components/data/wrapper-scale'
 import { countryLabel, formatEffectiveDate, formatPrice, shapeLabel } from '@/lib/cigar'
+import { Button } from '@/components/ui/button'
 import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 
 import { CommentThread } from './comment-thread'
+import { HumidorSection } from './humidor-section'
 import { NotebookSection } from './notebook-section'
 
 type Params = { params: Promise<{ slug: string }> }
@@ -116,6 +118,27 @@ export default async function CigarPage({ params }: Params) {
           </Row>
         ) : null}
       </dl>
+
+      {/* The two wiki doors, under the characteristics they act on. A
+          correction is proposed while looking at what is wrong, and the history
+          is where one checks whether somebody already noticed. */}
+      <div className="flex flex-wrap gap-3">
+        <Link href={routes.cigarPropose(cigar.slug)}>
+          <Button variant="secondary" size="sm">
+            {m.contributions.proposeLink}
+          </Button>
+        </Link>
+        <Link href={routes.cigarHistory(cigar.slug)}>
+          <Button variant="ghost" size="sm">
+            {m.contributions.historyLink}
+          </Button>
+        </Link>
+      </div>
+
+      {/* Before the notebook, because it is the earlier gesture: one takes the
+          cigar out, then writes about it. The section renders nothing at all
+          for a visitor with no humidor. */}
+      <HumidorSection cigarId={cigar.id} slug={cigar.slug} />
 
       <NotebookSection cigarId={cigar.id} slug={cigar.slug} />
 

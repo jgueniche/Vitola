@@ -77,6 +77,39 @@ partagées → tables → recherche → index → grants → RLS → storage →
   `if pg_cron existe and cron.job ne contient rien`, l'auto-contrôle de 0006 échouait sur
   « relation "cron.job" does not exist » là où la garde devait précisément l'éviter. La branche
   non évaluée est quand même **analysée**. Un `if` imbriqué, ou un `execute`, diffère l'analyse.
+- **Un trigger en droits d'appelant ne peut appeler que ce que l'appelant peut appeler.**
+  `tg_protect_profile_privileges()` appelait `is_privileged_context()`, que la 0002 avait fermée aux
+  clients — délibérément et avec raison. Résultat : **aucun membre n'a pu modifier son profil depuis
+  P1**, et rien ne l'a vu parce qu'aucun écran n'écrivait dans `profiles`. Le prédicat est descendu
+  dans le trigger (0009) et l'auxiliaire a été retiré : une fonction qu'aucun trigger en droits
+  d'appelant ne peut appeler n'est pas un auxiliaire, c'est un piège tendu au prochain garde-fou.
+  La garde générale vit dans `tests/02_function_grants.sql` et lit les **corps**, parce que plpgsql
+  ne déclare aucune dépendance — c'est exactement ce qui a rendu ce bug invisible aux outils.
+- **La correction la plus tentante est parfois celle qui désarme le test.** Passer ce trigger en
+  `SECURITY DEFINER` l'aurait fait tourner en tant que `postgres`, donc `current_user in
+  ('postgres', …)` aurait été **vrai**, donc le garde-fou aurait été sauté pour tout le monde. Vert,
+  et ouvert.
+- **Une transaction ne demande pas un privilège.** `SECURITY DEFINER` est le réflexe quand deux
+  tables doivent s'écrire ensemble ; il est presque toujours de trop. Un appel PostgREST **est**
+  une transaction, donc une fonction `SECURITY INVOKER` en `plpgsql` écrit les deux lignes sous la
+  RLS de l'appelant et ne peut rien écrire qu'il n'aurait pu écrire à la main :
+  `public.smoke_from_humidor()` (0008). `file_report()` a payé le privilège parce que `mod` est
+  injoignable autrement — c'est une exception, pas un modèle. L'auto-contrôle de 0008 échoue si la
+  fonction repasse un jour en `DEFINER`.
+- **Une vue sans `security_invoker` s'exécute avec les droits de son propriétaire**, c'est-à-dire
+  `postgres`, c'est-à-dire toutes les lignes de tout le monde. Une vue qui lit des tables sous RLS
+  doit porter `with (security_invoker = true)`, et l'auto-contrôle de 0008 le relit dans
+  `reloptions` — comme celui de 0003 relit le prédicat de `cigar_stats`.
+- **Une colonne dénormalisée se recalcule par la somme, jamais par un delta.** Un trigger qui
+  incrémente se trompe une fois et ment ensuite pour toujours ; un trigger qui refait
+  `sum()` sur le grand livre se répare au mouvement suivant. `humidor_items.qty` (0008), asserté
+  par V16 de `tests/07_cave_rls.sql`, qui casse volontairement la colonne pour vérifier qu'elle
+  se remet.
+- **Une contrainte peut être parfaitement cohérente et parfaitement fausse.**
+  `aging_start_date >= purchase_date` a été écrite, appliquée, testée verte, puis retirée le jour
+  même : une boîte achetée vieillie se repose **avant** d'être achetée. Aucune assertion ne
+  l'aurait vue, parce que rien dans le SQL ne dit ce qu'une date signifie. Ce genre de bug se
+  trouve en rangeant une vraie boîte dans un vrai navigateur.
 - **Une vue matérialisée n'accepte pas de RLS.** `cigar_stats` n'est sûre que par son
   `where visibility = 'public'` : ce prédicat est la frontière de sécurité, pas une optimisation.
   L'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est toujours.
@@ -92,6 +125,14 @@ l'auto-contrôle de leur migration : `reviews.user_id` et `reviews.cigar_id` (un
 ni d'auteur ni de cigare), `comments.hidden_at`, `comments.hidden_by` et `comments.hidden_reason`
 (masquer est un acte de modération, écrit par du code à clé de service — y compris pour un
 modérateur connecté).
+
+Depuis 0008, deux de plus, et l'une d'elles a une nuance qui vaut d'être lue :
+`humidor_items.cigar_id` (un lot ne change pas de cigare) et **`humidor_items.qty`, qui est dans
+le `GRANT INSERT` et dans aucun `GRANT UPDATE`**. Déclarer ce qu'on vient d'acheter est un
+inventaire d'ouverture ; changer un stock est un événement. C'est cette nuance qui permet à
+l'ajout d'un lot de rester une seule requête — un trigger `after insert` en tire l'événement
+`add` — donc atomique sans fonction. Les deux sens sont assertés : que `qty` reste insérable et
+qu'elle ne soit jamais modifiable.
 
 ## Seed
 
