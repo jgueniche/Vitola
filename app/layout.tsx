@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { HealthNotice } from '@/components/compliance/health-notice'
 import { SkipLink } from '@/components/layout/skip-link'
 import { BRAND } from '@/lib/brand'
-import { SITE_ORIGIN } from '@/lib/site'
+import { SITE_INDEXABLE, SITE_ORIGIN } from '@/lib/site'
 import { THEME_COLOR_DARK } from '@/lib/theme'
 
 import './globals.css'
@@ -54,8 +54,10 @@ export const metadata: Metadata = {
   },
   description: BRAND.tagline,
   applicationName: BRAND.name,
-  // Nothing is indexable until the legal review of §2 is signed off (Q1).
-  robots: { index: false, follow: false },
+  /* Nothing is indexable until the legal review of §2 is signed off (Q1);
+     SITE_INDEXABLE is the opening-day lever (lib/site.ts). Gated pages set
+     their own noindex on top, so opening the lever opens only the Q13 side. */
+  robots: { index: SITE_INDEXABLE, follow: SITE_INDEXABLE },
 }
 
 export const viewport: Viewport = {

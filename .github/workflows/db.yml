@@ -14,7 +14,11 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        # postgis/postgis et non postgres : la 0016 exige l'extension, absente
+        # de l'image de base. L'image la pré-installe dans `public` au premier
+        # démarrage — une étape plus bas la retire pour que la migration reste
+        # la seule vérité.
+        image: postgis/postgis:17-3.5
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: vitola
@@ -36,6 +40,15 @@ jobs:
 
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # L'image postgis crée l'extension dans `public` de la base initiale. Le
+      # dépôt l'installe dans `extensions` (0016), comme pg_trgm et unaccent
+      # depuis 0001 : sans cette purge, `if not exists` saute la création et
+      # `extensions.geography` ne résout pas — et `spatial_ref_sys` traînerait
+      # dans `public`, où le contrôle de couverture RLS le prendrait pour une
+      # table sans policy.
+      - name: Drop the pre-installed postgis
+        run: psql -c 'drop extension if exists postgis cascade;'
 
       # The Phase 0 verification file creates its own Supabase stand-ins
       # (auth.users, auth.uid(), storage.*, the anon/authenticated roles),
@@ -220,6 +233,55 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/10_clubs_events_messages.sql 2>&1 \
             | tee "$RUNNER_TEMP/clubs.log"
           if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/clubs.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0016 pose les lieux (ADR 0011). Trois décisions ne se voient qu'à
+      # l'exécution : un lieu naît pending et son auteur ne peut pas le publier
+      # (WITH CHECK), la revendication ne s'écrit pas depuis un client, et la
+      # note d'un avis est engendrée — le garde-fou §2 est la forme de la
+      # donnée, pas une consigne.
+      - name: Apply 0016 — les lieux
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0016_lieux.sql
+
+      - name: Lieux — proposition, publication, revendication, avis, rayon
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/11_venues_rls.sql 2>&1 \
+            | tee "$RUNNER_TEMP/lieux.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/lieux.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # Les 200 lieux du registre DGDDI (PROVENANCE §7). Sur la base principale
+      # et non sur vitola_seed : ce seed exige la 0016, que la base de seed du
+      # référentiel n'applique pas. Ses contrôles d'intégrité vivent dans le
+      # fichier ; l'idempotence se vérifie ici, comme pour le référentiel.
+      - name: Load the venue seed, twice — it must not duplicate
+        run: |
+          (cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed_venues.sql)
+          before=$(psql -tAc "select count(*) from public.venues")
+          (cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed_venues.sql > /dev/null)
+          after=$(psql -tAc "select count(*) from public.venues")
+          if [ "$before" != "$after" ]; then
+            echo "Le rejeu du seed des lieux a changé le compte : $before -> $after"; exit 1
+          fi
+
+      # 0017 pose le journal (ADR 0012). Deux décisions ne se voient qu'à
+      # l'exécution : un article naît gated et draft, et un article public ne
+      # pointe aucune fiche — deux triggers tiennent la frontière dans les
+      # deux sens.
+      - name: Apply 0017 — le journal
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0017_editorial.sql
+
+      - name: Journal — qui écrit, qui lit, et la frontière des audiences
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/12_editorial_rls.sql 2>&1 \
+            | tee "$RUNNER_TEMP/journal.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/journal.log"; then
             echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
             exit 1
           fi

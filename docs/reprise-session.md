@@ -1,10 +1,15 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 23 août 2026 à midi, après la
-> fusion de la PR #10. **P1, P2 et P3 sont fermées, et les clubs, l'agenda et la messagerie avec
-> elles. La prochaine dans l'ordre du §9 est P4 — et elle est bloquée, voir plus bas ; celle qui
-> suit, P5, ouvre sur une question de licence qui vaut une ADR avant la première ligne de SQL.**
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026 en fin de
+> journée, après la livraison de **P5 puis P6** sur la branche
+> `claude/vitola-v1-p5-lieux-ejti1n`. **P1, P2, P3, P5 et P6 sont fermées** — P5 par l'ADR 0011
+> (200 lieux du registre DGDDI, recherche 25 km en 0,6 ms), P6 par l'ADR 0012 (le journal,
+> Lighthouse SEO = 100 levier ouvert). **P4 reste bloquée** (clés et corpus) et **la newsletter
+> de P6 est différée** (pas de clé Resend, pas de domaine — ADR 0012, D5). La prochaine dans
+> l'ordre du §9 est **P7 (boutique + Stripe)** — vérifier d'abord si des clés Stripe existent
+> dans l'environnement : sans elles, P7 est un P4 de plus, et P8 (modération, RGPD, a11y) est
+> le travail suivant qui n'attend personne.
 
 ---
 
@@ -184,7 +189,7 @@ bornait pas à P3. Elle referme aussi les trois dettes que P3 attendait.
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Quinze migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Dix-sept migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -204,17 +209,23 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0013` | `post_card` | `supabase/migrations/0013_post_card.sql` |
 | `0014` | `clubs_evenements_messagerie` | `supabase/migrations/0014_clubs_evenements_messagerie.sql` |
 | `0015` | `conversation_inbox` | `supabase/migrations/0015_conversation_inbox.sql` |
+| `0016` | `lieux` | `supabase/migrations/0016_lieux.sql` |
+| `0017` | `editorial` | `supabase/migrations/0017_editorial.sql` |
 
-**Trois sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009` et `0015` : `20260822222420`, `20260822232400` et `20260823083729`. C'est l'outil
+**Cinq sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015`, `0016` et `0017` : `20260822222420`, `20260822232400`, `20260823083729`,
+`20260823103622` et `20260823115404`. C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
 Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref`.
 `mod` en est délibérément **absent**.
 
-Extension ajoutée : **`pg_cron`**, pour une seule tâche — `vitola-refresh-cigar-stats`, toutes les
-cinq minutes, `select public.refresh_cigar_stats()`.
+Extensions ajoutées : **`pg_cron`**, pour une seule tâche — `vitola-refresh-cigar-stats`, toutes
+les cinq minutes — et **`postgis`** (0016), dans le schéma `extensions` comme les autres. La CI
+tourne depuis sur l'image `postgis/postgis:17-3.5` et **purge la pré-installation** que cette
+image met dans `public` avant d'appliquer les migrations : sans cela `if not exists` saute la
+création et `extensions.geography` ne résout pas.
 
 ### Volumes réels
 
@@ -248,6 +259,10 @@ ref.cigar_revisions         0      public.cigar_stats     2 lignes (vue matéria
                                    public.event_attendees      0
                                    public.conversations        0
                                    public.messages             0
+                                   public.venues             200  ← seed DGDDI (0016)
+                                   public.venue_reviews        0
+                                   public.articles             2  ← brouillons d'amorçage (0017)
+                                   public.article_links        1  ← le guide gated → une fiche
 ```
 
 **`public.reviews` contient DEUX lignes, et aucune n'est de moi.** Deux entrées publiques de
@@ -257,8 +272,12 @@ fiches ni n'écrit ces textes, et tous effacent ce qu'ils écrivent. Je les ai l
 ligne pré-existante de `public.comments`, et c'est pour cela que `cigar_stats` a deux lignes.
 **À me dire si elles peuvent partir.**
 
-Les treize tables sociales sont à zéro : les parcours effacent ce qu'ils écrivent, et l'état final
-a été vérifié table par table plutôt que supposé. Une exception à connaître —
+Les treize tables sociales sont à zéro — **sauf `public.follows`, qui porte UNE ligne qui n'est
+pas d'un parcours** : `jeremy` s'est abonné à `test_un` le 23 août à 10 h 15, à la main, depuis le
+site. Elle est laissée en place, comme les deux entrées de carnet de `test_deux`. Les 200 lignes
+de `public.venues` sont le seed officiel (source `douane-fr-2018`), pas un reste de parcours :
+un reste s'y reconnaît à `source is null`. L'état final a été vérifié table par table plutôt que
+supposé. Une exception à connaître —
 **`public.conversations` n'a aucun droit `DELETE`, pour personne** (la rétention est la question
 ouverte de l'ADR 0010), donc une conversation vide survit à un parcours et se retire depuis un
 contexte privilégié. Celle du dernier parcours a été retirée ainsi.
@@ -445,7 +464,7 @@ public.event_kind          degustation | rencontre | visite | autre
 public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 161 au total (dont 10 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 184 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -477,10 +496,21 @@ public.event_attendees   4  select_all, insert_own, update_own, delete_own
 public.conversations     2  select_own, insert_linked, + 1 restrictive de blocage
 public.messages          5  select_own, select_moderator, insert_own, update_recipient,
                             delete_own, + 1 restrictive de blocage
+public.venues            7  select_public (published+closed, y compris anon), select_own,
+                            select_editor, insert_own (pending, WITH CHECK), update_author
+                            (pending seulement), update_claimant, update_editor,
+                            delete_author (pending), delete_moderator
+public.venue_reviews     8  select_visible, select_own, select_moderator, insert_own
+                            (lieu publié), update_own, delete_own, delete_moderator,
+                            + 1 restrictive de blocage
+public.articles          5  select_published (anon compris), select_editor,
+                            insert_editor, update_editor, delete_editor
+public.article_links     3  select_visible (EXISTS sous la RLS d'articles),
+                            insert_editor, delete_editor
 ```
 
-**Sept policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments`,
-`profiles`, `conversations` et `messages`. C'est la seule sémantique qui puisse **retirer** une ligne : les permissives sont
+**Huit policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments`,
+`profiles`, `conversations`, `messages` et `venue_reviews`. C'est la seule sémantique qui puisse **retirer** une ligne : les permissives sont
 OR-ées, donc en ajouter une ne peut jamais restreindre. Chacune épargne ses propres lignes.
 
 Toutes lisent `blocked_user_ids()` — **les deux sens** — sauf `profiles`, qui lit
@@ -542,6 +572,7 @@ le même jour : elle exige maintenant que la branche existe **et** que l'avertis
 | `public.shared_humidor_shelf(uuid)` | **oui** | ✗ | ✓ | ✓ |
 | `public.conversation_with(uuid)` | **non — INVOKER** | ✗ | ✓ | ✓ |
 | `public.conversation_inbox(int)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+| `public.venues_nearby(lat,lng,rayon,types[],max)` | **non — INVOKER** | ✓ | ✓ | ✓ |
 
 **`feed_page()`, `post_card()`, `conversation_with()` et `conversation_inbox()` sont en droits
 d'appelant, et l'auto-contrôle de leur migration échoue si elles passent un jour en `DEFINER`.** C'est la décision D1 de l'ADR 0006 réappliquée : un
@@ -623,6 +654,7 @@ le seul endroit d'où une régression se voit, l'auto-contrôle d'une migration 
 | `wiki_contributions_open` | oui | | Ouvre la file de révisions. |
 | `comments_min_role` | oui | `{"min_role":"member"}` | **À resserrer en `contributor` le jour où l'inscription s'ouvre.** |
 | `dsa_report_sla_hours` | oui | `{"hours":72}` | Publié dans les mentions légales, **lu à chaque rendu**. Le changer change ce qu'on promet, sans déploiement. Épinglé par `tests/compliance/dsa.test.ts`. |
+| `venues_enabled` | oui | `{"types":[…7 types]}` | Q6, ADR 0011. La charge utile liste les types offerts : restreindre l'annuaire après avis juridique est un UPDATE de cette ligne — écrans, formulaire de proposition et entrée de nav compris. |
 
 ### Buckets de stockage
 
@@ -773,7 +805,7 @@ recherche hybride (trigram + unaccent, déjà en base depuis P1), le quota adoss
 qu'à Upstash, et l'écran avec sa dégradation gracieuse vers la recherche manuelle. Cela ne ferme
 **pas** le critère de sortie, et le brief interdit explicitement d'avancer sans lui.
 
-### 8. P5 — les lieux (§5.7). **C'est par là qu'il faut commencer, et ça s'ouvre sur une ADR**
+### ~~8. P5 — les lieux (§5.7)~~ — **livrée le 23 août 2026, ADR 0011**
 
 Le §9 donne à P5 un critère net : « **200 lieux seedés, recherche 25 km < 200 ms** ». Les deux
 moitiés ne coûtent pas la même chose.
@@ -807,8 +839,78 @@ Deux conséquences déjà en attente ailleurs : `events.venue_id` **n'existe pas
 délibérément laissé de côté, un lieu écrit à la main tient en attendant et la migration se fera en
 une requête — et `posts.venue_id` non plus, pour la même raison.
 
+> **Livrée.** L'ADR 0011 tranche les quatre points : seed depuis le registre officiel des
+> buralistes (DGDDI 2018, Licence Ouverte — le régime exact de l'arrêté des prix), **OSM refusé**
+> tant qu'un avis juridique n'a pas borné le partage à l'identique de l'ODbL ; tout membre propose
+> (`pending`), un `editor` publie ; `claimed_by` est une identité posée en contexte privilégié,
+> jamais un drapeau auto-servi ; l'avis porte **trois critères structurels** (accueil, confort,
+> conseil) et sa note est `GENERATED` — le garde-fou §2 est la forme de la donnée. Les deux
+> `venue_id` existent et leurs écrans avec. Critère de sortie mesuré : 200 lieux, 0,6 ms par
+> recherche 25 km à chaud sur la vraie base, 8 ms en local sur 50 200 lignes, GiST engagé.
+> **Restent voulus** : pas de carte (le fournisseur de tuiles est un arbitrage de sous-traitance,
+> question ouverte de l'ADR) et pas de revendication en un clic (attend un canal de contact, Q7).
+
+### ~~9. P6 — l'éditorial, le SEO~~ — **livrée le 23 août 2026, ADR 0012 ; la newsletter est différée**
+
+> **Livrée.** L'ADR 0012 tranche : un article vit dans `public.articles` (`body_md`, **jamais de
+> MDX** — du code en base), le rendu passe par le sous-ensemble Markdown maison de
+> `lib/journal/markdown.ts` (arbre typé, cas d'injection testés et parcourus) ; `/journal` est le
+> **seul préfixe public** du site, un article `gated` se défend lui-même (cookie du portail exigé
+> par sa page, `noindex`, absent du sitemap et du flux RSS) ; pas de fiche liée sur un article
+> public (deux triggers) ; les `editor` écrivent et publient. **Lighthouse SEO = 100** sur `/`,
+> `/journal` et un article public, mesuré levier d'indexation ouvert (`SITE_INDEXABLE=1`, fermé
+> par défaut tant que Q1 n'est pas tranchée). **La newsletter n'existe pas** (D5) : pas de clé
+> Resend, pas de domaine (Q7), et collecter des adresses sans envoyeur serait une table de
+> données personnelles au service de rien — le flux RSS est l'abonnement de v1.
+> **Deux brouillons d'amorçage** signés `jeremy` attendent sa relecture au composeur.
+
+### 10. P7 — la boutique et Stripe. **À vérifier avant de commencer : les clés**
+
+Le §9 lui donne « commande test bout en bout + webhook idempotent ». Le §3 prévoit Stripe
+Checkout (ADR 0003, encore Proposée). **Vérifié en fin de session : aucune variable `STRIPE_*`
+dans l'environnement** (ni Resend, ni Anthropic, ni Replicate, ni Upstash — seul Supabase a ses
+clés). Sans clés, P7 est un P4 de plus (l'écran d'un paiement qui ne peut pas s'exercer), et il faut le dire plutôt que de
+livrer un panier qui ne se vide jamais. Ce qui reste faisable sans clés : le schéma `shop` (le
+`CHECK` anti-tabac du §5.8, le trigger de refus lexical — `lib/compliance/tobacco-terms.ts`
+existe pour lui), le catalogue et le panier. Le critère de sortie, lui, exige Stripe.
+
+### 11. P8 — modération, RGPD, i18n, PWA, perf, a11y. **Le travail qui n'attend personne**
+
+Critère : « audit axe-core 0 violation critique ». C'est aussi la phase du back-office de
+modération — la Q12 y prend sa réponse d'écran — et des dettes listées sous « À me signaler »
+qui attendent l'ouverture.
+
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
+- **Vous avez utilisé le site pendant la session, et rien de ce que vous avez écrit n'a été
+  touché** : un abonnement `jeremy` → `test_un` (10 h 15), deux entrées de carnet de plus chez
+  `test_deux` (les nouvelles fiches Macanudo, vers 12 h), et une publication « Publier au fil »
+  de `test_deux` sur l'une d'elles. `public.reviews` compte donc **4** lignes et `public.posts`
+  **1**, aucune des cinq n'étant d'un parcours.
+- **Les deux brouillons d'amorçage du journal sont à vous** : `vitole-cepo-module…` (public,
+  lexique) et `la-cape-du-claro-a-l-oscuro` (gated, lié à une fiche), signés de votre compte,
+  relus par personne. **Les publier est votre geste** — depuis `/journal/ecrire` — et l'ADR 0012
+  le dit en toutes lettres. La ligne éditoriale (sujets, rythme, signatures) est sa question
+  ouverte.
+- **La newsletter promise par F9 n'existe pas** (ADR 0012, D5) : pas de clé Resend, pas de
+  domaine (Q7). Le flux RSS tient lieu d'abonnement. **À me dire si la newsletter doit précéder
+  l'ouverture** — elle demande une clé, un domaine, un double opt-in et une ligne au registre
+  des consentements.
+- **Le levier `SITE_INDEXABLE` existe et reste fermé.** Le jour où Q1 tranche, l'ouverture de
+  l'indexation est une variable d'environnement sur le déploiement — robots.txt et la méta
+  passent ensemble à la frontière Q13, gated toujours exclu.
+- **Le seed des lieux date de 2018 et sous-représente certaines villes.** Lyon n'a que 3 lieux
+  nommés au registre (sur 157), Montpellier 4, Strasbourg 4 — le registre ne donne pas d'enseigne
+  à la plupart de leurs débits, et l'ADR 0011 refuse d'en inventer une. La règle de sélection est
+  dans PROVENANCE §7. **À me dire si un rééquilibrage éditorial est attendu** (par contribution,
+  jamais par invention).
+- **Le seul compte qui publie un lieu est aussi le seul qui valide le wiki** : `jeremy`, `admin`.
+  Même goulot que la file wiki, une surface de plus. Le seuil de réouverture n° 5 de l'ADR 0011
+  le mesure : dix propositions en attente plus d'une semaine.
+- **La carte de P5 n'existe pas, et c'est un arbitrage qui vous attend** (question ouverte de
+  l'ADR 0011) : MapTiler (clé, sous-traitant), Protomaps auto-hébergé (des Go à héberger), ou un
+  service gratuit sans contrat. Chacun voit l'adresse IP de chaque visiteur de la carte. La
+  recherche par distance, elle, est livrée et n'en dépend pas.
 - **Deux entrées de carnet publiques de `test_deux` sont en base, et elles ne sont pas de moi.**
   Une du 23 août à 06 h 17 (90/100, `macanudo-inspirado-white-toro`), une du 23 août à 08 h 16
   (95/100, `cao-pilon-robusto-extra`). Aucun parcours ne touche ces deux fiches, et les miens
@@ -974,7 +1076,18 @@ arbitrage et ne doivent pas être appliquées sans lui.**
   `/majorite`. La vérification est remontée dans `next.config.ts` et casse désormais le build.
 - **Pour les gros payloads SQL**, passe par l'API de gestion en `curl` plutôt que par le MCP.
   Attention : **un appel = une transaction**, donc retire le `begin;`/`commit;` du fichier.
-- **`pnpm check` et le commit doivent être dans la MÊME commande** (`&&`).
+- **`pnpm check` et le commit doivent être dans la MÊME commande** (`&&`) — et sans `| tail` sur
+  le `pnpm check` : le tube remplace le code de sortie par celui de `tail`, et un commit est passé
+  ainsi sur un check rouge avant d'être amendé.
+- **Un drapeau lu dans l'en-tête est lu sur toutes les pages.** `venues_enabled` décide d'une
+  entrée de nav, donc l'en-tête interroge la base à chaque rendu — et sur la base injoignable de
+  la CI, chaque écran devenait plus lent que le budget des e2e du portail : dix rouges sur un
+  produit qui marchait. `venuesFlag(1200)` porte un délai que seul l'en-tête passe ; un drapeau
+  muet répond « fermé ». C'est la preuve par l'exemple de « rejoue les e2e avec identifiants
+  bidon avant de pousser ».
+- **`body()` des parcours tronque à 400 caractères** — c'est un extrait de diagnostic, jamais un
+  test de présence. Une boucle de nettoyage du fil s'en servait : elle croyait le fil vide, le
+  post survivait, et seul le `count(*)` en base l'a dit. `seen()` attend, `body()` illustre.
 - **Prettier n'est pas dans la CI** et des dizaines de fichiers ne passent pas `pnpm format:check`.
   Ne lance pas `pnpm format` : tu enterrerais ton diff sous un reformatage.
 - **Le classificateur bloque parfois les heredocs `cat >`** ; utilise l'outil Write, ou un script
@@ -1208,6 +1321,51 @@ Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un second onglet
 pour personne. La rétention est la question ouverte de l'ADR 0010, et ouvrir la suppression
 l'aurait tranchée par accident. Une conversation vide peut donc rester ; elle se retire depuis un
 contexte privilégié.
+
+---
+
+## LES URL À OUVRIR POUR RECETTER LES LIEUX (livrés le 23 août au soir)
+
+Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un onglet `test_deux`, un onglet
+`jeremy` pour publier. **Les 200 lieux du registre sont en base en permanence** — c'est le seed,
+pas un reste de parcours.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/lieux` | L'annuaire, « 100 lieux » (le plafond, et la ligne qui le dit), la provenance (« registre officiel des débits de tabac, millésime 2018 »), la recherche par nom/ville/type, « Proposer un lieu ». L'entrée « Lieux » est dans la nav — elle disparaît si `venues_enabled` passe à false. |
+| ⟶ « Me localiser » (accorder la position) | La position part **dans l'URL** (`?lat=…&lng=…&rayon=25`), la liste se trie par distance (« à 350 m », « à 4,2 km »), la page annonce le rayon. À Paris : 25 civettes. |
+| ⟶ `?q=civette&type=civette` | La recherche texte, en GET : rechargeable, partageable. |
+| `/lieux/a-la-civette-paris` | La fiche : adresse, « Fumoir : non renseigné » (jamais « non » deviné), « Horaires non renseignés », la ligne de provenance et l'invitation à signaler ce qui a changé, la revendication expliquée (« rien ne se revendique en un clic — c'est voulu »), « Signaler cette fiche ». **Aucun prix nulle part.** |
+| ⟶ noter 5/4/4 + un mot | « Avis enregistré. » (`role=status`), la note **4,3/5 calculée**, « Votre avis ». La note globale ne se saisit nulle part : trois critères, c'est tout l'avis. |
+| **En `test_deux`** : noter 3/3/3 | La moyenne passe à **3,7/5**, « 2 avis ». « Signaler cet avis » sur l'avis de l'autre, jamais sur le sien. |
+| `/lieux/proposer` | Le formulaire : type (les 7 du drapeau), nom, ville (le minimum), position facultative avec « Utiliser ma position », horaires repliés. La phrase-clé : ce qu'on ne sait pas se laisse vide. |
+| ⟶ envoyer | On arrive sur la fiche, bandeau « Proposition en attente de relecture. Elle n'est visible que de vous et des relecteurs. », bouton « Retirer ma proposition ». |
+| La même URL en `test_un` | **404** — jamais « accès refusé ». |
+| **En `jeremy`** : `/lieux` | La section « Propositions en attente », la proposition dedans. |
+| ⟶ ouvrir, « Publier ce lieu » | « Lieu publié. » Le bandeau disparaît, la fiche se lit de tous, elle entre dans la recherche par distance si elle a une position. |
+| `/evenements`, annoncer avec « Où (lieu du référentiel) » | La page de l'événement porte le **lieu en lien** vers sa fiche ; la fiche du lieu liste l'événement sous « Annoncé ici ». Le champ libre reste pour tout le reste. |
+| Fiche cigare, « Je fume ce cigare » + « Où ça » | La publication du fil porte « chez <le lieu> », en lien. Sans lieu choisi, rien — dire où l'on fume est une confidence, jamais une exigence. |
+| **En `jeremy`** : « Marquer fermé » sur une fiche | « Fiche marquée fermée. » La fiche reste lisible avec son bandeau (« pour qu'on ne le re-propose pas ») ; elle sort de la liste et de la recherche. |
+| `/lieux` avec `venues_enabled=false` (UPDATE du drapeau) | 404 sur toute la section, nav comprise. Le remettre à true rallume tout. |
+
+---
+
+## LES URL À OUVRIR POUR RECETTER LE JOURNAL (livré le 23 août au soir)
+
+Un onglet en **navigation privée sans passer le portail** (c'est lui qui prouve la frontière), un
+onglet `jeremy` (seul compte `editor`). Les deux brouillons d'amorçage sont en base, à vous.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/journal` en navigation privée | Le journal se lit **sans portail**. Vide tant que rien n'est publié : l'invitation, et le lien « Flux RSS ». La phrase du bas dit que d'autres articles vivent derrière le portail, avec le lien qui y mène. |
+| `/journal/flux.xml` | Du RSS. Il ne portera **que** les articles publics — jamais un gated, jamais un brouillon. |
+| **En `jeremy`** : `/journal/ecrire` | Les deux brouillons d'amorçage (« Vitole, cepo, module… », « La cape… »), chacun avec « Reprendre ». La page blanche en dessous. En `test_un` : « réservé aux relecteurs », et pourquoi. |
+| ⟶ reprendre « Vitole, cepo, module », **Publier** | « Article publié. » (`role=status`). En navigation privée, `/journal` le montre ; le sitemap et le flux le portent. |
+| ⟶ l'article publié | Titres `##` rendus, listes, temps de lecture calculé. Le corps est du texte : collez `<script>` dans un brouillon d'essai, il s'affichera en toutes lettres. |
+| ⟶ reprendre « La cape » (gated, lié à une fiche), **Publier** | En navigation privée **sans portail**, son URL renvoie à `/majorite` — et le portail **ramène à l'article**. Le flux et le sitemap l'ignorent. Sous l'article : « Les fiches dont il est question », en lien. |
+| ⟶ passer « La cape » en audience publique | **Refusé en toutes lettres** : « Retirez d'abord les fiches liées ». C'est le garde-fou Q13, structurel (deux triggers). |
+| ⟶ **Dépublier** un article | « Article dépublié. » Son URL redevient 404 — jamais « accès refusé ». |
+| `robots.txt` | `Disallow: /` — le levier `SITE_INDEXABLE` est fermé tant que Q1 n'est pas tranchée. Ouvert (`SITE_INDEXABLE=1` sur le déploiement), il n'autorise que les routes publiques et `/journal`. |
 
 ---
 

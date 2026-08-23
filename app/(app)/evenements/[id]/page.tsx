@@ -84,7 +84,15 @@ export default async function EventPage({
           {formatDateTime(starts)}
           {ends ? (sameDay ? ` – ${formatTime(ends)}` : ` → ${formatDateTime(ends)}`) : ''}
         </p>
-        <p className="text-ink-muted text-sm">{event.location_text ?? copy.noPlace}</p>
+        <p className="text-ink-muted text-sm">
+          {event.venue_name && event.venue_slug ? (
+            <Link href={routes.venue(event.venue_slug)} className="text-accent hover:underline">
+              {event.venue_name}
+            </Link>
+          ) : (
+            (event.location_text ?? copy.noPlace)
+          )}
+        </p>
         <p className="text-ink-faint text-xs">
           {copy.hostedBy}{' '}
           {event.host_handle ? (

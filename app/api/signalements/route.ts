@@ -223,6 +223,22 @@ async function isVisibleToCaller(kind: ReportableKind, id: string): Promise<bool
       return data !== null
     }
 
+    /* The venue directory (ADR 0011). Same shape, same reason: `venues` has
+       three SELECT policies (published-or-closed for everyone, own pending,
+       editor), `venue_reviews` derives from them plus a RESTRICTIVE block
+       policy — repeating any of it here would be the filter ADR 0004 forbids. */
+    case 'venue': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('venues').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    case 'venueReview': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('venue_reviews').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
     default: {
       // Adding a surface to REPORTABLE without a branch here stops compiling.
       const unhandled: never = kind

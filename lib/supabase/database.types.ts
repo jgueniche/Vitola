@@ -52,6 +52,99 @@ export type Database = {
           },
         ]
       }
+      article_links: {
+        Row: {
+          article_id: string
+          cigar_id: string | null
+          created_at: string
+          id: string
+          venue_id: string | null
+        }
+        Insert: {
+          article_id: string
+          cigar_id?: string | null
+          created_at?: string
+          id?: string
+          venue_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          cigar_id?: string | null
+          created_at?: string
+          id?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_links_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_links_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      articles: {
+        Row: {
+          audience: Database["public"]["Enums"]["article_audience"]
+          author_id: string | null
+          body_md: string
+          category: Database["public"]["Enums"]["article_category"]
+          created_at: string
+          excerpt: string | null
+          id: string
+          published_at: string | null
+          reading_time_min: number | null
+          seo: Json
+          slug: string
+          status: Database["public"]["Enums"]["article_status"]
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Database["public"]["Enums"]["article_audience"]
+          author_id?: string | null
+          body_md: string
+          category: Database["public"]["Enums"]["article_category"]
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time_min?: number | null
+          seo?: Json
+          slug: string
+          status?: Database["public"]["Enums"]["article_status"]
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["article_audience"]
+          author_id?: string | null
+          body_md?: string
+          category?: Database["public"]["Enums"]["article_category"]
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time_min?: number | null
+          seo?: Json
+          slug?: string
+          status?: Database["public"]["Enums"]["article_status"]
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -305,6 +398,7 @@ export type Database = {
           starts_at: string
           title: string
           updated_at: string
+          venue_id: string | null
         }
         Insert: {
           attendee_count?: number
@@ -320,6 +414,7 @@ export type Database = {
           starts_at: string
           title: string
           updated_at?: string
+          venue_id?: string | null
         }
         Update: {
           attendee_count?: number
@@ -335,6 +430,7 @@ export type Database = {
           starts_at?: string
           title?: string
           updated_at?: string
+          venue_id?: string | null
         }
         Relationships: [
           {
@@ -342,6 +438,13 @@ export type Database = {
             columns: ["club_id"]
             isOneToOne: false
             referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
             referencedColumns: ["id"]
           },
         ]
@@ -744,6 +847,7 @@ export type Database = {
           kind: Database["public"]["Enums"]["post_kind"]
           review_id: string | null
           updated_at: string
+          venue_id: string | null
           visibility: Database["public"]["Enums"]["review_visibility"]
         }
         Insert: {
@@ -760,6 +864,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["post_kind"]
           review_id?: string | null
           updated_at?: string
+          venue_id?: string | null
           visibility?: Database["public"]["Enums"]["review_visibility"]
         }
         Update: {
@@ -776,6 +881,7 @@ export type Database = {
           kind?: Database["public"]["Enums"]["post_kind"]
           review_id?: string | null
           updated_at?: string
+          venue_id?: string | null
           visibility?: Database["public"]["Enums"]["review_visibility"]
         }
         Relationships: [
@@ -784,6 +890,13 @@ export type Database = {
             columns: ["review_id"]
             isOneToOne: false
             referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
             referencedColumns: ["id"]
           },
         ]
@@ -1001,6 +1114,134 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_reviews: {
+        Row: {
+          advice: number
+          body: string | null
+          comfort: number
+          created_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
+          id: string
+          rating: number | null
+          updated_at: string
+          user_id: string
+          venue_id: string
+          welcome: number
+        }
+        Insert: {
+          advice: number
+          body?: string | null
+          comfort: number
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+          venue_id: string
+          welcome: number
+        }
+        Update: {
+          advice?: number
+          body?: string | null
+          comfort?: number
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+          venue_id?: string
+          welcome?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_reviews_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venues: {
+        Row: {
+          address: string | null
+          city: string
+          claimed_by: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          geo: unknown
+          has_smoking_room: boolean | null
+          hours: Json
+          id: string
+          is_ventilated: boolean | null
+          name: string
+          phone: string | null
+          postal_code: string | null
+          slug: string
+          source: string | null
+          source_date: string | null
+          status: Database["public"]["Enums"]["venue_status"]
+          type: Database["public"]["Enums"]["venue_type"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          claimed_by?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          geo?: unknown
+          has_smoking_room?: boolean | null
+          hours?: Json
+          id?: string
+          is_ventilated?: boolean | null
+          name: string
+          phone?: string | null
+          postal_code?: string | null
+          slug: string
+          source?: string | null
+          source_date?: string | null
+          status?: Database["public"]["Enums"]["venue_status"]
+          type: Database["public"]["Enums"]["venue_type"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          claimed_by?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          geo?: unknown
+          has_smoking_room?: boolean | null
+          hours?: Json
+          id?: string
+          is_ventilated?: boolean | null
+          name?: string
+          phone?: string | null
+          postal_code?: string | null
+          slug?: string
+          source?: string | null
+          source_date?: string | null
+          status?: Database["public"]["Enums"]["venue_status"]
+          type?: Database["public"]["Enums"]["venue_type"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       cigar_stats: {
@@ -1213,6 +1454,27 @@ export type Database = {
         }
         Returns: string
       }
+      venues_nearby: {
+        Args: {
+          lat: number
+          lng: number
+          max_rows?: number
+          radius_km?: number
+          venue_types?: Database["public"]["Enums"]["venue_type"][]
+        }
+        Returns: {
+          address: string
+          city: string
+          distance_m: number
+          has_smoking_room: boolean
+          id: string
+          is_ventilated: boolean
+          name: string
+          postal_code: string
+          slug: string
+          type: Database["public"]["Enums"]["venue_type"]
+        }[]
+      }
     }
     Enums: {
       app_role: "member" | "contributor" | "editor" | "moderator" | "admin"
@@ -1228,6 +1490,15 @@ export type Database = {
         | "vegetal"
         | "mineral"
         | "defaut"
+      article_audience: "public" | "gated"
+      article_category:
+        | "guide"
+        | "interview"
+        | "reportage"
+        | "lexique"
+        | "actualite"
+        | "accord"
+      article_status: "draft" | "published"
       attendee_status: "going" | "maybe" | "declined"
       consent_kind:
         | "terms"
@@ -1245,6 +1516,15 @@ export type Database = {
       reaction_kind: "ember"
       review_kind: "log" | "tasting"
       review_visibility: "private" | "shared" | "followers" | "public"
+      venue_status: "pending" | "published" | "closed"
+      venue_type:
+        | "civette"
+        | "cave"
+        | "lounge"
+        | "hotel"
+        | "restaurant"
+        | "club"
+        | "evenement"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1861,6 +2141,16 @@ export const Constants = {
         "mineral",
         "defaut",
       ],
+      article_audience: ["public", "gated"],
+      article_category: [
+        "guide",
+        "interview",
+        "reportage",
+        "lexique",
+        "actualite",
+        "accord",
+      ],
+      article_status: ["draft", "published"],
       attendee_status: ["going", "maybe", "declined"],
       consent_kind: [
         "terms",
@@ -1879,6 +2169,16 @@ export const Constants = {
       reaction_kind: ["ember"],
       review_kind: ["log", "tasting"],
       review_visibility: ["private", "shared", "followers", "public"],
+      venue_status: ["pending", "published", "closed"],
+      venue_type: [
+        "civette",
+        "cave",
+        "lounge",
+        "hotel",
+        "restaurant",
+        "club",
+        "evenement",
+      ],
     },
   },
   ref: {

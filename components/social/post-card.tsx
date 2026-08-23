@@ -112,6 +112,17 @@ export function PostCard({
         </p>
       ) : null}
 
+      {/* The venue a session names (P5). Hydrated after the RLS: a place the
+          reader may not see renders nothing, and the card does not say so. */}
+      {post.venue_slug && post.venue_name ? (
+        <p className="text-sm">
+          <span className="eyebrow text-ink-faint">{copy.atVenue}</span>{' '}
+          <Link href={routes.venue(post.venue_slug)} className="text-accent hover:underline">
+            {post.venue_name}
+          </Link>
+        </p>
+      ) : null}
+
       {post.review_id ? (
         <p className="text-sm">
           <Link href={routes.notebookEntry(post.review_id)} className="text-accent hover:underline">

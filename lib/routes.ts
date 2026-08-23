@@ -114,8 +114,20 @@ export const routes = {
   conversations: () => `/${SEGMENTS.conversations}`,
   conversation: (id: string) => `/${SEGMENTS.conversations}/${id}`,
 
+  /* Le journal vit DEVANT le portail (ADR 0012, D3 — Q13) : c'est la seule
+     famille de routes publiques en préfixe. Un article `gated` se défend
+     lui-même dans sa page — cookie du portail exigé, noindex — et le composeur
+     exige une session d'editor, ce qui suppose d'avoir passé le portail. */
   journal: () => `/${SEGMENTS.journal}`,
+  journalArticle: (slug: string) => `/${SEGMENTS.journal}/${slug}`,
+  journalCompose: () => `/${SEGMENTS.journal}/ecrire`,
+  journalFeed: () => `/${SEGMENTS.journal}/flux.xml`,
+  /* Un lieu se lit par son slug, comme un club : le nom d'un établissement est
+     durable, et une adresse qui se partage doit se relire. `proposer` pend sous
+     la liste, comme la proposition de correction pend sous la fiche cigare. */
   venues: () => `/${SEGMENTS.venues}`,
+  venue: (slug: string) => `/${SEGMENTS.venues}/${slug}`,
+  venuePropose: () => `/${SEGMENTS.venues}/proposer`,
   shop: () => `/${SEGMENTS.shop}`,
   settings: () => `/${SEGMENTS.settings}`,
 
@@ -142,10 +154,22 @@ export const PUBLIC_PATHS: readonly string[] = [
   routes.terms(),
   routes.cookies(),
   routes.health(),
+  routes.journal(),
 ]
 
+/**
+ * The one public *prefix* (ADR 0012, D3): article slugs are rows, not routes,
+ * so they cannot be enumerated here. Everything under it is reachable without
+ * the gate — which is exactly why a `gated` article's page checks the cookie
+ * itself, and why the walkthrough crosses that guard in both directions.
+ */
+export const PUBLIC_PREFIXES: readonly string[] = [`/${SEGMENTS.journal}/`]
+
 export function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.includes(pathname)
+  return (
+    PUBLIC_PATHS.includes(pathname) ||
+    PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  )
 }
 
 /**
@@ -180,7 +204,17 @@ export function safeSuite(suite: string | null | undefined): string | null {
 
   // Compare the path alone: `/?x=1` is still the public landing page.
   const [path] = suite.split('?')
-  if (!path || isPublicPath(path)) return null
+  if (!path) return null
+
+  /* The journal prefix is public AND worth coming back to: a `gated` article
+     lives under it and sends its reader through the gate (ADR 0012, D3) —
+     refusing the return trip would drop them on the default page for nothing.
+     Every other public path is still refused: bouncing a visitor through the
+     gate toward a page that never needed it is the pointless loop this guard
+     exists to cut. */
+  const isJournal =
+    path === routes.journal() || PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix))
+  if (isPublicPath(path) && !isJournal) return null
 
   return suite
 }

@@ -50,7 +50,13 @@ export function EventCard({ event }: { event: EventCardRow }) {
       </p>
 
       <p className="text-ink-muted text-xs">
-        {event.location_text ?? copy.noPlace}
+        {event.venue_name && event.venue_slug ? (
+          <Link href={routes.venue(event.venue_slug)} className="text-accent hover:underline">
+            {event.venue_name}
+          </Link>
+        ) : (
+          (event.location_text ?? copy.noPlace)
+        )}
         {event.club_name && event.club_slug ? (
           <>
             {' · '}

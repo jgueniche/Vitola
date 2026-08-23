@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { FieldError, FieldStatus, Input, Label, Select, Textarea } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 import { EVENT_KINDS, EVENT_LIMITS, type EventKind } from '@/lib/social/groups'
+import type { VenueOption } from '@/lib/venues/queries'
 
 const copy = m.events.create
 
@@ -25,16 +26,24 @@ const KIND_LABELS: Record<EventKind, string> = {
  * read the same way. The alternative was two forms drifting apart on the two
  * pages that would have owned them.
  *
- * The place is a free-text field, and the note under it says why rather than
- * leaving a reader to think the site does not know about places: `events` has
- * no `venue_id`, P5 brings the referential, and a column nothing fills is what
- * ADR 0007 already refused for `posts`.
+ * The place is a referential venue when there is one, a free-text field
+ * otherwise — P5 brought `events.venue_id`, and both read the same on the
+ * announcement. The selector disappears with the Q6 flag: `venueOptions` comes
+ * in empty and `location_text` carries on alone, exactly as before P5.
  *
  * `datetime-local` gives a wall clock with no zone. The server reads it as
  * Paris time — see `fromBrandZoneWallClock()` — because the alternative was
  * announcing a July evening two hours late, silently.
  */
-export function EventForm({ clubId, clubName }: { clubId?: string; clubName?: string }) {
+export function EventForm({
+  clubId,
+  clubName,
+  venueOptions = [],
+}: {
+  clubId?: string
+  clubName?: string
+  venueOptions?: readonly VenueOption[]
+}) {
   const [state, action, pending] = useActionState<EventState, FormData>(createEvent, {})
 
   const idPrefix = clubId ? `club-${clubId}` : 'agenda'
@@ -89,6 +98,20 @@ export function EventForm({ clubId, clubName }: { clubId?: string; clubName?: st
           <Input id={`${idPrefix}-ends`} name="endsAt" type="datetime-local" />
         </div>
       </div>
+
+      {venueOptions.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={`${idPrefix}-venue`}>{copy.venue}</Label>
+          <Select id={`${idPrefix}-venue`} name="venueId" defaultValue="">
+            <option value="">{copy.venueNone}</option>
+            {venueOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor={`${idPrefix}-location`}>{copy.location}</Label>

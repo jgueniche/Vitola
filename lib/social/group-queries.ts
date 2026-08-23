@@ -144,6 +144,7 @@ export type EventRow = {
   id: string
   host_id: string
   club_id: string | null
+  venue_id: string | null
   kind: EventKind
   title: string
   description: string | null
@@ -157,6 +158,8 @@ export type EventRow = {
 export type EventCard = EventRow & {
   club_name: string | null
   club_slug: string | null
+  venue_name: string | null
+  venue_slug: string | null
   host_handle: string | null
   host_display_name: string | null
   viewer_status: AttendeeStatus | null
@@ -184,7 +187,7 @@ export async function listEvents(options: {
   let query = supabase
     .from('events')
     .select(
-      'id, host_id, club_id, kind, title, description, location_text, starts_at, ends_at, capacity, attendee_count',
+      'id, host_id, club_id, venue_id, kind, title, description, location_text, starts_at, ends_at, capacity, attendee_count',
     )
     .order('starts_at', { ascending: true })
     .limit(options.limit ?? 100)
@@ -199,11 +202,17 @@ export async function listEvents(options: {
   if (rows.length === 0) return []
 
   const clubIds = [...new Set(rows.map((row) => row.club_id).filter((id): id is string => !!id))]
+  const venueIds = [...new Set(rows.map((row) => row.venue_id).filter((id): id is string => !!id))]
   const hostIds = [...new Set(rows.map((row) => row.host_id))]
 
-  const [clubs, hosts, answers] = await Promise.all([
+  const [clubs, venues, hosts, answers] = await Promise.all([
     clubIds.length
       ? supabase.from('clubs').select('id, name, slug').in('id', clubIds)
+      : Promise.resolve({ data: [] as { id: string; name: string; slug: string }[] }),
+    /* A venue that comes back missing is a pending or vanished one: the card
+       falls back to location_text rather than leaking a name the RLS withheld. */
+    venueIds.length
+      ? supabase.from('venues').select('id, name, slug').in('id', venueIds)
       : Promise.resolve({ data: [] as { id: string; name: string; slug: string }[] }),
     supabase.from('profiles').select('id, handle, display_name').in('id', hostIds),
     options.viewerId
@@ -219,16 +228,20 @@ export async function listEvents(options: {
   ])
 
   const clubById = new Map((clubs.data ?? []).map((club) => [club.id, club]))
+  const venueById = new Map((venues.data ?? []).map((venue) => [venue.id, venue]))
   const hostById = new Map((hosts.data ?? []).map((host) => [host.id, host]))
   const statusByEvent = new Map((answers.data ?? []).map((row) => [row.event_id, row.status]))
 
   return rows.map((row) => {
     const club = row.club_id ? clubById.get(row.club_id) : undefined
+    const venue = row.venue_id ? venueById.get(row.venue_id) : undefined
     const host = hostById.get(row.host_id)
     return {
       ...row,
       club_name: club?.name ?? null,
       club_slug: club?.slug ?? null,
+      venue_name: venue?.name ?? null,
+      venue_slug: venue?.slug ?? null,
       host_handle: host?.handle ?? null,
       host_display_name: host?.display_name ?? null,
       viewer_status: statusByEvent.get(row.id) ?? null,
@@ -242,7 +255,7 @@ export async function getEvent(id: string, viewerId: string | null): Promise<Eve
   const { data, error } = await supabase
     .from('events')
     .select(
-      'id, host_id, club_id, kind, title, description, location_text, starts_at, ends_at, capacity, attendee_count',
+      'id, host_id, club_id, venue_id, kind, title, description, location_text, starts_at, ends_at, capacity, attendee_count',
     )
     .eq('id', id)
     .limit(1)
@@ -252,9 +265,12 @@ export async function getEvent(id: string, viewerId: string | null): Promise<Eve
   const row = (data ?? [])[0] as EventRow | undefined
   if (!row) return null
 
-  const [club, host, answer] = await Promise.all([
+  const [club, venue, host, answer] = await Promise.all([
     row.club_id
       ? supabase.from('clubs').select('id, name, slug').eq('id', row.club_id).limit(1)
+      : Promise.resolve({ data: [] as { id: string; name: string; slug: string }[] }),
+    row.venue_id
+      ? supabase.from('venues').select('id, name, slug').eq('id', row.venue_id).limit(1)
       : Promise.resolve({ data: [] as { id: string; name: string; slug: string }[] }),
     supabase.from('profiles').select('id, handle, display_name').eq('id', row.host_id).limit(1),
     viewerId
@@ -271,6 +287,8 @@ export async function getEvent(id: string, viewerId: string | null): Promise<Eve
     ...row,
     club_name: club.data?.[0]?.name ?? null,
     club_slug: club.data?.[0]?.slug ?? null,
+    venue_name: venue.data?.[0]?.name ?? null,
+    venue_slug: venue.data?.[0]?.slug ?? null,
     host_handle: host.data?.[0]?.handle ?? null,
     host_display_name: host.data?.[0]?.display_name ?? null,
     viewer_status: answer.data?.[0]?.status ?? null,

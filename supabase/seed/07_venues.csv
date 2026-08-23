@@ -1,0 +1,201 @@
+type,name,slug,address,city,postal_code,country,lat,lng,status,source,source_date
+civette,A LA CIVETTE,a-la-civette-paris,157 R SAINT HONORE,PARIS,75001,FR,48.862988,2.335837,published,douane-fr-2018,2018-01-01
+civette,CIVETTE DE LA REYNIE,civette-de-la-reynie-paris,26 rue de la Reynie,PARIS,75001,FR,48.860207,2.348516,published,douane-fr-2018,2018-01-01
+civette,L'ORATOIRE,l-oratoire-paris,143 R SAINT HONORE,PARIS,75001,FR,48.861797,2.340608,published,douane-fr-2018,2018-01-01
+civette,LA TABATIÈRE,la-tabatiere-paris,1 R MARCHE ST HONORE,PARIS,75001,FR,48.865599,2.330817,published,douane-fr-2018,2018-01-01
+civette,LE CAMÉLIA,le-camelia-paris,2 BIS QUAI MEGISSERIE,PARIS,75001,FR,48.857723,2.345766,published,douane-fr-2018,2018-01-01
+civette,LE CHAT NOIR,le-chat-noir-paris,5 BD DE SEBASTOPOL,PARIS,75001,FR,48.858312,2.347881,published,douane-fr-2018,2018-01-01
+civette,LE JEAN NICOT,le-jean-nicot-paris,173 R SAINT HONORE,PARIS,75001,FR,48.863991,2.333725,published,douane-fr-2018,2018-01-01
+civette,LE SAINT AMOUR,le-saint-amour-paris,19 R ETIENNE MARCEL,PARIS,75001,FR,48.863904,2.348682,published,douane-fr-2018,2018-01-01
+civette,AU SULTAN,au-sultan-paris,9 BIS BLD POISSONNIERE,PARIS,75002,FR,48.868989,2.347697,published,douane-fr-2018,2018-01-01
+civette,LA TABATIÈRE,la-tabatiere-paris-2,17 BD MONTMARTRE,PARIS,75002,FR,48.871668,2.340933,published,douane-fr-2018,2018-01-01
+civette,LE CAFÉ FRAPPÉ,le-cafe-frappe-paris,95 R MONTMARTRE,PARIS,75002,FR,48.867948,2.343582,published,douane-fr-2018,2018-01-01
+civette,LE FONTENOY,le-fontenoy-paris,1 R DE CHOISEUL,PARIS,75002,FR,48.869004,2.335864,published,douane-fr-2018,2018-01-01
+civette,LE LOSANGE,le-losange-paris,150 R SAINT DENIS,PARIS,75002,FR,48.865595,2.350669,published,douane-fr-2018,2018-01-01
+civette,LE LOUVOIS,le-louvois-paris,60 R RICHELIEU,PARIS,75002,FR,48.868402,2.338377,published,douane-fr-2018,2018-01-01
+civette,LE LUCKY,le-lucky-paris,65 RUE D'ABOUKIR,PARIS,75002,FR,48.867663,2.34647,published,douane-fr-2018,2018-01-01
+civette,LE NEW RALLYE,le-new-rallye-paris,120 R D ABOUKIR,PARIS,75002,FR,48.868812,2.350705,published,douane-fr-2018,2018-01-01
+civette,LE VÉLOCIVETTE,le-velocivette-paris,22 rue de Turbigo,PARIS,75002,FR,48.864151,2.350775,published,douane-fr-2018,2018-01-01
+civette,TABAC CIVETTE,tabac-civette-paris,9/11 rue de Tracy,PARIS,75002,FR,48.86807,2.352341,published,douane-fr-2018,2018-01-01
+civette,TABAC LE GAILLON,tabac-le-gaillon-paris,2 R DE LA MICHODIERE,PARIS,75002,FR,48.86902,2.3345219999999998,published,douane-fr-2018,2018-01-01
+civette,TABAC LE HAVANE,tabac-le-havane-paris,102  RUE MONTORGUEIL,PARIS,75002,FR,48.866266,2.347236,published,douane-fr-2018,2018-01-01
+civette,LE LUTETIA,le-lutetia-paris,43 R DE BRETAGNE,PARIS,75003,FR,48.863166,2.3617369999999998,published,douane-fr-2018,2018-01-01
+civette,LE MARYLAND,le-maryland-paris,47 RUE TURBIGO,PARIS,75003,FR,48.865096,2.354017,published,douane-fr-2018,2018-01-01
+civette,LE SAVOIE,le-savoie-paris,46 R PASTOURELLE,PARIS,75003,FR,48.863277,2.358574,published,douane-fr-2018,2018-01-01
+civette,LE WEEK END,le-week-end-paris,59 RUE TURBIGO,PARIS,75003,FR,48.865797,2.357102,published,douane-fr-2018,2018-01-01
+civette,QUEEN CAFÉ,queen-cafe-paris,9 BOULEVARD SAINT-MARTIN,PARIS,75003,FR,48.867975,2.361121,published,douane-fr-2018,2018-01-01
+civette,BAR DES 2 AMIS,bar-des-2-amis-marseille,59 R D AUBAGNE,MARSEILLE,13001,FR,43.294291,5.380808,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LE BALTO,bar-tabac-le-balto-marseille,86 R BERNARD DU BOIS,MARSEILLE,13001,FR,43.301949,5.379346,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LE VIEUX PORT,bar-tabac-le-vieux-port-marseille,14 R PYTHEAS,MARSEILLE,13001,FR,43.294314,5.37492,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LEVERRIER,bar-tabac-leverrier-marseille,5 PL LEVERRIER,MARSEILLE,13001,FR,43.305998,5.393282,published,douane-fr-2018,2018-01-01
+civette,BRASSERIE DES ALLEES,brasserie-des-allees-marseille,2 BD D ATHENES,MARSEILLE,13001,FR,43.299466,5.380998,published,douane-fr-2018,2018-01-01
+civette,L'HIPPOCAMPE,l-hippocampe-marseille,9 RUE D'ISOARD,MARSEILLE,13001,FR,43.301606,5.390978,published,douane-fr-2018,2018-01-01
+civette,LA CIVETTE DU CHAPITRE,la-civette-du-chapitre-marseille,77 ALL LEON GAMBETTA,MARSEILLE,13001,FR,43.299155999999996,5.385009,published,douane-fr-2018,2018-01-01
+civette,LA CIVETTE DU PALAIS,la-civette-du-palais-marseille,66 RUE GRIGNAN,MARSEILLE,13001,FR,43.291732,5.374962,published,douane-fr-2018,2018-01-01
+civette,LA COMETE,la-comete-marseille,3 CRS JEAN BALLARD,MARSEILLE,13001,FR,43.293785,5.374462,published,douane-fr-2018,2018-01-01
+civette,LA FRANCAISE,la-francaise-marseille,37 RUE NATIONALE,MARSEILLE,13001,FR,43.299639,5.378309,published,douane-fr-2018,2018-01-01
+civette,LE CALUMET,le-calumet-marseille,67 LA CANEBIERE,MARSEILLE,13001,FR,43.2972,5.379551,published,douane-fr-2018,2018-01-01
+civette,LE CANEBIERE,le-canebiere-marseille,3 LA CANEBIERE,MARSEILLE,13001,FR,43.295522,5.374708,published,douane-fr-2018,2018-01-01
+civette,LE CENTRAL,le-central-marseille,7 R DES FABRES,MARSEILLE,13001,FR,43.296513,5.377051,published,douane-fr-2018,2018-01-01
+civette,LE DIPLOMATE,le-diplomate-marseille,32 R PARADIS,MARSEILLE,13001,FR,43.293368,5.376728,published,douane-fr-2018,2018-01-01
+civette,LE DOME,le-dome-marseille,4 R DE LA REPUBLIQUE,MARSEILLE,13001,FR,43.296573,5.374086,published,douane-fr-2018,2018-01-01
+civette,LE FLASH,le-flash-marseille,21 rue de ROME,MARSEILLE,13001,FR,43.29492,5.378802,published,douane-fr-2018,2018-01-01
+civette,LE GIULIA,le-giulia-marseille,148 LA CANEBIERE,MARSEILLE,13001,FR,43.298526,5.38418,published,douane-fr-2018,2018-01-01
+civette,LE LYSIA,le-lysia-marseille,2 R DES AUGUSTINS,MARSEILLE,13001,FR,43.296235,5.37481,published,douane-fr-2018,2018-01-01
+civette,LE MARYLAND,le-maryland-marseille,1 R DE ROME,MARSEILLE,13001,FR,43.295104,5.378598,published,douane-fr-2018,2018-01-01
+civette,LE NAJA,le-naja-marseille,28 BD GARIBALDI,MARSEILLE,13001,FR,43.296218,5.381385,published,douane-fr-2018,2018-01-01
+civette,LE NATIONAL,le-national-marseille,4 BD NATIONAL,MARSEILLE,13001,FR,43.301901,5.387271,published,douane-fr-2018,2018-01-01
+civette,LE SAINT CHARLES,le-saint-charles-marseille,50 BD VOLTAIRE,MARSEILLE,13001,FR,43.302869,5.3849730000000005,published,douane-fr-2018,2018-01-01
+civette,LE TOTEM LE VOLTIGEUR,le-totem-le-voltigeur-marseille,87 BD LONGCHAMP,MARSEILLE,13001,FR,43.302546,5.390548,published,douane-fr-2018,2018-01-01
+civette,LE TRIANON,le-trianon-marseille,32 RUE SAINTE,MARSEILLE,13001,FR,43.292501,5.375056,published,douane-fr-2018,2018-01-01
+civette,LE VIZIR,le-vizir-marseille,14 R COLBERT,MARSEILLE,13001,FR,43.299289,5.374664,published,douane-fr-2018,2018-01-01
+civette,LA TABACTIERE,la-tabactiere-lyon,49 CRS RICHARD VITTON,LYON,69003,FR,45.753622,4.891167,published,douane-fr-2018,2018-01-01
+civette,LE GITANA,le-gitana-lyon,1 CRS DE LA LIBERTE,LYON,69003,FR,45.763439,4.84198,published,douane-fr-2018,2018-01-01
+civette,TABAC PRESSE DES BATTIERES,tabac-presse-des-battieres-lyon,27 AVENUE GENERAL EISENHOWER,LYON,69005,FR,45.753903,4.782296,published,douane-fr-2018,2018-01-01
+civette,A LA CHIMERE,a-la-chimere-bordeaux,4 R FONDAUDEGE,BORDEAUX,33000,FR,44.845415,-0.578498,published,douane-fr-2018,2018-01-01
+civette,A LA CIGALE,a-la-cigale-bordeaux,4 CRS ALSACE LORRAINE,BORDEAUX,33000,FR,44.842578,-0.589696,published,douane-fr-2018,2018-01-01
+civette,ANCRE ET NICOTINE,ancre-et-nicotine-bordeaux,19 R JENNY LEPREUX,BORDEAUX,33000,FR,44.832605,-0.611949,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LE ST NICOLAS,bar-tabac-le-st-nicolas-bordeaux,4 RUE DES SABLIERES,BORDEAUX,33000,FR,44.834989,-0.5644300000000001,published,douane-fr-2018,2018-01-01
+civette,CIVETTE LE HAVANE,civette-le-havane-bordeaux,27 R PERE LOUIS DE JABRUN,BORDEAUX,33000,FR,44.838585,-0.576471,published,douane-fr-2018,2018-01-01
+civette,DU CONSERVATOIRE,du-conservatoire-bordeaux,23 QUAI DE LA MONNAIE,BORDEAUX,33000,FR,44.840294,-0.5693619999999999,published,douane-fr-2018,2018-01-01
+civette,EL ESTANCO,el-estanco-bordeaux,110 CRS ARISTIDE BRIAND,BORDEAUX,33000,FR,44.831232,-0.5741269999999999,published,douane-fr-2018,2018-01-01
+civette,GINKO PRESSE,ginko-presse-bordeaux,1 PLACE JEAN CAYROL,BORDEAUX,33000,FR,44.84274,-0.59138,published,douane-fr-2018,2018-01-01
+civette,L'EPICURIEN,l-epicurien-bordeaux,190 R FONDAUDEGE,BORDEAUX,33000,FR,44.849962,-0.5858749999999999,published,douane-fr-2018,2018-01-01
+civette,LA BOITE A TABAC,la-boite-a-tabac-bordeaux,98 BD PRESIDENT WILSON,BORDEAUX,33000,FR,44.840971,-0.599212,published,douane-fr-2018,2018-01-01
+civette,LA CIVETTE,la-civette-bordeaux,3 CRS DE L INTENDANCE,BORDEAUX,33000,FR,44.842159,-0.57496,published,douane-fr-2018,2018-01-01
+civette,LA PERDRIX,la-perdrix-bordeaux,19 RUE JUDAIQUE,BORDEAUX,33000,FR,44.841605,-0.582073,published,douane-fr-2018,2018-01-01
+civette,LA PLANTATION,la-plantation-bordeaux,31 R CAMILLE GODARD,BORDEAUX,33000,FR,44.855232,-0.5742229999999999,published,douane-fr-2018,2018-01-01
+civette,LE 18,le-18-bordeaux,48 R LECOCQ,BORDEAUX,33000,FR,44.835079,-0.583978,published,douane-fr-2018,2018-01-01
+civette,LE 22,le-22-bordeaux,123 R STE CATHERINE,BORDEAUX,33000,FR,44.837147,-0.5737789999999999,published,douane-fr-2018,2018-01-01
+civette,LE 404 CAFE,le-404-cafe-bordeaux,15 R FERNAND PHILIPPART,BORDEAUX,33000,FR,44.840894,-0.5716439999999999,published,douane-fr-2018,2018-01-01
+civette,LE BOYARD,le-boyard-bordeaux,51 R DU TONDU,BORDEAUX,33000,FR,44.831765,-0.583198,published,douane-fr-2018,2018-01-01
+civette,LE BRAZZA,le-brazza-bordeaux,218 BIS RUE D ORNANO,BORDEAUX,33000,FR,44.832824,-0.5934889999999999,published,douane-fr-2018,2018-01-01
+civette,LE BRIVE,le-brive-bordeaux,61-63 RUE SAINT GENES,BORDEAUX,33000,FR,44.828429,-0.57967,published,douane-fr-2018,2018-01-01
+civette,LE CAMPING,le-camping-bordeaux,6 R DU MIRAIL,BORDEAUX,33000,FR,44.834627,-0.571207,published,douane-fr-2018,2018-01-01
+civette,LE CHABI,le-chabi-bordeaux,33 Rue STE COLOMBE,BORDEAUX,33000,FR,44.837417,-0.570929,published,douane-fr-2018,2018-01-01
+civette,LE DEBIT D'HUGO,le-debit-d-hugo-bordeaux,17 CRS VICTOR HUGO,BORDEAUX,33000,FR,44.836034,-0.567071,published,douane-fr-2018,2018-01-01
+civette,LE FUMOIR BORDELAIS,le-fumoir-bordelais-bordeaux,12 PL GAMBETTA,BORDEAUX,33000,FR,44.840874,-0.580048,published,douane-fr-2018,2018-01-01
+civette,LE JOHNSTON,le-johnston-bordeaux,4 R DAVID JOHNSTON,BORDEAUX,33000,FR,44.850106,-0.582176,published,douane-fr-2018,2018-01-01
+civette,LE MARINE ET BLANC,le-marine-et-blanc-bordeaux,251 BD MARECHAL LECLERC,BORDEAUX,33000,FR,44.827786,-0.59328,published,douane-fr-2018,2018-01-01
+civette,A L ETOILE,a-l-etoile-toulouse,26 PL DUPUY,TOULOUSE,31000,FR,43.599913,1.453563,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC,bar-tabac-toulouse,2 BIS PLACE BELFORT,TOULOUSE,31000,FR,43.608474,1.450239,published,douane-fr-2018,2018-01-01
+civette,CIVETTE VICTOR HUGO,civette-victor-hugo-toulouse,11 RUE DU REMPART VILLENEUVE,TOULOUSE,31000,FR,43.605768,1.446338,published,douane-fr-2018,2018-01-01
+civette,L OLIBAN,l-oliban-toulouse,19 ALL DES SOUPIRS,TOULOUSE,31000,FR,43.594503,1.454979,published,douane-fr-2018,2018-01-01
+civette,L'ENCRE ET LA PLUME,l-encre-et-la-plume-toulouse,6 PLACE SAINT ETIENNE,TOULOUSE,31000,FR,43.599704,1.44869,published,douane-fr-2018,2018-01-01
+civette,LA CHOPPE MATABIAU,la-choppe-matabiau-toulouse,70 R ue BAYARD,TOULOUSE,31000,FR,43.610923,1.451708,published,douane-fr-2018,2018-01-01
+civette,LA TABACASE,la-tabacase-toulouse,4 Rue de REMUSAT,TOULOUSE,31000,FR,43.605192,1.443915,published,douane-fr-2018,2018-01-01
+civette,LE CALUMET,le-calumet-toulouse,58 BD D ARCOLE,TOULOUSE,31000,FR,43.611785,1.438854,published,douane-fr-2018,2018-01-01
+civette,LE HAVANE,le-havane-toulouse,62 BD DE STRASBOURG,TOULOUSE,31000,FR,43.609907,1.444628,published,douane-fr-2018,2018-01-01
+civette,LE POINDIMIE,le-poindimie-toulouse,30 R MATABIAU,TOULOUSE,31000,FR,43.610862,1.44745,published,douane-fr-2018,2018-01-01
+civette,LE SAINT ROME,le-saint-rome-toulouse,1  rue Peyras,TOULOUSE,31000,FR,43.601536,1.443826,published,douane-fr-2018,2018-01-01
+civette,LE TABAC JAUNE,le-tabac-jaune-toulouse,23 BD DE STRASBOURG,TOULOUSE,31000,FR,43.607035,1.4469859999999999,published,douane-fr-2018,2018-01-01
+civette,LE TEMPS DE VIVRE,le-temps-de-vivre-toulouse,8 RUE DU POIDS DE L HUILE,TOULOUSE,31000,FR,43.604056,1.4450889999999998,published,douane-fr-2018,2018-01-01
+civette,LE WILSON,le-wilson-toulouse,20 PL WILSON,TOULOUSE,31000,FR,43.604942,1.448036,published,douane-fr-2018,2018-01-01
+civette,LIBRAIRIE PAPETERIE DU LYCEE,librairie-papeterie-du-lycee-toulouse,28 R GAMBETTA,TOULOUSE,31000,FR,43.602803,1.441581,published,douane-fr-2018,2018-01-01
+civette,TABAC BLEU,tabac-bleu-toulouse,1 BD LAZARE CARNOT,TOULOUSE,31000,FR,43.60064,1.451642,published,douane-fr-2018,2018-01-01
+civette,TABAC LE BRIDGE,tabac-le-bridge-toulouse,63 BD ARMAND DUPORTAL,TOULOUSE,31000,FR,43.609928,1.434776,published,douane-fr-2018,2018-01-01
+civette,TABAC LE VICTOR HUGO,tabac-le-victor-hugo-toulouse,29 BIS BD DE STRASBOURG,TOULOUSE,31000,FR,43.607831,1.446121,published,douane-fr-2018,2018-01-01
+civette,TABAC PRESSE AMIDONIERS,tabac-presse-amidoniers-toulouse,45 ALL DE BRIENNE,TOULOUSE,31000,FR,43.606935,1.427941,published,douane-fr-2018,2018-01-01
+civette,TABAC PRESSE DU MARCHE,tabac-presse-du-marche-toulouse,16 PL DES CARMES,TOULOUSE,31000,FR,43.598001,1.444435,published,douane-fr-2018,2018-01-01
+civette,TABAC ST GEORGES,tabac-st-georges-toulouse,5 RUE DE LA POMME,TOULOUSE,31000,FR,43.602109,1.4467430000000001,published,douane-fr-2018,2018-01-01
+civette,TABAC ST PIERRE,tabac-st-pierre-toulouse,5 RUE PARGAMINIERES,TOULOUSE,31000,FR,43.603912,1.436412,published,douane-fr-2018,2018-01-01
+civette,IMPULSION,impulsion-toulouse,16  PL DES PRADETTES,TOULOUSE,31100,FR,43.581883,1.387662,published,douane-fr-2018,2018-01-01
+civette,LA MOUETTE,la-mouette-toulouse,19 AV WINSTON CHURCHILL,TOULOUSE,31100,FR,43.571808,1.401426,published,douane-fr-2018,2018-01-01
+civette,LE SOLEIL D'OR,le-soleil-d-or-toulouse,420 RTE SAINT SIMON,TOULOUSE,31100,FR,43.591138,1.4190369999999999,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC DEFLY,bar-tabac-defly-nice,16 AV  ST JEAN BAPTISTE,NICE,06000,FR,43.701816,7.278022,published,douane-fr-2018,2018-01-01
+civette,CIVETTE ASSALIT NEMROD,civette-assalit-nemrod-nice,18 B R ASSALIT,NICE,06000,FR,43.706024,7.267496,published,douane-fr-2018,2018-01-01
+civette,CIVETTE LEPANTE,civette-lepante-nice,12 R LEPANTE,NICE,06000,FR,43.704142,7.270062,published,douane-fr-2018,2018-01-01
+civette,CKM HOLDING,ckm-holding-nice,31 rue Masséna,NICE,06000,FR,43.69717,7.266013,published,douane-fr-2018,2018-01-01
+civette,LE FLORIDE,le-floride-nice,24 R ALPHONSE KARR,NICE,06000,FR,43.700358,7.264436,published,douane-fr-2018,2018-01-01
+civette,LE LONGCHAMP,le-longchamp-nice,9 R DE LA LIBERTE,NICE,06000,FR,43.698202,7.267625,published,douane-fr-2018,2018-01-01
+civette,LE PARC IMPERIAL,le-parc-imperial-nice,36 AV PAUL ARENE,NICE,06000,FR,43.708226,7.252492,published,douane-fr-2018,2018-01-01
+civette,TABAC DU PALAIS,tabac-du-palais-nice,19 PROM DES ANGLAIS,NICE,06000,FR,43.694913,7.262539,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC DU RAY,bar-tabac-du-ray-nice,3 PL FONTAINE DU TEMPLE,NICE,06100,FR,43.725595,7.258117,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LE BERGERAC,bar-tabac-le-bergerac-nice,25 AV SAINT SYLVESTRE,NICE,06100,FR,43.725113,7.2481539999999995,published,douane-fr-2018,2018-01-01
+civette,LA GAIETE,la-gaiete-nice,72 AV CAP DE CROIX,NICE,06100,FR,43.732899,7.27636,published,douane-fr-2018,2018-01-01
+civette,LA VITA E BELLA,la-vita-e-bella-nice,91 AV HENRI DUNANT,NICE,06100,FR,43.725931,7.265076,published,douane-fr-2018,2018-01-01
+civette,LE DIPLOMATE,le-diplomate-nice,44 AV BORRIGLIONE,NICE,06100,FR,43.7149,7.261609,published,douane-fr-2018,2018-01-01
+civette,CHEZ GHIGLIANO,chez-ghigliano-nice,436 Av. Ste Marguerite,NICE,06200,FR,43.70843,7.19696,published,douane-fr-2018,2018-01-01
+civette,LA MASCOTTE,la-mascotte-nice,109 AV DE LA CALIFORNIE,NICE,06200,FR,43.687212,7.237787,published,douane-fr-2018,2018-01-01
+civette,LA PIGNATA,la-pignata-nice,242 AV DE FABRON,NICE,06200,FR,43.690547,7.214089,published,douane-fr-2018,2018-01-01
+civette,LE GENOIS,le-genois-nice,44 AV SAINT AUGUSTIN,NICE,06200,FR,43.67626,7.224846,published,douane-fr-2018,2018-01-01
+civette,TABAC PRESSE LOTO SAINTE HELENE,tabac-presse-loto-sainte-helene-nice,154 AV DE LA CALIFORNIE,NICE,06200,FR,43.6843,7.234065,published,douane-fr-2018,2018-01-01
+civette,LA CIVETTE GARIBALDI,la-civette-garibaldi-nice,1 B BD JEAN JAURES,NICE,06300,FR,43.700456,7.279121,published,douane-fr-2018,2018-01-01
+civette,LE BALTO,le-balto-nice,6 BD MAETERLINCK,NICE,06300,FR,43.687889,7.296444,published,douane-fr-2018,2018-01-01
+civette,LE CHIQUITO,le-chiquito-nice,1 R DROITE,NICE,06300,FR,43.698239,7.277656,published,douane-fr-2018,2018-01-01
+civette,LE GALLIA,le-gallia-nice,39 RTE DE TURIN,NICE,06300,FR,43.71115,7.284827,published,douane-fr-2018,2018-01-01
+civette,TABAC LES MURIERS,tabac-les-muriers-nice,23 R GUIGLIONDA STE AGATH,NICE,06300,FR,43.737333,7.297396,published,douane-fr-2018,2018-01-01
+civette,CAFE DE L'IPO DOM,cafe-de-l-ipo-dom-nantes,9 RUE MARECHAL JOFFRE,NANTES,44000,FR,47.22283,-1.545893,published,douane-fr-2018,2018-01-01
+civette,CAFE DE LA MAYENNE,cafe-de-la-mayenne-nantes,13 RUE DES HALLES,NANTES,44000,FR,47.215727,-1.55577,published,douane-fr-2018,2018-01-01
+civette,CAFE LES MATHURINS,cafe-les-mathurins-nantes,39 QUAI DE LA FOSSE,NANTES,44000,FR,47.210667,-1.562564,published,douane-fr-2018,2018-01-01
+civette,CAFE TABAC DE L'HOTEL DE VILLE,cafe-tabac-de-l-hotel-de-ville-nantes,5 RUE DE L HOTEL DE VILLE,NANTES,44000,FR,47.217709,-1.5553759999999999,published,douane-fr-2018,2018-01-01
+civette,L'AGORA,l-agora-nantes,20 RUE FRANKLIN,NANTES,44000,FR,47.214829,-1.563447,published,douane-fr-2018,2018-01-01
+civette,LA CARAVELLE,la-caravelle-nantes,6 RUE LEON MAITRE,NANTES,44000,FR,47.213646,-1.552989,published,douane-fr-2018,2018-01-01
+civette,LA COQUILLE,la-coquille-nantes,2 PLACE DU COMMERCE,NANTES,44000,FR,47.213525,-1.557573,published,douane-fr-2018,2018-01-01
+civette,LA DUCHESSE ANNE,la-duchesse-anne-nantes,1 PLACE DE LA DUCHESSE ANNE,NANTES,44000,FR,47.216711,-1.546992,published,douane-fr-2018,2018-01-01
+civette,LA PIPE D'ECUME,la-pipe-d-ecume-nantes,33 RUE DE STRASBOURG,NANTES,44000,FR,47.219439,-1.5542880000000001,published,douane-fr-2018,2018-01-01
+civette,LE BEL'AIR,le-bel-air-nantes,71 RUE DE BEL AIR,NANTES,44000,FR,47.224968,-1.5592000000000001,published,douane-fr-2018,2018-01-01
+civette,LE BRAZZA,le-brazza-nantes,3 RUE PAUL BELLAMY,NANTES,44000,FR,47.220772,-1.5554540000000001,published,douane-fr-2018,2018-01-01
+civette,LE CELTIQUE,le-celtique-nantes,1  QUAI DE LA FOSSE,NANTES,44000,FR,47.211958,-1.55956,published,douane-fr-2018,2018-01-01
+civette,LE COURBET,le-courbet-nantes,3  BOULEVARD AMIRAL COURBET,NANTES,44000,FR,47.228632,-1.553505,published,douane-fr-2018,2018-01-01
+civette,LE CYRANO,le-cyrano-nantes,1 PLACE VICTOR RICHARD,NANTES,44000,FR,47.228165,-1.532798,published,douane-fr-2018,2018-01-01
+civette,LE D'CLIC,le-d-clic-nantes,42 ROUTE DE SAINTE LUCE,NANTES,44000,FR,47.231969,-1.5352329999999998,published,douane-fr-2018,2018-01-01
+civette,LE DIPLOMATE,le-diplomate-nantes,221 RUE PAUL BELLAMY,NANTES,44000,FR,47.232887,-1.565691,published,douane-fr-2018,2018-01-01
+civette,LE GRASLIN,le-graslin-nantes,1 RUE GRESSET,NANTES,44000,FR,47.212882,-1.562833,published,douane-fr-2018,2018-01-01
+civette,LE KHEDIVE,le-khedive-nantes,1 RUE BOILEAU,NANTES,44000,FR,47.213978,-1.560454,published,douane-fr-2018,2018-01-01
+civette,LE LOUIS XVI,le-louis-xvi-nantes,92 RUE DU MARECHAL JOFFRE,NANTES,44000,FR,47.219976,-1.54926,published,douane-fr-2018,2018-01-01
+civette,LE LUTETIA,le-lutetia-nantes,58 RUE DU GENERAL BUAT,NANTES,44000,FR,47.23135,-1.538526,published,douane-fr-2018,2018-01-01
+civette,LE MONSELET,le-monselet-nantes,3 PLACE EMILE SARRADIN,NANTES,44000,FR,47.220934,-1.570277,published,douane-fr-2018,2018-01-01
+civette,LE NAJA,le-naja-nantes,2 RUE DE L EVECHE,NANTES,44000,FR,47.218904,-1.5505749999999998,published,douane-fr-2018,2018-01-01
+civette,LE PILORI,le-pilori-nantes,2 PLACE DU PILORI,NANTES,44000,FR,47.216278,-1.553021,published,douane-fr-2018,2018-01-01
+civette,LE SAINT-CLAUDE,le-saint-claude-nantes,25 RUE  DESHOULIERES,NANTES,44000,FR,47.218497,-1.5661619999999998,published,douane-fr-2018,2018-01-01
+civette,LE SAINT-MIHIEL,le-saint-mihiel-nantes,16 QUAI DE VERSAILLES,NANTES,44000,FR,47.222995,-1.553448,published,douane-fr-2018,2018-01-01
+civette,AU PETIT RELAIS,au-petit-relais-montpellier,129  rue de La Pépinière,MONTPELLIER,34000,FR,43.614111,3.889404,published,douane-fr-2018,2018-01-01
+civette,LE CHIQUITO,le-chiquito-montpellier,1 PLACE ROGER SALENGRO,MONTPELLIER,34000,FR,43.607578,3.867232,published,douane-fr-2018,2018-01-01
+civette,TABAC DES BEAUX ARTS,tabac-des-beaux-arts-montpellier,2 PL DES BEAUX ARTS,MONTPELLIER,34000,FR,43.61561,3.8811809999999998,published,douane-fr-2018,2018-01-01
+civette,TABAC,tabac-montpellier,70 Rambla des Calissons TABAC,MONTPELLIER,34070,FR,43.583694,3.858925,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC  KATBEL,bar-tabac-katbel-saint-etienne,25 R JULES LEDIN,SAINT-ETIENNE,42000,FR,45.444377,4.3821,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LE CARNOT,bar-tabac-le-carnot-saint-etienne,4 BD JULES JANIN,SAINT-ETIENNE,42000,FR,45.447128,4.3859960000000004,published,douane-fr-2018,2018-01-01
+civette,BAR TABAC LE SOLEIL,bar-tabac-le-soleil-saint-etienne,52 R LOUIS SOULIE,SAINT-ETIENNE,42000,FR,45.449093,4.40201,published,douane-fr-2018,2018-01-01
+civette,CAF' & CRÊME,caf-creme-saint-etienne,11 R DE LODI,SAINT-ETIENNE,42000,FR,45.441018,4.388806,published,douane-fr-2018,2018-01-01
+civette,CAFÉ DE LA MARINE,cafe-de-la-marine-saint-etienne,2 PL GRENETTE,SAINT-ETIENNE,42000,FR,45.436184,4.3868,published,douane-fr-2018,2018-01-01
+civette,CHEZ NICO,chez-nico-saint-etienne,10 R GEORGES TEISSIER,SAINT-ETIENNE,42000,FR,45.437444,4.386133,published,douane-fr-2018,2018-01-01
+civette,L'ESCALE,l-escale-saint-etienne,23 R JEAN HUSS,SAINT-ETIENNE,42000,FR,45.450719,4.415461,published,douane-fr-2018,2018-01-01
+civette,LA RECHUTE,la-rechute-saint-etienne,2 PL PAUL PAINLEVE,SAINT-ETIENNE,42000,FR,45.440549,4.392216,published,douane-fr-2018,2018-01-01
+civette,LE  PASSAGE,le-passage-saint-etienne,30 R MICHEL RONDET,SAINT-ETIENNE,42000,FR,45.437774,4.382834,published,douane-fr-2018,2018-01-01
+civette,LE  SELECT,le-select-saint-etienne,8 PL JACQUARD,SAINT-ETIENNE,42000,FR,45.441843,4.382642,published,douane-fr-2018,2018-01-01
+civette,LE 51 ÈME ELÉMENT,le-51-eme-element-saint-etienne,51 rue  Charles de Gaulle,SAINT-ETIENNE,42000,FR,45.446158,4.385103,published,douane-fr-2018,2018-01-01
+civette,LE BALTO,le-balto-saint-etienne,31 R GAMBETTA,SAINT-ETIENNE,42000,FR,45.432402,4.389172,published,douane-fr-2018,2018-01-01
+civette,LE BEL AIR,le-bel-air-saint-etienne,32 R J F REVOLLIER,SAINT-ETIENNE,42000,FR,45.456032,4.374648,published,douane-fr-2018,2018-01-01
+civette,LE BERGSON,le-bergson-saint-etienne,141 R BERGSON,SAINT-ETIENNE,42000,FR,45.458512,4.381588,published,douane-fr-2018,2018-01-01
+civette,LE CORONA,le-corona-saint-etienne,2 PL JEAN JAURES,SAINT-ETIENNE,42000,FR,45.440972,4.387483,published,douane-fr-2018,2018-01-01
+civette,LE FONTENOY,le-fontenoy-saint-etienne,9 R WILSON,SAINT-ETIENNE,42000,FR,45.440048,4.386837,published,douane-fr-2018,2018-01-01
+civette,LE GALLIA,le-gallia-saint-etienne,17 AV DE LA LIBERATION,SAINT-ETIENNE,42000,FR,45.437386,4.3901769999999996,published,douane-fr-2018,2018-01-01
+civette,LE HAVANE,le-havane-saint-etienne,6 PL DE L HOTEL VILLE,SAINT-ETIENNE,42000,FR,45.439083,4.387106,published,douane-fr-2018,2018-01-01
+civette,LE LONGHAMP,le-longhamp-saint-etienne,13 PL JEAN JAURES,SAINT-ETIENNE,42000,FR,45.441825,4.385382,published,douane-fr-2018,2018-01-01
+civette,LE NARVAL,le-narval-saint-etienne,16 R DU THEATRE,SAINT-ETIENNE,42000,FR,45.435546,4.386176,published,douane-fr-2018,2018-01-01
+civette,LE PARILLY,le-parilly-saint-etienne,7 AV DENFERT ROCHEREAU,SAINT-ETIENNE,42000,FR,45.440141,4.397016,published,douane-fr-2018,2018-01-01
+civette,LE PEUPLE,le-peuple-saint-etienne,3 PL DU PEUPLE,SAINT-ETIENNE,42000,FR,45.436729,4.388176,published,douane-fr-2018,2018-01-01
+civette,LE REINITAS,le-reinitas-saint-etienne,2 R DE LA PAREILLE,SAINT-ETIENNE,42000,FR,45.438641,4.380177,published,douane-fr-2018,2018-01-01
+civette,LE RÉPUBLIC,le-republic-saint-etienne,25 R DE LA REPUBLIQUE,SAINT-ETIENNE,42000,FR,45.439068,4.392055,published,douane-fr-2018,2018-01-01
+civette,LE ROYAL,le-royal-saint-etienne,CCIAL BERGSON,SAINT-ETIENNE,42000,FR,45.456123,4.382263,published,douane-fr-2018,2018-01-01
+civette,BAHAMAS CAFE,bahamas-cafe-brest,AVENUE DE PROVENCE,BREST,29200,FR,48.407535,-4.518617,published,douane-fr-2018,2018-01-01
+civette,BAR BRASSERIE LA PRESQU'ILE,bar-brasserie-la-presqu-ile-brest,10 QUAI DE LA DOUANE,BREST,29200,FR,48.381903,-4.487388,published,douane-fr-2018,2018-01-01
+civette,BAR HOTEL DU MUSÉE,bar-hotel-du-musee-brest,1 RUE DUCOUËDIC,BREST,29200,FR,48.385297,-4.491574,published,douane-fr-2018,2018-01-01
+civette,BREST MÊM,brest-mem-brest,33 RUE SAINT MARC,BREST,29200,FR,48.396784,-4.473557,published,douane-fr-2018,2018-01-01
+civette,CAVAL'PRESSE,caval-presse-brest,12 PL JACK LONDON,BREST,29200,FR,48.391974,-4.518631,published,douane-fr-2018,2018-01-01
+civette,ESPACE PRESSE TABAC,espace-presse-tabac-brest,10 PLACE NAPOLEON TROIS,BREST,29200,FR,48.403708,-4.507516,published,douane-fr-2018,2018-01-01
+civette,L'ANTRE 2,l-antre-2-brest,42 RUE YVES COLLET,BREST,29200,FR,48.392344,-4.479791,published,douane-fr-2018,2018-01-01
+civette,L'ARIEL,l-ariel-brest,237 RUE  ANATOLE FRANCE,BREST,29200,FR,48.382622,-4.512973,published,douane-fr-2018,2018-01-01
+civette,L'EFFET MER,l-effet-mer-brest,36 QUAI DE LA DOUANE,BREST,29200,FR,48.382969,-4.484087,published,douane-fr-2018,2018-01-01
+civette,L'HEBDO,l-hebdo-brest,163 RUE JEAN JAURES,BREST,29200,FR,48.39711,-4.475329,published,douane-fr-2018,2018-01-01
+civette,L'INSULAIRE,l-insulaire-brest,51 RUE DE LYON,BREST,29200,FR,48.39019,-4.491257,published,douane-fr-2018,2018-01-01
+civette,L'IROISE,l-iroise-brest,52 rue VICTOR EUSEN,BREST,29200,FR,48.380033,-4.53395,published,douane-fr-2018,2018-01-01
+civette,LA CHOPE,la-chope-brest,25 AV CLEMENCEAU,BREST,29200,FR,48.389699,-4.484929,published,douane-fr-2018,2018-01-01
+civette,LA CIVETTE,la-civette-brest,27 R DE LYON,BREST,29200,FR,48.388158,-4.487556,published,douane-fr-2018,2018-01-01
+civette,LA MAISON BLANCHE,la-maison-blanche-brest,2840  route de Ste Anne du Portzic,BREST,29200,FR,48.363752,-4.530921,published,douane-fr-2018,2018-01-01
+civette,LA ROTONDE,la-rotonde-brest,61 R GUYNEMER,BREST,29200,FR,48.393616,-4.463947,published,douane-fr-2018,2018-01-01
+civette,LA VILETTE,la-vilette-brest,52 RUE ROBESPIERRE,BREST,29200,FR,48.410353,-4.490813,published,douane-fr-2018,2018-01-01
+civette,LE 7ÈME ART,le-7eme-art-brest,66 R DE LA PORTE,BREST,29200,FR,48.383888,-4.503998,published,douane-fr-2018,2018-01-01
+civette,LE BACCHUS,le-bacchus-brest,249 R JEAN JAURES,BREST,29200,FR,48.400843,-4.469655,published,douane-fr-2018,2018-01-01
+civette,LE BALTO,le-balto-brest,121 R JEAN JAURES,BREST,29200,FR,48.395579,-4.477655,published,douane-fr-2018,2018-01-01

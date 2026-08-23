@@ -129,6 +129,7 @@ export async function publishSession(
     .object({
       cigarId: z.uuid(),
       slug: z.string().min(1),
+      venueId: z.union([z.uuid(), z.literal('')]),
       visibility: scopeSchema,
       body: z
         .string()
@@ -145,6 +146,7 @@ export async function publishSession(
     .safeParse({
       cigarId: formData.get('cigarId'),
       slug: formData.get('slug'),
+      venueId: formData.get('venueId') ?? '',
       visibility: formData.get('visibility'),
       body: formData.get('body') ?? '',
     })
@@ -162,6 +164,7 @@ export async function publishSession(
       kind: 'session' satisfies PostKind,
       visibility: parsed.data.visibility,
       cigar_id: parsed.data.cigarId,
+      venue_id: parsed.data.venueId.length > 0 ? parsed.data.venueId : null,
       body: parsed.data.body === '' ? null : parsed.data.body,
     })
     .select('id')

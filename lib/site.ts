@@ -24,3 +24,16 @@ export const SITE_ORIGIN: string =
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : 'https://vitola.vercel.app')
+
+/**
+ * The opening-day indexing lever (ADR 0012, Q1).
+ *
+ * False until the legal review of Q1 signs off: `robots.txt` disallows
+ * everything and every page carries `noindex`. Flipping it is one environment
+ * variable on the deployment — `SITE_INDEXABLE=1` — and it opens exactly the
+ * Q13 split: the public routes become indexable, the gated ones never do.
+ * The Lighthouse SEO criterion of P6 is measured with this lever open, on a
+ * local build, because a page forbidden from indexing caps the score by
+ * definition — the number describes the configuration the opening will run.
+ */
+export const SITE_INDEXABLE: boolean = process.env.SITE_INDEXABLE === '1'

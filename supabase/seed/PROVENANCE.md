@@ -7,7 +7,7 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 
 ---
 
-## 1. Quatre sources, quatre régimes
+## 1. Cinq sources, cinq régimes
 
 | Source | Ce qu'elle fournit | Régime |
 |---|---|---|
@@ -15,6 +15,7 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 | **B — Arrêté d'homologation des prix (Douane)** | 900 prix de vente au détail, 817 fiches supplémentaires | Donnée publique officielle, exacte à sa date |
 | **C — Site officiel Habanos S.A.** | Confirmation de 13 vitoles, ajout d'une vitole manquante | Spécifications publiées par le fabricant |
 | **D — Nomenclature rédigée pour ce projet** | 11 familles d'arômes, 76 descripteurs | Vocabulaire de dégustation, écrit ici |
+| **E — Registre des buralistes (DGDDI)** | 200 lieux (`07_venues.csv`) | Donnée publique officielle, exacte à sa date (2018) — voir §7 |
 
 ### Source A — saisie de mémoire
 
@@ -195,7 +196,45 @@ règles : origine documentée, aucune extraction de base tierce, publication par
 Si un contributeur verse un lot manifestement recopié, il doit être refusé — le risque n'est pas
 la qualité, il est juridique.
 
+## 7. Source E — le registre des buralistes (les lieux, P5)
+
+**« Adresses des buralistes de France métropolitaine — 2018 »**, publié par la Direction générale
+des douanes et droits indirects sur `data.economie.gouv.fr`, sous **Licence Ouverte v2.0
+(Etalab)** : attribution, pas de partage à l'identique. C'est le régime exact de la source B, et
+c'est ce régime qui a décidé — l'[ADR 0011](../../docs/adr/0011-les-lieux.md) refuse OpenStreetMap
+tant qu'un avis juridique n'a pas borné la clause de partage à l'identique de l'ODbL, qui
+engagerait notre propre base.
+
+- Fichier : `07_venues.csv`, chargé par `seed_venues.sql` (idempotent, clé : le slug)
+- Registre complet : 24 434 établissements, chacun avec enseigne, adresse, code postal, commune,
+  nature du débit et géolocalisation — la géolocalisation vient du registre lui-même, aucun
+  géocodeur tiers n'a été sollicité
+- Reporté dans `venues` avec `source = 'douane-fr-2018'` et `source_date = 2018-01-01`, par
+  contrainte de table (`venues_source_dated`) : une donnée officielle sans date devient une
+  désinformation en silence
+
+**La règle de sélection des 200, déterministe et rejouable** : les communes du registre sont
+parcourues par taille décroissante (Paris, Marseille, Lyon, Bordeaux, Toulouse, Nice, Nantes,
+Montpellier, Saint-Étienne, Brest…) ; dans chacune, les établissements **portant une enseigne et
+une géolocalisation**, triés par code postal, enseigne puis adresse, à raison de 25 au plus par
+commune, jusqu'à 200 lignes.
+
+**Pourquoi « portant une enseigne » ampute certaines villes** : le registre ne donne pas de nom
+commercial à la plupart des débits de Lyon (3 nommés sur 157), de Montpellier ou de Strasbourg.
+Fabriquer une enseigne à partir de l'adresse aurait mis un libellé inventé sur une carte — le même
+geste que rattacher une fiche à la vitole « la plus proche », refusé au §2. Un lieu sans nom
+attendra une contribution ; une ville sous-représentée aussi.
+
+**Ce que cette source ne donne pas, et qui reste vide** : horaires, téléphone, site, fumoir,
+ventilation. Ce sont les colonnes vivantes, remplies par la contribution et la revendication
+(ADR 0011, D3) — jamais approximées ici.
+
+**Ces lieux datent.** Le millésime du registre est 2018 : des établissements ont fermé, des
+enseignes ont changé. Chaque fiche affiche sa source et sa date ; une fermeture se signale
+(`inaccurate`) et se consigne par le statut `closed`, que le rejeu du seed **ne rouvre jamais**
+(voir l'en-tête de `seed_venues.sql`).
+
 ---
 
-*Dernière mise à jour : à la génération de l'amorçage. Toute modification manuelle des CSV doit être
+*Dernière mise à jour : au chargement des lieux (P5). Toute modification manuelle des CSV doit être
 consignée ici.*

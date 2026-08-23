@@ -79,6 +79,14 @@ export const REPORTABLE = {
   postComment: { schema: 'public', table: 'post_comments' },
   profile: { schema: 'public', table: 'profiles' },
   message: { schema: 'public', table: 'messages' },
+  /* P5 adds the venue directory (ADR 0011), and the two surfaces arrive for
+     different reasons. A venue entry is mostly reported as `inaccurate` — the
+     2018 registry ages, shops close, and the report is how a closure reaches
+     the `closed` status. A venue review is a member's text about a place that
+     sells tobacco: the exact situation ADR 0005 describes, plus the §2
+     guardrail — a review inciting consumption is `tobacco_promotion`. */
+  venue: { schema: 'public', table: 'venues' },
+  venueReview: { schema: 'public', table: 'venue_reviews' },
 } as const
 
 export type ReportableKind = keyof typeof REPORTABLE

@@ -421,6 +421,51 @@ export const PERSONAL_DATA_SOURCES = [
   },
   { key: 'messagesSent', schema: 'public', table: 'messages', column: 'sender_id', erasure: 'erased' },
 
+  /* The venue directory (migration 0016, ADR 0011). A proposal and a claim are
+     both links to a person: the proposal survives anonymised — a venue entry
+     is a fact about a place, not about its proposer — and the claim is
+     identity, dropped with the account. A review is the member's own text and
+     goes with them; `hidden_by` is a moderator's act, kept anonymised like its
+     two elder siblings. */
+  {
+    key: 'venuesProposed',
+    schema: 'public',
+    table: 'venues',
+    column: 'created_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'venuesClaimed',
+    schema: 'public',
+    table: 'venues',
+    column: 'claimed_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'venueReviews',
+    schema: 'public',
+    table: 'venue_reviews',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'venueReviewsHidden',
+    schema: 'public',
+    table: 'venue_reviews',
+    column: 'hidden_by',
+    erasure: 'anonymised',
+  },
+
+  /* The journal (migration 0017, ADR 0012). An article is the house's text,
+     not the member's: it survives its author anonymised, like a wiki review. */
+  {
+    key: 'articlesAuthored',
+    schema: 'public',
+    table: 'articles',
+    column: 'author_id',
+    erasure: 'anonymised',
+  },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */

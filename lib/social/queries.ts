@@ -50,6 +50,8 @@ export type FeedItem = {
   cigar_slug: string | null
   cigar_name: string | null
   brand_name: string | null
+  venue_name: string | null
+  venue_slug: string | null
 }
 
 export type FeedPage = {
@@ -80,7 +82,7 @@ export async function readFeedPage(
 
   if (error) throw new Error(`Could not read the feed: ${error.message}`)
 
-  const items = (data ?? []) as FeedItem[]
+  const items = await hydrateVenues((data ?? []) as RawFeedItem[])
   return {
     items,
     next: nextCursor(
@@ -88,6 +90,48 @@ export async function readFeedPage(
       pageSize,
     ),
   }
+}
+
+type RawFeedItem = Omit<FeedItem, 'venue_name' | 'venue_slug'>
+
+/**
+ * The one column `feed_page()` and `post_card()` do not return: the venue a
+ * session names (P5, migration 0016). Hydrated in TypeScript rather than by
+ * rewriting two SQL functions, in the notebook's fixed-count shape — one query
+ * for the ids, one for the venues, whatever the page length. A venue that
+ * comes back missing (pending again, or gone) simply renders no place: the RLS
+ * decided, and the card does not fill the hole.
+ */
+async function hydrateVenues(rows: RawFeedItem[]): Promise<FeedItem[]> {
+  if (rows.length === 0) return []
+  const supabase = await createSupabaseServerClient()
+
+  const { data: links } = await supabase
+    .from('posts')
+    .select('id, venue_id')
+    .in(
+      'id',
+      rows.map((row) => row.id),
+    )
+    .not('venue_id', 'is', null)
+
+  const venueIds = [...new Set((links ?? []).map((row) => row.venue_id as string))]
+  if (venueIds.length === 0) {
+    return rows.map((row) => ({ ...row, venue_name: null, venue_slug: null }))
+  }
+
+  const { data: venues } = await supabase
+    .from('venues')
+    .select('id, name, slug')
+    .in('id', venueIds)
+
+  const venueByPost = new Map((links ?? []).map((row) => [row.id, row.venue_id as string]))
+  const venueById = new Map((venues ?? []).map((venue) => [venue.id, venue]))
+
+  return rows.map((row) => {
+    const venue = venueByPost.has(row.id) ? venueById.get(venueByPost.get(row.id)!) : undefined
+    return { ...row, venue_name: venue?.name ?? null, venue_slug: venue?.slug ?? null }
+  })
 }
 
 /**
@@ -115,7 +159,7 @@ export async function getPost(id: string): Promise<FeedItem | null> {
   const { data, error } = await supabase.rpc('post_card', { p_id: id })
   if (error) throw new Error(`Could not read the publication: ${error.message}`)
 
-  const [row] = (data ?? []) as FeedItem[]
+  const [row] = await hydrateVenues((data ?? []) as RawFeedItem[])
   return row ?? null
 }
 

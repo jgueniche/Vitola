@@ -76,6 +76,7 @@ export async function createEvent(_previous: EventState, formData: FormData): Pr
         EVENT_LIMITS.locationMax,
         copy.locationTooLong.replace('{max}', String(EVENT_LIMITS.locationMax)),
       ),
+      venueId: z.union([z.uuid(), z.literal('')]),
       startsAt: z.string().min(1, copy.badDate),
       endsAt: z.string(),
       capacity: z.string(),
@@ -83,6 +84,7 @@ export async function createEvent(_previous: EventState, formData: FormData): Pr
     .safeParse({
       kind: formData.get('kind'),
       clubId: formData.get('clubId') ?? '',
+      venueId: formData.get('venueId') ?? '',
       title: formData.get('title') ?? '',
       description: formData.get('description') ?? '',
       location: formData.get('location') ?? '',
@@ -131,6 +133,7 @@ export async function createEvent(_previous: EventState, formData: FormData): Pr
     .insert({
       host_id: auth.user.id,
       club_id: parsed.data.clubId.length > 0 ? parsed.data.clubId : null,
+      venue_id: parsed.data.venueId.length > 0 ? parsed.data.venueId : null,
       kind: parsed.data.kind,
       title: parsed.data.title,
       description: parsed.data.description.length > 0 ? parsed.data.description : null,
