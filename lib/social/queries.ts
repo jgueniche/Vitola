@@ -90,15 +90,20 @@ export async function readFeedPage(
 }
 
 /**
- * One publication, hydrated the same way a feed row is.
+ * One publication, in the same row shape a feed row has.
  *
- * Deliberately reads `feed_page` rather than `posts`, and the reason is not
- * laziness: a detail page that read the table directly would need its own
- * ember count, its own "did I ember this" and its own author join, which is a
- * second implementation of the rule that the feed already carries. ADR 0007
- * forbids a second keyset; the same argument covers the row shape. The
- * `discover` scope is used because it is the widest — the RLS still decides,
- * and a followers-only post one may read comes back through it.
+ * Through `post_card()` (migration 0013), which is a different function from
+ * `feed_page()` on purpose. This one read the feed with the `discover` scope
+ * and a one-row page, on the argument that it was the widest and the RLS would
+ * decide anyway. **That was wrong**, and the distinction is the one ADR 0007
+ * makes everywhere else: `discover` filters `visibility = 'public'` inside the
+ * function, and that filter says which tab is being read — it is not an access
+ * rule. A publication scoped to its author's followers was therefore
+ * unreachable at its own address by anyone, its author included, so it could
+ * not even be deleted.
+ *
+ * Found by a walkthrough's *cleanup*, not by one of its assertions: three
+ * followers-only publications survived every run.
  *
  * Null covers "no such publication" and "not for you" without distinguishing
  * them, the way the notebook treats an entry one may not open.
@@ -106,24 +111,11 @@ export async function readFeedPage(
 export async function getPost(id: string): Promise<FeedItem | null> {
   const supabase = await createSupabaseServerClient()
 
-  const { data, error } = await supabase
-    .from('posts')
-    .select('created_at')
-    .eq('id', id)
-    .maybeSingle()
-
+  const { data, error } = await supabase.rpc('post_card', { p_id: id })
   if (error) throw new Error(`Could not read the publication: ${error.message}`)
-  if (!data) return null
 
-  /* One millisecond after the row's own timestamp, so the keyset predicate —
-     strictly less than — lets exactly this row through as the first of its
-     page. Asking for two and taking the first would be the same trick with a
-     wasted row. */
-  const justAfter = new Date(new Date(data.created_at).getTime() + 1).toISOString()
-
-  const { items } = await readFeedPage('discover', { createdAt: justAfter, id }, 1)
-  const [row] = items
-  return row && row.id === id ? row : null
+  const [row] = (data ?? []) as FeedItem[]
+  return row ?? null
 }
 
 /** The comments under a publication. Their RLS follows the publication's. */
@@ -403,6 +395,38 @@ export async function readSharedShelf(ownerId: string): Promise<ShelfCigar[]> {
       brand: cigar?.brands?.name ?? null,
     }
   })
+}
+
+/**
+ * Who the reader has blocked, with names.
+ *
+ * `blocks_select_own` gives the identifiers; the profiles behind them are
+ * readable because migration 0012 made the block one-directional on `profiles`.
+ * Before it, this function could only ever have returned uuids — one does not
+ * reconsider a decision presented as an identifier, and the block could not be
+ * lifted at all.
+ */
+export async function listBlockedPeople(): Promise<PersonRow[]> {
+  const supabase = await createSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from('blocks')
+    .select('blocked_id')
+    .order('created_at', { ascending: false })
+    .limit(200)
+
+  if (error) throw new Error(`Could not read the blocks: ${error.message}`)
+
+  const ids = (data ?? []).map((row) => row.blocked_id)
+  if (ids.length === 0) return []
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, handle, display_name')
+    .in('id', ids)
+
+  const byId = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
+  return ids.map((id) => byId.get(id)).filter((row): row is PersonRow => row !== undefined)
 }
 
 /* -------------------------------------------------------------------------- */

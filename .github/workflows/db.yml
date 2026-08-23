@@ -174,6 +174,19 @@ jobs:
       - name: Apply 0011 — les trois clés de confidentialité
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0011_profile_privacy.sql
 
+      # 0012 corrige la 0010, et le bug a été trouvé de la seule façon possible :
+      # en bloquant quelqu'un dans un navigateur, puis en cherchant comment le
+      # débloquer. La policy cachait le profil dans les deux sens, et le seul
+      # écran portant « Débloquer » est ce profil.
+      - name: Apply 0012 — un blocage se défait
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0012_unblock_is_reachable.sql
+
+      # 0013 corrige la 0010 par omission, et le bug a été trouvé par le
+      # NETTOYAGE d'un parcours : une publication réservée aux abonnés répondait
+      # 404 à son adresse, donc son bouton « Supprimer » était inatteignable.
+      - name: Apply 0013 — une publication se lit à son adresse
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0013_post_card.sql
+
       # Le seul endroit d'où se voit une régression de l'ADR 0007. Il n'accorde
       # rien. Même scrutin du journal qu'ailleurs — un `SET LOCAL ROLE` hors
       # transaction rend une assertion verte pour rien.

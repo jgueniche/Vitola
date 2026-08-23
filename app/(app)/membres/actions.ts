@@ -1,10 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 import { m } from '@/lib/i18n'
-import { routes } from '@/lib/routes'
+import { routes, safeSuite } from '@/lib/routes'
+import { PERSON_DONE } from '@/lib/social/model'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 /**
@@ -26,16 +28,43 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
  * Every one of them reads the result of its write. A policy that refuses a
  * delete does not raise — it matches no row — and a confirmation over nothing
  * is the failure mode `CLAUDE.md` names as having already cost a day.
+ *
+ * All five **navigate** on success rather than returning a message, and that is
+ * `/contributions`' lesson met a third time in this phase. Blocking someone
+ * replaces the whole control block with the un-block panel, so the component
+ * holding the returned state is unmounted in the same render and nobody reads
+ * anything; un-blocking from the settings list removes its own row. Measured in
+ * a browser, not supposed — the walkthrough asserted a `role="status"` that was
+ * never going to appear. The confirmation therefore rides in the URL and the
+ * arrival page renders it, which is also how a screen reader gets it.
+ *
+ * `retour` says where to land, and it is validated by `safeSuite` — the same
+ * open-redirect guard the age gate uses on its own `suite`. It arrives in a
+ * hidden field, so it is attacker controlled, and an unchecked one would turn
+ * every one of these buttons into an open redirect.
  */
 
 export type PersonState = { error?: string; done?: string }
 
 const copy = m.members
 
-const target = z.object({ userId: z.uuid(), handle: z.string().min(1) })
+const target = z.object({
+  userId: z.uuid(),
+  handle: z.string().min(1),
+  retour: z.string().optional(),
+})
 
 function refusal(message: string): PersonState {
   return { error: message }
+}
+
+/** Lands on the page the button was on, carrying what just happened. */
+function done(retour: string | undefined, fallback: string, code: string): never {
+  const base = safeSuite(retour ?? null) ?? fallback
+  const [path, existing] = base.split('?')
+  const params = new URLSearchParams(existing ?? '')
+  params.set('fait', code)
+  redirect(`${path}?${params.toString()}`)
 }
 
 async function session() {
@@ -48,6 +77,7 @@ export async function follow(_previous: PersonState, formData: FormData): Promis
   const parsed = target.safeParse({
     userId: formData.get('userId'),
     handle: formData.get('handle'),
+    retour: formData.get('retour') ?? undefined,
   })
   if (!parsed.success) return refusal(copy.signedOutAction)
 
@@ -66,13 +96,14 @@ export async function follow(_previous: PersonState, formData: FormData): Promis
 
   revalidatePath(routes.member(parsed.data.handle))
   revalidatePath(routes.feed())
-  return { done: copy.followed }
+  done(parsed.data.retour, routes.member(parsed.data.handle), PERSON_DONE.followed)
 }
 
 export async function unfollow(_previous: PersonState, formData: FormData): Promise<PersonState> {
   const parsed = target.safeParse({
     userId: formData.get('userId'),
     handle: formData.get('handle'),
+    retour: formData.get('retour') ?? undefined,
   })
   if (!parsed.success) return refusal(copy.signedOutAction)
 
@@ -89,7 +120,7 @@ export async function unfollow(_previous: PersonState, formData: FormData): Prom
 
   revalidatePath(routes.member(parsed.data.handle))
   revalidatePath(routes.feed())
-  return { done: copy.unfollowed }
+  done(parsed.data.retour, routes.member(parsed.data.handle), PERSON_DONE.unfollowed)
 }
 
 /**
@@ -109,6 +140,7 @@ export async function removeFollower(
   const parsed = target.safeParse({
     userId: formData.get('userId'),
     handle: formData.get('handle'),
+    retour: formData.get('retour') ?? undefined,
   })
   if (!parsed.success) return refusal(copy.signedOutAction)
 
@@ -126,7 +158,7 @@ export async function removeFollower(
   if (!data || data.length === 0) return refusal(copy.signedOutAction)
 
   revalidatePath(routes.member(parsed.data.handle))
-  return { done: copy.removedFollower }
+  done(parsed.data.retour, routes.member(parsed.data.handle), PERSON_DONE.removedFollower)
 }
 
 /**
@@ -141,6 +173,7 @@ export async function block(_previous: PersonState, formData: FormData): Promise
   const parsed = target.safeParse({
     userId: formData.get('userId'),
     handle: formData.get('handle'),
+    retour: formData.get('retour') ?? undefined,
   })
   if (!parsed.success) return refusal(copy.signedOutAction)
 
@@ -153,20 +186,17 @@ export async function block(_previous: PersonState, formData: FormData): Promise
 
   if (error && error.code !== '23505') return refusal(error.message)
 
-  /* The profile page is about to 404 for this reader — the RESTRICTIVE policy
-     hides the person they just blocked — so the members list is where they
-     land. Revalidating the profile anyway: the path has to be re-rendered for
-     the 404 to be the thing that renders. */
   revalidatePath(routes.member(parsed.data.handle))
   revalidatePath(routes.members())
   revalidatePath(routes.feed())
-  return { done: copy.blocked }
+  done(parsed.data.retour, routes.member(parsed.data.handle), PERSON_DONE.blocked)
 }
 
 export async function unblock(_previous: PersonState, formData: FormData): Promise<PersonState> {
   const parsed = target.safeParse({
     userId: formData.get('userId'),
     handle: formData.get('handle'),
+    retour: formData.get('retour') ?? undefined,
   })
   if (!parsed.success) return refusal(copy.signedOutAction)
 
@@ -184,5 +214,5 @@ export async function unblock(_previous: PersonState, formData: FormData): Promi
   revalidatePath(routes.member(parsed.data.handle))
   revalidatePath(routes.members())
   revalidatePath(routes.feed())
-  return { done: copy.unblocked }
+  done(parsed.data.retour, routes.member(parsed.data.handle), PERSON_DONE.unblocked)
 }

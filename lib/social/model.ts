@@ -194,3 +194,31 @@ export type FollowState = {
   followsMe: boolean
   blocked: boolean
 }
+
+/* -------------------------------------------------------------------------- */
+/* What just happened, carried in a URL                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The confirmation codes the relation gestures put in `?fait=…`.
+ *
+ * They live here rather than beside the Server Actions that emit them for a
+ * blunt reason: a `'use server'` module may only export async functions, so a
+ * plain object exported from one breaks the build — at page-data collection,
+ * with an error naming the last line of the file rather than the export. The
+ * codes are data, `lib/` is where data lives, and both sides import them.
+ *
+ * Three of the five gestures replace the subtree they were clicked in — a block
+ * swaps the whole control panel, an un-block from the settings list removes its
+ * own row — so their confirmation cannot be returned state. It rides the
+ * redirect instead, which is the pattern `/contributions` established.
+ */
+export const PERSON_DONE = {
+  followed: 'abonne',
+  unfollowed: 'desabonne',
+  removedFollower: 'retire',
+  blocked: 'bloque',
+  unblocked: 'debloque',
+} as const
+
+export type PersonDoneCode = (typeof PERSON_DONE)[keyof typeof PERSON_DONE]

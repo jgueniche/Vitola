@@ -307,6 +307,40 @@ begin
   reset role;
 end $$;
 
+\echo '=== P6  une publication reservee se lit A SON ADRESSE, par les bonnes personnes'
+do $$
+declare v_post uuid; n integer;
+begin
+  -- Le bug trouvé par le NETTOYAGE d'un parcours, pas par une assertion : la
+  -- page d'une publication passait par la portée `discover` de `feed_page()`,
+  -- qui filtre `visibility = 'public'` — un filtre d'ONGLET, pas de droit. Une
+  -- publication réservée était donc introuvable à son adresse, y compris pour
+  -- son auteur, donc impossible à supprimer. Corrigé par la 0013.
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  insert into public.posts (author_id, kind, visibility, body)
+  values ('a1000000-0000-4000-8000-000000000001','post','followers','Reservee, et adressable')
+  returning id into v_post;
+
+  select count(*) into n from public.post_card(v_post);
+  if n <> 1 then raise exception 'FAIL: l auteur ne lit pas sa propre publication reservee'; end if;
+
+  -- Un abonné aussi : bob suit alice depuis S1.
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  select count(*) into n from public.post_card(v_post);
+  if n <> 1 then raise exception 'FAIL: l abonne ne lit pas la publication a son adresse'; end if;
+
+  -- Carol, non.
+  perform set_config('request.jwt.claim.sub','c3000000-0000-4000-8000-000000000003',true);
+  select count(*) into n from public.post_card(v_post);
+  if n <> 0 then raise exception 'FAIL: un non-abonne lit la publication a son adresse'; end if;
+
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  delete from public.posts where id = v_post;
+  raise notice 'PASS';
+  reset role;
+end $$;
+
 \echo '=== B1  la braise est comptee par un count(), et se retire'
 do $$
 declare v_post uuid; n integer;
@@ -518,6 +552,44 @@ begin
     raise exception 'FAIL: bob s est reabonne a qui l a bloque';
   exception when insufficient_privilege then null;
   end;
+  raise notice 'PASS';
+  reset role;
+end $$;
+
+\echo '=== X6  celui qui bloque VOIT encore le profil, donc il peut debloquer'
+do $$
+declare n integer;
+begin
+  -- Le bug trouvé en navigateur : la policy cachait le profil dans les deux
+  -- sens, et le seul écran portant « Débloquer » est ce profil. Un blocage
+  -- était donc définitif. Corrigé par la 0012, et asserté ici dans les deux
+  -- directions parce qu'une seule des deux est le bug.
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  insert into public.blocks (blocker_id, blocked_id)
+  values ('a1000000-0000-4000-8000-000000000001','b2000000-0000-4000-8000-000000000002')
+  on conflict do nothing;
+
+  -- Celui qui a bloqué voit toujours le profil de sa cible.
+  select count(*) into n from public.profiles
+   where id = 'b2000000-0000-4000-8000-000000000002';
+  if n <> 1 then raise exception 'FAIL: le bloquant ne voit plus qui il a bloque'; end if;
+
+  -- Mais pas son contenu : le profil est une coquille.
+  select count(*) into n from public.posts
+   where author_id = 'b2000000-0000-4000-8000-000000000002';
+  if n <> 0 then raise exception 'FAIL: le bloquant lit encore le contenu de sa cible'; end if;
+
+  -- Et la personne bloquée, elle, ne voit rien.
+  perform set_config('request.jwt.claim.sub','b2000000-0000-4000-8000-000000000002',true);
+  select count(*) into n from public.profiles
+   where id = 'a1000000-0000-4000-8000-000000000001';
+  if n <> 0 then raise exception 'FAIL: la personne bloquee voit le profil de qui l a bloquee'; end if;
+
+  perform set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
+  delete from public.blocks
+   where blocker_id='a1000000-0000-4000-8000-000000000001'
+     and blocked_id='b2000000-0000-4000-8000-000000000002';
   raise notice 'PASS';
   reset role;
 end $$;

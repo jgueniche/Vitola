@@ -121,7 +121,7 @@ export function PostCard({
       ) : null}
 
       <div className="border-rule flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
-        <EmberButton postId={post.id} embered={post.viewer_embered} count={post.ember_count} />
+        <EmberButton postId={post.id} embered={post.viewer_embered} />
         <span className="text-ink-faint text-xs">{embers}</span>
 
         {standalone ? (

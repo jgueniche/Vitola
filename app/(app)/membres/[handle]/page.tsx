@@ -21,6 +21,7 @@ import {
   readProfilePrivacy,
   readSharedShelf,
 } from '@/lib/social/queries'
+import { relationConfirmation } from '@/lib/social/confirmations'
 import { createSupabaseServerClient, currentUser } from '@/lib/supabase/server'
 
 import { RelationForms } from './relation-forms'
@@ -95,8 +96,15 @@ function PersonList({ people, empty }: { people: { id: string; handle: string; d
  * middle one is somebody's explicit choice, honoured rather than worked around
  * (the rule `lib/reviews/queries.ts` set for a hidden author).
  */
-export default async function MemberPage({ params }: { params: Promise<{ handle: string }> }) {
+export default async function MemberPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ handle: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   const { handle } = await params
+  const confirmation = relationConfirmation((await searchParams).fait)
 
   const user = await currentUser()
   if (!user) {
@@ -141,27 +149,50 @@ export default async function MemberPage({ params }: { params: Promise<{ handle:
     privacy.show_humidor ? readSharedShelf(profile.id) : Promise.resolve([]),
   ])
 
-  /* One query for the whole page's embers, never one per card. The feed gets
-     this for free inside `feed_page()`; here the list is short and bounded, so
-     a single `in (…)` is the same fixed cost and not an N+1. Rendering `false`
-     to save it would have shown an un-embered button over a publication the
-     reader had embered, which is the kind of small lie a page tells once and
-     then teaches people to distrust. */
+  /* Two follow-up queries for the whole page, never one per card. The feed gets
+     both for free inside `feed_page()`; here the list is short and bounded, so
+     a pair of `in (…)` is a fixed cost and not an N+1.
+     
+     Neither is optional. Rendering `viewer_embered: false` would have shown an
+     un-embered button over a publication the reader had embered; leaving the
+     cigar null would have rendered a "je fume" publication with nothing to say
+     what is being smoked — a card that is about a cigar, without the cigar. */
   const ids = (postRows ?? []).map((row) => row.id)
-  const { data: mine } = ids.length
-    ? await supabase.from('post_reactions').select('post_id').in('post_id', ids).eq('user_id', user.id)
-    : { data: [] }
-  const embered = new Set((mine ?? []).map((row) => row.post_id))
+  const cigarIds = [
+    ...new Set((postRows ?? []).map((row) => row.cigar_id).filter((id): id is string => !!id)),
+  ]
 
-  const posts = (postRows ?? []).map((row) => ({
-    ...row,
-    viewer_embered: embered.has(row.id),
-    author_handle: profile.handle,
-    author_display_name: profile.display_name,
-    cigar_slug: null,
-    cigar_name: null,
-    brand_name: null,
-  }))
+  const [mine, cigars] = await Promise.all([
+    ids.length
+      ? supabase.from('post_reactions').select('post_id').in('post_id', ids).eq('user_id', user.id)
+      : Promise.resolve({ data: [] as { post_id: string }[] }),
+    cigarIds.length
+      ? supabase.schema('ref').from('cigars').select('id, slug, commercial_name, brands(name)').in('id', cigarIds)
+      : Promise.resolve({ data: [] }),
+  ])
+
+  const embered = new Set((mine.data ?? []).map((row) => row.post_id))
+  const cigarById = new Map(
+    ((cigars.data ?? []) as unknown as {
+      id: string
+      slug: string
+      commercial_name: string
+      brands: { name: string } | null
+    }[]).map((cigar) => [cigar.id, cigar]),
+  )
+
+  const posts = (postRows ?? []).map((row) => {
+    const cigar = row.cigar_id ? cigarById.get(row.cigar_id) : undefined
+    return {
+      ...row,
+      viewer_embered: embered.has(row.id),
+      author_handle: profile.handle,
+      author_display_name: profile.display_name,
+      cigar_slug: cigar?.slug ?? null,
+      cigar_name: cigar?.commercial_name ?? null,
+      brand_name: cigar?.brands?.name ?? null,
+    }
+  })
 
   const followersLabel =
     counts.followers === 1
@@ -209,6 +240,12 @@ export default async function MemberPage({ params }: { params: Promise<{ handle:
         </div>
       </dl>
 
+      {confirmation ? (
+        <p role="status" className="text-ink-muted text-sm">
+          {confirmation}
+        </p>
+      ) : null}
+
       <div className="border-rule bg-surface rounded-[3px] border p-5">
         {isMe ? (
           <div className="flex flex-wrap items-center gap-4">
@@ -220,7 +257,12 @@ export default async function MemberPage({ params }: { params: Promise<{ handle:
             </Link>
           </div>
         ) : (
-          <RelationForms userId={profile.id} handle={profile.handle} state={relation} />
+          <RelationForms
+            userId={profile.id}
+            handle={profile.handle}
+            state={relation}
+            retour={routes.member(profile.handle)}
+          />
         )}
       </div>
 

@@ -21,16 +21,16 @@ const copy = m.feed.ember
  * move, and a label that also carried a number would change size on every
  * click. `aria-pressed` is what tells a screen reader the state, which a
  * changing label would only imply.
+ *
+ * It carried an `aria-label` with the count until a browser walkthrough could
+ * not find it. That was the bug rather than the symptom: `aria-label`
+ * **replaces** the accessible name, so the control announced itself as "Aucune
+ * braise" — a count, where a button has to say what it does. The count is
+ * already the sibling `<span>`, read in document order; the label was both
+ * redundant and wrong, and only an assertion looking for the control by its
+ * role could see it.
  */
-export function EmberButton({
-  postId,
-  embered,
-  count,
-}: {
-  postId: string
-  embered: boolean
-  count: number
-}) {
+export function EmberButton({ postId, embered }: { postId: string; embered: boolean }) {
   const [pending, start] = useTransition()
 
   return (
@@ -50,7 +50,6 @@ export function EmberButton({
         type="submit"
         disabled={pending}
         aria-pressed={embered}
-        aria-label={count === 0 ? copy.countNone : undefined}
         className={cn(
           'inline-flex items-center gap-1.5 rounded-[3px] border px-2.5 py-1 text-xs',
           'transition-colors duration-(--duration-quick) disabled:opacity-50',

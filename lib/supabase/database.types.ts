@@ -884,6 +884,7 @@ export type Database = {
     }
     Functions: {
       blocked_user_ids: { Args: never; Returns: string[] }
+      blockers_of_me: { Args: never; Returns: string[] }
       blocks_between: { Args: { other: string }; Returns: boolean }
       comment_min_role: {
         Args: never
@@ -948,6 +949,28 @@ export type Database = {
         Returns: Json
       }
       owns_review: { Args: { target: string }; Returns: boolean }
+      post_card: {
+        Args: { p_id: string }
+        Returns: {
+          author_display_name: string
+          author_handle: string
+          author_id: string
+          body: string
+          brand_name: string
+          cigar_id: string
+          cigar_name: string
+          cigar_slug: string
+          comment_count: number
+          created_at: string
+          ember_count: number
+          id: string
+          kind: Database["public"]["Enums"]["post_kind"]
+          review_id: string
+          updated_at: string
+          viewer_embered: boolean
+          visibility: Database["public"]["Enums"]["review_visibility"]
+        }[]
+      }
       profile_privacy: { Args: { owner: string }; Returns: Json }
       refresh_cigar_stats: { Args: never; Returns: undefined }
       shared_humidor_shelf: {
