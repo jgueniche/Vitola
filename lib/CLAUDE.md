@@ -32,7 +32,8 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `site.ts` | L'origine sur laquelle le site répond — sitemap et `metadataBase`. |
 | `flags.ts` | La lecture d'un drapeau, et le repli fermé qui va avec. |
 | `social/model.ts` | Ce qu'est une publication, les deux portées qu'elle accepte, et **le curseur keyset**. |
-| `social/confirmations.ts` | Ce qu'un `?fait=…` veut dire, pour les deux pages qui en reçoivent un. |
+| `social/confirmations.ts` | Ce qu'un `?fait=…` veut dire, pour les pages qui en reçoivent un. |
+| `social/groups.ts` | Les bornes d'un club, d'un événement et d'un message, le vocabulaire des deux enums, et **le slug d'un club**. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 
@@ -103,6 +104,31 @@ forme de la donnée plutôt que par une discipline à se rappeler.
 Corollaire à ne pas oublier : `feed_page()` a une notion d'**onglet**, `post_card()` n'en a pas.
 Lire une publication à son adresse en demandant au fil une page d'une ligne a rendu toute
 publication réservée aux abonnés introuvable, y compris pour son auteur.
+
+## Les clubs, l'agenda et la messagerie non plus, et la nuance est ailleurs
+
+`social/group-queries.ts` ne double aucune des treize policies de la 0014 — onze permissives et deux
+restrictives. La nuance par rapport au fil : `clubs`, `events` et les deux tables d'appartenance
+sont lisibles par **tout le monde**, y compris un visiteur déconnecté, donc leurs policies ne
+filtrent rien et la tentation de les « aider » d'un `.eq()` est réelle. `conversations` et
+`messages` sont l'inverse — leurs policies sont toute la règle d'accès — et ni ce fichier ni un
+écran ne la redisent.
+
+Deux `.eq()` de ce fichier méritent d'être lus deux fois, parce qu'ils ressemblent à une policy
+doublée sans en être une : « de quels clubs suis-je membre » change le libellé d'un bouton et jamais
+la présence d'une ligne, et « à qui puis-je écrire » empêche le formulaire de proposer un nom que la
+base refusera. Une liste qui offre une porte fermée est un piège, pas une barrière.
+
+La boîte de réception passe par `conversation_inbox()` (0015) pour la raison qui a produit
+`feed_page()` : qui est l'autre, quel est le dernier message et combien n'ai-je pas lu sont trois
+questions **par ligne**. Le reste s'hydrate en un nombre fixe de requêtes — les identifiants, puis
+les profils — ce qui est le motif du carnet et jamais un N+1.
+
+Une duplication de logique de plus, et la troisième du dossier : `clubSlug()` recopie ce que
+`public.slugify()` sait déjà faire. Elle est justifiée par le formulaire, qui montre l'adresse du
+club **pendant** qu'on tape son nom — un aller-retour par frappe n'en est pas un — et
+`tests/unit/groups-model.test.ts` la compare à `clubs_slug_format` pour qu'un slug produit ici ne
+soit jamais un slug que le CHECK refuse.
 
 ## Les caves ne se filtrent pas ici non plus
 

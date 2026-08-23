@@ -5,7 +5,7 @@
 `'use client'` est l'exception et doit être justifié par un commentaire d'une ligne juste au-dessus.
 La recherche facettée n'en est pas un : ses facettes sont des liens et son champ un
 `<form method="get">`, donc zéro JavaScript. La recherche de la cave non plus, pour la même
-raison. Vingt-sept existent :
+raison. Trente existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -36,6 +36,9 @@ raison. Vingt-sept existent :
 | `carnet/[id]/feed-share-panel.tsx` | annoncer une entrée au fil, ou dire pourquoi c'est impossible |
 | `membres/[handle]/relation-forms.tsx` | s'abonner, se désabonner, retirer un abonné, bloquer |
 | `membres/[handle]/unblock-button.tsx` | débloquer depuis la liste des paramètres |
+| `clubs/club-form.tsx` | l'adresse du club s'affiche **pendant** la frappe, avant qu'il existe |
+| `evenements/event-form.tsx` | `useActionState` — une date refusée se relit sans perdre le reste |
+| `messages/[id]/composer.tsx` | `useActionState` — envoyer ne retire pas la boîte, donc l'état se lit |
 
 Les règles apprises en les écrivant :
 
@@ -90,6 +93,18 @@ Les règles apprises en les écrivant :
   serveur**, et un panneau ouvert par `useState` se referme à ce moment-là, sous les doigts de la
   personne qui vient de fumer un cigare. Dans l'URL, il reste ouvert, se partage et survit au
   retour arrière. Les formulaires à l'intérieur sont le seul code client de la page.
+- **Une page ne doit pas écrire pendant qu'elle rend, et un accusé de lecture le rappelle.**
+  Ouvrir une conversation ne marque rien comme lu : `read_at` est visible de l'expéditeur, donc un
+  accusé déclenché par le préchargement d'un lien mentirait **sur quelqu'un**. C'est un bouton, et
+  répondre le fait aussi — répondre est la preuve.
+- **Trois écrans de plus qui naviguent plutôt que de rendre un état** : quitter un club, retirer un
+  membre, annuler un événement. Même cause que `/contributions`. Le seul qui garde un état de
+  retour est le composeur de message, parce que la boîte reste à l'écran.
+- **Un `<input type="datetime-local">` rend une heure murale sans fuseau.** PostgREST tourne en
+  UTC : une dégustation annoncée à 20 h en juillet s'enregistrait à 22 h de Paris, en silence, sur
+  le seul champ autour duquel les gens organisent une soirée. `fromBrandZoneWallClock()` mesure le
+  décalage à l'instant lui-même, donc il suit l'heure d'été, et il est épinglé des deux côtés de
+  l'année.
 - **Lire `localStorage` demande `useSyncExternalStore`.** Pendant le rendu, serveur et client
   divergent ; dans un effet, `set-state-in-effect` refuse. Le hook rend l'instantané serveur
   (`null`) pendant l'hydratation puis relit côté client, sans écart. C'est le brouillon de

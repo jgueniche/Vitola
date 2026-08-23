@@ -63,6 +63,11 @@ export default async function EventPage({
 
   const query = await searchParams
   const done = eventConfirmation(query.fait)
+  /* A refused answer is `event_attendees_insert_own` declining — a block, one
+     way or the other. A page that simply repainted itself would leave somebody
+     clicking the same button. */
+  const refusedRaw = Array.isArray(query.erreur) ? query.erreur[0] : query.erreur
+  const refused = refusedRaw === 'refus'
   const attendees = await listAttendees(event.id)
 
   const starts = new Date(event.starts_at)
@@ -106,6 +111,12 @@ export default async function EventPage({
       {done ? (
         <p role="status" className="text-ink-muted text-sm">
           {done}
+        </p>
+      ) : null}
+
+      {refused ? (
+        <p role="alert" className="text-negative measure text-sm leading-relaxed">
+          {copy.answerRefused}
         </p>
       ) : null}
 

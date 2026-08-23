@@ -2,6 +2,88 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Clubs, agenda, messagerie — et un `upsert` qui ne pouvait pas marcher
+
+### Ce qui est livré
+
+L'ADR 0010 avant la première ligne de SQL, puis deux migrations — `0014` les cinq
+tables, `0015` la boîte de réception en un appel. Dix-neuf assertions SQL, trente
+tests unitaires sur les bornes et le slug, six sur l'heure murale, et un parcours
+navigateur avec deux comptes qui nettoie derrière lui.
+
+Cinq écrans : `/clubs`, `/clubs/[slug]`, `/evenements`, `/evenements/[id]`,
+`/messages` et `/messages/[id]`.
+
+### La décision qui n'était dans aucune option
+
+**Un message n'est pas chiffré de bout en bout, et la plateforme peut le lire.**
+Personne ne l'avait demandé, et elle ne se choisit pas : l'article 16 du DSA veut
+qu'un contenu signalé soit examinable, donc `public.messages` entre dans les
+cibles de `mod.reports`, un modérateur a une policy `SELECT` dessus, et la
+politique de confidentialité le dit en toutes lettres. Une messagerie qui
+laisserait croire le contraire serait pire qu'une messagerie franche.
+
+### Cinq décisions qui ne méritaient pas d'ADR
+
+**Une conversation a exactement deux personnes, en colonnes ordonnées.** Aucune
+contrainte ne sait compter des lignes, donc une table de jonction n'aurait pas pu
+exprimer « exactement deux » — et chacune des questions qui découlent de N
+participants (qui ajoute, que voit un arrivant, que devient une conversation à
+une personne) est une décision sur de la donnée que le §2 range possiblement à
+l'article 9. `member_a < member_b` rend la paire canonique : « la conversation
+entre X et Y » est une lecture, pas une recherche.
+
+**Un club n'a pas de fil.** `posts` ne gagne pas de `club_id`, parce qu'une
+colonne qui décide d'une audience doit garder un seul sens et que `visibility` en
+aurait eu deux selon qu'une autre colonne est nulle. Un club est un groupe et un
+calendrier ; ce qu'on y écrit se lit dans le fil du site.
+
+**Le lieu d'un événement est une chaîne, pas un `venue_id`.** P5 apporte les
+lieux ; une colonne que rien ne remplit et qu'aucune policy ne lit est ce que
+l'ADR 0007 a déjà refusé pour `posts`. La migration se fera en une requête.
+
+**Ouvrir une conversation ne la marque pas lue.** `read_at` est visible de
+l'expéditeur : un accusé de lecture déclenché par le préchargement d'un lien
+mentirait sur quelqu'un. C'est un bouton, et répondre le fait aussi — répondre
+est la preuve.
+
+**« Complet » n'empêche rien, et le dit.** Aucun `CHECK` ne peut comparer un
+compte à la colonne d'une autre ligne, donc la limite de places est une courtoisie
+d'interface. L'écrire sans le dire aurait été une promesse que rien ne tient.
+
+### Deux bugs trouvés dans un navigateur, pas dans un type
+
+**Un `upsert` PostgREST demande l'UPDATE sur toutes les colonnes de sa charge.**
+`event_attendees` accorde `insert (event_id, user_id, status)` et `update (status)`
+seulement — une réponse ne déménage pas vers un autre événement. Un upsert devient
+`… do update set event_id = excluded.event_id, …`, donc `42501`. Et comme une
+écriture refusée **rend zéro ligne au lieu de lever**, l'écran se repeignait sur
+« 0 personnes viennent », sans message nulle part. Le geste correct sous des droits
+de colonne est `update` puis `insert` si rien n'a bougé. Trouvé au deuxième clic.
+
+**Un `datetime-local` rend une heure murale sans fuseau.** PostgREST tourne en
+UTC : une dégustation annoncée à 20 h en juillet s'enregistrait à 22 h de Paris,
+en silence, sur le seul champ autour duquel les gens organisent une soirée.
+`fromBrandZoneWallClock()` mesure le décalage à l'instant lui-même, donc il suit
+l'heure d'été. Le parcours saisit 20:00 et exige de relire 20:00.
+
+### Et un piège de parcours, pour la prochaine fois
+
+**Une Server Action qui redirige rend la main avant que le routeur ait navigué.**
+`page.url()` lu après 900 ms rendait encore `/messages` : tout le reste du parcours
+visitait ensuite la boîte de réception en croyant lire une conversation, et deux
+assertions étaient rouges sur un produit qui marchait. On attend l'**adresse**
+(`waitForURL`), jamais un délai.
+
+### Ce qui reste ouvert
+
+`public.conversations` n'a **aucun droit DELETE**, pour personne : la rétention
+est la question ouverte de l'ADR 0010, et ouvrir la suppression l'aurait tranchée
+par accident. Conséquence pratique : une conversation vide survit à un parcours et
+se retire depuis un contexte privilégié.
+
+---
+
 ## P3 — le fil, et cinq bugs dont quatre étaient verts
 
 ### Ce qui est livré

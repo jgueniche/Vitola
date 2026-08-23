@@ -156,6 +156,21 @@ export async function createEvent(_previous: EventState, formData: FormData): Pr
  * different one checked, so this one could have returned state; it does not,
  * because the attendee list beside it changes too and two mechanisms on one
  * page is one more than the page needs.
+ *
+ * **An upsert would have been the obvious shape, and it does not work here.**
+ * PostgREST turns one into `insert … on conflict (event_id, user_id) do update
+ * set` with *every column of the payload* on the right-hand side — `event_id`
+ * and `user_id` included. Those two are in the INSERT grant and in no UPDATE
+ * grant, deliberately: an answer does not move to another event or to somebody
+ * else. So the upsert is refused with `42501`, and because a refused write
+ * comes back as no row rather than raising, the page repainted itself showing
+ * "0 personnes viennent" with no error anywhere. Found in a browser, on the
+ * second click, by a walkthrough that read the number back.
+ *
+ * Update first, then insert if nothing was updated: two statements rather than
+ * one, each inside its grant, each read back. Two people answering the same
+ * event in the same instant is not a race worth a function — the loser gets
+ * the refusal below and clicks again.
  */
 export async function answerEvent(formData: FormData): Promise<void> {
   const eventId = z.uuid().safeParse(formData.get('eventId'))
@@ -166,22 +181,34 @@ export async function answerEvent(formData: FormData): Promise<void> {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return
 
-  /* An upsert, because answering twice is changing one's mind and not an
-     error. The primary key is `(event_id, user_id)`, so the conflict target is
-     the identity of the answer itself. */
-  const { data } = await supabase
+  const { data: changed } = await supabase
     .from('event_attendees')
-    .upsert(
-      { event_id: eventId.data, user_id: auth.user.id, status: status.data },
-      { onConflict: 'event_id,user_id' },
-    )
+    .update({ status: status.data })
+    .eq('event_id', eventId.data)
+    .eq('user_id', auth.user.id)
     .select('event_id')
     .maybeSingle()
 
+  let answered = changed !== null
+
+  if (!answered) {
+    const { data: inserted } = await supabase
+      .from('event_attendees')
+      .insert({ event_id: eventId.data, user_id: auth.user.id, status: status.data })
+      .select('event_id')
+      .maybeSingle()
+    answered = inserted !== null
+  }
+
   revalidatePath(routes.event(eventId.data))
   revalidatePath(routes.events())
+  /* A refusal here is `event_attendees_insert_own` declining, which means a
+     block stands between the two of you. It says so rather than repainting an
+     unchanged page. */
   redirect(
-    data ? `${routes.event(eventId.data)}?fait=${EVENT_DONE.answered}` : routes.event(eventId.data),
+    answered
+      ? `${routes.event(eventId.data)}?fait=${EVENT_DONE.answered}`
+      : `${routes.event(eventId.data)}?erreur=refus`,
   )
 }
 

@@ -155,6 +155,18 @@ partagées → tables → recherche → index → grants → RLS → storage →
   compris pour son auteur — donc impossible à supprimer. Lire un fil et lire une
   ligne sont deux questions ; `post_card()` (0013) est la seconde, et elle n'a
   aucun prédicat d'audience du tout.
+- **Un `upsert` PostgREST écrit TOUTES les colonnes de sa charge dans le `DO UPDATE`.**
+  `event_attendees` accorde `insert (event_id, user_id, status)` et
+  `update (status)` seulement — une réponse ne déménage pas vers un autre
+  événement ni vers quelqu'un d'autre. Un upsert devient
+  `insert … on conflict (event_id, user_id) do update set event_id = excluded.event_id,
+  user_id = …, status = …`, donc il demande l'UPDATE sur les trois colonnes et
+  se fait refuser en `42501`. Et comme une écriture refusée **rend zéro ligne
+  au lieu de lever**, l'écran se repeignait sur « 0 personnes viennent » sans
+  message nulle part. Le geste correct sous des droits de colonne est
+  `update` puis `insert` si rien n'a bougé — deux instructions, chacune dans
+  son droit, chacune relue. Trouvé au deuxième clic dans un navigateur, jamais
+  par un type ni par une policy.
 - **Une vue matérialisée n'accepte pas de RLS.** `cigar_stats` n'est sûre que par son
   `where visibility = 'public'` : ce prédicat est la frontière de sécurité, pas une optimisation.
   L'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est toujours.

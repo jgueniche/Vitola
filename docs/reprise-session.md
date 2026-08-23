@@ -671,19 +671,37 @@ d'être. Parcouru aussi dans un navigateur : vingt-et-une publications, vingt su
 un lien « suite » dont le curseur est une date **et** un identifiant, une seconde page qui ne
 partage aucune ligne avec la première.
 
-**Trois choses de P3 ont été délibérément laissées de côté**, et il faut les savoir avant de les
-croire faites :
+**Deux choses de P3 restent délibérément de côté**, et il faut les savoir avant de les croire
+faites :
 
-- **Clubs, événements et messagerie** (§5.6, F7) ne sont pas créés. Le §9 borne P3 à « profils,
-  follows, feed, publications, braises, commentaires » et son critère ne parle que du fil. Chacun
-  est une table et des écrans à part entière ; la messagerie est en outre un régime de données
-  différent — un message privé sur une donnée art. 9 n'est pas une publication, et il vaut sa propre
-  ADR. C'est la question ouverte de l'ADR 0007.
 - **Les réactions autres que la braise.** `reaction_kind` a une seule valeur. En ajouter une est
   bon marché : elle n'apparaît dans aucune policy, donc pas de migration en deux temps comme pour
   `review_visibility`.
 - **`posts.venue_id`** (§5.6) n'existe pas. Il arrivera avec P5 ; l'ajouter maintenant aurait été
   une colonne que rien ne remplit et qu'aucune policy ne lit.
+
+### ~~6 bis. Clubs, événements et messagerie~~ — **livrés le 23 août 2026 à midi**
+
+Demandés en v1 (§5.6, F7) et laissés de côté par P3, ils sont là. ADR 0010 avant le SQL, migrations
+`0014` (les cinq tables) et `0015` (la boîte de réception en un appel), **19 assertions SQL**,
+36 tests unitaires de plus, et **42 assertions de parcours** contre la vraie base avec deux comptes.
+
+Six écrans : `/clubs`, `/clubs/[slug]`, `/evenements`, `/evenements/[id]`, `/messages`,
+`/messages/[id]`.
+
+La décision qui n'était dans aucune option, et qu'il faut connaître : **un message n'est pas chiffré
+de bout en bout, et la plateforme peut le lire.** L'article 16 du DSA veut qu'un contenu signalé soit
+examinable, donc `public.messages` est une cible de `mod.reports`, un modérateur a une policy
+`SELECT` dessus, et la politique de confidentialité le dit en toutes lettres. Une messagerie qui
+laisserait croire le contraire serait pire qu'une messagerie franche.
+
+Deux bugs trouvés **dans un navigateur** et nulle part ailleurs : un `upsert` PostgREST demande
+l'UPDATE sur toutes les colonnes de sa charge, donc répondre à un événement était refusé en silence ;
+et un `datetime-local` rend une heure murale sans fuseau, donc une soirée annoncée à 20 h était
+enregistrée à 22 h de Paris. Le détail est dans `docs/decisions-log.md`.
+
+**Ce qui reste ouvert de l'ADR 0010** : la rétention des messages. `public.conversations` n'a donc
+aucun droit `DELETE`, pour personne — ouvrir la suppression aurait tranché la question par accident.
 
 ### 7. P4 — le scan de bague. **BLOQUÉE, et c'est à toi de le dire**
 
@@ -709,6 +727,14 @@ qu'à Upstash, et l'écran avec sa dégradation gracieuse vers la recherche manu
 **pas** le critère de sortie, et le brief interdit explicitement d'avancer sans lui.
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
+
+- **Deux entrées de carnet publiques de `test_deux` sont en base, et elles ne sont pas de moi.**
+  Une du 23 août à 06 h 17 (90/100, `macanudo-inspirado-white-toro`), une du 23 août à 08 h 16
+  (95/100, `cao-pilon-robusto-extra`). Aucun parcours ne touche ces deux fiches, et les miens
+  effacent ce qu'ils écrivent — l'état final est vérifié à zéro sur les treize tables sociales.
+  Ce sont donc des essais faits à la main depuis le site, probablement les vôtres. **Je ne les
+  efface pas** : effacer l'entrée de carnet de quelqu'un sans le lui demander est exactement ce que
+  la portée `private` protège. Dites-moi si elles doivent partir.
 
 - **Un membre ne pouvait pas modifier son profil, et personne ne l'avait vu.** Réparé par la 0009 ;
   le détail est dans « Fonctions appelables ». Ce qu'il faut en retenir n'est pas le correctif, c'est
@@ -1070,6 +1096,41 @@ Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un second onglet
 
 ---
 
+## LES URL À OUVRIR POUR RECETTER LES CLUBS, L'AGENDA ET LES MESSAGES (livrés le 23 août)
+
+Connecté avec `test_un` (`test1@cigardeur.com` / `cigardeur`), un second onglet avec `test_deux`.
+**Tout est vide au départ** : le parcours a nettoyé derrière lui.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/clubs` | « Aucun club pour l'instant », et le formulaire de création au-dessus. |
+| ⟶ taper un nom dans « Nom du club » | **L'adresse s'affiche pendant la frappe** : `Adresse : /clubs/les-amateurs-de-maduro`. C'est la seule façon de voir une collision avant qu'elle échoue. |
+| ⟶ créer | Le club apparaît, **« 1 membre »** : son fondateur y est entré par un trigger. Et **il n'y a aucun fil dedans** — un club est un groupe et un calendrier, jamais un second fil (ADR 0010, D1). |
+| **En `test_deux`** : `/clubs/<slug>`, « Rejoindre » | **« Vous avez rejoint le club. »**, « 2 membres ». Personne n'a approuvé : c'est libre. |
+| **En `test_un`** : la même page | Un bouton « Retirer » en face du nouveau, et **aucun en face de soi** — partir est l'autre geste, et il ne dissout rien. |
+| `/evenements` | « Rien d'annoncé », et le formulaire. Le champ « Où » porte la phrase qui dit que les lieux du référentiel arrivent en P5. |
+| ⟶ annoncer à **20:00** | La page de l'événement affiche **20:00**. Si elle affichait 18:00 ou 22:00, le fuseau serait cassé — c'est le bug que ce champ produit par défaut. |
+| ⟶ **En `test_deux`** : « Je viens », « Répondre » | **« Réponse enregistrée. »**, « 1 personne vient ». |
+| ⟶ « Peut-être », « Répondre » | Le compte **retombe à 0** : seul un « je viens » compte, et c'est le trigger qui recompte, pas un delta. |
+| ⟶ « Retirer ma réponse » | **« Réponse retirée. »** |
+| Depuis `/clubs/<slug>` en tant que membre | Le même formulaire, préfixé du club. L'événement paraît **dans les deux** calendriers, et dit d'où il vient. |
+| `/messages` sans abonnement | « Personne à qui écrire pour l'instant » — un écran, pas une liste vide qui offrirait une porte fermée. Et le paragraphe encadré : **un message n'est pas chiffré de bout en bout**. |
+| ⟶ s'abonner à quelqu'un, revenir | Le destinataire est proposé. **« Ouvrir la conversation »** mène à `/messages/<uuid>`. |
+| ⟶ écrire, envoyer | **« Message envoyé. »** Le message porte **« Non lu »** — c'est l'expéditeur qui le voit. |
+| **En `test_deux`** : `/messages` | La conversation, l'extrait, et **« 1 non lu »**. Un seul appel la rend : `conversation_inbox()`. |
+| ⟶ ouvrir la conversation | **Rien n'est marqué lu.** Un bouton « Marquer comme lu », et la phrase qui dit pourquoi : un accusé déclenché par un préchargement mentirait sur quelqu'un. |
+| ⟶ cliquer | **« Conversation marquée comme lue. »** — et chez `test_un`, le message passe à « Lu ». |
+| ⟶ répondre, puis **En `test_un`** : « Supprimer » | **« Message supprimé. »**, et il disparaît **aussi chez `test_deux`**. Une suppression « de son côté » serait un bouton qui ment. |
+| Une conversation qui n'est pas la vôtre, par son adresse | 404 — jamais « accès refusé ». |
+| `/clubs`, `/evenements`, `/messages` en navigation privée | Renvoient vers `/connexion`. |
+
+**Ce qui ne se nettoie pas depuis un navigateur** : `public.conversations` n'a aucun droit `DELETE`,
+pour personne. La rétention est la question ouverte de l'ADR 0010, et ouvrir la suppression
+l'aurait tranchée par accident. Une conversation vide peut donc rester ; elle se retire depuis un
+contexte privilégié.
+
+---
+
 ## REJOUER TOUS LES PARCOURS
 
 Chacun se rejoue d'une commande, contre la vraie base, et **nettoie derrière lui** :
@@ -1081,6 +1142,8 @@ pnpm tsx tooling/parcours/parametres.ts      # 25 assertions
 pnpm tsx tooling/parcours/reference.ts       # 24 assertions
 pnpm tsx tooling/parcours/contributions.ts   # 26 assertions
 pnpm tsx tooling/parcours/social.ts          # 66 assertions
+pnpm tsx tooling/parcours/dettes.ts          # 23 assertions
+pnpm tsx tooling/parcours/groupes.ts         # 37 assertions
 ```
 
 Le mot de passe se surcharge par `PARCOURS_PASSWORD`. Ces parcours **écrivent dans la vraie base** :
@@ -1088,7 +1151,9 @@ caves, lots, événements, propositions de révision. Ils effacent ce qu'ils éc
 a été vérifié à zéro. `audit_log` ne s'efface jamais.
 
 Les pièges d'écriture de ces parcours sont dans « PIÈGES DE CET ENVIRONNEMENT » — lis-les **avant**
-d'en écrire un cinquième, ils coûtent une heure chacun la première fois.
+d'en écrire un huitième, ils coûtent une heure chacun la première fois. Le dernier en date :
+**une Server Action qui redirige rend la main avant que le routeur ait navigué**, donc `page.url()`
+lu après un délai fixe rend encore l'adresse d'avant. On attend `waitForURL`, jamais un délai.
 
 ---
 

@@ -1637,6 +1637,7 @@
     },
     "answerLegend": "Votre réponse",
     "answer": "Répondre",
+    "answerRefused": "Réponse refusée. Un blocage existe entre vous et l'hôte, dans un sens ou dans l'autre.",
     "withdraw": "Retirer ma réponse",
     "cancel": "Annuler l'événement",
     "cancelConfirm": "Annuler cet événement ? Les réponses disparaissent avec lui.",
