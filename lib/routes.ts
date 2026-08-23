@@ -55,6 +55,11 @@ export const routes = {
   cigars: () => `/${SEGMENTS.cigars}`,
   cigar: (slug: string) => `/${SEGMENTS.cigars}/${slug}`,
   cigarHistory: (slug: string) => `/${SEGMENTS.cigars}/${slug}/${SEGMENTS.history}`,
+  /* Proposer une correction pend sous la fiche qu'elle corrige : c'est de là
+     qu'on part, en ayant sous les yeux ce qu'on veut changer. La file, elle,
+     est un lieu à part — on y va pour relire, pas pour lire une fiche. */
+  cigarPropose: (slug: string) => `/${SEGMENTS.cigars}/${slug}/proposer`,
+  contributions: () => `/${SEGMENTS.contributions}`,
   cigarCompare: () => `/${SEGMENTS.cigars}/${SEGMENTS.compare}`,
   /* The structured tasting hangs off the cigar it is about, because that is
      where one starts it: the entry is already open, and the form needs nothing

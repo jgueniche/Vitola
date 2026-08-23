@@ -29,6 +29,17 @@ const SHADE_LABELS: Record<WrapperShade, string> = {
   oscuro: 'Oscuro',
 }
 
+/**
+ * The label, on its own.
+ *
+ * Exported because the contribution queue renders a proposed shade as text —
+ * a diff is a list of before-and-after values, not a swatch — and a second copy
+ * of these six words is a second place for them to disagree with the scale.
+ */
+export function shadeLabel(shade: WrapperShade): string {
+  return SHADE_LABELS[shade]
+}
+
 const SHADE_SWATCH: Record<WrapperShade, string> = {
   claro: 'bg-shade-claro',
   colorado_claro: 'bg-shade-colorado-claro',
