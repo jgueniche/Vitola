@@ -2,6 +2,74 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## P8 — la file se relève enfin, et le parcours a trouvé le trou avant l'audit
+
+### Ce qui est livré
+
+L'ADR 0013 avant le SQL, la migration `0018` (quatre portes `SECURITY DEFINER` vers `mod`, onze
+assertions SQL), `/moderation` (file, dossier, décision — la réponse d'écran de Q12), le chemin de
+contestation sur un commentaire masqué, l'audit axe-core rejouable (`tooling/audit/a11y.ts`), le
+manifest PWA avec son icône générée, et les Core Web Vitals mesurés. **Hors de l'ordre du §9, et
+dit** : P7 (Stripe) et P4 (Gemini) attendent leurs clés — commande de session du 23 août.
+
+**Le critère de sortie du §9 est mesuré et dépassé : 0 violation axe-core, tous impacts
+confondus**, sur 24 écrans en trois rôles (visiteur, membre, modérateur). Le critère ne demandait
+que zéro critique ; il y en avait deux au premier passage, et quatre autres au-dessous.
+
+### Ce que le parcours a trouvé que rien d'autre ne pouvait trouver
+
+**L'auteur d'un commentaire masqué n'avait aucun chemin pour contester.** Le bouton « Signaler »
+n'existe pas sur son propre commentaire — décision délibérée de 0004, le bouton pour soi est
+« Supprimer » — et un commentaire masqué n'offrait plus aucun contrôle. Une ligne barrée sans
+recours n'est pas la décision contestable que le DSA exige. Le parcours s'est arrêté exactement
+là ; l'auteur lit désormais le motif sous la ligne barrée (art. 17, l'exposé des motifs) et
+« Contester ce retrait » dépose le nouveau signalement que l'ADR 0013 définit comme la voie de
+contestation. **La première version du test M6 se trompait dans le même sens** : elle exigeait que
+l'auteur ne voie plus son commentaire masqué — la 0004 avait raison contre le test.
+
+### Ce que l'audit a trouvé, et qui était vrai
+
+Seize filtres de recherche portaient `aria-pressed` — un attribut que les liens ne connaissent
+pas : seize états annoncés à personne, `aria-current` est le mot juste pour un filtre que l'URL
+tient déjà. Le champ libre de la dégustation avait un titre visuel et aucun nom accessible. Les
+pastilles de l'accueil disaient leur sens en 11 px d'une couleur qui rate le contraste AA sur le
+fond sombre — le mot porte le sens, l'anneau garde le ton. Un qualificatif de prix en encre
+pâle, trois liens du journal distingués par la seule couleur, deux repères de navigation
+homonymes.
+
+### Trois décisions qui ne méritaient pas d'ADR
+
+**Pas de service worker.** Mettre en cache des pages du portail sous une clé qui ignore le cookie,
+c'est servir le carnet de quelqu'un à côté de la session — un bug de vie privée déguisé en
+fonctionnalité. L'installabilité n'en a plus besoin ; le manifest et l'icône suffisent, exemptés
+du portail dans le `matcher` (mesuré : gated, installer échoue en silence sur un 307).
+
+**La file n'a pas d'entrée de navigation globale.** L'en-tête tourne sur toutes les pages ; lui
+faire lire un rôle par rendu pour un lien que deux comptes peuvent suivre serait payer le prix au
+mauvais endroit. Le lien vit sur `/parametres`, où le rôle est déjà chargé.
+
+**L'i18n de P8 est une vérification, pas un sélecteur.** Toute copie passe par `messages/fr.json`
+(vérifié par `tokens:check` et le build), la locale par `lib/brand.ts`. Un sélecteur de langue
+sans seconde langue serait le registre de consentements à l'envers : un contrôle qui ne contrôle
+rien.
+
+### Les chiffres de perf, avec leur machine
+
+Fiche cigare, desktop local : **LCP 0,7 s, CLS 0, TBT 0 ms** — les trois objectifs du §8 tenus.
+Mobile émulé (CPU 4×, slow 4G) : 93/100, LCP 3,2 s dont ~700 ms de TTFB — le conteneur interroge
+Supabase en eu-west-3 à chaque rendu, ce que la production (même région) ne paiera pas. L'accueil
+statique le confirme : TTFB 10 ms, tout le reste est l'émulation. Corriger la page pour flatter le
+banc d'essai aurait été régler le mauvais ordinateur.
+
+### Deux pièges d'outillage, pour la prochaine fois
+
+Les e2e et le serveur de vérification veulent le même port 3100 : un `pnpm start` oublié fait
+échouer les 56 tests en 3 ms chacun. Et ce conteneur porte le build Chromium 1194 quand
+`@playwright/test` 1.62 attend 1234 : les e2e passent avec
+`PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium`, jamais avec `playwright install`. Enfin, un
+`WITH` qui supprime puis compte dans la même instruction compte l'instantané d'avant — les
+comptes de nettoyage se font dans une requête séparée.
+
 ## P6 — le journal, et un parseur qui refuse en ne connaissant pas
 
 ### Ce qui est livré
