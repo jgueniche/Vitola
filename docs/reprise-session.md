@@ -1,28 +1,29 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 23 août 2026 au matin, après le
-> social. **P1, P2 et P3 sont fermées ; la prochaine est P4 — et elle est bloquée, voir tout en
-> bas.**
+> **aucune requête n'est nécessaire pour la découvrir**. Réécrit le 23 août 2026 à midi, après la
+> fusion de la PR #10. **P1, P2 et P3 sont fermées, et les clubs, l'agenda et la messagerie avec
+> elles. La prochaine dans l'ordre du §9 est P4 — et elle est bloquée, voir plus bas ; celle qui
+> suit, P5, ouvre sur une question de licence qui vaut une ADR avant la première ligne de SQL.**
 
 ---
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
-`docs/decisions-log.md` (les dix sections — la première est de la session précédente),
-`docs/adr/` (0004, 0005 et 0006 sont **Acceptées**), `supabase/seed/PROVENANCE.md` et
+`docs/decisions-log.md` (les onze sections — la première est de la session précédente),
+`docs/adr/` : **0004, 0005, 0006, 0007 et 0010 sont Acceptées**, **0008 et 0009 attendent votre
+arbitrage** et ne doivent pas être appliquées sans lui. Puis `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`. Un `CLAUDE.md` par domaine complète le racine :
 `app/`, `lib/`, `supabase/` — les trois ont été enrichis par la dernière session et leurs nouveaux
 paragraphes sont exactement ceux qu'on regrette de ne pas avoir lus.
 
-**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. Attention : au moment
-d'écrire ceci, `master` s'arrête à la PR #9 et **tout P3 est sur `claude/vitola-p3-social-kxl9pd`**,
-poussée mais pas encore fusionnée. Vérifie où en est `master` avant de partir de lui — si #9 est
-toujours le dernier commit, c'est de la branche P3 qu'il faut repartir, sans quoi tu réécriras le
-social. Vérifie d'un coup d'œil plutôt que de
-supposer : `git log --oneline origin/master -3` doit montrer la fusion de #9, et `/api/health` sert
-le commit réellement déployé.
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. **La PR #10 est
+fusionnée** : tout P3, plus les clubs, l'agenda et la messagerie, sont dans `master`. Vérifie-le
+d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3` doit montrer la
+fusion de #10, et `/api/health` sert le commit réellement déployé. La session précédente est partie
+d'une branche vieille de deux PR sans regarder ; recréer la branche depuis `master` prend trente
+secondes, bâtir dessus sans regarder coûte la session.
 
-Le code du dépôt et l'état de la base concordent : **treize migrations**, toutes dans
+Le code du dépôt et l'état de la base concordent : **quinze migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet. Le carnet n'en a demandé aucune — la 0003
 avait tout prévu, ce qui est la meilleure chose qu'on puisse dire d'une ADR écrite avant le SQL. La
 cave en a demandé une, la 0008, et ses six empreintes de schéma ont été comparées entre le fichier
@@ -47,7 +48,10 @@ pardonné.
 
 ## OBJECTIF : AMENER LE SITE À SA VERSION DÉFINITIVE
 
-**La v1 du brief, phases P4 à P8 comprises** — P1, P2 et P3 sont fermées. C'est plusieurs sessions ; l'ordre est donné plus bas.
+**La v1 du brief, phases P4 à P8 comprises** — P1, P2 et P3 sont fermées, et les clubs, l'agenda et
+la messagerie du §5.6 avec elles. C'est plusieurs sessions ; l'ordre est donné plus bas. **P4 est
+bloquée pour des raisons qui ne sont pas contournables par du code** ; commence donc par **P5**, et
+par son ADR.
 Il n'est pas négociable sans me le dire, parce que chaque phase ouvre la suivante et qu'une phase
 qu'on quitte avant son critère de sortie est une dette qu'on ne retrouve qu'en production.
 
@@ -88,9 +92,11 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #9 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la #9 a porté la
+PR #1 à #10 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la #9 a porté la
 cave, les statistiques et tout le reste de P1 — la cave **ferme le critère de sortie de P2**, le
-reste **ferme P1**.
+reste **ferme P1**. La #10 a porté **tout P3** — le fil, les profils publics, les notifications —
+**plus les clubs, l'agenda et la messagerie**, que le §5.6 et F7 promettent en v1 et que le §9 ne
+bornait pas à P3. Elle referme aussi les trois dettes que P3 attendait.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
@@ -178,7 +184,7 @@ reste **ferme P1**.
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Treize migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Quinze migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -196,11 +202,13 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0011` | `profile_privacy` | `supabase/migrations/0011_profile_privacy.sql` |
 | `0012` | `unblock_is_reachable` | `supabase/migrations/0012_unblock_is_reachable.sql` |
 | `0013` | `post_card` | `supabase/migrations/0013_post_card.sql` |
+| `0014` | `clubs_evenements_messagerie` | `supabase/migrations/0014_clubs_evenements_messagerie.sql` |
+| `0015` | `conversation_inbox` | `supabase/migrations/0015_conversation_inbox.sql` |
 
-**Les deux dernières sont enregistrées sous un horodatage**, pas sous `0008` / `0009` :
-`20260822222420` et `20260822232400`. C'est l'outil d'application qui numérote, pas le fichier.
-`list_migrations` affiche donc des versions qui ne ressemblent pas au dépôt, et c'est normal —
-l'ordre et le contenu sont les bons.
+**Trois sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009` et `0015` : `20260822222420`, `20260822232400` et `20260823083729`. C'est l'outil
+d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
+ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
 Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref`.
 `mod` en est délibérément **absent**.
@@ -212,18 +220,18 @@ cinq minutes, `select public.refresh_cigar_stats()`.
 
 ```
 ref.manufacturers          30      public.profiles             3
-ref.brands                114      public.reviews              1  ← pas de moi
+ref.brands                114      public.reviews              2  ← pas de moi
 ref.lines                   0  ←   public.review_shares        0
 ref.vitolas                51      public.review_thirds        0
-ref.cigars                940      public.comments             1
+ref.cigars                940      public.comments             1  ← pas de moi
   dont published          940      public.aroma_taxonomy      87
   avec vitole              78        dont familles            11
   avec prix               900      public.consents             0
-  avec force / cape       123      public.audit_log            4
+  avec force / cape       123      public.audit_log            6
   verified_by non nul       0  ←   public.feature_flags        5
 ref.box_codes              18      mod.reports                 0
 ref.cigar_images            0      mod.moderation_actions      0
-ref.cigar_revisions         0      public.cigar_stats     1 ligne (vue matérialisée)
+ref.cigar_revisions         0      public.cigar_stats     2 lignes (vue matérialisée)
                                    public.humidors             0
                                    public.humidor_items        0
                                    public.humidor_events       0
@@ -234,16 +242,26 @@ ref.cigar_revisions         0      public.cigar_stats     1 ligne (vue matérial
                                    public.post_reactions       0
                                    public.post_comments        0
                                    public.notifications        0
+                                   public.clubs                0  ← 0014
+                                   public.club_members         0
+                                   public.events               0
+                                   public.event_attendees      0
+                                   public.conversations        0
+                                   public.messages             0
 ```
 
-**`public.reviews` contient UNE ligne, et elle n'est pas de moi.** Une entrée publique de
-`test_deux` sur `macanudo-inspirado-white-toro`, notée 90, écrite le 23 août à 06 h 17 — pendant ma
-session mais sur un cigare qu'aucun de mes parcours ne touche, avec un texte qu'aucun n'écrit. Je
-l'ai donc laissée, comme la ligne pré-existante de `public.comments`, et c'est pour cela que
-`cigar_stats` a une ligne. **À me dire si elle peut partir.**
+**`public.reviews` contient DEUX lignes, et aucune n'est de moi.** Deux entrées publiques de
+`test_deux` : `macanudo-inspirado-white-toro` notée 90 le 23 août à 06 h 17, et
+`cao-pilon-robusto-extra` notée 95 le même jour à 08 h 16. Aucun de mes parcours ne touche ces
+fiches ni n'écrit ces textes, et tous effacent ce qu'ils écrivent. Je les ai laissées, comme la
+ligne pré-existante de `public.comments`, et c'est pour cela que `cigar_stats` a deux lignes.
+**À me dire si elles peuvent partir.**
 
-Les six tables de P3 sont à zéro : les parcours effacent ce qu'ils écrivent, et l'état final a été
-vérifié table par table plutôt que supposé.
+Les treize tables sociales sont à zéro : les parcours effacent ce qu'ils écrivent, et l'état final
+a été vérifié table par table plutôt que supposé. Une exception à connaître —
+**`public.conversations` n'a aucun droit `DELETE`, pour personne** (la rétention est la question
+ouverte de l'ADR 0010), donc une conversation vide survit à un parcours et se retire depuis un
+contexte privilégié. Celle du dernier parcours a été retirée ainsi.
 
 Les entrées écrites en parcourant sont effacées derrière la vérification, comme le demande
 « Nettoie derrière une vérification » plus bas. `ref.lines` à zéro est une **décision de v1**,
@@ -423,9 +441,11 @@ public.post_kind           post | session | review_share | question
 public.reaction_kind       ember
 public.notification_kind   follow | ember | post_comment | review_share
 public.feed_scope          following | discover
+public.event_kind          degustation | rencontre | visite | autre
+public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 127 au total (dont 8 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 161 au total (dont 10 RESTRICTIVE), toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -450,16 +470,28 @@ public.posts             9  select_public/own/followers/moderator, insert_own, u
                             delete_own, delete_moderator, + 1 restrictive de blocage
 public.post_reactions    3  · public.post_comments 8 (dont 1 restrictive)
 public.notifications     3  select_own, update_own, delete_own — AUCUNE insert
+public.clubs             4  select_all, insert_own, update_owner, delete_owner
+public.club_members      4  select_all, insert_own, delete_own, delete_owner
+public.events            4  select_all, insert_own, update_host, delete_host
+public.event_attendees   4  select_all, insert_own, update_own, delete_own
+public.conversations     2  select_own, insert_linked, + 1 restrictive de blocage
+public.messages          5  select_own, select_moderator, insert_own, update_recipient,
+                            delete_own, + 1 restrictive de blocage
 ```
 
-**Cinq policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments` et
-`profiles`. C'est la seule sémantique qui puisse **retirer** une ligne : les permissives sont
+**Sept policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments`,
+`profiles`, `conversations` et `messages`. C'est la seule sémantique qui puisse **retirer** une ligne : les permissives sont
 OR-ées, donc en ajouter une ne peut jamais restreindre. Chacune épargne ses propres lignes.
 
-Les quatre premières lisent `blocked_user_ids()` — **les deux sens**. `profiles` lit
+Toutes lisent `blocked_user_ids()` — **les deux sens** — sauf `profiles`, qui lit
 `blockers_of_me()` — **un seul**, et la différence est la correction de la 0012 : cacher le profil
 dans les deux sens rendait le seul écran portant « Débloquer » introuvable, donc un blocage était
 définitif. Celui qui bloque voit désormais le profil de sa cible, jamais son contenu.
+
+`clubs`, `events` et les deux tables d'appartenance n'en reçoivent **pas** : leur contenu est un nom
+et une date, et les masquer casserait un compteur public sans rien protéger. Le blocage y agit à
+l'écriture — on ne rejoint pas le club de quelqu'un qu'on a bloqué, on ne s'inscrit pas à son
+événement.
 
 **Trois policies `RESTRICTIVE` propriétaires** sur `humidor_items`, `humidor_events` et
 `humidor_readings`. Sans elles, `humidors_select_shown` cascade : les tables filles rejoignent le
@@ -508,9 +540,11 @@ le même jour : elle exige maintenant que la branche existe **et** que l'avertis
 | `public.profile_privacy(uuid)` | **oui** | ✗ | ✓ | ✓ |
 | `public.shows_humidor(uuid)` | **oui** — délègue | ✗ | ✓ | ✓ |
 | `public.shared_humidor_shelf(uuid)` | **oui** | ✗ | ✓ | ✓ |
+| `public.conversation_with(uuid)` | **non — INVOKER** | ✗ | ✓ | ✓ |
+| `public.conversation_inbox(int)` | **non — INVOKER** | ✗ | ✓ | ✓ |
 
-**`feed_page()` et `post_card()` sont en droits d'appelant, et l'auto-contrôle de leur migration
-échoue si elles passent un jour en `DEFINER`.** C'est la décision D1 de l'ADR 0006 réappliquée : un
+**`feed_page()`, `post_card()`, `conversation_with()` et `conversation_inbox()` sont en droits
+d'appelant, et l'auto-contrôle de leur migration échoue si elles passent un jour en `DEFINER`.** C'est la décision D1 de l'ADR 0006 réappliquée : un
 appel PostgREST est une transaction, pas un privilège. Sur `post_card()` c'est plus visible encore —
 elle n'a **aucun** prédicat d'audience dans son corps, donc la RLS est littéralement la seule chose
 qui décide.
@@ -519,6 +553,19 @@ qui décide.
 `discover` filtre `visibility = 'public'` dans son corps, ce qui dit de quoi la page parle. S'en
 servir pour lire *une* publication rendait toute publication réservée introuvable à son adresse.
 `post_card()` est la fonction de l'autre geste.
+
+**`conversation_inbox()` existe pour la même raison que `feed_page()`** : qui est l'autre, quel est
+le dernier message et combien n'ai-je pas lu sont trois questions **par ligne**, donc trois
+allers-retours par conversation si on les pose une à une. Comme `post_card()`, elle n'a **aucun**
+prédicat d'audience : `conversations_select_own` et la restrictive de blocage décident seules.
+Elle rend au plus 100 lignes et **l'écran le dit** quand la page est pleine — un plafond muet se lit
+comme une liste complète.
+
+**`conversation_with()` calcule `least`/`greatest` et jamais le client.** La paire est canonique
+(`member_a < member_b`), donc « la conversation entre X et Y » est une lecture ; faire calculer la
+convention au client, c'est la lui faire connaître, et l'oublier une fois crée un doublon que
+l'index unique refuse avec une erreur illisible. Elle est INVOKER, donc la policy `insert_linked`
+— qui exige le lien d'abonnement — s'applique pleinement.
 
 **`blocked_user_ids()` rend un TABLEAU et pas un prédicat**, et c'est une mesure : un prédicat dans
 une policy s'évalue une fois **par ligne examinée** — 2 420 appels pour rendre vingt lignes de fil.
@@ -726,6 +773,40 @@ recherche hybride (trigram + unaccent, déjà en base depuis P1), le quota adoss
 qu'à Upstash, et l'écran avec sa dégradation gracieuse vers la recherche manuelle. Cela ne ferme
 **pas** le critère de sortie, et le brief interdit explicitement d'avancer sans lui.
 
+### 8. P5 — les lieux (§5.7). **C'est par là qu'il faut commencer, et ça s'ouvre sur une ADR**
+
+Le §9 donne à P5 un critère net : « **200 lieux seedés, recherche 25 km < 200 ms** ». Les deux
+moitiés ne coûtent pas la même chose.
+
+**La recherche est de l'ingénierie ordinaire** : `postgis` (l'extension n'est pas encore installée),
+une colonne `geography(Point,4326)`, un index GiST, `ST_DWithin`. Rien qui demande un arbitrage. La
+table du §5.7 a déjà son `status enum(pending|published|closed)`, donc — contrairement à
+`ref.lines`, et c'est tout l'objet de l'ADR 0009 — un lieu n'est **pas** public dès son insertion.
+C'est la bonne asymétrie, et elle permet la contribution dès le premier jour.
+
+**Les 200 lieux sont une question juridique, pas technique.** Le §2 interdit l'extraction (art.
+L341-1 CPI), et `PROVENANCE.md` exige que chaque ligne soit justifiable — c'est ce document qui nous
+défend en cas de contestation. Il y a trois voies, et elles n'ont pas le même prix :
+
+1. **OpenStreetMap** (Overpass, `shop=tobacco`, `smoking=*`). Complet, à jour, et **ODbL** : la
+   licence impose l'attribution **et le partage à l'identique de la base dérivée**. C'est la clause
+   à trancher, pas la faisabilité — elle engage le régime de notre propre base.
+2. **SIRENE / l'annuaire des débits de tabac**, en Licence ouverte Etalab : pas de partage à
+   l'identique, mais des établissements sans horaires, sans fumoir, sans site — la moitié des
+   colonnes du §5.7 resteraient vides.
+3. **La contribution seule** : `status = 'pending'` par défaut, et on part de zéro. Honnête, et le
+   critère de sortie n'est pas tenu avant longtemps.
+
+**Écris l'ADR 0011 avant la première ligne de SQL**, comme la 0007 et la 0010 l'ont été. Elle doit
+trancher la source et sa licence, qui peut créer un lieu, ce que `claimed_by` veut dire (un
+professionnel revendique sa civette : c'est une donnée d'identité, pas un drapeau), et ce que
+`venue_reviews` autorise — le §5.7 le borne à « l'accueil, le confort, le conseil », **jamais
+l'incitation à consommer**, ce qui est un garde-fou §2 à écrire quelque part de vérifiable.
+
+Deux conséquences déjà en attente ailleurs : `events.venue_id` **n'existe pas** — la 0014 l'a
+délibérément laissé de côté, un lieu écrit à la main tient en attendant et la migration se fera en
+une requête — et `posts.venue_id` non plus, pour la même raison.
+
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
 - **Deux entrées de carnet publiques de `test_deux` sont en base, et elles ne sont pas de moi.**
@@ -769,14 +850,17 @@ qu'à Upstash, et l'écran avec sa dégradation gracieuse vers la recherche manu
   possiblement à l'art. 9, c'est la décision que je défends le moins bien, et l'ADR propose une
   troisième voie : garder `followers` pour les **publications**, qu'on écrit pour être lues, et la
   retirer des portées offertes au **carnet**. Cela coûte un `CHECK` et un choix de moins à l'écran.
-- **Clubs, événements et messagerie ne sont pas livrés**, et le §9 ne les demandait pas dans P3.
-  **À me dire si l'un des trois est attendu en v1** — la messagerie plus que les deux autres, parce
-  qu'un message privé sur une donnée art. 9 n'a pas le régime d'une publication, et qu'elle vaut sa
-  propre ADR.
-- **Une entrée de carnet dans la base n'est pas de moi.** `test_deux`, publique, 90/100, sur
-  `macanudo-inspirado-white-toro`, écrite le 23 août à 06 h 17. Aucun de mes parcours ne touche ce
-  cigare ni n'écrit ce texte. Laissée en place, comme la ligne de `public.comments`. **À me dire si
-  elle peut partir** — elle est la seule ligne de `cigar_stats`.
+- **Clubs, événements et messagerie sont livrés** (ADR 0010, migrations 0014 et 0015), et **une
+  décision de conformité y a été prise sans vous la demander parce qu'elle ne se choisit pas** : un
+  message **n'est pas chiffré de bout en bout et la plateforme peut le lire**. L'art. 16 du DSA veut
+  qu'un contenu signalé soit examinable ; `public.messages` est donc une cible de `mod.reports`, un
+  modérateur a une policy `SELECT` dessus, et `/confidentialite` le dit en toutes lettres. **Si vous
+  vouliez une messagerie chiffrée, il faut le dire maintenant** — cela change la table, le
+  signalement et la promesse faite à l'utilisateur, donc une ADR et une migration.
+- **La rétention des messages est la question ouverte de l'ADR 0010.** Conséquence en base :
+  `public.conversations` n'a **aucun droit `DELETE`**, pour personne. Ouvrir la suppression aurait
+  tranché la question par accident. Un message, lui, se supprime — par son auteur, et **pour les
+  deux**.
 - **`api.supabase.com` répond, dans cette session.** Le fichier disait le contraire, et c'était vrai
   à l'époque. Conséquence : la **clé de service** est récupérable
   (`GET /v1/projects/{ref}/api-keys?reveal=true`), donc le rafraîchissement de `cigar_stats`, l'écriture
@@ -817,19 +901,14 @@ qu'à Upstash, et l'écran avec sa dégradation gracieuse vers la recherche manu
   commentables, notables et signalables** : à rouvrir avant toute mise en ligne réelle.
 - **`verified_by` est NULL sur les 940 fiches** : elles ont été publiées avant que les comptes
   n'existent. La traçabilité est dans `public.audit_log`.
-- **La page confidentialité n'a pas été relue depuis que le carnet existe**, et **la cave puis les
-  paramètres n'ont fait qu'allonger la liste** : la cave enregistre ce qu'on possède, ce qu'on a payé
-  et quand on l'a fumé. `/parametres` affiche en outre le **registre des consentements** et la base
-  légale de chacun des six `consent_kind` — et il est vide, délibérément : trois d'entre eux ne
-  relèvent pas du consentement (art. 6.1.b et 6.1.c), les trois autres sont facultatifs et **n'ont
-  pas lieu**. La page l'écrit. Mais elle **renvoie** à une politique de confidentialité qui, elle,
-  ne décrit toujours ni le carnet, ni la cave, ni ces bases légales.
-  Les quatre tables sont bien dans l'export RGPD — vérifié par le test d'inventaire, qui a d'ailleurs
-  cassé le build jusqu'à ce qu'elles y soient — mais la page ne les décrit pas. Elle doit décrire
-  les droits d'export et d'effacement, comment les exercer, **et ce que le carnet
-  enregistre** — le §2 range possiblement ces données à l'art. 9. Elle doit aussi dire, comme l'ADR
-  0004 l'exige, que **retirer un destinataire ferme l'accès à venir sans défaire une lecture
-  passée**. Voir `docs/legal/`.
+- **La politique de confidentialité est écrite et à l'écran** (`/confidentialite`, publique,
+  devant le portail). Elle décrit le carnet, la cave, le social et la messagerie, dit l'art. 9 avant
+  tout le reste, dit qu'un retrait ne défait pas une lecture passée, dit que l'abonnement est libre
+  donc que l'audience peut grandir, dit que la cave montrée ne montre ni le prix ni le grand livre,
+  et **compte ses sources depuis le code** (`PERSONAL_DATA_SOURCES`) plutôt que par une phrase qui
+  vieillirait. Elle porte aussi ce qui manque encore, plutôt que de l'omettre.
+  **Ce qui reste** : elle n'a **pas été relue par un juriste**, et la page le dit. C'est le seul
+  point ouvert la concernant.
 - **Les sous-notes d'une dégustation sont sur 10, la note globale en est la moyenne**, non
   saisissable. Le §5.4 ne le disait pas : c'est une décision, argumentée dans
   `docs/decisions-log.md`, et elle se défait tant que `reviews` est vide.
@@ -845,7 +924,8 @@ Les 23 questions de `docs/phase-0/05-questions-ouvertes.md` ont chacune une rép
 **Applique le défaut et signale-le**, ou pose la question si le défaut ne tient plus — c'est arrivé
 pour la Q12, qui est annotée deux fois. Les quatre règles non négociables sont en tête de
 `CLAUDE.md`. Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 à 0003 attendent
-toujours validation ; 0004 et 0005 sont acceptées.
+toujours validation ; **0004, 0005, 0006, 0007 et 0010 sont acceptées ; 0008 et 0009 attendent un
+arbitrage et ne doivent pas être appliquées sans lui.**
 
 ## PIÈGES DE CET ENVIRONNEMENT, APPRIS À NOS DÉPENS
 
