@@ -33,22 +33,43 @@ export type VenueFlag = { enabled: boolean; types: readonly VenueType[] }
  *
  * Falls back to **closed**, like every flag that opens something: a database
  * hiccup must never open a door (lib/flags.ts).
+ *
+ * `timeoutMs` exists for the one caller that runs on EVERY page — the site
+ * header, which shows or hides the nav entry. A flag that cannot answer within
+ * the timeout answers « closed », which is the same fallback as an error: a
+ * nav entry is not worth a slow page. Measured, not supposed — on a base that
+ * does not answer (the CI build), this read made every screen slower than the
+ * age-gate e2e budget, and the tests were what caught it. The `/lieux` pages
+ * themselves pass no timeout: there the answer is the page.
  */
-export async function venuesFlag(): Promise<VenueFlag> {
+export async function venuesFlag(timeoutMs?: number): Promise<VenueFlag> {
+  const closed: VenueFlag = { enabled: false, types: [] }
   try {
     const supabase = await createSupabaseServerClient()
-    const { data } = await supabase
-      .from('feature_flags')
-      .select('enabled, payload')
-      .eq('key', 'venues_enabled')
-      .maybeSingle()
+    const read = (async (): Promise<VenueFlag | null> => {
+      const { data } = await supabase
+        .from('feature_flags')
+        .select('enabled, payload')
+        .eq('key', 'venues_enabled')
+        .maybeSingle()
 
-    if (!data?.enabled) return { enabled: false, types: [] }
-    const raw = (data.payload as { types?: unknown } | null)?.types
-    const types = Array.isArray(raw) ? (raw.filter((t) => typeof t === 'string') as VenueType[]) : []
-    return { enabled: types.length > 0, types }
+      if (!data?.enabled) return closed
+      const raw = (data.payload as { types?: unknown } | null)?.types
+      const types = Array.isArray(raw)
+        ? (raw.filter((t) => typeof t === 'string') as VenueType[])
+        : []
+      return { enabled: types.length > 0, types }
+    })()
+
+    const result = timeoutMs
+      ? await Promise.race([
+          read,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+        ])
+      : await read
+    return result ?? closed
   } catch {
-    return { enabled: false, types: [] }
+    return closed
   }
 }
 

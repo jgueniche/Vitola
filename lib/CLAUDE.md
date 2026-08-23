@@ -34,6 +34,7 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `social/model.ts` | Ce qu'est une publication, les deux portées qu'elle accepte, et **le curseur keyset**. |
 | `social/confirmations.ts` | Ce qu'un `?fait=…` veut dire, pour les pages qui en reçoivent un. |
 | `social/groups.ts` | Les bornes d'un club, d'un événement et d'un message, le vocabulaire des deux enums, et **le slug d'un club**. |
+| `venues/model.ts` | Les bornes d'un lieu et d'un avis, les trois critères du §5.7, la forme de `hours`, le slug d'un lieu. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 
@@ -129,6 +130,21 @@ Une duplication de logique de plus, et la troisième du dossier : `clubSlug()` r
 club **pendant** qu'on tape son nom — un aller-retour par frappe n'en est pas un — et
 `tests/unit/groups-model.test.ts` la compare à `clubs_slug_format` pour qu'un slug produit ici ne
 soit jamais un slug que le CHECK refuse.
+
+## Les lieux ne se filtrent pas ici non plus, et deux `.eq('status', …)` y ressemblent
+
+`venues/queries.ts` ne double aucune des quinze policies de la 0016. Les deux
+`.eq('status', 'published')` qu'on y lit sont des filtres d'**onglet**, le mot de `feed_page()` :
+ils disent de quoi la liste parle, jamais qui a le droit de lire. La preuve par l'autre fonction —
+`getVenueBySlug()` n'a **aucun** prédicat de statut : une proposition `pending` se lit à son
+adresse par son auteur et les relecteurs, parce que la RLS le décide, et par personne d'autre,
+pour la même raison. Confondre les deux a coûté une page à P3 (`post_card`).
+
+`venuesFlag()` porte un délai optionnel, et un seul appelant s'en sert : l'en-tête du site, qui
+tourne sur **toutes** les pages. Un drapeau qui ne répond pas dans le délai répond « fermé » — le
+même repli qu'une erreur. Mesuré, pas supposé : sans lui, la lecture du drapeau sur une base
+injoignable rendait chaque écran plus lent que le budget des e2e du portail, et ce sont eux qui
+l'ont attrapé.
 
 ## Les caves ne se filtrent pas ici non plus
 

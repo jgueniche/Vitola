@@ -183,6 +183,33 @@ lus par un écran.
 policy s'évalue une fois par ligne examinée.** Une règle qui se laisse écrire comme un tableau sans
 argument s'évalue une fois par requête — en InitPlan, dès qu'on l'enveloppe dans `(select …)`.
 
+## P5 — les lieux, livrés le 23 août 2026
+
+ADR 0011 avant le SQL, migration `0016` (postgis, `venues`, `venue_reviews`,
+`events.venue_id`, `posts.venue_id`), 200 lieux seedés depuis le **registre officiel des
+buralistes** (DGDDI 2018, Licence Ouverte — voir `supabase/seed/PROVENANCE.md` §7), quatre écrans
+sous `/lieux`, 14 assertions SQL, 36 assertions de parcours. Critère de sortie mesuré : 0,6 ms par
+recherche 25 km sur la vraie base (47 ms à froid), 8 ms en local sur 50 200 lignes, GiST engagé.
+
+**Cinq règles qui ne se contournent pas, héritées de l'ADR 0011 :**
+
+1. **Aucune ligne d'OSM dans `venues`**, directe ou recopiée, tant qu'un avis juridique n'a pas
+   borné le partage à l'identique de l'ODbL — il engagerait le régime de notre propre base.
+2. **Un lieu naît `pending` et son auteur ne le publie pas** : le WITH CHECK de sa policy l'exige,
+   un `editor` publie. C'est l'asymétrie que `ref.lines` n'avait pas (ADR 0009), à l'endroit.
+3. **`claimed_by` est une identité, pas un drapeau.** Hors de tout grant client ; le parcours de
+   revendication attend un canal de contact (Q7), et la fiche le dit.
+4. **Un avis n'a que trois colonnes où exister** — accueil, confort, conseil — et sa note est
+   `GENERATED`. Le garde-fou du §5.7 est la forme de la donnée ; l'auto-contrôle de 0016 compare
+   le `GRANT INSERT` à la liste exacte.
+5. **Tout `/lieux` vit derrière `venues_enabled`**, dont la charge utile liste les types offerts :
+   la restriction que Q6 anticipe est un `UPDATE` d'une ligne, nav comprise.
+
+**Deux absences voulues** : la **carte** (le fournisseur de tuiles est un sous-traitant à choisir —
+question ouverte de l'ADR) et la **revendication en un clic** (rien ne se revendique sur simple
+déclaration). Le seed date de 2018 et le dit sur chaque fiche ; une fermeture se signale
+(`inaccurate`) et se consigne en `closed`, que le rejeu du seed ne rouvre jamais.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent

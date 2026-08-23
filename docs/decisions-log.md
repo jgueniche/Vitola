@@ -2,6 +2,67 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## P5 — les lieux, et un drapeau qui ralentissait toutes les pages
+
+### Ce qui est livré
+
+L'ADR 0011 avant la première ligne de SQL, la migration `0016` (postgis dans `extensions`,
+`venues`, `venue_reviews`, les deux colonnes `venue_id` que 0010 et 0014 avaient laissées de
+côté « jusqu'à P5 »), 200 lieux seedés depuis le registre officiel des buralistes (DGDDI 2018,
+Licence Ouverte, PROVENANCE §7), quatre écrans sous `/lieux`, le lieu branché sur l'agenda et sur
+« je fume ce cigare ». Quatorze assertions SQL, quinze tests unitaires, **36 assertions de
+parcours** avec trois comptes — dont l'éditeur, parce que publier est le geste central — et le
+nettoyage compté en base.
+
+**Le critère de sortie du §9 est mesuré** : 200 lieux seedés ; recherche 25 km en **0,6 ms** sur la
+vraie base (47 ms sur une connexion froide — le chargement de postgis, pas la requête), **8,2 ms
+en local sur 50 200 lignes**, Bitmap Index Scan sur `venues_geo_gist` engagé.
+
+### Quatre décisions qui ne méritaient pas d'ADR
+
+**La sélection des 200 est une règle, pas une liste.** Communes par taille décroissante au
+registre, 25 établissements **nommés et géolocalisés** au plus par commune, tri par code postal
+puis enseigne, jusqu'à 200. Lyon n'en fournit que 3 : le registre ne nomme presque aucun de ses
+débits, et fabriquer une enseigne depuis une adresse aurait mis un libellé inventé sur une carte —
+le geste que le seed refuse depuis P0.
+
+**Le rejeu du seed ne touche jamais `status` ni les colonnes vivantes.** Un lieu passé `closed`
+depuis 2018 ne se rouvre pas parce qu'on recharge un fichier de 2018, et les horaires qu'un
+revendicateur remplira ne s'écrasent pas sous des colonnes que le registre n'a pas.
+
+**La géolocalisation est une API du terminal, et la position vit dans l'URL.** « Me localiser »
+lit la position au moment du clic, l'écrit en deux nombres dans la barre d'adresse, et rien
+d'autre ne la voit : la recherche se partage, se recharge, et montre exactement ce qui est parti.
+Aucun géocodeur tiers, ni à la recherche ni au seed — le registre porte ses propres coordonnées.
+
+**L'avis se sauve en `update` puis `insert`, jamais en upsert.** La leçon d'`event_attendees`,
+réappliquée avant de coûter un deuxième clic silencieux : un upsert PostgREST exige l'UPDATE sur
+`venue_id` et `user_id`, que rien n'accorde.
+
+### Le bug de la livraison, attrapé par les e2e du portail
+
+**Un drapeau lu dans l'en-tête est lu sur toutes les pages.** L'entrée « Lieux » de la nav suit
+`venues_enabled` (Q6), donc l'en-tête interrogeait la base à chaque rendu — y compris sur
+`/primitives`, qui n'avait jamais eu besoin d'elle. Sur la base injoignable de la CI, cette
+lecture rendait chaque écran plus lent que le budget des tests du portail : **dix e2e rouges, sur
+un produit qui marchait**, et c'est exactement pour cela qu'on les rejoue avec des identifiants
+bidon avant de pousser. La correction n'est pas un cache : `venuesFlag()` gagne un délai optionnel
+que seul l'en-tête passe — un drapeau qui ne répond pas dans la seconde répond « fermé », le même
+repli qu'une erreur.
+
+### Et deux pièges de parcours, pour la prochaine fois
+
+**`body()` tronque, `seen()` attend.** La boucle de nettoyage du fil testait la présence de la
+publication sur les 400 premiers caractères de la page — la publication vivait plus bas, la boucle
+croyait le fil vide, et le post survivait à chaque exécution. Vu en **comptant les lignes en
+base**, jamais à l'écran : troisième fois que ce compte attrape ce qu'aucune assertion ne voit.
+
+**Deux groupes de radios `visibility` cohabitent sur la fiche cigare** (le carnet et la session) :
+un sélecteur non borné à son formulaire viole le mode strict de Playwright. On borne au
+formulaire (`form:has(#session-venue)`), pas au premier match.
+
+---
+
 ## Clubs, agenda, messagerie — et un `upsert` qui ne pouvait pas marcher
 
 ### Ce qui est livré

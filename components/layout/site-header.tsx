@@ -56,8 +56,10 @@ export async function SiteHeader() {
   const unread = user ? await countUnreadNotifications() : 0
   /* Lieux came back with P5 — behind its Q6 flag, so a legal restriction that
      closes the directory removes the promise from the nav in the same UPDATE.
-     Readable signed out, like the referential, hence NAV and not MEMBER_NAV. */
-  const venues = await venuesFlag()
+     Readable signed out, like the referential, hence NAV and not MEMBER_NAV.
+     The short timeout is load-bearing: this header is on every page, and a nav
+     entry is not worth a slow one — an unanswered flag reads as closed. */
+  const venues = await venuesFlag(1200)
   const nav = venues.enabled
     ? [...NAV, { label: m.venues.title, href: routes.venues() }]
     : [...NAV]
