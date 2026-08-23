@@ -6,15 +6,17 @@ import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { countUnreadNotifications } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
+import { venuesFlag } from '@/lib/venues/queries'
 
 /*
  * Only destinations that exist.
  *
  * Lieux (P5), Journal (P6) and Boutique (P7) were listed here from P0 to show
- * the shape of the product. They have no page, so every visitor got a 404 on
+ * the shape of the product. They had no page, so every visitor got a 404 on
  * click — and Next prefetches nav links, so the 404s were already firing on
  * page load without anyone clicking anything. A nav is a promise; each entry
- * comes back with its phase.
+ * comes back with its phase. Lieux came back with P5, below, behind its flag;
+ * Journal and Boutique still wait for theirs.
  */
 const NAV = [
   { label: 'Cigares', href: routes.cigars() },
@@ -52,6 +54,13 @@ export async function SiteHeader() {
      nothing anyway, and a query per anonymous page view to learn that is a
      query too many. */
   const unread = user ? await countUnreadNotifications() : 0
+  /* Lieux came back with P5 — behind its Q6 flag, so a legal restriction that
+     closes the directory removes the promise from the nav in the same UPDATE.
+     Readable signed out, like the referential, hence NAV and not MEMBER_NAV. */
+  const venues = await venuesFlag()
+  const nav = venues.enabled
+    ? [...NAV, { label: m.venues.title, href: routes.venues() }]
+    : [...NAV]
 
   return (
     <header className="border-rule border-b">
@@ -61,7 +70,7 @@ export async function SiteHeader() {
         </Link>
         <nav aria-label="Navigation principale">
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-            {[...NAV, ...(user ? MEMBER_NAV : [])].map((item) => (
+            {[...nav, ...(user ? MEMBER_NAV : [])].map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}

@@ -115,7 +115,12 @@ export const routes = {
   conversation: (id: string) => `/${SEGMENTS.conversations}/${id}`,
 
   journal: () => `/${SEGMENTS.journal}`,
+  /* Un lieu se lit par son slug, comme un club : le nom d'un établissement est
+     durable, et une adresse qui se partage doit se relire. `proposer` pend sous
+     la liste, comme la proposition de correction pend sous la fiche cigare. */
   venues: () => `/${SEGMENTS.venues}`,
+  venue: (slug: string) => `/${SEGMENTS.venues}/${slug}`,
+  venuePropose: () => `/${SEGMENTS.venues}/proposer`,
   shop: () => `/${SEGMENTS.shop}`,
   settings: () => `/${SEGMENTS.settings}`,
 
