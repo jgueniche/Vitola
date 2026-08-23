@@ -473,7 +473,14 @@ export function TastingForm({
 
       {/* -------------------------------------------------- the last word */}
       <Section title={copy.body}>
-        <Textarea name="body" maxLength={REVIEW_LIMITS.bodyMax} defaultValue={field('body')} />
+        {/* The section title is visual only — a textarea still needs its own
+            accessible name, and axe counts the lack as critical. */}
+        <Textarea
+          name="body"
+          aria-label={copy.body}
+          maxLength={REVIEW_LIMITS.bodyMax}
+          defaultValue={field('body')}
+        />
       </Section>
 
       {/* -------------------------------------------------- the humidor */}

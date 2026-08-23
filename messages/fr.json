@@ -156,7 +156,8 @@
     "hero": {
       "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré et une cave numérique. Le réseau des amateurs francophones, les lieux où l'on fume, une boutique d'accessoires.",
       "ledeEmphasis": "Rien à vendre, rien à promouvoir.",
-      "tocTitle": "Ce que contient le site"
+      "tocTitle": "Ce que contient le site",
+      "tocShortcuts": "Aller à une section"
     },
     "plate": {
       "emberLabel": "La braise",

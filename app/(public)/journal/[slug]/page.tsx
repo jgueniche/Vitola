@@ -95,13 +95,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 {link.cigar ? (
                   <Link
                     href={routes.cigar(link.cigar.slug)}
-                    className="text-accent hover:underline"
+                    className="text-accent underline underline-offset-4"
                   >
                     {link.cigar.brand ? `${link.cigar.brand} ` : ''}
                     {link.cigar.name}
                   </Link>
                 ) : link.venue ? (
-                  <Link href={routes.venue(link.venue.slug)} className="text-accent hover:underline">
+                  <Link href={routes.venue(link.venue.slug)} className="text-accent underline underline-offset-4">
                     {link.venue.name}
                   </Link>
                 ) : null}
