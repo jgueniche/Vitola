@@ -58,6 +58,15 @@ export type ReportReason = (typeof REPORT_REASONS)[number]
  * stayed out of this map for one reason only: a profile had no page. It has one
  * now, so it is offered.
  *
+ * `messages` is the one that is not like the others, and it is here on purpose
+ * rather than by symmetry. A private message is not published, so nothing about
+ * ADR 0005 reaches it — what reaches it is art. 16 of the DSA, which asks for a
+ * mechanism against *illegal content* wherever it lands, and harassment lands
+ * here. ADR 0010 takes the consequence rather than hiding it: a message is not
+ * end-to-end encrypted, a moderator can read a reported one, and the privacy
+ * policy says so. Offering the button without that sentence would have been
+ * the dishonest half of the pair.
+ *
  * What is reportable is decided per *surface*, not per row: RLS decides whether
  * the reporter may see the entry at all, and the route asks it that question
  * before filing anything.
@@ -69,6 +78,7 @@ export const REPORTABLE = {
   post: { schema: 'public', table: 'posts' },
   postComment: { schema: 'public', table: 'post_comments' },
   profile: { schema: 'public', table: 'profiles' },
+  message: { schema: 'public', table: 'messages' },
 } as const
 
 export type ReportableKind = keyof typeof REPORTABLE

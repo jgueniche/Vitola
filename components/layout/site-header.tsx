@@ -30,6 +30,9 @@ const NAV = [
 const MEMBER_NAV = [
   { label: m.feed.title, href: routes.feed() },
   { label: m.members.title, href: routes.members() },
+  { label: m.clubs.title, href: routes.clubs() },
+  { label: m.events.title, href: routes.events() },
+  { label: m.messaging.title, href: routes.conversations() },
   { label: m.notebook.title, href: routes.notebook() },
   { label: m.humidor.title, href: routes.humidor() },
   { label: m.statistics.title, href: routes.statistics() },

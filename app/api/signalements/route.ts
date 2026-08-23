@@ -210,6 +210,19 @@ async function isVisibleToCaller(kind: ReportableKind, id: string): Promise<bool
       return data !== null
     }
 
+    /* A private message, and the check is the same shape as all the others for
+       a reason worth naming: `messages_select_own` joins the conversation, so
+       only a participant reads one — which means only a participant can report
+       one, and nobody can probe for a message by id. The surface is offered
+       because art. 16 of the DSA does not stop at what is published, and
+       ADR 0010 accepts the consequence out loud rather than implying an
+       encryption this product does not have. */
+    case 'message': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('messages').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
     default: {
       // Adding a surface to REPORTABLE without a branch here stops compiling.
       const unhandled: never = kind

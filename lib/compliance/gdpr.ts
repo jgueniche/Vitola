@@ -368,6 +368,59 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'erased',
   },
 
+  /* Clubs, événements, messagerie (migration 0014, ADR 0010). Sept colonnes de
+     plus, toutes ici parce que `tests/compliance/gdpr-inventory.test.ts` relit
+     le SQL et refuse d'en laisser passer une. Troisième fois que ce garde-fou
+     mord, après la cave et le fil.
+
+     Deux choses valent d'être lues plutôt que devinées.
+
+     **Un club survit à son propriétaire, anonymisé.** `clubs.owner_id` cascade
+     en base — c'est une clé étrangère `on delete cascade` — donc effacer un
+     compte efface ses clubs et, avec eux, l'appartenance de tous leurs membres.
+     C'est le comportement du schéma et il est brutal ; il est déclaré `erased`
+     ici parce que c'est ce qui se passe réellement, et la question de savoir
+     s'il faudrait plutôt transmettre un club est ouverte plutôt que résolue.
+
+     **Une conversation est exportée deux fois, dans les deux colonnes.** Ce
+     n'est pas de la redondance : `member_a` et `member_b` sont ordonnés par la
+     valeur de l'uuid et non par un rôle, donc « mes conversations » est
+     l'union des deux, et une seule des deux lignes ici rendrait la moitié des
+     échanges invisible à l'export d'une personne sur deux — un bug qu'aucun
+     test ne verrait, puisqu'il dépend de l'ordre de deux identifiants
+     aléatoires. */
+  { key: 'clubsOwned', schema: 'public', table: 'clubs', column: 'owner_id', erasure: 'erased' },
+  {
+    key: 'clubMemberships',
+    schema: 'public',
+    table: 'club_members',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  { key: 'eventsHosted', schema: 'public', table: 'events', column: 'host_id', erasure: 'erased' },
+  {
+    key: 'eventsAttending',
+    schema: 'public',
+    table: 'event_attendees',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'conversationsAsFirst',
+    schema: 'public',
+    table: 'conversations',
+    column: 'member_a',
+    erasure: 'erased',
+  },
+  {
+    key: 'conversationsAsSecond',
+    schema: 'public',
+    table: 'conversations',
+    column: 'member_b',
+    erasure: 'erased',
+  },
+  { key: 'messagesSent', schema: 'public', table: 'messages', column: 'sender_id', erasure: 'erased' },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */

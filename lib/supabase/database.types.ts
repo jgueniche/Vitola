@@ -109,6 +109,65 @@ export type Database = {
         }
         Relationships: []
       }
+      club_members: {
+        Row: {
+          club_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          member_count: number
+          name: string
+          owner_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_count?: number
+          name: string
+          owner_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_count?: number
+          name?: string
+          owner_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -177,6 +236,115 @@ export type Database = {
           version?: string
         }
         Relationships: []
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          member_a: string
+          member_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          member_a: string
+          member_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          member_a?: string
+          member_b?: string
+        }
+        Relationships: []
+      }
+      event_attendees: {
+        Row: {
+          answered_at: string
+          event_id: string
+          status: Database["public"]["Enums"]["attendee_status"]
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          event_id: string
+          status?: Database["public"]["Enums"]["attendee_status"]
+          user_id: string
+        }
+        Update: {
+          answered_at?: string
+          event_id?: string
+          status?: Database["public"]["Enums"]["attendee_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          attendee_count: number
+          capacity: number | null
+          club_id: string | null
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          host_id: string
+          id: string
+          kind: Database["public"]["Enums"]["event_kind"]
+          location_text: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attendee_count?: number
+          capacity?: number | null
+          club_id?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          host_id: string
+          id?: string
+          kind?: Database["public"]["Enums"]["event_kind"]
+          location_text?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attendee_count?: number
+          capacity?: number | null
+          club_id?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          host_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["event_kind"]
+          location_text?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feature_flags: {
         Row: {
@@ -404,6 +572,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -890,6 +1093,20 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      conversation_inbox: {
+        Args: { p_limit?: number }
+        Returns: {
+          conversation_id: string
+          last_body: string
+          last_message_at: string
+          last_sender_id: string
+          other_display_name: string
+          other_handle: string
+          other_id: string
+          unread_count: number
+        }[]
+      }
+      conversation_with: { Args: { other: string }; Returns: string }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1011,6 +1228,7 @@ export type Database = {
         | "vegetal"
         | "mineral"
         | "defaut"
+      attendee_status: "going" | "maybe" | "declined"
       consent_kind:
         | "terms"
         | "privacy"
@@ -1018,6 +1236,7 @@ export type Database = {
         | "analytics"
         | "marketing_email"
         | "health_related_processing"
+      event_kind: "degustation" | "rencontre" | "visite" | "autre"
       feed_scope: "following" | "discover"
       humidor_event_type: "add" | "smoke" | "gift" | "loss" | "move" | "adjust"
       humidor_reading_source: "manual" | "device"
@@ -1642,6 +1861,7 @@ export const Constants = {
         "mineral",
         "defaut",
       ],
+      attendee_status: ["going", "maybe", "declined"],
       consent_kind: [
         "terms",
         "privacy",
@@ -1650,6 +1870,7 @@ export const Constants = {
         "marketing_email",
         "health_related_processing",
       ],
+      event_kind: ["degustation", "rencontre", "visite", "autre"],
       feed_scope: ["following", "discover"],
       humidor_event_type: ["add", "smoke", "gift", "loss", "move", "adjust"],
       humidor_reading_source: ["manual", "device"],

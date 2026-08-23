@@ -30,6 +30,9 @@ export const SEGMENTS = {
   feed: 'fil',
   members: 'membres',
   notifications: 'notifications',
+  clubs: 'clubs',
+  events: 'evenements',
+  conversations: 'messages',
   venues: 'lieux',
   journal: 'journal',
   shop: 'boutique',
@@ -96,6 +99,20 @@ export const routes = {
   members: () => `/${SEGMENTS.members}`,
   member: (handle: string) => `/${SEGMENTS.members}/${handle}`,
   notifications: () => `/${SEGMENTS.notifications}`,
+
+  /* Un club se lit par son slug et un événement par son identifiant, et la
+     dissymétrie est voulue : le nom d'un club est choisi et durable, le titre
+     d'un événement se corrige la veille. `clubs_slug_key` garantit le premier ;
+     rien ne pourrait garantir le second sans figer un titre. */
+  clubs: () => `/${SEGMENTS.clubs}`,
+  club: (slug: string) => `/${SEGMENTS.clubs}/${slug}`,
+  events: () => `/${SEGMENTS.events}`,
+  event: (id: string) => `/${SEGMENTS.events}/${id}`,
+  /* Une conversation a exactement deux personnes (ADR 0010, D4), donc son
+     adresse est celle de la conversation et jamais celle de l'autre : deux
+     personnes, une paire canonique, une URL. */
+  conversations: () => `/${SEGMENTS.conversations}`,
+  conversation: (id: string) => `/${SEGMENTS.conversations}/${id}`,
 
   journal: () => `/${SEGMENTS.journal}`,
   venues: () => `/${SEGMENTS.venues}`,
