@@ -255,6 +255,20 @@ jobs:
             exit 1
           fi
 
+      # Les 200 lieux du registre DGDDI (PROVENANCE §7). Sur la base principale
+      # et non sur vitola_seed : ce seed exige la 0016, que la base de seed du
+      # référentiel n'applique pas. Ses contrôles d'intégrité vivent dans le
+      # fichier ; l'idempotence se vérifie ici, comme pour le référentiel.
+      - name: Load the venue seed, twice — it must not duplicate
+        run: |
+          (cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed_venues.sql)
+          before=$(psql -tAc "select count(*) from public.venues")
+          (cd supabase/seed && psql -v ON_ERROR_STOP=1 -f seed_venues.sql > /dev/null)
+          after=$(psql -tAc "select count(*) from public.venues")
+          if [ "$before" != "$after" ]; then
+            echo "Le rejeu du seed des lieux a changé le compte : $before -> $after"; exit 1
+          fi
+
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 

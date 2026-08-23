@@ -105,9 +105,12 @@ begin
   select count(*) into n from public.venues where id = v_id;
   if n <> 1 then raise exception 'FAIL: l editor ne voit pas la proposition en attente'; end if;
 
+  -- Le point de recherche des assertions V11/V12 est en Lozère, à plus de
+  -- 100 km de toute commune du seed (PROVENANCE §7) : les comptes exacts de
+  -- venues_nearby() restent vrais que les 200 lieux soient charges ou non.
   update public.venues
      set status = 'published',
-         geo = extensions.st_setsrid(extensions.st_makepoint(2.3522, 48.8566), 4326)::extensions.geography
+         geo = extensions.st_setsrid(extensions.st_makepoint(3.2000, 44.8500), 4326)::extensions.geography
    where id = v_id;
   select count(*) into n from public.venues where id = v_id and status = 'published';
   if n <> 1 then raise exception 'FAIL: l editor n a pas pu publier'; end if;
@@ -281,37 +284,38 @@ end $$;
 do $$
 declare n integer; first_slug text; d1 double precision; d2 double precision;
 begin
-  -- Trois lieux de plus autour du premier (place de l Hotel de Ville, Paris) :
-  -- un publie a ~6 km, un publie SANS geo, un publie a ~60 km (Fontainebleau).
+  -- Trois lieux de plus autour du premier (44.85, 3.20 — Lozère) : un publie
+  -- a ~4,5 km, un publie SANS geo, un publie a ~65 km. Loin des villes du
+  -- seed, pour que les comptes tiennent avec ou sans lui.
   insert into public.venues (type, name, slug, city, status, geo) values
-    ('civette','Civette des Batignolles','civette-batignolles-test','Paris','published',
-     extensions.st_setsrid(extensions.st_makepoint(2.3200, 48.8850), 4326)::extensions.geography),
-    ('lounge','Salon sans adresse','salon-sans-geo-test','Paris','published', null),
-    ('civette','Civette de Fontainebleau','civette-fontainebleau-test','Fontainebleau','published',
-     extensions.st_setsrid(extensions.st_makepoint(2.7016, 48.4047), 4326)::extensions.geography);
+    ('civette','Civette du causse','civette-du-causse-test','Mende','published',
+     extensions.st_setsrid(extensions.st_makepoint(3.2500, 44.8700), 4326)::extensions.geography),
+    ('lounge','Salon sans adresse','salon-sans-geo-test','Mende','published', null),
+    ('civette','Civette des gorges','civette-des-gorges-test','Florac','published',
+     extensions.st_setsrid(extensions.st_makepoint(3.9000, 44.5200), 4326)::extensions.geography);
 
   set local role authenticated;
   perform set_config('request.jwt.claim.sub','cc100000-0000-4000-8000-000000000003',true);
 
   select count(*) into n
-    from public.venues_nearby(48.8566, 2.3522, 25);
+    from public.venues_nearby(44.8500, 3.2000, 25);
   if n <> 2 then
     raise exception 'FAIL: % lieux rendus au lieu de 2 (pending, sans geo et hors rayon exclus)', n;
   end if;
 
   select r.slug, r.distance_m into first_slug, d1
-    from public.venues_nearby(48.8566, 2.3522, 25) r limit 1;
+    from public.venues_nearby(44.8500, 3.2000, 25) r limit 1;
   if first_slug <> 'le-fumoir-d-essai-test' then
     raise exception 'FAIL: le plus proche est %, attendu le-fumoir-d-essai-test', first_slug;
   end if;
 
-  select max(r.distance_m) into d2 from public.venues_nearby(48.8566, 2.3522, 25) r;
+  select max(r.distance_m) into d2 from public.venues_nearby(44.8500, 3.2000, 25) r;
   if d1 > 100 or d2 not between 3000 and 6000 then
     raise exception 'FAIL: distances % et % hors des ordres de grandeur attendus', d1, d2;
   end if;
 
-  -- A 100 km, Fontainebleau entre dans le rayon.
-  select count(*) into n from public.venues_nearby(48.8566, 2.3522, 100);
+  -- A 100 km, la civette des gorges entre dans le rayon.
+  select count(*) into n from public.venues_nearby(44.8500, 3.2000, 100);
   if n <> 3 then raise exception 'FAIL: % lieux a 100 km au lieu de 3', n; end if;
   raise notice 'PASS';
   reset role;
@@ -330,7 +334,7 @@ begin
   reset role;
   set local role authenticated;
   perform set_config('request.jwt.claim.sub','cc100000-0000-4000-8000-000000000003',true);
-  select count(*) into n from public.venues_nearby(48.8566, 2.3522, 25);
+  select count(*) into n from public.venues_nearby(44.8500, 3.2000, 25);
   if n <> 1 then raise exception 'FAIL: un lieu ferme apparait encore dans la recherche'; end if;
   raise notice 'PASS';
   reset role;
@@ -366,7 +370,7 @@ begin
   values ('restaurant','Table d''essai','table-d-essai-test','Nice',
           'aa100000-0000-4000-8000-000000000001')
   returning id into v_pending;
-  select id into v_pub from public.venues where slug = 'civette-batignolles-test';
+  select id into v_pub from public.venues where slug = 'civette-du-causse-test';
 
   set local role authenticated;
   perform set_config('request.jwt.claim.sub','aa100000-0000-4000-8000-000000000001',true);
