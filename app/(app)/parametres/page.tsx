@@ -15,6 +15,7 @@ import {
   type ConsentKind,
 } from '@/lib/settings/model'
 import { getAccount } from '@/lib/settings/queries'
+import { hasMinRole } from '@/lib/settings/roles'
 import { relationConfirmation } from '@/lib/social/confirmations'
 import { listBlockedPeople } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -92,6 +93,17 @@ export default async function SettingsPage({
           {' · '}
           {copy.reputation} : {account.reputation}
         </p>
+        {/* The desk has no global nav entry — the header would pay a role read
+            on every page for a link two accounts can use. It lives here, where
+            the role is already loaded. */}
+        {hasMinRole(account.role, 'moderator') ? (
+          <p className="text-sm">
+            <Link href={routes.moderation()} className="text-ink underline">
+              {m.moderation.desk.settingsLink}
+            </Link>{' '}
+            <span className="text-ink-faint text-xs">{m.moderation.desk.settingsLede}</span>
+          </p>
+        ) : null}
       </div>
 
       <section className="flex flex-col gap-4">

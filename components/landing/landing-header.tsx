@@ -36,7 +36,10 @@ export function LandingHeader() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4">
         <span className="font-display text-ink text-2xl leading-none">{BRAND.name}</span>
 
-        <nav aria-label={m.landing.hero.tocTitle} className="flex items-center gap-5">
+        {/* Its own label: the hero's table of contents already carries
+            `tocTitle`, and two landmarks with the same name are one landmark a
+            screen-reader user cannot tell apart. */}
+        <nav aria-label={m.landing.hero.tocShortcuts} className="flex items-center gap-5">
           <ul className="hidden items-center gap-x-5 text-sm lg:flex">
             {NAV.map((item, index) => (
               <li key={`${item.href}-${index}`}>

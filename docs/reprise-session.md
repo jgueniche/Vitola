@@ -1,39 +1,40 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026 en fin de
-> journée, après la livraison de **P5 puis P6** sur la branche
-> `claude/vitola-v1-p5-lieux-ejti1n`. **P1, P2, P3, P5 et P6 sont fermées** — P5 par l'ADR 0011
-> (200 lieux du registre DGDDI, recherche 25 km en 0,6 ms), P6 par l'ADR 0012 (le journal,
-> Lighthouse SEO = 100 levier ouvert). **P4 reste bloquée** (clés et corpus) et **la newsletter
-> de P6 est différée** (pas de clé Resend, pas de domaine — ADR 0012, D5). La prochaine dans
-> l'ordre du §9 est **P7 (boutique + Stripe)** — vérifier d'abord si des clés Stripe existent
-> dans l'environnement : sans elles, P7 est un P4 de plus, et P8 (modération, RGPD, a11y) est
-> le travail suivant qui n'attend personne.
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026 au soir, après
+> la fusion de la **PR #11** (P5 + P6 → `master`) puis la livraison de **P8** sur la même branche
+> repartie de `master`. **P1, P2, P3, P5, P6 et P8 sont fermées** — P8 par l'ADR 0013 (les portes
+> du modérateur, `/moderation`, critère §9 mesuré : **0 violation axe-core, tous impacts**, sur
+> 24 écrans). L'enjambement de P7 et P4 est **autorisé et acté** : le porteur a dit le 23 août
+> « avance sur ce que tu peux — je mettrai les clés API IA plus tard (**on passera par Gemini**)
+> et les clés Stripe plus tard ». Il reste donc exactement **P7 (boutique + Stripe)** et
+> **P4 (scan de bague, VLM Gemini)**, toutes deux fermées par leurs clés — vérifier
+> l'environnement en début de session : le jour où `STRIPE_*` ou une clé Gemini existe, la phase
+> correspondante s'ouvre, ADR d'abord. Sans clés, il reste du vrai travail : les arbitrages listés
+> sous « À me signaler », les brouillons du journal à publier (geste du porteur), et rien d'autre
+> qui vaille d'être inventé.
 
 ---
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
-`docs/decisions-log.md` (les onze sections — la première est de la session précédente),
-`docs/adr/` : **0004, 0005, 0006, 0007 et 0010 sont Acceptées**, **0008 et 0009 attendent votre
+`docs/decisions-log.md` (la première section est celle de P8, de la dernière session),
+`docs/adr/` : **0004 à 0007 et 0010 à 0013 sont Acceptées**, **0008 et 0009 attendent votre
 arbitrage** et ne doivent pas être appliquées sans lui. Puis `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`. Un `CLAUDE.md` par domaine complète le racine :
-`app/`, `lib/`, `supabase/` — les trois ont été enrichis par la dernière session et leurs nouveaux
-paragraphes sont exactement ceux qu'on regrette de ne pas avoir lus.
+`app/`, `lib/`, `supabase/` — leurs paragraphes récents sont exactement ceux qu'on regrette de ne
+pas avoir lus.
 
-**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. **La PR #10 est
-fusionnée** : tout P3, plus les clubs, l'agenda et la messagerie, sont dans `master`. Vérifie-le
-d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3` doit montrer la
-fusion de #10, et `/api/health` sert le commit réellement déployé. La session précédente est partie
-d'une branche vieille de deux PR sans regarder ; recréer la branche depuis `master` prend trente
-secondes, bâtir dessus sans regarder coûte la session.
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. **Les PR #10 et #11
+sont fusionnées, et P8 est parti en PR #12** depuis la même branche repartie de `master`.
+Vérifie l'état d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3`
+dit si #12 est entrée, et `/api/health` sert le commit réellement déployé. **Si #12 est
+fusionnée, repars de `master`** ; sinon, la branche `claude/vitola-v1-p5-lieux-ejti1n` porte
+l'état le plus avancé et #12 attend sa CI ou son arbitrage.
 
-Le code du dépôt et l'état de la base concordent : **quinze migrations**, toutes dans
-`supabase/migrations/` **et** appliquées sur le projet. Le carnet n'en a demandé aucune — la 0003
-avait tout prévu, ce qui est la meilleure chose qu'on puisse dire d'une ADR écrite avant le SQL. La
-cave en a demandé une, la 0008, et ses six empreintes de schéma ont été comparées entre le fichier
-et le projet plutôt que supposées égales. La 0009 n'était prévue nulle part : elle répare un
-garde-fou qui, depuis la 0002, interdisait à **tout** membre de modifier son propre profil.
+Le code du dépôt et l'état de la base concordent : **dix-huit migrations**, toutes dans
+`supabase/migrations/` **et** appliquées sur le projet — la 0018 (les portes du modérateur) est
+enregistrée sous la version `20260823174500`. `lib/supabase/database.types.ts` est régénéré et le
+contrôle de dérive passe.
 
 Et cette concordance n'est plus une promesse : `tooling/scripts/check-types-drift.ts` compare, à
 chaque CI, l'inventaire des objets exposés à `lib/supabase/database.types.ts`, **dans les deux
@@ -53,12 +54,15 @@ pardonné.
 
 ## OBJECTIF : AMENER LE SITE À SA VERSION DÉFINITIVE
 
-**La v1 du brief, phases P4 à P8 comprises** — P1, P2 et P3 sont fermées, et les clubs, l'agenda et
-la messagerie du §5.6 avec elles. C'est plusieurs sessions ; l'ordre est donné plus bas. **P4 est
-bloquée pour des raisons qui ne sont pas contournables par du code** ; commence donc par **P5**, et
-par son ADR.
-Il n'est pas négociable sans me le dire, parce que chaque phase ouvre la suivante et qu'une phase
-qu'on quitte avant son critère de sortie est une dette qu'on ne retrouve qu'en production.
+**La v1 du brief** — il ne reste que **P7 (boutique + Stripe)** et **P4 (scan de bague)**, toutes
+deux fermées par leurs clés, et les arbitrages du porteur. **Commence par vérifier les clés** :
+`env | grep -icE "stripe"` et l'équivalent Gemini (`GEMINI_API_KEY`, `GOOGLE_API_KEY`…). Une clé
+présente ouvre sa phase, **ADR d'abord** — pour P4, l'ADR de pipeline doit être écrite pour
+**Gemini** (le §6 du brief disait Claude ; le porteur a tranché Gemini le 23 août, et le choix du
+modèle change le format des sorties, le coût par scan et le rate limiting). Sans clés, ne
+construis pas « la moitié sans clé » d'une phase de ta propre initiative : un panier qui ne se
+vide jamais et un écran de scan qui ne scanne pas sont des promesses à l'écran, et la décision de
+les montrer appartient au porteur.
 
 **Le rythme attendu : enchaîne.** Ne t'arrête pas au premier item livré pour me demander la suite.
 Prends l'item suivant, livre-le en entier — écrans compris, parcourus, nettoyés derrière —, puis le
@@ -97,11 +101,14 @@ le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le m
 savoir ce qui tourne. Chaque branche poussée reçoit une préversion Vercel, protégée par
 l'authentification Vercel.
 
-PR #1 à #10 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la #9 a porté la
+PR #1 à #11 fusionnées. La #7 a porté le carnet du fumeur (P2, première moitié) ; la #9 a porté la
 cave, les statistiques et tout le reste de P1 — la cave **ferme le critère de sortie de P2**, le
-reste **ferme P1**. La #10 a porté **tout P3** — le fil, les profils publics, les notifications —
-**plus les clubs, l'agenda et la messagerie**, que le §5.6 et F7 promettent en v1 et que le §9 ne
-bornait pas à P3. Elle referme aussi les trois dettes que P3 attendait.
+reste **ferme P1**. La #10 a porté **tout P3** plus les clubs, l'agenda et la messagerie. La #11
+a porté **P5 (les lieux) et P6 (le journal)**. **P8 part en PR #12** (mêmes gestes : CI verte,
+squash) : ADR 0013, migration 0018 (appliquée en base), `/moderation`, le chemin de contestation,
+l'audit axe-core à zéro, le manifest PWA — validés par `pnpm check`, `pnpm build`, les 56 e2e,
+les 22 assertions du parcours de modération et l'audit. `git log --oneline origin/master -3` dit
+si elle est entrée ; si oui, repars de `master`, sinon la branche assignée porte tout.
 
 ### Ce qui marche, vérifié en HTTP réel ou en navigateur
 
@@ -211,10 +218,11 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0015` | `conversation_inbox` | `supabase/migrations/0015_conversation_inbox.sql` |
 | `0016` | `lieux` | `supabase/migrations/0016_lieux.sql` |
 | `0017` | `editorial` | `supabase/migrations/0017_editorial.sql` |
+| `0018` | `moderation` | `supabase/migrations/0018_moderation.sql` |
 
-**Cinq sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009`, `0015`, `0016` et `0017` : `20260822222420`, `20260822232400`, `20260823083729`,
-`20260823103622` et `20260823115404`. C'est l'outil
+**Six sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015`, `0016`, `0017` et `0018` : `20260822222420`, `20260822232400`, `20260823083729`,
+`20260823103622`, `20260823115404` et `20260823174500`. C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
@@ -231,25 +239,25 @@ création et `extensions.geography` ne résout pas.
 
 ```
 ref.manufacturers          30      public.profiles             3
-ref.brands                114      public.reviews              2  ← pas de moi
+ref.brands                114      public.reviews              4  ← pas de moi
 ref.lines                   0  ←   public.review_shares        0
 ref.vitolas                51      public.review_thirds        0
 ref.cigars                940      public.comments             1  ← pas de moi
   dont published          940      public.aroma_taxonomy      87
   avec vitole              78        dont familles            11
   avec prix               900      public.consents             0
-  avec force / cape       123      public.audit_log            6
+  avec force / cape       123      public.audit_log           19
   verified_by non nul       0  ←   public.feature_flags        5
 ref.box_codes              18      mod.reports                 0
 ref.cigar_images            0      mod.moderation_actions      0
-ref.cigar_revisions         0      public.cigar_stats     2 lignes (vue matérialisée)
-                                   public.humidors             0
-                                   public.humidor_items        0
-                                   public.humidor_events       0
-                                   public.humidor_readings     0
-                                   public.follows              0  ← P3
+ref.cigar_revisions         0      public.cigar_stats     3 lignes (vue matérialisée)
+                                   public.humidors             1  ← « LA cave », test_deux
+                                   public.humidor_items        ?  ← vit avec la cave du porteur
+                                   public.humidor_events       ?
+                                   public.humidor_readings     ?
+                                   public.follows              1  ← jeremy → test_un, à la main
                                    public.blocks               0
-                                   public.posts                0
+                                   public.posts                1  ← test_deux, « Publier au fil »
                                    public.post_reactions       0
                                    public.post_comments        0
                                    public.notifications        0
@@ -265,33 +273,31 @@ ref.cigar_revisions         0      public.cigar_stats     2 lignes (vue matéria
                                    public.article_links        1  ← le guide gated → une fiche
 ```
 
-**`public.reviews` contient DEUX lignes, et aucune n'est de moi.** Deux entrées publiques de
-`test_deux` : `macanudo-inspirado-white-toro` notée 90 le 23 août à 06 h 17, et
-`cao-pilon-robusto-extra` notée 95 le même jour à 08 h 16. Aucun de mes parcours ne touche ces
-fiches ni n'écrit ces textes, et tous effacent ce qu'ils écrivent. Je les ai laissées, comme la
-ligne pré-existante de `public.comments`, et c'est pour cela que `cigar_stats` a deux lignes.
-**À me dire si elles peuvent partir.**
+**Le site est utilisé pour de bon, et rien de ce qui suit n'est d'un parcours.** `test_deux`
+porte **quatre entrées de carnet publiques** (`macanudo-inspirado-white-toro` à 06 h 17,
+`cao-pilon-robusto-extra` à 08 h 16, et **deux** sur `macanudo-inspirado-black-short-robusto` à
+12 h 01 et 12 h 02 — probablement un double envoi, mais c'est à son auteur d'en juger), **une
+cave** (« LA cave », 08 h 18 — d'où le `?` sur ses tables filles : elles vivent, ne les compte
+pas pour les figer), et **une publication au fil** (`review_share`, 12 h 09). `jeremy` est abonné
+à `test_un`. La ligne pré-existante de `public.comments` est toujours là. **Aucune de ces lignes
+ne se touche ni ne s'efface** — la portée `private` protège exactement cela, et une cave est à
+son propriétaire. `cigar_stats` a trois lignes parce que trois fiches ont des entrées publiques.
 
-Les treize tables sociales sont à zéro — **sauf `public.follows`, qui porte UNE ligne qui n'est
-pas d'un parcours** : `jeremy` s'est abonné à `test_un` le 23 août à 10 h 15, à la main, depuis le
-site. Elle est laissée en place, comme les deux entrées de carnet de `test_deux`. Les 200 lignes
-de `public.venues` sont le seed officiel (source `douane-fr-2018`), pas un reste de parcours :
-un reste s'y reconnaît à `source is null`. L'état final a été vérifié table par table plutôt que
-supposé. Une exception à connaître —
-**`public.conversations` n'a aucun droit `DELETE`, pour personne** (la rétention est la question
-ouverte de l'ADR 0010), donc une conversation vide survit à un parcours et se retire depuis un
-contexte privilégié. Celle du dernier parcours a été retirée ainsi.
+Les 200 lignes de `public.venues` sont le seed officiel (source `douane-fr-2018`), pas un reste
+de parcours : un reste s'y reconnaît à `source is null`. **`mod.reports` et
+`mod.moderation_actions` sont à zéro** : les dossiers du parcours de modération ont été retirés
+en contexte privilégié (aucun DELETE client n'existe, par construction) et les comptes vérifiés à
+zéro. Une exception connue de longue date — **`public.conversations` n'a aucun droit `DELETE`,
+pour personne** (rétention : question ouverte de l'ADR 0010).
 
 Les entrées écrites en parcourant sont effacées derrière la vérification, comme le demande
 « Nettoie derrière une vérification » plus bas. `ref.lines` à zéro est une **décision de v1**,
 écrite dans `CLAUDE.md` avec son déclencheur — ne la rouvre pas sans la lire. `verified_by` à zéro
 est une dette de relecture, voir « À me signaler ».
 
-`public.comments` contient **une ligne** qui n'a pas été écrite par une session Claude : elle est
-antérieure et a été laissée en place. Ne l'efface pas sans demander.
-
-`audit_log` contient quatre lignes, écrites en vérifiant les endpoints. Le journal est en ajout
-seul, personne n'a de `DELETE` dessus : c'est voulu.
+`audit_log` contient dix-neuf lignes — les vérifications d'endpoints des sessions, plus l'usage
+réel. Le journal est en ajout seul, personne n'a de `DELETE` dessus : c'est voulu, il ne
+s'efface jamais.
 
 ### Colonnes, table par table
 
@@ -573,6 +579,19 @@ le même jour : elle exige maintenant que la branche existe **et** que l'avertis
 | `public.conversation_with(uuid)` | **non — INVOKER** | ✗ | ✓ | ✓ |
 | `public.conversation_inbox(int)` | **non — INVOKER** | ✗ | ✓ | ✓ |
 | `public.venues_nearby(lat,lng,rayon,types[],max)` | **non — INVOKER** | ✓ | ✓ | ✓ |
+| `public.mod_queue(text,int)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
+| `public.mod_report(uuid)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
+| `public.mod_acknowledge(uuid)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
+| `public.mod_decide(uuid,text,text,text,text)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
+
+**Les quatre `mod_*` (0018) sont l'inverse assumé : `DEFINER`, parce que `mod` est injoignable
+autrement** — l'exception de `file_report()`, appliquée au troisième acteur qui devait entrer
+dans le schéma. La garde est DANS chaque fonction (`has_min_role('moderator')`, errcode 42501),
+le grant à `authenticated` ne fait que fermer la porte aux rôles qui n'ont pas à frapper — ni
+`anon` ni `service_role` ne l'ont. Aucune ne rend `reporter_id`. `mod_decide()` refuse : une
+décision sans note, un verbe sur un rejet, `warn`/`suspend`/`delete` (sans bras, ADR 0013 D4),
+`hide`/`restore` hors des quatre surfaces à colonnes `hidden_*`, et tout dossier déjà tranché —
+la contestation est un **nouveau** signalement.
 
 **`feed_page()`, `post_card()`, `conversation_with()` et `conversation_inbox()` sont en droits
 d'appelant, et l'auto-contrôle de leur migration échoue si elles passent un jour en `DEFINER`.** C'est la décision D1 de l'ADR 0006 réappliquée : un
@@ -782,13 +801,16 @@ enregistrée à 22 h de Paris. Le détail est dans `docs/decisions-log.md`.
 **Ce qui reste ouvert de l'ADR 0010** : la rétention des messages. `public.conversations` n'a donc
 aucun droit `DELETE`, pour personne — ouvrir la suppression aurait tranché la question par accident.
 
-### 7. P4 — le scan de bague. **BLOQUÉE, et c'est à toi de le dire**
+### 7. P4 — le scan de bague. **BLOQUÉE par ses clés, et le VLM sera Gemini**
 
-C'est la phase suivante dans l'ordre du §9, et elle **ne peut pas être livrée depuis une session
-distante en l'état**. Deux raisons indépendantes, aucune contournable par du code :
+Elle **ne peut pas être livrée depuis une session distante en l'état**. Deux raisons
+indépendantes, aucune contournable par du code :
 
-1. **Aucune clé.** Le §6 demande un VLM (Claude vision) et un endpoint d'embeddings image
-   (SigLIP/CLIP via Replicate ou HF), plus Upstash pour le quota. Ni `ANTHROPIC_API_KEY`, ni
+1. **Aucune clé — et le fournisseur a changé.** Le §6 demandait un VLM « Claude vision » ; **le
+   porteur a tranché le 23 août : on passera par Gemini**, clés fournies plus tard. L'ADR de
+   pipeline de P4 doit donc être écrite pour Gemini (format des sorties structurées, coût par
+   scan, rate limiting, et la question embeddings — Gemini a une API d'embeddings multimodaux qui
+   peut remplacer SigLIP/Replicate, à arbitrer dans l'ADR). Ni clé Gemini, ni
    `REPLICATE_API_TOKEN`, ni `UPSTASH_*` ne sont dans l'environnement. Sans le VLM et sans les
    embeddings, un scan ne reconnaît rien : l'écran serait un appareil photo qui répond « je ne sais
    pas ».
@@ -864,29 +886,56 @@ une requête — et `posts.venue_id` non plus, pour la même raison.
 > données personnelles au service de rien — le flux RSS est l'abonnement de v1.
 > **Deux brouillons d'amorçage** signés `jeremy` attendent sa relecture au composeur.
 
-### 10. P7 — la boutique et Stripe. **À vérifier avant de commencer : les clés**
+### 10. P7 — la boutique et Stripe. **Les clés viendront « plus tard » — c'est dit, pas supposé**
 
 Le §9 lui donne « commande test bout en bout + webhook idempotent ». Le §3 prévoit Stripe
-Checkout (ADR 0003, encore Proposée). **Vérifié en fin de session : aucune variable `STRIPE_*`
-dans l'environnement** (ni Resend, ni Anthropic, ni Replicate, ni Upstash — seul Supabase a ses
-clés). Sans clés, P7 est un P4 de plus (l'écran d'un paiement qui ne peut pas s'exercer), et il faut le dire plutôt que de
-livrer un panier qui ne se vide jamais. Ce qui reste faisable sans clés : le schéma `shop` (le
-`CHECK` anti-tabac du §5.8, le trigger de refus lexical — `lib/compliance/tobacco-terms.ts`
-existe pour lui), le catalogue et le panier. Le critère de sortie, lui, exige Stripe.
+Checkout (ADR 0003, encore Proposée — elle attend l'arbitrage avec 0008 et 0009). **Le porteur a
+confirmé le 23 août que les clés Stripe arriveront plus tard** ; d'ici là, aucune variable
+`STRIPE_*` dans l'environnement. Sans clés, P7 est l'écran d'un paiement qui ne peut pas
+s'exercer, et la session P8 a délibérément choisi de **ne pas** livrer sa moitié sans clé — un
+panier qui ne se vide jamais est une promesse à l'écran, et la décision de le montrer appartient
+au porteur. Ce qui restera vrai le jour des clés : le schéma `shop` (le `CHECK` anti-tabac du
+§5.8, le trigger de refus lexical — `lib/compliance/tobacco-terms.ts` existe pour lui, et
+`supabase/CLAUDE.md` documente sa subtilité des composés d'accessoires), le catalogue, le panier,
+puis Checkout et son webhook idempotent. Il manque aussi **un catalogue réel** : quels
+accessoires, quels prix, quel stock — une décision commerciale qu'aucune session ne peut inventer.
 
-### 11. P8 — modération, RGPD, i18n, PWA, perf, a11y. **Le travail qui n'attend personne**
+### ~~11. P8 — modération, RGPD, i18n, PWA, perf, a11y~~ — **livrée le 23 août 2026, ADR 0013**
 
-Critère : « audit axe-core 0 violation critique ». C'est aussi la phase du back-office de
-modération — la Q12 y prend sa réponse d'écran — et des dettes listées sous « À me signaler »
-qui attendent l'ouverture.
+> Critère du §9 mesuré et dépassé : **0 violation axe-core, tous impacts confondus**, sur
+> 24 écrans en trois rôles (`tooling/audit/a11y.ts`, rejouable). La 0018 pose les quatre portes
+> `SECURITY DEFINER` vers `mod` (`mod_queue`, `mod_report`, `mod_acknowledge`, `mod_decide`),
+> gardées par `has_min_role('moderator')` — le schéma reste non exposé, aucun rôle client n'y
+> gagne de droit de table, l'auto-contrôle casse si cela change. `/moderation` est la réponse
+> d'écran de Q12 : file `open` du plus ancien au plus récent (l'ordre du délai de 72 h), dossier,
+> décision motivée obligatoire, acte (`hide`/`restore`) dans la même transaction que sa trace.
+> **La contestation est un nouveau signalement** : l'auteur d'un commentaire masqué lit le motif
+> et a « Contester ce retrait » — trou trouvé par le parcours, pas par l'audit. `warn`, `suspend`
+> et `delete` restent refusés avec leur raison (ADR 0013, D4). Le manifest PWA et l'icône générée
+> sont exemptés du portail dans le `matcher` ; **pas de service worker**, décision documentée.
+> RGPD : rien de neuf à faire — la 0018 n'ajoute aucune colonne de données personnelles, et
+> `moderation_records_for_subject()` (0006) couvrait déjà l'export. i18n : vérification, pas de
+> sélecteur. Perf §8 : fiche à LCP 0,7 s / CLS 0 / TBT 0 ms en desktop local ; 93/100 en mobile
+> émulé, dominé par le TTFB conteneur→eu-west-3 que la production ne paiera pas.
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
-- **Vous avez utilisé le site pendant la session, et rien de ce que vous avez écrit n'a été
-  touché** : un abonnement `jeremy` → `test_un` (10 h 15), deux entrées de carnet de plus chez
-  `test_deux` (les nouvelles fiches Macanudo, vers 12 h), et une publication « Publier au fil »
-  de `test_deux` sur l'une d'elles. `public.reviews` compte donc **4** lignes et `public.posts`
-  **1**, aucune des cinq n'étant d'un parcours.
+- **Vous avez utilisé le site, et rien de ce que vous avez écrit n'a été touché** : un abonnement
+  `jeremy` → `test_un`, quatre entrées de carnet publiques de `test_deux`, sa cave « LA cave »,
+  et une publication « Publier au fil ». Le détail est sous « Volumes réels ». Un point mérite
+  votre œil : **les deux entrées de 12 h 01 et 12 h 02 portent la même fiche**
+  (`macanudo-inspirado-black-short-robusto`) — probablement un double envoi, mais l'effacer est
+  le geste de son auteur, pas le mien.
+- **Personne n'est désigné pour relever la file de modération** — la question ouverte de
+  l'ADR 0013, et la seule chose qui manque au dispositif DSA. L'écran existe (`/moderation`),
+  le délai de 72 h est publié, et le seul compte qui passe la garde est `jeremy` (`admin`).
+  Nommer quelqu'un — et décider si 72 h est tenable à un seul — est un arbitrage du porteur.
+  Trois verbes restent volontairement sans bras (`warn`, `suspend`, `delete` — ADR 0013, D4),
+  chacun avec son déclencheur de réarmement.
+- **Les pastilles de l'accueil ont légèrement changé d'aspect** (a11y) : leur texte est passé de
+  la couleur du ton (vert/ambre, 11 px, contraste AA raté sur le fond sombre) à l'encre, l'anneau
+  gardant le ton. L'accueil est votre vitrine — à me dire si le compromis visuel ne vous va pas,
+  la contrainte à tenir étant le contraste, pas cette solution-là.
 - **Les deux brouillons d'amorçage du journal sont à vous** : `vitole-cepo-module…` (public,
   lexique) et `la-cape-du-claro-a-l-oscuro` (gated, lié à une fiche), signés de votre compte,
   relus par personne. **Les publier est votre geste** — depuis `/journal/ecrire` — et l'ADR 0012
@@ -911,14 +960,6 @@ qui attendent l'ouverture.
   l'ADR 0011) : MapTiler (clé, sous-traitant), Protomaps auto-hébergé (des Go à héberger), ou un
   service gratuit sans contrat. Chacun voit l'adresse IP de chaque visiteur de la carte. La
   recherche par distance, elle, est livrée et n'en dépend pas.
-- **Deux entrées de carnet publiques de `test_deux` sont en base, et elles ne sont pas de moi.**
-  Une du 23 août à 06 h 17 (90/100, `macanudo-inspirado-white-toro`), une du 23 août à 08 h 16
-  (95/100, `cao-pilon-robusto-extra`). Aucun parcours ne touche ces deux fiches, et les miens
-  effacent ce qu'ils écrivent — l'état final est vérifié à zéro sur les treize tables sociales.
-  Ce sont donc des essais faits à la main depuis le site, probablement les vôtres. **Je ne les
-  efface pas** : effacer l'entrée de carnet de quelqu'un sans le lui demander est exactement ce que
-  la portée `private` protège. Dites-moi si elles doivent partir.
-
 - **Un membre ne pouvait pas modifier son profil, et personne ne l'avait vu.** Réparé par la 0009 ;
   le détail est dans « Fonctions appelables ». Ce qu'il faut en retenir n'est pas le correctif, c'est
   la façon dont il a été trouvé : en ouvrant un écran. Le dépôt avait `pnpm check` vert, 247 tests
@@ -1050,7 +1091,16 @@ arbitrage et ne doivent pas être appliquées sans lui.**
   `pnpm start --port 3100`, puis pointer Playwright sur `127.0.0.1`. `curl` sort normalement.
 - **Playwright** : lance avec `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium`. Les scripts de
   parcours doivent vivre **dans le dépôt** (`test-results/` est gitignoré) pour que Node résolve
-  `@playwright/test`.
+  `@playwright/test`. **Et cela vaut aussi pour `pnpm test:e2e`** : ce conteneur porte le build
+  Chromium 1194 quand `@playwright/test` 1.62 attend 1234 — sans la variable, les 56 e2e échouent
+  en 3 ms chacun sur « Executable doesn't exist ». Ne lance jamais `playwright install`.
+- **Les e2e et le serveur de vérification veulent le même port 3100.** Un `pnpm start` resté
+  ouvert fait échouer toute la suite e2e instantanément (`reuseExistingServer` réutilise TON
+  serveur — avec tes variables, pas les siennes). `fuser -k 3100/tcp` avant `pnpm test:e2e`.
+- **Lighthouse tourne ici par `npx lighthouse@12`** avec `CHROME_PATH=/opt/pw-browsers/chromium`
+  et `--chrome-flags="--headless=new --no-sandbox"` ; une page du portail s'audite en passant le
+  cookie via `--extra-headers` (le cookie s'obtient en jouant le portail dans Playwright et en
+  lisant `ctx.cookies()`).
 - **Les formulaires sont câblés par l'hydratation.** Cliquer « Publier » avant que React n'ait
   attaché l'action ne soumet **rien**, en silence. `networkidle` **ne suffit pas** : il a fallu y
   ajouter ~800 ms d'attente avant chaque interaction pour que les parcours du carnet soient stables.
@@ -1369,6 +1419,23 @@ onglet `jeremy` (seul compte `editor`). Les deux brouillons d'amorçage sont en 
 
 ---
 
+## LES URL À OUVRIR POUR RECETTER LA MODÉRATION (livrée le 23 août au soir)
+
+Trois onglets : `test_deux` (écrit et conteste), `test_un` (signale), `jeremy` (`admin`, donc
+modérateur — il n'existe aucun compte `moderator` à proprement parler).
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| En `test_un` : `/moderation` | « Réservé aux modérateurs », et pourquoi — jamais une page blanche. |
+| En `jeremy` : `/parametres` | Sous l'en-tête, « Relever la file de modération ». C'est la seule entrée — pas de lien global. |
+| `/moderation` | La file « À traiter », du plus ancien au plus récent, chaque dossier daté (« il y a N h ») contre le délai publié ; « Délai dépassé » en gras au-delà de 72 h. Onglet « Tranchés » à côté. Vide : l'explication, pas un écran nu. |
+| ⟶ un dossier | Le motif, les précisions du signalant (**jamais son identité**), le contenu visé cité avec « Voir en situation », « Prendre le dossier », puis le formulaire « Trancher ». |
+| ⟶ trancher « Retenu » + « Masquer » + motif | `window.confirm` (« ne se modifie plus »), puis retour file : « Dossier tranché. » Le commentaire disparaît pour la salle, **reste visible de son auteur**, barré, avec le motif dessous et « Contester ce retrait ». |
+| ⟶ contester depuis le commentaire barré | Le dialogue de signalement, un nouveau dossier dans la file, « Actuellement masqué » sur sa page ; « Retenu » + « Rétablir » remet les trois colonnes à null et le commentaire revient. |
+| ⟶ rouvrir le premier dossier | Sa motivation, sa date — **aucun formulaire** : un dossier tranché ne se retranche pas. |
+
+---
+
 ## REJOUER TOUS LES PARCOURS
 
 Chacun se rejoue d'une commande, contre la vraie base, et **nettoie derrière lui** :
@@ -1382,11 +1449,18 @@ pnpm tsx tooling/parcours/contributions.ts   # 26 assertions
 pnpm tsx tooling/parcours/social.ts          # 66 assertions
 pnpm tsx tooling/parcours/dettes.ts          # 23 assertions
 pnpm tsx tooling/parcours/groupes.ts         # 37 assertions
+pnpm tsx tooling/parcours/lieux.ts           # 36 assertions
+pnpm tsx tooling/parcours/journal.ts         # 24 assertions
+pnpm tsx tooling/parcours/moderation.ts      # 22 assertions
+pnpm tsx tooling/audit/a11y.ts               # 24 écrans, 0 violation attendu (critère P8)
 ```
 
 Le mot de passe se surcharge par `PARCOURS_PASSWORD`. Ces parcours **écrivent dans la vraie base** :
 caves, lots, événements, propositions de révision. Ils effacent ce qu'ils écrivent, et l'état final
-a été vérifié à zéro. `audit_log` ne s'efface jamais.
+a été vérifié à zéro. `audit_log` ne s'efface jamais. Le parcours de modération laisse ses
+dossiers dans `mod.*` (aucun DELETE client, par construction) : leur retrait est un geste
+privilégié en fin de session, à compter — et **un `WITH` qui supprime puis compte dans la même
+instruction compte l'instantané d'avant** ; les comptes se font dans une requête séparée.
 
 Les pièges d'écriture de ces parcours sont dans « PIÈGES DE CET ENVIRONNEMENT » — lis-les **avant**
 d'en écrire un huitième, ils coûtent une heure chacun la première fois. Le dernier en date :

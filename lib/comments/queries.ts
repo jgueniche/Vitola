@@ -24,6 +24,7 @@ export type CommentRow = {
   created_at: string
   updated_at: string
   hidden_at: string | null
+  hidden_reason: string | null
   author: CommentAuthor | null
 }
 
@@ -47,7 +48,7 @@ export async function listComments(cigarId: string): Promise<CommentRow[]> {
 
   const { data, error } = await supabase
     .from('comments')
-    .select('id, body, author_id, created_at, updated_at, hidden_at')
+    .select('id, body, author_id, created_at, updated_at, hidden_at, hidden_reason')
     .eq('cigar_id', cigarId)
     .order('created_at', { ascending: true })
     .limit(MAX_COMMENTS)

@@ -38,7 +38,9 @@ export default async function JournalPage() {
         <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="text-sm">
-          <a href={routes.journalFeed()} className="text-accent hover:underline">
+          {/* Always underlined: a link in running text told apart by colour
+              alone is invisible to anyone who does not see that colour. */}
+          <a href={routes.journalFeed()} className="text-accent underline underline-offset-4">
             {copy.rss}
           </a>
         </p>
@@ -86,7 +88,7 @@ export default async function JournalPage() {
           {copy.gatedTeaser}{' '}
           <Link
             href={`${routes.ageGate()}?suite=${encodeURIComponent(routes.journal())}`}
-            className="text-accent hover:underline"
+            className="text-accent underline underline-offset-4"
           >
             {copy.gatedTeaserLink}
           </Link>

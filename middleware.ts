@@ -99,7 +99,13 @@ export const config = {
      * simply never rendered — measured, a 307 to /majorite — so every shared
      * link showed nothing at all. Ungated **and** per-sheet would have been the
      * §2 problem; ungated and neutral is the point of building it that way.
+     *
+     * `manifest.webmanifest` and `icon` (P8) are the same family: fetched by
+     * the browser itself, before and regardless of any gate, and both neutral
+     * by construction — the manifest names the site and its tagline, the icon
+     * is an initial on the house ground. Gated, installing the app would 307
+     * into the age gate and silently fail.
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|api/health|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|manifest.webmanifest|icon|api/health|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?)$).*)',
   ],
 }

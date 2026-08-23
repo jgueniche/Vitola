@@ -106,10 +106,13 @@ export function Row({ children, className }: { children: ReactNode; className?: 
   )
 }
 
+/* The word carries the meaning, the ring carries the tone: 11px of
+   `text-positive` on a raised surface fails AA contrast in the default dark
+   theme, and a pill whose meaning lived in its colour would fail 1.4.1 anyway. */
 const PILL_TONE = {
   neutral: 'text-ink-muted',
-  positive: 'text-positive ring-positive/40 ring-1 ring-inset',
-  caution: 'text-caution ring-caution/40 ring-1 ring-inset',
+  positive: 'text-ink ring-positive/40 ring-1 ring-inset',
+  caution: 'text-ink ring-caution/40 ring-1 ring-inset',
 } as const
 
 export function Pill({

@@ -25,8 +25,10 @@ import { cn } from '@/lib/utils'
  * usable before hydration — and it is why `app/CLAUDE.md` puts interface state
  * in the URL rather than in a store.
  *
- * `aria-pressed` carries the on/off state, because a link that acts as a toggle
- * does not announce itself as one.
+ * `aria-current` carries the on state. The first version said `aria-pressed`,
+ * which only exists on buttons — axe counts it critical on a link, and rightly:
+ * an unsupported attribute is silence, not state. "Current" is also the truer
+ * word for a filter the URL already holds.
  */
 
 function href(facets: Facets): string {
@@ -62,7 +64,7 @@ function FacetLink({
   return (
     <Link
       href={target}
-      aria-pressed={active}
+      aria-current={active ? 'true' : undefined}
       className={cn(
         'border-rule rounded-[3px] border px-3 py-1.5 text-sm transition-colors',
         active

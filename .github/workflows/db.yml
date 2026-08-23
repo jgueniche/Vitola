@@ -286,6 +286,23 @@ jobs:
             exit 1
           fi
 
+      # 0018 pose les portes du modérateur (ADR 0013). Ce qui ne se voit qu'à
+      # l'exécution : la garde has_min_role('moderator') dans chaque porte, la
+      # décision qui emporte son acte dans la même transaction, et le refus des
+      # verbes sans bras.
+      - name: Apply 0018 — la modération
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0018_moderation.sql
+
+      - name: Modération — qui relève la file, et ce qu'une décision emporte
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/13_moderation_rls.sql 2>&1 \
+            | tee "$RUNNER_TEMP/moderation.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/moderation.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 

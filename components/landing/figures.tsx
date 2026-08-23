@@ -786,7 +786,9 @@ export function PlansFigure() {
         <div className="flex items-baseline justify-between gap-4 pt-2 pb-3.5">
           <span className="eyebrow text-ink">{f.paidName}</span>
           <span className="text-ink font-mono text-lg">
-            {P.price} {f.currency} <span className="text-ink-faint text-[13px]">{f.perMonth}</span>
+            {/* ink-muted, not ink-faint: 13px of faint fails AA on the dark
+                ground, and a price qualifier is information, not decoration. */}
+            {P.price} {f.currency} <span className="text-ink-muted text-[13px]">{f.perMonth}</span>
           </span>
         </div>
         <span aria-hidden="true" className="brass-rule -mx-8 h-0.5" />

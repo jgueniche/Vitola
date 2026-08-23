@@ -19,6 +19,7 @@ export type CommentItemProps = {
   createdAt: string
   updatedAt: string
   hidden: boolean
+  hiddenReason: string | null
   isAuthor: boolean
   signedIn: boolean
   slug: string
@@ -34,9 +35,13 @@ export type CommentItemProps = {
  * allowed to be a plain boolean computed on the server rather than a check.
  *
  * A hidden comment reaches this component only for its own author, through
- * `comments_select_own`. It is shown struck through and without controls: the
- * DSA requires a decision to be contestable, and one does not contest what one
- * can no longer see — but one does not edit around it either.
+ * `comments_select_own` — plus the moderators, whose SELECT policy sees
+ * everything. It is shown struck through, with its reason, and without edit or
+ * delete: one does not edit around a moderation decision. What the author DOES
+ * get is a contest path — the DSA requires a decision to be contestable, and a
+ * struck line with no recourse is not that. Contesting files a new report
+ * (ADR 0013): the moderation walkthrough shipped without this button first,
+ * and proved the gap by getting stuck exactly here.
  */
 export function CommentItem(props: CommentItemProps) {
   const [editing, setEditing] = useState(false)
@@ -108,6 +113,25 @@ export function CommentItem(props: CommentItemProps) {
           {props.body}
         </p>
       )}
+
+      {props.hidden ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-ink-faint text-xs">
+            {m.comments.hiddenByModeration.replace(
+              '{reason}',
+              props.hiddenReason ?? m.comments.hiddenNoReason,
+            )}
+          </p>
+          {props.isAuthor ? (
+            <ReportDialog
+              kind="comment"
+              id={props.id}
+              slaHours={props.slaHours}
+              label={m.moderation.report.triggerContest}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       {!editing && !props.hidden ? (
         <div className="flex flex-wrap items-center gap-2">

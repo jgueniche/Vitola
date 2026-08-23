@@ -241,6 +241,47 @@ du tout-interdit à exactement la frontière Q13. Il reste fermé tant que Q1 n'
 Deux **brouillons d'amorçage** signés du compte du porteur attendent sa relecture — les publier
 est son geste (question ouverte de l'ADR 0012).
 
+## P8 — modération, a11y, PWA, perf, livré le 23 août 2026
+
+**Hors de l'ordre du §9, et dit** : P7 attend ses clés Stripe et P4 ses clés IA (Gemini) — la
+commande de session du 23 août (« avance sur ce que tu peux ») autorise l'enjambement. ADR 0013
+avant le SQL, migration `0018` (les quatre portes du modérateur), `/moderation`, l'audit axe-core,
+le manifest PWA. Critère de sortie mesuré : **0 violation axe-core, tous impacts confondus**, sur
+24 écrans en trois rôles — le §9 ne demandait que zéro critique.
+
+**Cinq règles qui ne se contournent pas, héritées de l'ADR 0013 :**
+
+1. **`mod` reste non exposé, et les portes sont tout le chemin.** Quatre fonctions
+   `SECURITY DEFINER` gardées par `has_min_role('moderator')` à l'intérieur ; aucun rôle client
+   n'a de droit de table dans le schéma, et l'auto-contrôle de 0018 casse si cela change.
+2. **La décision emporte sa trace et son acte dans la même transaction.** Un contenu masqué sans
+   trace motivée est l'état que le DSA interdit ; `mod_decide()` rend les trois inséparables.
+3. **Un dossier tranché ne se retranche pas : la contestation est un nouveau signalement**, qui
+   peut porter `restore`. L'auteur d'un commentaire masqué lit le motif sous la ligne barrée et a
+   un bouton « Contester ce retrait » — le parcours a prouvé le trou avant que le bouton n'existe.
+4. **Aucune porte ne rend `reporter_id`.** Un signalement se juge sur ce qu'il vise ; les
+   décisions, elles, sont signées.
+5. **`warn`, `suspend` et `delete` restent dans l'enum et sont refusés avec leur raison.** Un
+   verbe sans bras fabrique un enregistrement, pas un acte. `warn` s'armera quand `notifications`
+   saura le porter, `suspend` à l'ouverture des inscriptions, `delete` pas tant que le masquage
+   motivé suffit.
+
+**Le reste de P8, à sa mesure** : l'audit est rejouable (`tooling/audit/a11y.ts` — six vraies
+trouvailles corrigées, dont seize filtres qui n'annonçaient rien avec un `aria-pressed` que les
+liens ne connaissent pas) ; le manifest et l'icône sont neutres par construction §2 et exemptés du
+portail dans le `matcher` (sans quoi installer échouait en silence) ; **pas de service worker** —
+mettre en cache des pages du portail sous une clé qui ignore le cookie serait un bug de vie privée
+déguisé en fonctionnalité, et le client crédible du hors-ligne est la file de scan de P4 ; les
+Core Web Vitals du §8 sont tenus là où la mesure a du sens (fiche : LCP 0,7 s, CLS 0, TBT 0 ms en
+desktop ; 93/100 en mobile émulé 4×, dominé par les ~700 ms de TTFB du conteneur vers eu-west-3) ;
+et l'i18n de P8 est une **vérification**, pas un sélecteur : toute copie passe par
+`messages/fr.json`, et un sélecteur de langue sans seconde langue serait le registre de
+consentements à l'envers.
+
+**Ce qui manque encore, et c'est le même manque qu'avant** : personne n'est désigné pour relever
+la file — la question ouverte de l'ADR 0013. L'écran existe, le goulot est humain : `jeremy` est
+le seul compte qui passe la garde.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent

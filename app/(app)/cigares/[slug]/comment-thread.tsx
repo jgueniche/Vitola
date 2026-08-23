@@ -70,6 +70,7 @@ export async function CommentThread({ cigarId, slug }: { cigarId: string; slug: 
               createdAt={comment.created_at}
               updatedAt={comment.updated_at}
               hidden={comment.hidden_at !== null}
+              hiddenReason={comment.hidden_reason}
               isAuthor={user?.id === comment.author_id}
               signedIn={user !== null}
               slug={slug}
