@@ -613,7 +613,9 @@
       "tooLong": "2 000 caractères au plus.",
       "notAllowed": "Votre compte ne permet pas encore de commenter.",
       "unknown": "Le commentaire n'a pas pu être enregistré."
-    }
+    },
+    "hiddenByModeration": "Masqué par la modération — {reason}",
+    "hiddenNoReason": "motif au dossier"
   },
   "notebook": {
     "eyebrow": "Carnet",
@@ -853,7 +855,8 @@
         "spam": "Indésirable ou publicité",
         "inaccurate": "Information inexacte",
         "other": "Autre"
-      }
+      },
+      "triggerContest": "Contester ce retrait"
     },
     "desk": {
       "eyebrow": "Modération",

@@ -6,7 +6,8 @@
 La recherche facettée n'en est pas un : ses facettes sont des liens et son champ un
 `<form method="get">`, donc zéro JavaScript. La recherche de la cave non plus, pour la même
 raison — ni celle des lieux, dont le seul code client est le bouton de géolocalisation, ni la
-liste du journal, qui n'en charge aucun. Trente-six existent :
+liste du journal, qui n'en charge aucun — ni la file de modération, dont le seul code client est
+le formulaire de décision. Trente-sept existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -46,6 +47,7 @@ liste du journal, qui n'en charge aucun. Trente-six existent :
 | `lieux/[slug]/controls.tsx` | `window.confirm` avant de retirer une proposition ou un avis |
 | `journal/ecrire/compose-form.tsx` | `useActionState` — un refus se relit sans perdre l'article en cours |
 | `journal/ecrire/controls.tsx` | `window.confirm` avant de supprimer un article |
+| `moderation/[id]/decide-form.tsx` | `useActionState`, plus `window.confirm` — trancher ne se refait pas |
 
 Les règles apprises en les écrivant :
 
