@@ -14,17 +14,21 @@ import { reportSlaHours } from '@/lib/moderation/queries'
 import { listMyNotebook, myScoreScale } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import {
+  countAcceptedRevisions,
   countFollows,
+  currentAppRole,
   getProfileByHandle,
   listFollowGraph,
   readFollowState,
   readProfilePrivacy,
   readSharedShelf,
 } from '@/lib/social/queries'
+import { hasMinRole } from '@/lib/settings/roles'
 import { relationConfirmation } from '@/lib/social/confirmations'
 import { createSupabaseServerClient, currentUser } from '@/lib/supabase/server'
 
 import { RelationForms } from './relation-forms'
+import { RolePanel } from './role-panel'
 
 const copy = m.members
 
@@ -116,7 +120,7 @@ export default async function MemberPage({
 
   const isMe = profile.id === user.id
 
-  const [privacy, counts, followers, following, relation, slaHours] = await Promise.all([
+  const [privacy, counts, followers, following, relation, slaHours, viewerRole] = await Promise.all([
     readProfilePrivacy(profile.id),
     countFollows(profile.id),
     listFollowGraph(profile.id, 'followers', 30),
@@ -125,7 +129,15 @@ export default async function MemberPage({
       ? Promise.resolve({ iFollow: false, followsMe: false, blocked: false })
       : readFollowState(user.id, profile.id),
     reportSlaHours(),
+    currentAppRole(),
   ])
+
+  const viewerIsAdmin = hasMinRole(viewerRole, 'admin')
+
+  /* Only fetched for the one reader who can act on it. A count of accepted
+     proposals is what an admin actually judges on, and asking for it on every
+     profile view would be a query for a panel nobody else sees. */
+  const acceptedRevisions = viewerIsAdmin ? await countAcceptedRevisions(profile.id) : 0
 
   /* Their publications, through the same keyset the feed uses. `feed_page` has
      no author argument — adding one would be a second shape of the same query —
@@ -239,6 +251,21 @@ export default async function MemberPage({
           <dd>{copy.followingCount.replace('{count}', String(counts.following))}</dd>
         </div>
       </dl>
+
+      {/* Le panneau de rôle, pour un administrateur seulement. C'est de
+          l'affichage et jamais la barrière : `/api/roles` revérifie
+          `has_min_role('admin')` sous la session de l'appelant avant de toucher
+          à la clé de service. Cacher un contrôle n'a jamais protégé une écriture. */}
+      {viewerIsAdmin && !isMe ? (
+        <div className="border-rule bg-surface rounded-[3px] border p-5">
+          <RolePanel
+            userId={profile.id}
+            currentRole={profile.role}
+            reputation={profile.reputation}
+            acceptedRevisions={acceptedRevisions}
+          />
+        </div>
+      ) : null}
 
       {confirmation ? (
         <p role="status" className="text-ink-muted text-sm">

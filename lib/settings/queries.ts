@@ -1,3 +1,4 @@
+import type { AppRole } from '@/lib/settings/roles'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 import {
@@ -25,7 +26,7 @@ export type Account = {
   country: string | null
   city: string | null
   is_discoverable: boolean
-  role: string
+  role: AppRole
   reputation: number
   created_at: string
   birth_date: string | null

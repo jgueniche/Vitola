@@ -1,4 +1,5 @@
 import { readPrivacy, type Privacy } from '@/lib/settings/model'
+import type { AppRole } from '@/lib/settings/roles'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 import {
@@ -194,6 +195,7 @@ export type PublicProfile = {
   country: string | null
   city: string | null
   reputation: number
+  role: AppRole
   created_at: string
 }
 
@@ -211,7 +213,7 @@ export async function getProfileByHandle(handle: string): Promise<PublicProfile 
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, handle, display_name, bio, country, city, reputation, created_at')
+    .select('id, handle, display_name, bio, country, city, reputation, role, created_at')
     .eq('handle', handle)
     .maybeSingle()
 
@@ -427,6 +429,42 @@ export async function listBlockedPeople(): Promise<PersonRow[]> {
 
   const byId = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
   return ids.map((id) => byId.get(id)).filter((row): row is PersonRow => row !== undefined)
+}
+
+/**
+ * The caller's own role, through `current_app_role()`.
+ *
+ * SECURITY DEFINER and answering only about its caller, so it says nothing a
+ * reader could not already deduce. Used to decide whether to *render* the role
+ * panel; `/api/roles` re-asks the same question before writing, because hiding
+ * a control has never been a barrier.
+ */
+export async function currentAppRole(): Promise<AppRole> {
+  const supabase = await createSupabaseServerClient()
+
+  const { data, error } = await supabase.rpc('current_app_role')
+  if (error) return 'member'
+  return (data as AppRole | null) ?? 'member'
+}
+
+/**
+ * How many of this member's wiki proposals were accepted.
+ *
+ * What an admin actually judges a promotion on, next to reputation. A count and
+ * not a list: the decision is "has this person been useful", and a list would
+ * invite reading twenty diffs on a screen that is about one yes or no.
+ */
+export async function countAcceptedRevisions(userId: string): Promise<number> {
+  const supabase = await createSupabaseServerClient()
+
+  const { count } = await supabase
+    .schema('ref')
+    .from('cigar_revisions')
+    .select('id', { head: true, count: 'exact' })
+    .eq('author_id', userId)
+    .eq('status', 'approved')
+
+  return count ?? 0
 }
 
 /* -------------------------------------------------------------------------- */

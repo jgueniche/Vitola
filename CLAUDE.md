@@ -199,6 +199,19 @@ s'en passe sinon ; la page marque n'en dépend pas.
 de fait qu'un contributeur connaît et qu'un relecteur vérifie — c'est le bon chemin, et il existera
 bientôt. Y verser une liste devinée maintenant, c'est se priver du seul contrôle qu'on a.
 
+**Le déclencheur est arrivé, et la relecture est écrite** :
+[`docs/adr/0009-rouvrir-ref-lines.md`](docs/adr/0009-rouvrir-ref-lines.md), en attente d'arbitrage.
+Elle trouve un fait que la décision d'origine avait vu sans le suivre jusqu'au bout — `ref.lines`
+n'a pas de colonne `status`, donc une gamme est publique **dès son insertion**, là où corriger la
+longueur d'un cigare passe par une file de relecture. L'asymétrie est à l'envers, et c'est elle qui
+décide : la table gagne un `status` avant de gagner des lignes.
+
+La création d'une **fiche** entièrement nouvelle a sa propre ADR,
+[`0008`](docs/adr/0008-proposer-une-fiche-nouvelle.md), pour une raison voisine : la colonne qui
+bloque est `created_by`, hors de tout `GRANT UPDATE`, et la seule façon qu'elle porte le nom du
+proposeur est qu'il insère la ligne lui-même — donc un brouillon de `ref.cigars`, pas une table à
+part.
+
 ## Commandes
 
 ```bash
