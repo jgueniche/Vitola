@@ -15,11 +15,12 @@ import { venuesFlag } from '@/lib/venues/queries'
  * the shape of the product. They had no page, so every visitor got a 404 on
  * click — and Next prefetches nav links, so the 404s were already firing on
  * page load without anyone clicking anything. A nav is a promise; each entry
- * comes back with its phase. Lieux came back with P5, below, behind its flag;
- * Journal and Boutique still wait for theirs.
+ * comes back with its phase. Lieux came back with P5 (behind its flag),
+ * Journal with P6 ; Boutique still waits for P7.
  */
 const NAV = [
   { label: 'Cigares', href: routes.cigars() },
+  { label: m.journal.title, href: routes.journal() },
   { label: 'Marques', href: routes.brands() },
   { label: 'Vitoles', href: routes.vitolas() },
   { label: 'Arômes', href: routes.aromas() },

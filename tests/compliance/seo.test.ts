@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import robots from '@/app/robots'
 import sitemap from '@/app/sitemap'
@@ -22,7 +22,14 @@ import { PUBLIC_PATHS, isPublicPath } from '@/lib/routes'
  */
 
 describe('the sitemap stays in front of the gate', () => {
-  const entries = sitemap()
+  /* Async since P6: the sitemap now appends the journal's PUBLIC articles.
+     In this test run the database is unreachable, `publicPublishedArticles`
+     degrades to nothing, and what is asserted below is the static boundary —
+     which is exactly the part that must never depend on data. */
+  let entries: Awaited<ReturnType<typeof sitemap>> = []
+  beforeAll(async () => {
+    entries = await sitemap()
+  })
 
   it('lists something, so the assertions below are not vacuous', () => {
     expect(entries.length).toBeGreaterThan(3)

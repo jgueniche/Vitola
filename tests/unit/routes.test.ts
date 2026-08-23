@@ -42,8 +42,21 @@ describe('routes', () => {
         '/conditions',
         '/cookies',
         '/sante',
+        /*
+         * The journal (P6, ADR 0012) — the indexable face of Q13. A `gated`
+         * article under it defends itself: its page requires the age-gate
+         * cookie and carries noindex, which the walkthrough crosses in both
+         * directions.
+         */
+        '/journal',
       ].sort(),
     )
+  })
+
+  it('treats everything under the journal prefix as public (ADR 0012, D3)', () => {
+    expect(isPublicPath('/journal/lire-une-bague')).toBe(true)
+    // A prefix is not a substring: /journalx is not the journal.
+    expect(isPublicPath('/journalx')).toBe(false)
   })
 
   it('treats every product route as gated', () => {
@@ -54,7 +67,6 @@ describe('routes', () => {
       routes.scanner(),
       routes.shop(),
       routes.venues(),
-      routes.journal(),
     ]) {
       expect(isPublicPath(path)).toBe(false)
     }

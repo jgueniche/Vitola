@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 
-import { PUBLIC_PATHS } from '@/lib/routes'
+import { publicPublishedArticles } from '@/lib/journal/queries'
+import { PUBLIC_PATHS, routes } from '@/lib/routes'
 import { SITE_ORIGIN } from '@/lib/site'
 
 /**
@@ -31,13 +32,26 @@ import { SITE_ORIGIN } from '@/lib/site'
  * than it should: the day the legal review is signed off, the allow rule
  * changes in one place and this file is already correct.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const MECHANISMS = ['/majorite', '/auth/callback', '/api/health']
 
-  return PUBLIC_PATHS.filter((path) => !MECHANISMS.includes(path)).map((path) => ({
+  const pages = PUBLIC_PATHS.filter((path) => !MECHANISMS.includes(path)).map((path) => ({
     url: new URL(path, SITE_ORIGIN).toString(),
     lastModified: new Date(),
     changeFrequency: path === '/' ? ('weekly' as const) : ('monthly' as const),
     priority: path === '/' ? 1 : 0.5,
   }))
+
+  /* The journal's PUBLIC articles — the only rows of the whole database this
+     file will ever list, and the same audience filter the RSS feed applies
+     (ADR 0012, D3): a gated article never reaches a crawler. Best effort — on
+     a base that does not answer (the CI build), the list is simply the pages. */
+  const articles = (await publicPublishedArticles()).map((article) => ({
+    url: new URL(routes.journalArticle(article.slug), SITE_ORIGIN).toString(),
+    lastModified: article.updated_at ? new Date(article.updated_at) : new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }))
+
+  return [...pages, ...articles]
 }
