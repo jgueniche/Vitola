@@ -31,6 +31,9 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `boxcode/decode.ts` | La **forme** d'un code de boîte. Le **sens** est en base, dans `ref.box_codes`. |
 | `site.ts` | L'origine sur laquelle le site répond — sitemap et `metadataBase`. |
 | `flags.ts` | La lecture d'un drapeau, et le repli fermé qui va avec. |
+| `social/model.ts` | Ce qu'est une publication, les deux portées qu'elle accepte, et **le curseur keyset**. |
+| `social/confirmations.ts` | Ce qu'un `?fait=…` veut dire, pour les pages qui en reçoivent un. |
+| `social/groups.ts` | Les bornes d'un club, d'un événement et d'un message, le vocabulaire des deux enums, et **le slug d'un club**. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 
@@ -85,11 +88,61 @@ silence, dans la direction que personne ne vérifie. `tests/unit/humidor-model.t
 les branches du `case` dans la migration 0008 et compare arme par arme — `move` compris, qui vaut
 zéro des deux côtés et que « corriger » en `-qty` viderait tous les lots déplacés.
 
+## Le fil ne se filtre pas ici non plus, et il ne s'hydrate pas ici non plus
+
+`social/queries.ts` ne contient aucun `.eq('visibility', …)` ni aucun `not in` de blocage, pour la
+raison de toujours : cinq policies décident, dont une **restrictive**, et une requête qui les
+doublerait survivrait à ce qu'elle double.
+
+Ce qui est nouveau, c'est la seconde moitié. Le carnet s'hydrate en trois allers-retours — les
+lignes, puis les auteurs, puis les cigares —, ce qui est un coût fixe et jamais un N+1. Un fil ne
+peut pas se le permettre : il lui faut en plus le nombre de braises, le nombre de commentaires et
+« l'ai-je braisée », qui sont des questions **par ligne**. Le fil passe donc par `feed_page()`, qui
+répond à tout en **un seul appel**, en droits d'appelant. Le critère de sortie de P3 est tenu par la
+forme de la donnée plutôt que par une discipline à se rappeler.
+
+Corollaire à ne pas oublier : `feed_page()` a une notion d'**onglet**, `post_card()` n'en a pas.
+Lire une publication à son adresse en demandant au fil une page d'une ligne a rendu toute
+publication réservée aux abonnés introuvable, y compris pour son auteur.
+
+## Les clubs, l'agenda et la messagerie non plus, et la nuance est ailleurs
+
+`social/group-queries.ts` ne double aucune des treize policies de la 0014 — onze permissives et deux
+restrictives. La nuance par rapport au fil : `clubs`, `events` et les deux tables d'appartenance
+sont lisibles par **tout le monde**, y compris un visiteur déconnecté, donc leurs policies ne
+filtrent rien et la tentation de les « aider » d'un `.eq()` est réelle. `conversations` et
+`messages` sont l'inverse — leurs policies sont toute la règle d'accès — et ni ce fichier ni un
+écran ne la redisent.
+
+Deux `.eq()` de ce fichier méritent d'être lus deux fois, parce qu'ils ressemblent à une policy
+doublée sans en être une : « de quels clubs suis-je membre » change le libellé d'un bouton et jamais
+la présence d'une ligne, et « à qui puis-je écrire » empêche le formulaire de proposer un nom que la
+base refusera. Une liste qui offre une porte fermée est un piège, pas une barrière.
+
+La boîte de réception passe par `conversation_inbox()` (0015) pour la raison qui a produit
+`feed_page()` : qui est l'autre, quel est le dernier message et combien n'ai-je pas lu sont trois
+questions **par ligne**. Le reste s'hydrate en un nombre fixe de requêtes — les identifiants, puis
+les profils — ce qui est le motif du carnet et jamais un N+1.
+
+Une duplication de logique de plus, et la troisième du dossier : `clubSlug()` recopie ce que
+`public.slugify()` sait déjà faire. Elle est justifiée par le formulaire, qui montre l'adresse du
+club **pendant** qu'on tape son nom — un aller-retour par frappe n'en est pas un — et
+`tests/unit/groups-model.test.ts` la compare à `clubs_slug_format` pour qu'un slug produit ici ne
+soit jamais un slug que le CHECK refuse.
+
 ## Les caves ne se filtrent pas ici non plus
 
-`humidor/queries.ts` ne contient aucun `.eq('user_id', …)`, et cette fois ce n'est pas une nuance :
-`humidors` n'a qu'une policy `select`, `user_id = auth.uid()`, et les trois autres tables la
-rejoignent par un `EXISTS`. « Mes caves », c'est donc ce que rend `select * from humidors`. Le jour
-où P3 ouvrira une cave à un tiers via `privacy.show_humidor`, ces fonctions renverront celle d'un
-autre — correctement, sans qu'une ligne change — et c'est la page qui devra dire de quoi elle
-parle, comme `listMyNotebook` le fait déjà.
+`humidor/queries.ts` ne contient aucun `.eq('user_id', …)` : `humidors` avait une seule policy
+`select`, `user_id = auth.uid()`, et les trois autres tables la rejoignent par un `EXISTS`.
+« Mes caves », c'était donc ce que rend `select * from humidors`.
+
+**Ce paragraphe annonçait que P3 changerait cela, et P3 ne l'a pas changé.** La 0010 ouvre bien
+`humidors` à un tiers quand `privacy.show_humidor` est coché — donc ces fonctions rendraient la cave
+de quelqu'un d'autre — mais elle referme aussitôt les trois tables filles par des policies
+**restrictives** propriétaires. Sans elles, ouvrir une cave ouvrait son grand livre, c'est-à-dire
+quand la personne a fumé quoi.
+
+Conséquence pratique : ces fonctions restent « mes caves », et la cave d'un tiers se lit par
+`social/queries.ts` → `shared_humidor_shelf()`, qui projette trois colonnes et jamais le prix. Une
+policy filtre des lignes ; elle ne sait pas cacher une colonne, et un prix de tabac sur le profil
+d'un membre est précisément ce que le §2 regarde.

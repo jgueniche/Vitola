@@ -11,6 +11,7 @@ import { formatEffectiveDate } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { getAccount } from '@/lib/settings/queries'
+import { hasMinRole, REVIEWER_ROLE } from '@/lib/settings/roles'
 import { currentUser } from '@/lib/supabase/server'
 import {
   listMine,
@@ -25,7 +26,10 @@ export const metadata: Metadata = { title: m.contributions.title }
 
 const copy = m.contributions
 
-const EDITOR_ROLES = ['editor', 'moderator', 'admin']
+/* The ladder lives in `lib/settings/roles.ts` since the promotion screen shipped:
+   two lists of role names that must agree is one list too many, and this one was
+   the copy. `hasMinRole` compares by rung, so a role added above `editor` is
+   included without anybody remembering to add it here. */
 
 /**
  * Contributions — what I proposed, and, for a reviewer, what is waiting.
@@ -51,7 +55,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
   }
 
   const account = await getAccount(user.id)
-  const isEditor = EDITOR_ROLES.includes(account?.role ?? 'member')
+  const isEditor = hasMinRole(account?.role ?? 'member', REVIEWER_ROLE)
 
   const [mine, pending, vitolas] = await Promise.all([
     listMine(user.id),

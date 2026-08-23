@@ -161,6 +161,69 @@ jobs:
             exit 1
           fi
 
+      # 0010 pose le social. Deux de ses décisions ne se voient qu'à l'exécution :
+      # le blocage est une policy RESTRICTIVE — la seule sémantique qui puisse
+      # retirer une ligne —, et `show_humidor` ouvre les caves sans ouvrir le
+      # grand livre, ce qui demande trois policies restrictives de plus.
+      - name: Apply 0010 — le fil social
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0010_social.sql
+
+      # 0011 complète la 0010 : les deux clés de confidentialité qui décident
+      # d'un AFFICHAGE et non d'un droit se lisent par la même porte que celle
+      # qui décide d'un droit, pour que la clé n'ait qu'un interprète.
+      - name: Apply 0011 — les trois clés de confidentialité
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0011_profile_privacy.sql
+
+      # 0012 corrige la 0010, et le bug a été trouvé de la seule façon possible :
+      # en bloquant quelqu'un dans un navigateur, puis en cherchant comment le
+      # débloquer. La policy cachait le profil dans les deux sens, et le seul
+      # écran portant « Débloquer » est ce profil.
+      - name: Apply 0012 — un blocage se défait
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0012_unblock_is_reachable.sql
+
+      # 0013 corrige la 0010 par omission, et le bug a été trouvé par le
+      # NETTOYAGE d'un parcours : une publication réservée aux abonnés répondait
+      # 404 à son adresse, donc son bouton « Supprimer » était inatteignable.
+      - name: Apply 0013 — une publication se lit à son adresse
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0013_post_card.sql
+
+      # Le seul endroit d'où se voit une régression de l'ADR 0007. Il n'accorde
+      # rien. Même scrutin du journal qu'ailleurs — un `SET LOCAL ROLE` hors
+      # transaction rend une assertion verte pour rien.
+      - name: Social — abonnement, fil keyset, braise, blocage, cave montrée
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/09_social_rls.sql 2>&1 | tee "$RUNNER_TEMP/social.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/social.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0014 pose les clubs, les événements et la messagerie. Trois décisions ne
+      # se voient qu'à l'exécution : une conversation a exactement deux
+      # personnes en colonnes ordonnées, on n'écrit qu'à qui l'on suit, et un
+      # message est lisible d'un modérateur — c'est ce qui fait qu'il n'est pas
+      # chiffré de bout en bout, et le mécanisme de l'art. 16 du DSA en dépend.
+      - name: Apply 0014 — clubs, événements, messagerie
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0014_clubs_evenements_messagerie.sql
+
+      # 0015 rend la boîte de réception en un appel : « qui est l'autre », « quel
+      # est le dernier message » et « combien n'ai-je pas lu » sont trois
+      # questions PAR LIGNE, donc la forme même du N+1 que le critère de sortie
+      # de P3 interdit au fil.
+      - name: Apply 0015 — la boîte de réception en un appel
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0015_conversation_inbox.sql
+
+      - name: Clubs, événements, messagerie — appartenance, présence, paire canonique
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/10_clubs_events_messages.sql 2>&1 \
+            | tee "$RUNNER_TEMP/clubs.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/clubs.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 

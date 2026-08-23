@@ -91,6 +91,83 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      club_members: {
+        Row: {
+          club_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          member_count: number
+          name: string
+          owner_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_count?: number
+          name: string
+          owner_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_count?: number
+          name?: string
+          owner_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           author_id: string
@@ -160,6 +237,115 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          member_a: string
+          member_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          member_a: string
+          member_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          member_a?: string
+          member_b?: string
+        }
+        Relationships: []
+      }
+      event_attendees: {
+        Row: {
+          answered_at: string
+          event_id: string
+          status: Database["public"]["Enums"]["attendee_status"]
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          event_id: string
+          status?: Database["public"]["Enums"]["attendee_status"]
+          user_id: string
+        }
+        Update: {
+          answered_at?: string
+          event_id?: string
+          status?: Database["public"]["Enums"]["attendee_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          attendee_count: number
+          capacity: number | null
+          club_id: string | null
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          host_id: string
+          id: string
+          kind: Database["public"]["Enums"]["event_kind"]
+          location_text: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          attendee_count?: number
+          capacity?: number | null
+          club_id?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          host_id: string
+          id?: string
+          kind?: Database["public"]["Enums"]["event_kind"]
+          location_text?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          attendee_count?: number
+          capacity?: number | null
+          club_id?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          host_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["event_kind"]
+          location_text?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feature_flags: {
         Row: {
           description: string
@@ -181,6 +367,24 @@ export type Database = {
           key?: string
           payload?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
         }
         Relationships: []
       }
@@ -217,6 +421,13 @@ export type Database = {
             foreignKeyName: "humidor_events_item_id_fkey"
             columns: ["item_id"]
             isOneToOne: false
+            referencedRelation: "humidor_inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "humidor_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
             referencedRelation: "humidor_items"
             referencedColumns: ["id"]
           },
@@ -246,12 +457,6 @@ export type Database = {
           updated_at: string
           vendor_name: string | null
         }
-        /*
-         * `qty` is insertable and NOT updatable, which is ADR 0006 D3 rendered
-         * in TypeScript: an opening balance is declared when the lot is born,
-         * and every later move is an event. The GRANT is what enforces it —
-         * this shape only makes the refusal visible before the round trip.
-         */
         Insert: {
           aging_start_date?: string | null
           box_code?: string | null
@@ -271,6 +476,7 @@ export type Database = {
         Update: {
           aging_start_date?: string | null
           box_code?: string | null
+          cigar_id?: string
           created_at?: string
           currency?: string
           humidor_id?: string
@@ -279,6 +485,7 @@ export type Database = {
           position?: string | null
           purchase_date?: string | null
           purchase_price_eur?: number | null
+          qty?: number
           updated_at?: string
           vendor_name?: string | null
         }
@@ -362,8 +569,224 @@ export type Database = {
           target_rh?: number | null
           target_temp?: number | null
           updated_at?: string
+          user_id?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          post_id: string | null
+          read_at: string | null
+          review_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          post_id?: string | null
+          read_at?: string | null
+          review_id?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          post_id?: string | null
+          read_at?: string | null
+          review_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
+          id: string
+          post_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          post_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          post_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reactions: {
+        Row: {
+          created_at: string
+          kind: Database["public"]["Enums"]["reaction_kind"]
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          kind?: Database["public"]["Enums"]["reaction_kind"]
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          kind?: Database["public"]["Enums"]["reaction_kind"]
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          body: string | null
+          cigar_id: string | null
+          comment_count: number
+          created_at: string
+          ember_count: number
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
+          id: string
+          kind: Database["public"]["Enums"]["post_kind"]
+          review_id: string | null
+          updated_at: string
+          visibility: Database["public"]["Enums"]["review_visibility"]
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          cigar_id?: string | null
+          comment_count?: number
+          created_at?: string
+          ember_count?: number
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["post_kind"]
+          review_id?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["review_visibility"]
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          cigar_id?: string | null
+          comment_count?: number
+          created_at?: string
+          ember_count?: number
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["post_kind"]
+          review_id?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["review_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_settings: {
         Row: {
@@ -580,9 +1003,23 @@ export type Database = {
       }
     }
     Views: {
+      cigar_stats: {
+        Row: {
+          bayesian_score: number | null
+          cigar_id: string | null
+          distribution: Json | null
+          last_review_at: string | null
+          mean_score: number | null
+          mean_score_90d: number | null
+          review_count: number | null
+          review_count_90d: number | null
+        }
+        Relationships: []
+      }
       humidor_inventory: {
         Row: {
           aging_days: number | null
+          aging_start_date: string | null
           box_code: string | null
           cigar_id: string | null
           created_at: string | null
@@ -597,6 +1034,45 @@ export type Database = {
           qty: number | null
           stock_value_eur: number | null
           updated_at: string | null
+          vendor_name: string | null
+        }
+        Insert: {
+          aging_days?: never
+          aging_start_date?: string | null
+          box_code?: string | null
+          cigar_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          humidor_id?: string | null
+          id?: string | null
+          last_smoked_on?: never
+          notes?: string | null
+          position?: string | null
+          purchase_date?: string | null
+          purchase_price_eur?: number | null
+          qty?: number | null
+          stock_value_eur?: never
+          updated_at?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          aging_days?: never
+          aging_start_date?: string | null
+          box_code?: string | null
+          cigar_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          humidor_id?: string | null
+          id?: string | null
+          last_smoked_on?: never
+          notes?: string | null
+          position?: string | null
+          purchase_date?: string | null
+          purchase_price_eur?: number | null
+          qty?: number | null
+          stock_value_eur?: never
+          updated_at?: string | null
+          vendor_name?: string | null
         }
         Relationships: [
           {
@@ -608,47 +1084,68 @@ export type Database = {
           },
         ]
       }
-      cigar_stats: {
-        Row: {
-          bayesian_score: number | null
-          cigar_id: string | null
-          distribution: Json | null
-          last_review_at: string | null
-          mean_score: number | null
-          mean_score_90d: number | null
-          review_count: number | null
-          review_count_90d: number | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
+      blocked_user_ids: { Args: never; Returns: string[] }
+      blockers_of_me: { Args: never; Returns: string[] }
+      blocks_between: { Args: { other: string }; Returns: boolean }
       comment_min_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      conversation_inbox: {
+        Args: { p_limit?: number }
+        Returns: {
+          conversation_id: string
+          last_body: string
+          last_message_at: string
+          last_sender_id: string
+          other_display_name: string
+          other_handle: string
+          other_id: string
+          unread_count: number
+        }[]
+      }
+      conversation_with: { Args: { other: string }; Returns: string }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
-      /*
-       * The two doors of migration 0006 onto the `mod` schema. They are typed
-       * here like any other function even though only the service-role client
-       * may call them: the type says what the signature is, the GRANT says who
-       * may use it, and conflating the two is how a guard gets relaxed by
-       * accident.
-       *
-       * `p_reason` is text rather than the enum because `mod.report_reason`
-       * lives in a schema PostgREST does not see — see the migration's §1.
-       */
+      feed_page: {
+        Args: {
+          p_before_created_at?: string
+          p_before_id?: string
+          p_limit?: number
+          p_scope: Database["public"]["Enums"]["feed_scope"]
+        }
+        Returns: {
+          author_display_name: string
+          author_handle: string
+          author_id: string
+          body: string
+          brand_name: string
+          cigar_id: string
+          cigar_name: string
+          cigar_slug: string
+          comment_count: number
+          created_at: string
+          ember_count: number
+          id: string
+          kind: Database["public"]["Enums"]["post_kind"]
+          review_id: string
+          updated_at: string
+          viewer_embered: boolean
+          visibility: Database["public"]["Enums"]["review_visibility"]
+        }[]
+      }
       file_report: {
         Args: {
-          p_reporter_id: string | null
+          p_detail?: string
+          p_entity_id: string
           p_entity_schema: string
           p_entity_table: string
-          p_entity_id: string
           p_reason: string
-          p_detail?: string | null
+          p_reporter_id: string
         }
         Returns: Json
       }
@@ -658,37 +1155,64 @@ export type Database = {
       }
       humidor_event_delta: {
         Args: {
-          p_type: Database["public"]["Enums"]["humidor_event_type"]
           p_qty: number
+          p_type: Database["public"]["Enums"]["humidor_event_type"]
         }
         Returns: number
       }
       immutable_unaccent: { Args: { value: string }; Returns: string }
-      is_privileged_context: { Args: never; Returns: boolean }
-      moderation_records_for_subject: { Args: { p_subject: string }; Returns: Json }
+      moderation_records_for_subject: {
+        Args: { p_subject: string }
+        Returns: Json
+      }
       owns_review: { Args: { target: string }; Returns: boolean }
+      post_card: {
+        Args: { p_id: string }
+        Returns: {
+          author_display_name: string
+          author_handle: string
+          author_id: string
+          body: string
+          brand_name: string
+          cigar_id: string
+          cigar_name: string
+          cigar_slug: string
+          comment_count: number
+          created_at: string
+          ember_count: number
+          id: string
+          kind: Database["public"]["Enums"]["post_kind"]
+          review_id: string
+          updated_at: string
+          viewer_embered: boolean
+          visibility: Database["public"]["Enums"]["review_visibility"]
+        }[]
+      }
+      profile_privacy: { Args: { owner: string }; Returns: Json }
       refresh_cigar_stats: { Args: never; Returns: undefined }
-      /*
-       * ADR 0006, D1. The only call in the app that writes two tables at once,
-       * and the only one that has to: PostgREST gives one transaction per
-       * request, so the notebook entry and the `smoke` event land together or
-       * not at all. SECURITY INVOKER, so RLS still decides — see the migration.
-       *
-       * Returns the entry id, or null when nothing was noted. Null is a
-       * success: the ledger event is then the whole record.
-       */
+      shared_humidor_shelf: {
+        Args: { owner: string }
+        Returns: {
+          aging_start_date: string
+          cigar_id: string
+          humidor_id: string
+          humidor_name: string
+          qty: number
+        }[]
+      }
+      shows_humidor: { Args: { owner: string }; Returns: boolean }
+      slugify: { Args: { value: string }; Returns: string }
       smoke_from_humidor: {
         Args: {
+          p_body?: string
           p_item_id: string
           p_qty?: number
+          p_score?: number
           p_smoked_on?: string
           p_visibility?: Database["public"]["Enums"]["review_visibility"]
-          p_score?: number | null
-          p_body?: string | null
         }
-        Returns: string | null
+        Returns: string
       }
-      slugify: { Args: { value: string }; Returns: string }
     }
     Enums: {
       app_role: "member" | "contributor" | "editor" | "moderator" | "admin"
@@ -704,6 +1228,7 @@ export type Database = {
         | "vegetal"
         | "mineral"
         | "defaut"
+      attendee_status: "going" | "maybe" | "declined"
       consent_kind:
         | "terms"
         | "privacy"
@@ -711,14 +1236,13 @@ export type Database = {
         | "analytics"
         | "marketing_email"
         | "health_related_processing"
-      humidor_event_type:
-        | "add"
-        | "smoke"
-        | "gift"
-        | "loss"
-        | "move"
-        | "adjust"
+      event_kind: "degustation" | "rencontre" | "visite" | "autre"
+      feed_scope: "following" | "discover"
+      humidor_event_type: "add" | "smoke" | "gift" | "loss" | "move" | "adjust"
       humidor_reading_source: "manual" | "device"
+      notification_kind: "follow" | "ember" | "post_comment" | "review_share"
+      post_kind: "post" | "session" | "review_share" | "question"
+      reaction_kind: "ember"
       review_kind: "log" | "tasting"
       review_visibility: "private" | "shared" | "followers" | "public"
     }
@@ -1337,6 +1861,7 @@ export const Constants = {
         "mineral",
         "defaut",
       ],
+      attendee_status: ["going", "maybe", "declined"],
       consent_kind: [
         "terms",
         "privacy",
@@ -1345,8 +1870,13 @@ export const Constants = {
         "marketing_email",
         "health_related_processing",
       ],
+      event_kind: ["degustation", "rencontre", "visite", "autre"],
+      feed_scope: ["following", "discover"],
       humidor_event_type: ["add", "smoke", "gift", "loss", "move", "adjust"],
       humidor_reading_source: ["manual", "device"],
+      notification_kind: ["follow", "ember", "post_comment", "review_share"],
+      post_kind: ["post", "session", "review_share", "question"],
+      reaction_kind: ["ember"],
       review_kind: ["log", "tasting"],
       review_visibility: ["private", "shared", "followers", "public"],
     },

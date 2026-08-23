@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
+import { UnblockButton } from '@/app/(app)/membres/[handle]/unblock-button'
 import { Band } from '@/components/band/band'
 import { Button } from '@/components/ui/button'
 import { formatEffectiveDate } from '@/lib/cigar'
@@ -13,6 +15,8 @@ import {
   type ConsentKind,
 } from '@/lib/settings/model'
 import { getAccount } from '@/lib/settings/queries'
+import { relationConfirmation } from '@/lib/social/confirmations'
+import { listBlockedPeople } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
 
 import { DeleteAccountButton, PreferencesForm, PrivacyForm, ProfileForm } from './forms'
@@ -55,13 +59,18 @@ const KIND_LABELS: Record<ConsentKind, string> = {
  * which scale is in force and a link back to this page, so the affordance is
  * not lost by the move.
  */
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const confirmation = relationConfirmation((await searchParams).fait)
   const user = await currentUser()
   if (!user) {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.settings())}`)
   }
 
-  const account = await getAccount(user.id)
+  const [account, blocked] = await Promise.all([getAccount(user.id), listBlockedPeople()])
   /* `tg_handle_new_user()` creates the profile with the account. Its absence is
      a broken trigger, not an empty state, and a 404 says so loudly. */
   if (!account) notFound()
@@ -118,6 +127,48 @@ export default async function SettingsPage() {
         </div>
         <PrivacyForm privacy={account.privacy} />
         <p className="text-ink-faint measure text-xs leading-relaxed">{copy.privacyNotYet}</p>
+      </section>
+
+      {/* Les personnes bloquées vivent ici et pas seulement sur leur profil.
+          Le profil suffirait techniquement — la 0012 le laisse visible de qui a
+          posé le blocage —, mais il faut en connaître le pseudo pour y aller.
+          « Une commande qu'on ne trouve pas n'est pas un contrepoids » est
+          l'argument que l'ADR 0007 fait pour le retrait d'un abonné ; il vaut
+          mot pour mot ici. */}
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-2xl">{copy.blockedTitle}</h2>
+          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.blockedLede}</p>
+        </div>
+
+        {confirmation ? (
+          <p role="status" className="text-ink-muted text-sm">
+            {confirmation}
+          </p>
+        ) : null}
+
+        {blocked.length === 0 ? (
+          <p className="text-ink-faint text-sm">{copy.blockedEmpty}</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {blocked.map((person) => (
+              <li
+                key={person.id}
+                className="border-rule bg-surface flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-[3px] border px-4 py-3"
+              >
+                <Link href={routes.member(person.handle)} className="text-ink text-sm">
+                  {person.display_name ?? `@${person.handle}`}
+                  <span className="text-ink-faint font-mono text-xs"> @{person.handle}</span>
+                </Link>
+                <UnblockButton
+                  userId={person.id}
+                  handle={person.handle}
+                  retour={routes.settings()}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <Band variant="divider" />

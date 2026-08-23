@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     p_entity_table: target.table,
     p_entity_id: id,
     p_reason: reason,
-    p_detail: detail ?? null,
+    p_detail: detail ?? undefined,
   })
 
   if (error) {
@@ -181,6 +181,45 @@ async function isVisibleToCaller(kind: ReportableKind, id: string): Promise<bool
         .eq('id', id)
         .eq('status', 'published')
         .maybeSingle()
+      return data !== null
+    }
+
+    /* The three surfaces P3 opened. Each is one `maybeSingle()` and no
+       predicate: `posts` has five SELECT policies plus a RESTRICTIVE one for
+       blocks, `post_comments` derives its audience from the publication by an
+       EXISTS, and `profiles` honours `is_discoverable`. Writing any of that
+       here would be the visibility filter ADR 0004 forbids, and it would be
+       wrong within a phase — a policy changes, the copy in TypeScript does
+       not. Someone reporting what they cannot read gets the same 404 as
+       someone reporting what does not exist. */
+    case 'post': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('posts').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    case 'postComment': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('post_comments').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    case 'profile': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('profiles').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    /* A private message, and the check is the same shape as all the others for
+       a reason worth naming: `messages_select_own` joins the conversation, so
+       only a participant reads one — which means only a participant can report
+       one, and nobody can probe for a message by id. The surface is offered
+       because art. 16 of the DSA does not stop at what is published, and
+       ADR 0010 accepts the consequence out loud rather than implying an
+       encryption this product does not have. */
+    case 'message': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase.from('messages').select('id').eq('id', id).maybeSingle()
       return data !== null
     }
 

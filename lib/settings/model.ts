@@ -103,16 +103,38 @@ export function readPrivacy(value: unknown): Privacy {
 }
 
 /**
- * Which privacy switches actually govern something a third party can reach
- * **today**, and which are promises to P3.
+ * What each privacy switch actually governs, now that all three do something.
  *
- * The distinction has to be renderable, for the same reason `SCOPE_TRAITS`
- * exists in the notebook: a switch that changes nothing, offered without saying
- * so, is a setting that lies. `public.follows` and the public profile arrive in
- * P3; until then nobody can read another member's reviews or country whatever
- * these say, and the humidor is owner-only in the policies themselves.
+ * This replaced a single `PRIVACY_REACHES_NOBODY_YET = true`, and the
+ * replacement is the debt closing rather than a refinement. Until P3 nobody
+ * could read another member's profile at all, so none of the three switches
+ * changed anything and the settings page said so — the same obligation
+ * `SCOPE_TRAITS` carries in the notebook: a switch that does nothing, offered
+ * without saying so, is a setting that lies.
+ *
+ * Migration 0010 gave `show_humidor` a policy and 0011 gave the other two a
+ * reader. What is left is a distinction that has to stay visible, because the
+ * three switches are not the same *kind* of promise:
+ *
+ *   - `right`   — the data is unreadable without it. `show_humidor` is enforced
+ *     by `humidors_select_shown`, so turning it off does not merely hide the
+ *     humidor from a page: it makes the rows unreadable, by any route.
+ *   - `display` — the data is readable, and the switch decides whether the
+ *     profile *shows* it. A `public` notebook entry stays on the cigar page and
+ *     in its average whatever `show_reviews` says; `profiles` is a public
+ *     directory, so `show_country` takes the country off the profile page
+ *     without making it a secret.
+ *
+ * Rendering the difference is the honest thing to do, and it is cheap. Hiding
+ * it would let someone believe `show_country` is a lock.
  */
-export const PRIVACY_REACHES_NOBODY_YET = true
+export type PrivacyGovernance = 'right' | 'display'
+
+export const PRIVACY_GOVERNANCE: Record<keyof Privacy, PrivacyGovernance> = {
+  show_humidor: 'right',
+  show_reviews: 'display',
+  show_country: 'display',
+}
 
 /* -------------------------------------------------------------------------- */
 /* Consents — public.consents                                                  */

@@ -110,6 +110,63 @@ partagées → tables → recherche → index → grants → RLS → storage →
   même : une boîte achetée vieillie se repose **avant** d'être achetée. Aucune assertion ne
   l'aurait vue, parce que rien dans le SQL ne dit ce qu'une date signifie. Ce genre de bug se
   trouve en rangeant une vraie boîte dans un vrai navigateur.
+- **Une policy résout un nom nu dans la portée la plus INTERNE.** La policy
+  d'insertion de `posts` comparait la portée d'une publication à celle de
+  l'entrée qu'elle pointe : `where r.id = review_id and r.visibility = visibility`.
+  `reviews` a une colonne `visibility`, donc la condition comparait la colonne à
+  elle-même et valait **toujours vrai** — une publication publique sur une entrée
+  réservée aux abonnés était acceptée. Qualifier la table extérieure
+  (`posts.visibility`) est la correction ; la relecture ne trouve pas ce bug,
+  parce que l'expression est juste à l'œil. Assertion P3 de `tests/09_social_rls.sql`.
+- **Une policy permissive de plus ne peut jamais RETIRER une ligne.** Elles sont
+  OR-ées : c'est la bonne sémantique pour ouvrir (`show_humidor`, la branche
+  `followers`), et c'est l'inverse de ce qu'il faut pour un blocage. Un blocage
+  est un `AND`, donc une policy `as restrictive`, et il n'y a pas d'autre
+  mécanisme dans PostgreSQL qui dise cela.
+- **Une policy restrictive s'ajoute aussi pour EMPÊCHER une ouverture de
+  cascader.** Les trois tables filles de `humidors` ne redisent pas la propriété :
+  elles rejoignent le parent par un `EXISTS` soumis à sa RLS. Ouvrir `humidors`
+  pour `privacy.show_humidor` ouvrait donc **le grand livre**, c'est-à-dire quand
+  la personne a fumé quoi — la donnée que le carnet protège par un défaut
+  `private`, republiée par une porte de côté. Trois policies restrictives
+  propriétaires referment cela, et l'auto-contrôle de 0010 vérifie qu'elles y
+  sont : rien ne casse si elles disparaissent, une lecture rend simplement plus.
+- **Un prédicat dans une policy s'évalue une fois PAR LIGNE examinée.**
+  `blocks_between(author_id)` en `SECURITY DEFINER` coûtait 2 420 appels pour
+  rendre vingt lignes de fil — l'essentiel du coût de la page. La même règle
+  rendue sous forme de **tableau** par une fonction sans argument s'évalue une
+  seule fois, en InitPlan, dès qu'on l'enveloppe dans `(select …)` : c'est le
+  geste de `(select auth.uid())` de la 0003, appliqué à une fonction. 29 ms → 2 ms.
+  Écrire `x = any ((select f())::uuid[])` : sans le cast, `ANY (sous-requête)` est
+  la forme ensembliste et PostgreSQL refuse `uuid = uuid[]`.
+- **Le planificateur ne voit pas à travers un paramètre.** Une fonction qui
+  choisit sa branche par un argument — `(p_scope = 'discover' and …) or
+  (p_scope = 'following' and …)` — ne peut prouver aucune des deux, donc elle
+  n'utilise aucun index partiel et trie la table. 258 ms sur 50 000 lignes contre
+  2,5 ms pour la même requête écrite en dur. Un `if` en plpgsql sépare les deux
+  et chacune est planifiée sur un prédicat constant. Corollaire : `set search_path
+  = ''` empêche l'*inlining* d'une fonction `language sql`, donc une fonction SQL
+  paramétrée du dépôt ne sera jamais inlinée — le `if` n'est pas une option de
+  style.
+- **Un filtre d'ONGLET n'est pas un filtre de DROIT, et les confondre coûte une
+  page.** `feed_page(scope => 'discover')` filtre `visibility = 'public'` dans son
+  corps : cela dit de quoi la page parle. Le réutiliser pour lire *une*
+  publication rendait toute publication réservée introuvable à son adresse, y
+  compris pour son auteur — donc impossible à supprimer. Lire un fil et lire une
+  ligne sont deux questions ; `post_card()` (0013) est la seconde, et elle n'a
+  aucun prédicat d'audience du tout.
+- **Un `upsert` PostgREST écrit TOUTES les colonnes de sa charge dans le `DO UPDATE`.**
+  `event_attendees` accorde `insert (event_id, user_id, status)` et
+  `update (status)` seulement — une réponse ne déménage pas vers un autre
+  événement ni vers quelqu'un d'autre. Un upsert devient
+  `insert … on conflict (event_id, user_id) do update set event_id = excluded.event_id,
+  user_id = …, status = …`, donc il demande l'UPDATE sur les trois colonnes et
+  se fait refuser en `42501`. Et comme une écriture refusée **rend zéro ligne
+  au lieu de lever**, l'écran se repeignait sur « 0 personnes viennent » sans
+  message nulle part. Le geste correct sous des droits de colonne est
+  `update` puis `insert` si rien n'a bougé — deux instructions, chacune dans
+  son droit, chacune relue. Trouvé au deuxième clic dans un navigateur, jamais
+  par un type ni par une policy.
 - **Une vue matérialisée n'accepte pas de RLS.** `cigar_stats` n'est sûre que par son
   `where visibility = 'public'` : ce prédicat est la frontière de sécurité, pas une optimisation.
   L'auto-contrôle de 0003 relit `pg_get_viewdef()` pour vérifier qu'il y est toujours.

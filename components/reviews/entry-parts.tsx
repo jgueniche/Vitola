@@ -70,13 +70,15 @@ const SCOPE_LABELS: Record<ReviewVisibility, string> = {
  * notebook one has to open to trust, and the whole promise of ADR 0004's
  * per-entry scope is that one can see it at a glance.
  *
- * `followers` is drawn in the caution tone rather than the neutral one, because
- * it is the one scope that does not do today what its label says: `public
- * .follows` arrives in P3, so the entry currently reaches nobody but its
- * author. The tone is the badge's share of the warning the selector spells out.
+ * `followers` is drawn in the caution tone rather than the neutral one, and the
+ * reason changed in P3 without the tone changing. It used to mark a scope that
+ * reached nobody at all — `public.follows` did not exist, so the SELECT branch
+ * could not either. Migration 0010 wrote both. What the tone now marks is the
+ * scope whose audience is **living and free to join**: the badge's share of the
+ * warning `ScopeSelector` spells out in full.
  */
 export function ScopeBadge({ visibility }: { visibility: ReviewVisibility }) {
-  const pending = SCOPE_TRAITS[visibility].reachesNobodyYet
+  const living = SCOPE_TRAITS[visibility].livingAudience
 
   return (
     <span
@@ -85,9 +87,9 @@ export function ScopeBadge({ visibility }: { visibility: ReviewVisibility }) {
         visibility === 'public' && 'border-accent text-accent',
         visibility === 'shared' && 'border-rule-strong text-ink-muted',
         visibility === 'private' && 'border-rule text-ink-faint',
-        pending && 'border-caution text-caution',
+        living && 'border-caution text-caution',
       )}
-      title={pending ? scopeCopy.followersUnavailable : undefined}
+      title={living ? scopeCopy.followersOpen : undefined}
     >
       {SCOPE_LABELS[visibility]}
     </span>

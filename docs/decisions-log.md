@@ -2,6 +2,221 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Clubs, agenda, messagerie — et un `upsert` qui ne pouvait pas marcher
+
+### Ce qui est livré
+
+L'ADR 0010 avant la première ligne de SQL, puis deux migrations — `0014` les cinq
+tables, `0015` la boîte de réception en un appel. Dix-neuf assertions SQL, trente
+tests unitaires sur les bornes et le slug, six sur l'heure murale, et un parcours
+navigateur avec deux comptes qui nettoie derrière lui.
+
+Cinq écrans : `/clubs`, `/clubs/[slug]`, `/evenements`, `/evenements/[id]`,
+`/messages` et `/messages/[id]`.
+
+### La décision qui n'était dans aucune option
+
+**Un message n'est pas chiffré de bout en bout, et la plateforme peut le lire.**
+Personne ne l'avait demandé, et elle ne se choisit pas : l'article 16 du DSA veut
+qu'un contenu signalé soit examinable, donc `public.messages` entre dans les
+cibles de `mod.reports`, un modérateur a une policy `SELECT` dessus, et la
+politique de confidentialité le dit en toutes lettres. Une messagerie qui
+laisserait croire le contraire serait pire qu'une messagerie franche.
+
+### Cinq décisions qui ne méritaient pas d'ADR
+
+**Une conversation a exactement deux personnes, en colonnes ordonnées.** Aucune
+contrainte ne sait compter des lignes, donc une table de jonction n'aurait pas pu
+exprimer « exactement deux » — et chacune des questions qui découlent de N
+participants (qui ajoute, que voit un arrivant, que devient une conversation à
+une personne) est une décision sur de la donnée que le §2 range possiblement à
+l'article 9. `member_a < member_b` rend la paire canonique : « la conversation
+entre X et Y » est une lecture, pas une recherche.
+
+**Un club n'a pas de fil.** `posts` ne gagne pas de `club_id`, parce qu'une
+colonne qui décide d'une audience doit garder un seul sens et que `visibility` en
+aurait eu deux selon qu'une autre colonne est nulle. Un club est un groupe et un
+calendrier ; ce qu'on y écrit se lit dans le fil du site.
+
+**Le lieu d'un événement est une chaîne, pas un `venue_id`.** P5 apporte les
+lieux ; une colonne que rien ne remplit et qu'aucune policy ne lit est ce que
+l'ADR 0007 a déjà refusé pour `posts`. La migration se fera en une requête.
+
+**Ouvrir une conversation ne la marque pas lue.** `read_at` est visible de
+l'expéditeur : un accusé de lecture déclenché par le préchargement d'un lien
+mentirait sur quelqu'un. C'est un bouton, et répondre le fait aussi — répondre
+est la preuve.
+
+**« Complet » n'empêche rien, et le dit.** Aucun `CHECK` ne peut comparer un
+compte à la colonne d'une autre ligne, donc la limite de places est une courtoisie
+d'interface. L'écrire sans le dire aurait été une promesse que rien ne tient.
+
+### Deux bugs trouvés dans un navigateur, pas dans un type
+
+**Un `upsert` PostgREST demande l'UPDATE sur toutes les colonnes de sa charge.**
+`event_attendees` accorde `insert (event_id, user_id, status)` et `update (status)`
+seulement — une réponse ne déménage pas vers un autre événement. Un upsert devient
+`… do update set event_id = excluded.event_id, …`, donc `42501`. Et comme une
+écriture refusée **rend zéro ligne au lieu de lever**, l'écran se repeignait sur
+« 0 personnes viennent », sans message nulle part. Le geste correct sous des droits
+de colonne est `update` puis `insert` si rien n'a bougé. Trouvé au deuxième clic.
+
+**Un `datetime-local` rend une heure murale sans fuseau.** PostgREST tourne en
+UTC : une dégustation annoncée à 20 h en juillet s'enregistrait à 22 h de Paris,
+en silence, sur le seul champ autour duquel les gens organisent une soirée.
+`fromBrandZoneWallClock()` mesure le décalage à l'instant lui-même, donc il suit
+l'heure d'été. Le parcours saisit 20:00 et exige de relire 20:00.
+
+### Et un piège de parcours, pour la prochaine fois
+
+**Une Server Action qui redirige rend la main avant que le routeur ait navigué.**
+`page.url()` lu après 900 ms rendait encore `/messages` : tout le reste du parcours
+visitait ensuite la boîte de réception en croyant lire une conversation, et deux
+assertions étaient rouges sur un produit qui marchait. On attend l'**adresse**
+(`waitForURL`), jamais un délai.
+
+### Ce qui reste ouvert
+
+`public.conversations` n'a **aucun droit DELETE**, pour personne : la rétention
+est la question ouverte de l'ADR 0010, et ouvrir la suppression l'aurait tranchée
+par accident. Conséquence pratique : une conversation vide survit à un parcours et
+se retire depuis un contexte privilégié.
+
+---
+
+## P3 — le fil, et cinq bugs dont quatre étaient verts
+
+### Ce qui est livré
+
+L'ADR 0007 avant la première ligne de SQL, puis quatre migrations — `0010` le
+schéma social, `0011` les trois clés de confidentialité, `0012` et `0013` deux
+corrections de la 0010 trouvées en parcourant. Trente-deux assertions SQL, vingt
+tests unitaires sur le curseur et les bornes, **soixante-six assertions de
+parcours** contre la vraie base avec deux comptes, et le nettoyage vérifié à
+zéro ligne.
+
+Les trois dettes que la phase attendait sont refermées : la branche `followers`
+de `reviews` existe, `show_humidor` ouvre une cave sans ouvrir son grand livre,
+`show_reviews` et `show_country` sont lus par un écran de profil.
+
+### Cinq décisions qui ne méritaient pas d'ADR
+
+**Le fil est un lien, jamais un défilement infini.** Le §5.6 l'interdit ; ce qui
+n'était pas écrit, c'est pourquoi un lien est mieux qu'un bouton « charger la
+suite ». Trois raisons, dans l'ordre où elles comptent : il survit à un
+rafraîchissement, il se partage, et **le curseur est lisible dans la barre
+d'adresse** — donc une page qui commence au mauvais endroit est un bug qu'on
+voit plutôt qu'un bug qu'on instrumente.
+
+**Une publication ne peut être ni privée ni partagée.** Un `CHECK` sur deux
+valeurs plutôt que quatre. Publier, c'est s'adresser à quelqu'un ; écrire pour
+soi, c'est le carnet, et c'est déjà ce qu'il fait par défaut. Quelqu'un voudra un
+brouillon de publication ; il n'y en a pas, et c'est un refus assumé plutôt
+qu'une fonctionnalité manquante.
+
+**Trois portes d'entrée pour trois gestes, chacune près de son objet.** Le
+composeur de `/fil` écrit une note ou une question ; « je fume ce cigare » part
+de la fiche, parce que `posts_session_has_cigar` veut un cigare et qu'un champ
+qui le demanderait par identifiant demanderait de taper un uuid ; « publier au
+fil » part de l'entrée de carnet, où son audience est déjà à l'écran.
+
+**Deux tables du §5.6 changent de nom.** `reactions` devient `post_reactions`,
+`comments` devient `post_comments` — `public.comments` est pris par l'ADR 0005 et
+porte les commentaires de fiche, publics par construction. Une table pour les
+deux aurait mis deux régimes de visibilité dans une seule policy.
+
+**Le blocage est asymétrique sur `profiles` et symétrique partout ailleurs.**
+Ce n'est pas une nuance : voir la 0012 plus bas.
+
+### Trois mesures qui ont changé le code
+
+Chacune a été prise sur 50 000 publications synthétiques, en local, avant de
+croire quoi que ce soit.
+
+1. **`feed_page()` écrite en une requête paramétrée : 258 ms.** Le planificateur
+   ne peut prouver aucune branche d'un `or` dont la portée est un paramètre, donc
+   il abandonne `posts_public_keyset_idx` — dont le prédicat partiel est
+   justement `visibility = 'public'` — et trie la table entière pour rendre vingt
+   lignes. Deux requêtes statiques derrière un `if` plpgsql : **2,5 ms**.
+2. **Le fil des abonnements : 600 ms.** Un `exists` sur `follows` avec un
+   `order by` global n'a aucun index à suivre, `posts_author_keyset_idx`
+   commençant par l'auteur. Un `LATERAL` par personne suivie fait dépendre le
+   coût du nombre d'abonnements et non du nombre de publications du site :
+   **4 ms**.
+3. **`blocks_between(author_id)` dans une policy : 2 420 appels pour vingt
+   lignes.** Un prédicat s'évalue par ligne examinée. La même règle rendue sous
+   forme de **tableau**, enveloppée dans un `(select …)`, s'évalue une fois par
+   requête en InitPlan — le geste exact de `(select auth.uid())` de la 0003.
+   **27 ms de moins par page.**
+
+Et la mesure qui compte pour le §9 : après avoir parcouru 10 000 lignes, la page
+suivante coûte **1,4 ms**. Un keyset est plat en profondeur ; c'est toute sa
+raison d'être, et c'est ce qu'un `offset` ne sait pas faire.
+
+### Les bugs, et ce qu'ils ont en commun
+
+Cinq, dont **aucun** n'était visible d'un compilateur, de 270 tests unitaires ou
+de 32 assertions SQL. Quatre ont été trouvés en ouvrant une page ; le cinquième
+a été trouvé en **nettoyant** derrière une page.
+
+**1. Une publication publique sur une entrée réservée était acceptée.** La
+policy comparait `r.visibility = visibility` : `reviews` a une colonne de ce nom,
+donc PostgreSQL résout d'abord dans la portée la plus interne, et la condition
+comparait la colonne à elle-même. Toujours vraie. Attrapée par l'assertion P3, et
+par relecture jamais — l'expression est correcte à l'œil.
+
+**2. Un blocage était définitif.** `profiles_block_restrictive` cachait le profil
+dans les deux sens ; le seul écran portant « Débloquer » est ce profil. Trouvé en
+bloquant quelqu'un et en cherchant comment revenir en arrière. La 0012 rend le
+prédicat directionnel **sur `profiles` seulement** : celui qui bloque voit
+toujours sa cible, jamais son contenu. Cacher à quelqu'un l'objet de sa propre
+décision ne protège personne.
+
+**3. Une publication réservée aux abonnés répondait 404 à son adresse.**
+`getPost()` demandait au fil une page d'une ligne avec la portée `discover`, en
+raisonnant que c'était la plus large et que la RLS déciderait. Faux :
+`discover` filtre `visibility = 'public'` **dans le corps de la fonction**, et ce
+filtre dit de quel onglet on parle, pas qui a le droit de lire. Personne ne
+pouvait ouvrir la page, donc personne ne pouvait supprimer la publication — et
+c'est ainsi qu'il est apparu : **trois d'entre elles survivaient à chaque
+exécution du parcours**, visibles seulement en comptant les lignes en base. La
+0013 ajoute `post_card()`, qui n'a aucun prédicat d'audience.
+
+**4. Le bouton braise s'annonçait « Aucune braise ».** Un `aria-label`
+**remplace** le nom accessible : le contrôle nommait un compte là où un bouton
+doit dire ce qu'il fait. Seule une assertion cherchant le contrôle par son rôle
+pouvait le voir ; à l'œil, la page était parfaite.
+
+**5. Ouvrir une cave à un tiers ouvrait son grand livre.** Les trois tables
+filles ne redisent pas la propriété — elles rejoignent `humidors` par un `EXISTS`
+soumis à sa RLS —, donc la policy de `show_humidor` cascadait jusqu'à « quand
+cette personne a fumé quoi ». Trouvé en lisant la 0008 avant d'écrire la 0010,
+et c'est le seul des cinq qui ait été attrapé avant d'exister.
+
+Ce qu'ils ont en commun : **quatre sur cinq sont verts**. Le code compile, les
+tests passent, la page s'affiche. Trois demandent d'ouvrir un écran avec un vrai
+compte ; le troisième demande en plus de **ranger derrière soi** — le parcours
+comptait 49 assertions vertes au moment où il laissait trois lignes en base.
+
+### Le harnais a menti trois fois, et il est réparé
+
+Il fallait le noter, parce qu'un parcours qui se trompe est pire qu'un parcours
+absent : il rassure.
+
+- **Une exception n'était pas un échec.** Un `finally` sortait avec zéro échec
+  parce que rien n'avait été *coché* en échec : un parcours interrompu à l'étape
+  8 rendait « 29 assertions, 0 échec ».
+- **Une boucle d'écriture faisait confiance à un délai.** 700 ms entre deux
+  publications en a perdu six sur vingt-et-une, et quinze publications
+  ressemblent à une page pleine. On attend maintenant que le champ se vide —
+  React 19 réinitialise le formulaire **au retour** de la Server Action, donc un
+  champ vide est le signal exact que l'écriture a eu lieu.
+- **Un clic sur un `<Link>` navigue côté client.** Lire `page.url()` après une
+  attente fixe interroge la page qu'on vient de quitter. On lit le `href` et on
+  y va.
+
+---
+
 ## La fin de P1, et un garde-fou qui se gardait lui-même
 
 22 août 2026 au soir. `/parametres`, le comparateur, le décodeur, la contribution wiki, le sitemap,

@@ -20,10 +20,12 @@ import {
   searchMembers,
 } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
+import { findPostForReview } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
 
 import { DeleteEntryForm } from './delete-entry-form'
 import { EntryEditor } from './entry-editor'
+import { FeedSharePanel } from './feed-share-panel'
 import { HumidorLink } from './humidor-link'
 import { SharePanel } from './share-panel'
 
@@ -81,6 +83,10 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
     user ? myScoreScale(user.id) : Promise.resolve(100 as const),
     reportSlaHours(),
   ])
+
+  /* Only for the author: nobody else sees the panel it feeds, and asking for it
+     on every read of a shared entry would be one query for one branch. */
+  const feedPostId = isMine ? await findPostForReview(entry.id) : null
 
   const thirdLabels = [copy.thirdOne, copy.thirdTwo, copy.thirdThree]
   const scoreLabels = m.notebook.scores
@@ -238,6 +244,17 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
               body={entry.body}
               visibility={entry.visibility}
               sharedCount={shares.length}
+            />
+          </div>
+
+          {/* Le fil, between the editor and the named recipients, because that
+              is the order the two audiences widen in: this one is the entry's
+              own scope announced, the next one names people one by one. */}
+          <div className="border-rule bg-surface rounded-[3px] border p-5">
+            <FeedSharePanel
+              reviewId={entry.id}
+              visibility={entry.visibility}
+              existingPostId={feedPostId}
             />
           </div>
 

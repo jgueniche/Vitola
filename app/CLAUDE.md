@@ -5,7 +5,7 @@
 `'use client'` est l'exception et doit être justifié par un commentaire d'une ligne juste au-dessus.
 La recherche facettée n'en est pas un : ses facettes sont des liens et son champ un
 `<form method="get">`, donc zéro JavaScript. La recherche de la cave non plus, pour la même
-raison. Dix-neuf existent :
+raison. Trente existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -28,8 +28,19 @@ raison. Dix-neuf existent :
 | `parametres/forms.tsx` | profil, préférences, confidentialité, et l'effacement du compte |
 | `cigares/[slug]/proposer/propose-form.tsx` | une proposition part des valeurs de la fiche |
 | `contributions/decide-forms.tsx` | accepter ou refuser, et retirer sa proposition |
+| `fil/composer.tsx` | `useActionState` — un refus se relit sur place, sans perdre le texte |
+| `fil/ember-button.tsx` | `useTransition` — une braise n'a rien à rendre, la page revalidée dit tout |
+| `fil/[id]/comment-form.tsx` | idem `comment-form.tsx` : vider le champ **seulement** en cas de succès |
+| `fil/[id]/delete-forms.tsx` | `window.confirm` avant une suppression en cascade |
+| `cigares/[slug]/session-form.tsx` | publier au fil depuis la fiche, avec sa portée |
+| `carnet/[id]/feed-share-panel.tsx` | annoncer une entrée au fil, ou dire pourquoi c'est impossible |
+| `membres/[handle]/relation-forms.tsx` | s'abonner, se désabonner, retirer un abonné, bloquer |
+| `membres/[handle]/unblock-button.tsx` | débloquer depuis la liste des paramètres |
+| `clubs/club-form.tsx` | l'adresse du club s'affiche **pendant** la frappe, avant qu'il existe |
+| `evenements/event-form.tsx` | `useActionState` — une date refusée se relit sans perdre le reste |
+| `messages/[id]/composer.tsx` | `useActionState` — envoyer ne retire pas la boîte, donc l'état se lit |
 
-Cinq règles apprises en les écrivant :
+Les règles apprises en les écrivant :
 
 - **Un formulaire qui doit se refermer tout seul n'utilise pas `useActionState`.** La règle
   `react-hooks/set-state-in-effect` refuse `setState` dans un `useEffect`, et surveiller l'état
@@ -57,12 +68,43 @@ Cinq règles apprises en les écrivant :
   phrase apparaître. Effet de bord utile : les parcours ont enfin quelque chose d'univoque à
   attendre. Ils attendaient le mot « enregistré » dans le texte de la page, et le trouvaient dans
   sa prose : trois écritures refusées ont été lues comme des succès.
+- **Un `aria-label` REMPLACE le nom accessible, il ne s'y ajoute pas.** Le bouton braise portait
+  `aria-label={count === 0 ? 'Aucune braise' : undefined}`, avec l'idée d'annoncer le compte. Le
+  contrôle s'annonçait donc « Aucune braise » — un compte, là où un bouton doit dire ce qu'il fait.
+  Le compte est déjà le `<span>` voisin, lu dans l'ordre du document. Seule une assertion cherchant
+  le contrôle **par son rôle** pouvait le voir : à l'œil, la page était parfaite.
+- **Une action qui remplace le sous-arbre où elle a été cliquée navigue.** C'est la règle de
+  `/contributions`, rencontrée deux fois de plus en P3 : bloquer quelqu'un remplace tout le bloc de
+  relations par le panneau de déblocage, et débloquer depuis les paramètres retire sa propre ligne.
+  Le composant qui tenait l'état de retour est démonté dans le même rendu. La confirmation voyage
+  donc dans l'URL (`?fait=…`) et la page d'arrivée la rend, avec `role="status"`. Le **refus**, lui,
+  reste un état de retour : il laisse tout en place, donc il a un endroit où s'afficher.
+- **Un chemin de retour qui vient d'un champ caché est contrôlé par l'attaquant.** Les cinq gestes de
+  relation prennent un `retour`, et il passe par `safeSuite()` — le garde-fou d'open-redirect que
+  l'age gate applique déjà à son `suite`. Sans lui, chacun de ces boutons est une redirection
+  ouverte.
+- **Un module `'use server'` ne peut exporter que des fonctions asynchrones.** Un objet de
+  constantes exporté depuis `actions.ts` casse le build à la collecte des données de page, avec une
+  erreur qui désigne la dernière ligne du fichier plutôt que l'export fautif. Les constantes vont
+  dans `lib/`, et les deux côtés les importent.
 - **L'état d'interface d'une page qui écrit doit vivre dans l'URL, pas dans un composant client.**
   `/cave/[id]` en a trois — le terme cherché, le cigare qu'on ajoute, le lot qu'on ouvre — et les
   trois sont des liens. Ce n'est pas de la pureté : **chaque écriture provoque un nouveau rendu
   serveur**, et un panneau ouvert par `useState` se referme à ce moment-là, sous les doigts de la
   personne qui vient de fumer un cigare. Dans l'URL, il reste ouvert, se partage et survit au
   retour arrière. Les formulaires à l'intérieur sont le seul code client de la page.
+- **Une page ne doit pas écrire pendant qu'elle rend, et un accusé de lecture le rappelle.**
+  Ouvrir une conversation ne marque rien comme lu : `read_at` est visible de l'expéditeur, donc un
+  accusé déclenché par le préchargement d'un lien mentirait **sur quelqu'un**. C'est un bouton, et
+  répondre le fait aussi — répondre est la preuve.
+- **Trois écrans de plus qui naviguent plutôt que de rendre un état** : quitter un club, retirer un
+  membre, annuler un événement. Même cause que `/contributions`. Le seul qui garde un état de
+  retour est le composeur de message, parce que la boîte reste à l'écran.
+- **Un `<input type="datetime-local">` rend une heure murale sans fuseau.** PostgREST tourne en
+  UTC : une dégustation annoncée à 20 h en juillet s'enregistrait à 22 h de Paris, en silence, sur
+  le seul champ autour duquel les gens organisent une soirée. `fromBrandZoneWallClock()` mesure le
+  décalage à l'instant lui-même, donc il suit l'heure d'été, et il est épinglé des deux côtés de
+  l'année.
 - **Lire `localStorage` demande `useSyncExternalStore`.** Pendant le rendu, serveur et client
   divergent ; dans un effet, `set-state-in-effect` refuse. Le hook rend l'instantané serveur
   (`null`) pendant l'hydratation puis relit côté client, sans écart. C'est le brouillon de

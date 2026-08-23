@@ -38,35 +38,39 @@ export const DEFAULT_SCOPE: ReviewVisibility = 'private'
 /**
  * What each scope actually does *today*, as opposed to what it names.
  *
- * The two flags exist because two of the four scopes lie if you only read their
+ * The flags exist because two of the four scopes lie if you only read their
  * label, and the interface is what has to stop them lying:
  *
  *   - `namesPeople` — `shared` is the only scope whose audience is a list the
  *     author writes. It needs a second control; the others do not.
- *   - `reachesNobodyYet` — `followers` has no readers at all until `public
- *     .follows` exists in P3, because a policy cannot query a table that is not
- *     there. Its SELECT branch is therefore missing, and an entry marked
- *     `followers` is visible to its author and no one else. Offering it without
- *     saying that would sell an audience that does not read.
+ *   - `livingAudience` — the ADR 0004 arbitration rendered executable:
+ *     `followers` is the one scope whose readership grows *after* the author
+ *     chose it. "Il écrit pour ses 12 abonnés du jour ; ils sont 300 six mois
+ *     plus tard, et rien ne le lui a redemandé." The 22 August ruling kept the
+ *     scope and turned the warning into an interface obligation — this flag is
+ *     where that obligation is stored, so a component cannot render the option
+ *     without it.
  *
- * `livingAudience` is the third, and it is the ADR's arbitration rendered
- * executable: `followers` is the one scope whose readership grows *after* the
- * author chose it. "Il écrit pour ses 12 abonnés du jour ; ils sont 300 six mois
- * plus tard, et rien ne le lui a redemandé." The 22 August ruling kept the scope
- * and turned the warning into an interface obligation — this flag is where that
- * obligation is stored, so a component cannot render the option without it.
+ * A third flag lived here until P3 and is worth knowing about, because its
+ * absence is the debt closing rather than a simplification.
+ * `reachesNobodyYet` marked `followers` as having no readers at all: the SELECT
+ * branch could not exist while `public.follows` did not, so an entry scoped to
+ * one's followers was visible to its author and no one else, and the interface
+ * said so. Migration 0010 writes that branch (ADR 0007, D1), so the flag, the
+ * sentence it rendered and the message key behind it all went in the same
+ * commit — an interface that keeps warning about a limit that has been lifted
+ * is a worse lie than the one the warning existed to prevent.
  */
 export type ScopeTraits = {
   namesPeople: boolean
   livingAudience: boolean
-  reachesNobodyYet: boolean
 }
 
 export const SCOPE_TRAITS: Record<ReviewVisibility, ScopeTraits> = {
-  private: { namesPeople: false, livingAudience: false, reachesNobodyYet: false },
-  shared: { namesPeople: true, livingAudience: false, reachesNobodyYet: false },
-  followers: { namesPeople: false, livingAudience: true, reachesNobodyYet: true },
-  public: { namesPeople: false, livingAudience: false, reachesNobodyYet: false },
+  private: { namesPeople: false, livingAudience: false },
+  shared: { namesPeople: true, livingAudience: false },
+  followers: { namesPeople: false, livingAudience: true },
+  public: { namesPeople: false, livingAudience: false },
 }
 
 /** Only a public entry feeds `cigar_stats` — ADR 0004, D3. */

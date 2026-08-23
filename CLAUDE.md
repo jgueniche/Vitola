@@ -82,7 +82,9 @@ destinataires et supprimer, la bascule /100 ↔ /20 du §5.4, et `cigar_stats` s
 **Trois règles héritées de l'ADR, qui ne se contournent pas** : aucun filtre `visibility` en
 TypeScript — la RLS l'applique et rien d'autre ; la portée est **par entrée**, jamais globale ; et
 seules les entrées publiques alimentent une moyenne publique. La quatrième est d'interface :
-choisir « mes abonnés » doit **dire** que l'audience est vivante, et qu'elle est vide jusqu'à P3.
+choisir « mes abonnés » doit **dire** que l'audience est vivante. Depuis P3 elle n'est plus vide, et
+la phrase a changé plutôt que disparu — l'abonnement étant libre, l'auteur ne choisit pas qui la
+rejoint ; ce qu'il garde, c'est le retrait.
 
 **Deux décisions prises en construisant**, consignées dans `docs/decisions-log.md` : les six
 sous-notes sont sur 10 et la note globale en est la moyenne — elle ne se saisit pas, faute de quoi
@@ -153,6 +155,34 @@ OG et le contrôle de dérive des types.
 **Ce qui rouvre `ref.lines` existe désormais** — la file de contribution — mais proposer une *gamme*
 n'est pas offert : il faut d'abord que des gammes existent. La décision de v1 ci-dessous tient.
 
+## P3 — le social, livré le 23 août 2026 au matin
+
+`/fil` (deux onglets, pagination keyset par lien, composeur), `/fil/[id]` (braises, réponses),
+`/membres` et `/membres/[handle]` (profil public, abonnements, blocage), `/notifications`, plus
+« Je fume ce cigare » sur la fiche et « Publier au fil » sur une entrée de carnet. ADR 0007,
+migrations `0010` à `0013`, 66 assertions de parcours en navigateur.
+
+**Les trois dettes de P3 sont refermées** : la branche `followers` de `reviews` existe,
+`show_humidor` ouvre une cave sans ouvrir son grand livre, `show_reviews` et `show_country` sont
+lus par un écran.
+
+**Quatre décisions à ne pas redécider sans ADR** (les détails sont dans 0007) :
+
+1. **Un abonnement est libre, asymétrique, et se retire des deux côtés.** Pas de file
+   d'approbation : une approbation donnée en janvier ne se redemande pas en juin, un retrait reste
+   exerçable. C'est la question encore ouverte de l'ADR — elle porte sur ce qu'on promet.
+2. **Le fil est `posts`, et rien d'autre.** Une entrée de carnet y entre par une publication qui la
+   pointe, dont la portée est celle de l'entrée, tenue par un trigger dans les deux sens.
+3. **Une publication est `followers` ou `public`.** Jamais privée ni partagée : publier, c'est
+   s'adresser à quelqu'un, et écrire pour soi c'est le carnet — qui le fait déjà par défaut.
+4. **Un blocage est une policy `RESTRICTIVE`.** Les permissives sont OR-ées ; une de plus ne peut
+   jamais retirer une ligne. C'est le seul mécanisme de PostgreSQL qui dise « quoi qu'on autorise
+   ailleurs, pas celle-ci ».
+
+**Et une règle de mesure**, qui a changé le code trois fois en une phase : **un prédicat dans une
+policy s'évalue une fois par ligne examinée.** Une règle qui se laisse écrire comme un tableau sans
+argument s'évalue une fois par requête — en InitPlan, dès qu'on l'enveloppe dans `(select …)`.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent
@@ -168,6 +198,19 @@ s'en passe sinon ; la page marque n'en dépend pas.
 **Ce qui rouvre :** la file de contribution wiki (F3, fin de P1). Une gamme est exactement le genre
 de fait qu'un contributeur connaît et qu'un relecteur vérifie — c'est le bon chemin, et il existera
 bientôt. Y verser une liste devinée maintenant, c'est se priver du seul contrôle qu'on a.
+
+**Le déclencheur est arrivé, et la relecture est écrite** :
+[`docs/adr/0009-rouvrir-ref-lines.md`](docs/adr/0009-rouvrir-ref-lines.md), en attente d'arbitrage.
+Elle trouve un fait que la décision d'origine avait vu sans le suivre jusqu'au bout — `ref.lines`
+n'a pas de colonne `status`, donc une gamme est publique **dès son insertion**, là où corriger la
+longueur d'un cigare passe par une file de relecture. L'asymétrie est à l'envers, et c'est elle qui
+décide : la table gagne un `status` avant de gagner des lignes.
+
+La création d'une **fiche** entièrement nouvelle a sa propre ADR,
+[`0008`](docs/adr/0008-proposer-une-fiche-nouvelle.md), pour une raison voisine : la colonne qui
+bloque est `created_by`, hors de tout `GRANT UPDATE`, et la seule façon qu'elle porte le nom du
+proposeur est qu'il insère la ligne lui-même — donc un brouillon de `ref.cigars`, pas une table à
+part.
 
 ## Commandes
 

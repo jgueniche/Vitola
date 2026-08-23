@@ -26,17 +26,26 @@ import {
  * mirror following would show a member an error for a value the database would
  * happily have taken, which is the most annoying kind of wrong.
  *
- * The scope traits are pinned too, and for a heavier reason. `followers` has no
- * SELECT branch until `public.follows` lands in P3, and ADR 0004's arbitration
- * of 22 August turned "say so in the interface" into an obligation. The day that
- * branch is written, `reachesNobodyYet` must go false — the test below fails
- * then, on purpose, so nobody has to remember.
+ * The scope traits are pinned too, and for a heavier reason. Until P3 this file
+ * asserted the *absence* of a `followers` SELECT branch, and required the
+ * interface to say the scope reached nobody — ADR 0004's arbitration of 22
+ * August turned "say so" into an obligation. Migration 0010 wrote that branch
+ * (ADR 0007, D1), so the assertion turned over rather than being deleted: it now
+ * requires the branch to exist and the sentence to be gone. Drop the policy and
+ * this fails; leave the old warning in the copy and it fails too.
  */
 
 const M0003 = readFileSync(
   join(process.cwd(), 'supabase/migrations/0003_carnet.sql'),
   'utf8',
 )
+
+const M0010 = readFileSync(
+  join(process.cwd(), 'supabase/migrations/0010_social.sql'),
+  'utf8',
+)
+
+const MESSAGES = readFileSync(join(process.cwd(), 'messages/fr.json'), 'utf8')
 
 describe('the bounds mirror migration 0003', () => {
   it('caps the body at what reviews_body_len allows', () => {
@@ -92,20 +101,28 @@ describe('the bounds mirror migration 0003', () => {
 })
 
 describe('scope traits', () => {
-  it('marks followers as reaching nobody while the policy branch is missing', () => {
+  it('has the followers SELECT branch the scope promises', () => {
     /*
-     * The inverse assertion is the point: if a `followers` branch appears in the
-     * SELECT policies, this fails and the interface warning must be retired with
-     * it. Matching on the policy body rather than on the enum value, which is
-     * declared from day one and says nothing about who can read.
+     * Matching on a policy body rather than on the enum value: `followers` has
+     * been declared in `review_visibility` since migration 0003 and says nothing
+     * there about who can read. What makes the scope real is the branch, and the
+     * branch reads `public.follows`.
      */
-    const selectPolicies = /create policy reviews_select_[\s\S]*?create policy reviews_insert_own/.exec(
-      M0003,
-    )
-    const usesFollowers = /visibility = 'followers'/.test(selectPolicies?.[0] ?? '')
+    const branch = /create policy reviews_select_followers on public\.reviews[\s\S]*?;/.exec(M0010)
+    expect(branch, 'the followers SELECT branch has left migration 0010').not.toBeNull()
+    expect(branch?.[0]).toMatch(/visibility = 'followers'/)
+    expect(branch?.[0]).toMatch(/public\.follows/)
+  })
 
-    expect(usesFollowers).toBe(false)
-    expect(SCOPE_TRAITS.followers.reachesNobodyYet).toBe(true)
+  it('no longer tells anyone the scope reaches nobody', () => {
+    /*
+     * The other half, and the reason this file reads `messages/fr.json`: an
+     * interface that keeps warning about a limit that has been lifted is a worse
+     * lie than the one the warning existed to prevent. `followersOpen` replaced
+     * it, and says the true thing instead — the audience is free to join.
+     */
+    expect(MESSAGES).not.toContain('followersUnavailable')
+    expect(MESSAGES).toContain('followersOpen')
   })
 
   it('names people only for the shared scope', () => {

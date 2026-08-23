@@ -13,6 +13,7 @@ import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 
 import { CommentThread } from './comment-thread'
+import { FeedSection } from './feed-section'
 import { HumidorSection } from './humidor-section'
 import { NotebookSection } from './notebook-section'
 
@@ -141,6 +142,12 @@ export default async function CigarPage({ params }: Params) {
       <HumidorSection cigarId={cigar.id} slug={cigar.slug} />
 
       <NotebookSection cigarId={cigar.id} slug={cigar.slug} />
+
+      {/* Le fil after the notebook, and the order is the argument the notebook
+          section already makes one level down: the private gesture comes first
+          because it is the one that costs nothing to make, and the public one
+          second because it is the one worth thinking about. */}
+      <FeedSection cigarId={cigar.id} slug={cigar.slug} />
 
       <CommentThread cigarId={cigar.id} slug={cigar.slug} />
     </main>

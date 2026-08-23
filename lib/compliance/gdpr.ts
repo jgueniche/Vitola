@@ -285,6 +285,142 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'erased',
   },
 
+  /* Le social (migration 0010, ADR 0007). Onze colonnes pointent auth.users, et
+     chacune est ici parce que `tests/compliance/gdpr-inventory.test.ts` relit le
+     SQL et refuse d'en laisser passer une. C'est le garde-fou qui a mordu en
+     P3, comme il avait mordu pour la cave.
+
+     Les deux sens d'un abonnement sont exportés séparément, et ce n'est pas de
+     la symétrie gratuite : « qui je suis » et « qui me suit » ne répondent pas
+     à la même question de l'art. 15, et une seule ligne les confondrait.
+
+     `hidden_by` survit anonymisé, sur les deux tables : c'est l'acte d'un
+     modérateur, pas de l'auteur, et une décision de modération doit rester
+     lisible après le départ de qui l'a prise. Même règle que `comments`.
+
+     `notifications.actor_id` est le seul cas légèrement contre-intuitif : il
+     cascade plutôt que de s'anonymiser, parce qu'une notification dont l'auteur
+     a disparu n'a plus rien à dire — « quelqu'un a braisé votre publication »
+     sans le quelqu'un n'est pas une information, c'est un résidu. */
+  {
+    key: 'following',
+    schema: 'public',
+    table: 'follows',
+    column: 'follower_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'followers',
+    schema: 'public',
+    table: 'follows',
+    column: 'followee_id',
+    erasure: 'erased',
+  },
+  { key: 'blocksMade', schema: 'public', table: 'blocks', column: 'blocker_id', erasure: 'erased' },
+  {
+    key: 'blocksReceived',
+    schema: 'public',
+    table: 'blocks',
+    column: 'blocked_id',
+    erasure: 'erased',
+  },
+  { key: 'posts', schema: 'public', table: 'posts', column: 'author_id', erasure: 'erased' },
+  {
+    key: 'postsHidden',
+    schema: 'public',
+    table: 'posts',
+    column: 'hidden_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'embers',
+    schema: 'public',
+    table: 'post_reactions',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'postComments',
+    schema: 'public',
+    table: 'post_comments',
+    column: 'author_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'postCommentsHidden',
+    schema: 'public',
+    table: 'post_comments',
+    column: 'hidden_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'notifications',
+    schema: 'public',
+    table: 'notifications',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'notificationsCaused',
+    schema: 'public',
+    table: 'notifications',
+    column: 'actor_id',
+    erasure: 'erased',
+  },
+
+  /* Clubs, événements, messagerie (migration 0014, ADR 0010). Sept colonnes de
+     plus, toutes ici parce que `tests/compliance/gdpr-inventory.test.ts` relit
+     le SQL et refuse d'en laisser passer une. Troisième fois que ce garde-fou
+     mord, après la cave et le fil.
+
+     Deux choses valent d'être lues plutôt que devinées.
+
+     **Un club survit à son propriétaire, anonymisé.** `clubs.owner_id` cascade
+     en base — c'est une clé étrangère `on delete cascade` — donc effacer un
+     compte efface ses clubs et, avec eux, l'appartenance de tous leurs membres.
+     C'est le comportement du schéma et il est brutal ; il est déclaré `erased`
+     ici parce que c'est ce qui se passe réellement, et la question de savoir
+     s'il faudrait plutôt transmettre un club est ouverte plutôt que résolue.
+
+     **Une conversation est exportée deux fois, dans les deux colonnes.** Ce
+     n'est pas de la redondance : `member_a` et `member_b` sont ordonnés par la
+     valeur de l'uuid et non par un rôle, donc « mes conversations » est
+     l'union des deux, et une seule des deux lignes ici rendrait la moitié des
+     échanges invisible à l'export d'une personne sur deux — un bug qu'aucun
+     test ne verrait, puisqu'il dépend de l'ordre de deux identifiants
+     aléatoires. */
+  { key: 'clubsOwned', schema: 'public', table: 'clubs', column: 'owner_id', erasure: 'erased' },
+  {
+    key: 'clubMemberships',
+    schema: 'public',
+    table: 'club_members',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  { key: 'eventsHosted', schema: 'public', table: 'events', column: 'host_id', erasure: 'erased' },
+  {
+    key: 'eventsAttending',
+    schema: 'public',
+    table: 'event_attendees',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'conversationsAsFirst',
+    schema: 'public',
+    table: 'conversations',
+    column: 'member_a',
+    erasure: 'erased',
+  },
+  {
+    key: 'conversationsAsSecond',
+    schema: 'public',
+    table: 'conversations',
+    column: 'member_b',
+    erasure: 'erased',
+  },
+  { key: 'messagesSent', schema: 'public', table: 'messages', column: 'sender_id', erasure: 'erased' },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */
