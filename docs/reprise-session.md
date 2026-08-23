@@ -79,7 +79,7 @@ Tout le reste : applique le défaut documenté et signale-le dans ton compte ren
 
 ---
 
-## ÉTAT AU 22 AOÛT 2026, FIN DE SESSION
+## ÉTAT AU 23 AOÛT 2026, FIN DE SESSION
 
 `master` est la branche de production et **Vercel déploie bien depuis `master`**. `/api/health` sert
 le commit déployé (`{"status":"ok","phase":"P1","commit":"…"}`) : c'est le moyen le plus rapide de
