@@ -31,17 +31,19 @@ const LABELS: Record<ReviewVisibility, { label: string; hint: string }> = {
  * that default to art. 25: publishing is a gesture one makes, never one one
  * forgets to undo.
  *
- * Two options carry more than a label, and `SCOPE_TRAITS` is what forces this
- * component to render them:
+ * One option carries more than a label, and `SCOPE_TRAITS` is what forces this
+ * component to render it: **followers**' audience grows after the choice is
+ * made. Twelve today, three hundred in six months, and nothing asks again. That
+ * is the ADR 0004 arbitration of 22 August, and the caution note below is where
+ * it is discharged.
  *
- *   - **followers** has no readers at all until `public.follows` arrives in P3.
- *     The SELECT branch does not exist, so the entry is visible to its author
- *     and nobody else. Saying so is the difference between a scope that waits
- *     and a scope that silently does nothing.
- *   - **followers** again, once it does work: its audience grows after the
- *     choice is made. Twelve today, three hundred in six months, and nothing
- *     asks again. That is the ADR's arbitration of 22 August, and the sentence
- *     below is where it is discharged.
+ * A second sentence joined it in P3, and it is the honest half of ADR 0007's D1.
+ * Until migration 0010 this component said the scope reached nobody, because no
+ * `follows` table existed. It now reaches people — and the thing worth saying
+ * changed rather than disappeared: an abonnement is **free**, so the author does
+ * not choose who joins that audience. What they do keep is the removal, from
+ * their own profile. Dropping the warning without replacing it would have turned
+ * a scope that did nothing into a scope that quietly did more than expected.
  *
  * `shared` names people from the entry's own page rather than here: the rows go
  * in `review_shares` keyed by `review_id`, which does not exist until the entry
@@ -143,18 +145,13 @@ export function ScopeSelector({
       </div>
 
       {SCOPE_TRAITS[selected].livingAudience ? (
-        <p
+        <div
           role="note"
-          className="border-caution text-ink-muted measure border-l-2 pl-3 text-xs leading-relaxed"
+          className="border-caution measure flex flex-col gap-2 border-l-2 pl-3 text-xs leading-relaxed"
         >
-          {copy.followersWarning}
-        </p>
-      ) : null}
-
-      {SCOPE_TRAITS[selected].reachesNobodyYet ? (
-        <p className="text-ink-faint measure text-xs leading-relaxed">
-          {copy.followersUnavailable}
-        </p>
+          <p className="text-ink-muted">{copy.followersWarning}</p>
+          <p className="text-ink-faint">{copy.followersOpen}</p>
+        </div>
       ) : null}
 
       {SCOPE_TRAITS[selected].namesPeople ? (

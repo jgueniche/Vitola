@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     p_entity_table: target.table,
     p_entity_id: id,
     p_reason: reason,
-    p_detail: detail ?? null,
+    p_detail: detail ?? undefined,
   })
 
   if (error) {

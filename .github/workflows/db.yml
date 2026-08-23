@@ -161,6 +161,25 @@ jobs:
             exit 1
           fi
 
+      # 0010 pose le social. Deux de ses décisions ne se voient qu'à l'exécution :
+      # le blocage est une policy RESTRICTIVE — la seule sémantique qui puisse
+      # retirer une ligne —, et `show_humidor` ouvre les caves sans ouvrir le
+      # grand livre, ce qui demande trois policies restrictives de plus.
+      - name: Apply 0010 — le fil social
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0010_social.sql
+
+      # Le seul endroit d'où se voit une régression de l'ADR 0007. Il n'accorde
+      # rien. Même scrutin du journal qu'ailleurs — un `SET LOCAL ROLE` hors
+      # transaction rend une assertion verte pour rien.
+      - name: Social — abonnement, fil keyset, braise, blocage, cave montrée
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/09_social_rls.sql 2>&1 | tee "$RUNNER_TEMP/social.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/social.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 

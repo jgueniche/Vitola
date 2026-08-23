@@ -701,7 +701,7 @@
       "followers": "Mes abonnés",
       "followersHint": "L'audience est vivante : elle grandit après votre choix.",
       "followersWarning": "Vos abonnés d'aujourd'hui ne sont pas ceux de dans six mois. Une entrée ouverte à douze personnes sera lisible par trois cents si vous en gagnez autant, sans qu'on vous le redemande.",
-      "followersUnavailable": "L'abonnement n'existe pas encore sur ce site. En attendant, une entrée « à mes abonnés » n'est lue par personne d'autre que vous — elle n'est pas perdue, elle attend.",
+      "followersOpen": "L'abonnement est libre : quelqu'un peut rejoindre cette audience sans vous le demander. Vous pouvez retirer un abonné depuis votre profil — sa lecture à venir se referme, ce qu'il a déjà lu reste lu.",
       "public": "Tout le monde",
       "publicHint": "Visible sur la fiche du cigare, y compris d'un visiteur non connecté.",
       "publicCounts": "Seules les entrées publiques entrent dans la moyenne d'un cigare.",

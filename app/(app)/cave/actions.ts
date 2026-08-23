@@ -373,8 +373,14 @@ export async function smokeFromLot(
     p_qty: parsed.data.qty,
     p_smoked_on: parsed.data.occurredOn,
     p_visibility: parsed.data.visibility,
-    p_score: parsed.data.score,
-    p_body: parsed.data.body,
+    // `?? undefined` and not `?? null` : la signature régénérée par Supabase
+    // déclare un paramètre à valeur par défaut comme `T | undefined`, jamais
+    // `T | null` — et c'est juste. Un `null` explicite ÉCRASE le DEFAULT côté
+    // PostgREST ; une clé absente le laisse s'appliquer. Les deux se comportent
+    // pareil ici parce que les défauts SQL sont nuls, mais l'écart mordra le
+    // jour où l'un d'eux ne le sera plus.
+    p_score: parsed.data.score ?? undefined,
+    p_body: parsed.data.body ?? undefined,
   })
 
   if (error) return { error: smokeRefusal(error.code, error.message) }

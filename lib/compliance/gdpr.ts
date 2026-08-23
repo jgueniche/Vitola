@@ -285,6 +285,89 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'erased',
   },
 
+  /* Le social (migration 0010, ADR 0007). Onze colonnes pointent auth.users, et
+     chacune est ici parce que `tests/compliance/gdpr-inventory.test.ts` relit le
+     SQL et refuse d'en laisser passer une. C'est le garde-fou qui a mordu en
+     P3, comme il avait mordu pour la cave.
+
+     Les deux sens d'un abonnement sont exportés séparément, et ce n'est pas de
+     la symétrie gratuite : « qui je suis » et « qui me suit » ne répondent pas
+     à la même question de l'art. 15, et une seule ligne les confondrait.
+
+     `hidden_by` survit anonymisé, sur les deux tables : c'est l'acte d'un
+     modérateur, pas de l'auteur, et une décision de modération doit rester
+     lisible après le départ de qui l'a prise. Même règle que `comments`.
+
+     `notifications.actor_id` est le seul cas légèrement contre-intuitif : il
+     cascade plutôt que de s'anonymiser, parce qu'une notification dont l'auteur
+     a disparu n'a plus rien à dire — « quelqu'un a braisé votre publication »
+     sans le quelqu'un n'est pas une information, c'est un résidu. */
+  {
+    key: 'following',
+    schema: 'public',
+    table: 'follows',
+    column: 'follower_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'followers',
+    schema: 'public',
+    table: 'follows',
+    column: 'followee_id',
+    erasure: 'erased',
+  },
+  { key: 'blocksMade', schema: 'public', table: 'blocks', column: 'blocker_id', erasure: 'erased' },
+  {
+    key: 'blocksReceived',
+    schema: 'public',
+    table: 'blocks',
+    column: 'blocked_id',
+    erasure: 'erased',
+  },
+  { key: 'posts', schema: 'public', table: 'posts', column: 'author_id', erasure: 'erased' },
+  {
+    key: 'postsHidden',
+    schema: 'public',
+    table: 'posts',
+    column: 'hidden_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'embers',
+    schema: 'public',
+    table: 'post_reactions',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'postComments',
+    schema: 'public',
+    table: 'post_comments',
+    column: 'author_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'postCommentsHidden',
+    schema: 'public',
+    table: 'post_comments',
+    column: 'hidden_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'notifications',
+    schema: 'public',
+    table: 'notifications',
+    column: 'user_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'notificationsCaused',
+    schema: 'public',
+    table: 'notifications',
+    column: 'actor_id',
+    erasure: 'erased',
+  },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */
