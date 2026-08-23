@@ -17,6 +17,7 @@ dans `docs/decisions-log.md`, pas ici.
 | [0009](./0009-rouvrir-ref-lines.md) | Rouvrir `ref.lines` par la contribution, avec le `status` qui lui manque | **Proposée** — attend arbitrage | 2026-08-23 |
 | [0010](./0010-clubs-evenements-messagerie.md) | Un club est un groupe et un calendrier ; une conversation a exactement deux personnes | **Acceptée** | 2026-08-23 |
 | [0011](./0011-les-lieux.md) | Les lieux : seed depuis le registre officiel des buralistes, avis à trois critères structurels | **Acceptée** | 2026-08-23 |
+| [0012](./0012-le-journal.md) | Un article est du contenu, jamais du code ; la frontière passe entre deux audiences | **Acceptée** | 2026-08-23 |
 
 ## Statuts
 
