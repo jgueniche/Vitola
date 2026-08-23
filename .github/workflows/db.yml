@@ -169,6 +169,17 @@ jobs:
       - name: RLS coverage
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/00_rls_coverage.sql
 
+      # Le contrôle de dérive des types, sur la base que les migrations viennent
+      # de construire — donc sur ce que le dépôt décrit, et pas sur ce qu'un
+      # projet contient par hasard. Il a été vérifié en retirant une table des
+      # types : il échoue, ce qui est le seul moyen de savoir qu'il mord.
+      - name: Types drift — database.types.ts décrit-il encore le schéma ?
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --silent
+          psql -tA -f tooling/scripts/schema-inventory.sql > "$RUNNER_TEMP/inventory.json"
+          pnpm tsx tooling/scripts/check-types-drift.ts "$RUNNER_TEMP/inventory.json"
+
       # The seed runs on its own database: the verification file above inserts
       # fixtures that would otherwise collide with real seed rows.
       - name: Load the seed referential
