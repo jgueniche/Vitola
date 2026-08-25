@@ -20,6 +20,7 @@ dans `docs/decisions-log.md`, pas ici.
 | [0012](./0012-le-journal.md) | Un article est du contenu, jamais du code ; la frontière passe entre deux audiences | **Acceptée** | 2026-08-23 |
 | [0013](./0013-le-back-office-de-moderation.md) | Le modérateur entre dans `mod` par des portes de la taille du geste ; la décision emporte son acte | **Acceptée** | 2026-08-23 |
 | [0014](./0014-le-back-office-d-administration.md) | L'administration regroupe ce qui existe ; le drapeau devient un acte tracé | **Acceptée** | 2026-08-25 |
+| [0015](./0015-le-catalogue-avant-la-caisse.md) | Le catalogue naît avant la caisse, et il s'alimente sans développeur | **Acceptée** | 2026-08-25 |
 
 ## Statuts
 

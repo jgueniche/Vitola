@@ -99,6 +99,12 @@ export default async function AdminPage() {
             href={routes.adminAccounts()}
             link={copy.dash.accountsLink}
           />
+          <Queue
+            count={counts.productsTotal}
+            label={copy.dash.shopLabel.replace('{draft}', String(counts.productsDraft))}
+            href={routes.adminShop()}
+            link={copy.dash.shopLink}
+          />
         </ul>
       </section>
 

@@ -142,11 +142,12 @@ ils disent de quoi la liste parle, jamais qui a le droit de lire. La preuve par 
 adresse par son auteur et les relecteurs, parce que la RLS le décide, et par personne d'autre,
 pour la même raison. Confondre les deux a coûté une page à P3 (`post_card`).
 
-`venuesFlag()` porte un délai optionnel, et un seul appelant s'en sert : l'en-tête du site, qui
-tourne sur **toutes** les pages. Un drapeau qui ne répond pas dans le délai répond « fermé » — le
-même repli qu'une erreur. Mesuré, pas supposé : sans lui, la lecture du drapeau sur une base
-injoignable rendait chaque écran plus lent que le budget des e2e du portail, et ce sont eux qui
-l'ont attrapé.
+`venuesFlag()` porte un délai optionnel, né pour l'en-tête du site quand celui-ci listait
+« Lieux » sur **toutes** les pages : sur la base injoignable de la CI, cette lecture rendait
+chaque écran plus lent que le budget des e2e du portail. Depuis la navigation en quatre univers,
+**l'en-tête ne lit plus aucun drapeau** — la promesse des lieux vit dans le hub Autour, la seule
+page qui la fait, et le délai reste disponible pour le prochain appelant qui tournerait partout.
+Un drapeau qui ne répond pas dans le délai répond « fermé » — le même repli qu'une erreur.
 
 ## Les caves ne se filtrent pas ici non plus
 

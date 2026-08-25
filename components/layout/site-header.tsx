@@ -6,41 +6,29 @@ import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { countUnreadNotifications } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
-import { venuesFlag } from '@/lib/venues/queries'
 
 /*
- * Only destinations that exist.
+ * Four universes, not seventeen entries.
  *
- * Lieux (P5), Journal (P6) and Boutique (P7) were listed here from P0 to show
- * the shape of the product. They had no page, so every visitor got a 404 on
- * click — and Next prefetches nav links, so the 404s were already firing on
- * page load without anyone clicking anything. A nav is a promise; each entry
- * comes back with its phase. Lieux came back with P5 (behind its flag),
- * Journal with P6 ; Boutique still waits for P7.
+ * The flat nav grew one link per delivered phase until it stopped being a map
+ * of anything. Each entry is now a universe whose hub lists its sections with
+ * a sentence each — one click more to reach a section, seventeen fewer things
+ * to scan on every page. The nav-promise rule survives the regrouping: a hub
+ * only lists destinations that exist, and the venues card of Q6 moved WITH its
+ * flag from this header (read on every page, and once slow enough to redden
+ * ten e2e) to the one page that makes the promise: the Autour hub.
  */
 const NAV = [
-  { label: 'Cigares', href: routes.cigars() },
-  { label: m.journal.title, href: routes.journal() },
-  { label: 'Marques', href: routes.brands() },
-  { label: 'Vitoles', href: routes.vitolas() },
-  { label: 'Arômes', href: routes.aromas() },
-  { label: 'Codes de boîte', href: routes.boxCodes() },
+  { label: m.nav.discover.label, href: routes.hubDiscover() },
+  { label: m.nav.around.label, href: routes.hubAround() },
 ] as const
 
-/* Shown only to a signed-in member, because that is the only person it is a
-   destination for: /carnet redirects a visitor to the sign-in page, and a nav
-   entry whose one behaviour is to bounce you is a promise it cannot keep. */
+/* Shown only to a signed-in member: their sections all redirect a visitor to
+   the sign-in page, and a nav entry whose one behaviour is to bounce you is a
+   promise it cannot keep. */
 const MEMBER_NAV = [
-  { label: m.feed.title, href: routes.feed() },
-  { label: m.members.title, href: routes.members() },
-  { label: m.clubs.title, href: routes.clubs() },
-  { label: m.events.title, href: routes.events() },
-  { label: m.messaging.title, href: routes.conversations() },
-  { label: m.notebook.title, href: routes.notebook() },
-  { label: m.humidor.title, href: routes.humidor() },
-  { label: m.statistics.title, href: routes.statistics() },
-  { label: m.contributions.eyebrow, href: routes.contributions() },
-  { label: m.settings.title, href: routes.settings() },
+  { label: m.nav.mine.label, href: routes.hubMine() },
+  { label: m.nav.circle.label, href: routes.hubCircle() },
 ] as const
 
 /**
@@ -55,15 +43,8 @@ export async function SiteHeader() {
      nothing anyway, and a query per anonymous page view to learn that is a
      query too many. */
   const unread = user ? await countUnreadNotifications() : 0
-  /* Lieux came back with P5 — behind its Q6 flag, so a legal restriction that
-     closes the directory removes the promise from the nav in the same UPDATE.
-     Readable signed out, like the referential, hence NAV and not MEMBER_NAV.
-     The short timeout is load-bearing: this header is on every page, and a nav
-     entry is not worth a slow one — an unanswered flag reads as closed. */
-  const venues = await venuesFlag(1200)
-  const nav = venues.enabled
-    ? [...NAV, { label: m.venues.title, href: routes.venues() }]
-    : [...NAV]
+
+  const nav = user ? [NAV[0], MEMBER_NAV[0], MEMBER_NAV[1], NAV[1]] : [...NAV]
 
   return (
     <header className="border-rule border-b">
@@ -71,9 +52,9 @@ export async function SiteHeader() {
         <Link href={routes.home()} className="font-display text-ink text-2xl leading-none">
           {BRAND.name}
         </Link>
-        <nav aria-label="Navigation principale">
+        <nav aria-label={m.nav.mainLabel}>
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-            {[...nav, ...(user ? MEMBER_NAV : [])].map((item) => (
+            {nav.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -95,6 +76,16 @@ export async function SiteHeader() {
                       {unread}
                     </span>
                   ) : null}
+                </Link>
+              </li>
+            ) : null}
+            {user ? (
+              <li>
+                <Link
+                  href={routes.settings()}
+                  className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
+                >
+                  {m.settings.title}
                 </Link>
               </li>
             ) : null}

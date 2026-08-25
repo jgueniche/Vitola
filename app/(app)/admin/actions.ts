@@ -5,9 +5,11 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 import { isKnownFlag, PAYLOAD_FIELDS } from '@/lib/admin/flags'
+import { isShopTextAllowed } from '@/lib/compliance/tobacco-terms'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { clubSlug } from '@/lib/social/groups'
+import { Constants } from '@/lib/supabase/database.types'
 import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
 
 /**
@@ -234,4 +236,255 @@ export async function deleteLine(formData: FormData): Promise<void> {
 
   revalidatePath(routes.adminLines())
   redirect(`${routes.adminLines()}?fait=${!data || data.length === 0 ? 'refus' : 'gamme-supprimee'}`)
+}
+
+/* -------------------------------------------------------------------------- */
+/* Shop catalogue (ADR 0015)                                                   */
+/* -------------------------------------------------------------------------- */
+
+const IMAGE_MIME = ['image/webp', 'image/jpeg', 'image/png', 'image/avif']
+const IMAGE_MAX_BYTES = 8_388_608
+
+const productSchema = z.object({
+  category: z.enum(Constants.shop.Enums.product_category, m.admin.errors.categoryNeeded),
+  title: z
+    .string()
+    .transform((value) => value.trim())
+    .pipe(
+      z
+        .string()
+        .min(2, m.admin.errors.productTitleNeeded)
+        .max(140, m.admin.errors.tooLong),
+    ),
+  description: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+    z
+      .string()
+      .transform((value) => value.trim())
+      .pipe(z.string().max(4000, m.admin.errors.tooLong))
+      .nullable(),
+  ),
+  /* The French keyboard types a comma; refusing 24,90 over a dot would make
+     the one person feeding this catalogue retype every price. */
+  price: z.preprocess(
+    (value) => Number.parseFloat(String(value ?? '').replace(',', '.')),
+    z.number(m.admin.errors.priceRange).min(0.01, m.admin.errors.priceRange).max(99999.99, m.admin.errors.priceRange),
+  ),
+  stock: z.preprocess(
+    (value) => Number.parseInt(String(value ?? '0') || '0', 10),
+    z
+      .number(m.admin.errors.stockRange)
+      .int(m.admin.errors.stockRange)
+      .min(0, m.admin.errors.stockRange)
+      .max(100000, m.admin.errors.stockRange),
+  ),
+})
+
+function parseProduct(formData: FormData) {
+  return productSchema.safeParse({
+    category: formData.get('category'),
+    title: formData.get('title'),
+    description: formData.get('description'),
+    price: formData.get('price'),
+    stock: formData.get('stock'),
+  })
+}
+
+/** The screen half of D2: the same refusal the trigger makes, as a sentence. */
+function refuseTobaccoWording(title: string, description: string | null): string | null {
+  return isShopTextAllowed(`${title} ${description ?? ''}`) ? null : m.admin.errors.titleRefused
+}
+
+/** Null when no usable file was submitted; a sentence when one was and is invalid. */
+function readImage(formData: FormData): { file: File | null; error: string | null } {
+  const raw = formData.get('image')
+  if (!(raw instanceof File) || raw.size === 0) return { file: null, error: null }
+  if (!IMAGE_MIME.includes(raw.type) || raw.size > IMAGE_MAX_BYTES) {
+    return { file: null, error: m.admin.errors.imageInvalid }
+  }
+  return { file: raw, error: null }
+}
+
+function productRefusal(code: string | undefined, message: string): string {
+  if (code === '42501') return copy.notAdmin
+  if (code === '23505') return copy.productExists
+  if (code === '23514' && message.includes('VITOLA_TOBACCO_LISTING')) return copy.titleRefused
+  return copy.unknown
+}
+
+export async function createProduct(
+  _previous: AdminState,
+  formData: FormData,
+): Promise<AdminState> {
+  const parsed = parseProduct(formData)
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
+
+  const refused = refuseTobaccoWording(parsed.data.title, parsed.data.description)
+  if (refused) return { error: refused }
+
+  const slug = clubSlug(parsed.data.title)
+  if (slug === '') return { error: copy.productTitleNeeded }
+
+  const image = readImage(formData)
+  if (image.error) return { error: image.error }
+
+  const supabase = await createSupabaseServerClient()
+  const { data: session } = await supabase.auth.getUser()
+  if (!session.user) return { error: copy.notAdmin }
+
+  const { data, error } = await supabase
+    .schema('shop')
+    .from('products')
+    .insert({
+      category: parsed.data.category,
+      title: parsed.data.title,
+      slug,
+      description: parsed.data.description,
+      price_eur: parsed.data.price,
+      stock_qty: parsed.data.stock,
+      created_by: session.user.id,
+    })
+    .select('id')
+
+  if (error) return { error: productRefusal(error.code, error.message) }
+  if (!data || data.length === 0) return { error: copy.notAdmin }
+
+  const productId = data[0]?.id
+  if (image.file && productId) {
+    const attach = await attachImage(productId, null, image.file)
+    if (attach) {
+      /* The product exists without its image — a visible, repairable state:
+         it shows « Sans image » in the list and the edit panel retries. */
+      revalidatePath(routes.adminShop())
+      return { error: attach }
+    }
+  }
+
+  revalidatePath(routes.adminShop())
+  revalidatePath(routes.admin())
+  return { done: true }
+}
+
+export async function updateProduct(
+  _previous: AdminState,
+  formData: FormData,
+): Promise<AdminState> {
+  const id = z.uuid().safeParse(formData.get('id'))
+  const parsed = parseProduct(formData)
+  if (!id.success || !parsed.success) {
+    return { error: parsed.success ? copy.unknown : (parsed.error.issues[0]?.message ?? copy.unknown) }
+  }
+
+  const refused = refuseTobaccoWording(parsed.data.title, parsed.data.description)
+  if (refused) return { error: refused }
+
+  const image = readImage(formData)
+  if (image.error) return { error: image.error }
+
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .schema('shop')
+    .from('products')
+    .update({
+      category: parsed.data.category,
+      title: parsed.data.title,
+      description: parsed.data.description,
+      price_eur: parsed.data.price,
+      stock_qty: parsed.data.stock,
+    })
+    .eq('id', id.data)
+    .select('id, image_path')
+
+  if (error) return { error: productRefusal(error.code, error.message) }
+  if (!data || data.length === 0) return { error: copy.notAdmin }
+
+  if (image.file) {
+    const attach = await attachImage(id.data, data[0]?.image_path ?? null, image.file)
+    if (attach) return { error: attach }
+  }
+
+  revalidatePath(routes.adminShop())
+  return { done: true }
+}
+
+/**
+ * Uploads the file, points the product at it, and only then drops the old
+ * object — in that order, so a failure anywhere leaves a product whose image
+ * still renders. Returns null on success, the refusal sentence otherwise.
+ */
+async function attachImage(
+  productId: string,
+  previousPath: string | null,
+  file: File,
+): Promise<string | null> {
+  const supabase = await createSupabaseServerClient()
+  const path = `products/${productId}/${Date.now()}.${file.type.split('/')[1] ?? 'webp'}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('shop-images')
+    .upload(path, file, { contentType: file.type })
+  if (uploadError) return copy.unknown
+
+  const { data } = await supabase
+    .schema('shop')
+    .from('products')
+    .update({ image_path: path })
+    .eq('id', productId)
+    .select('id')
+  if (!data || data.length === 0) return copy.notAdmin
+
+  if (previousPath) await supabase.storage.from('shop-images').remove([previousPath])
+  return null
+}
+
+const productStatusSchema = z.object({
+  id: z.uuid(),
+  status: z.enum(Constants.shop.Enums.product_status),
+})
+
+const PRODUCT_OUTCOME: Record<string, string> = {
+  published: 'produit-publie',
+  draft: 'produit-depublie',
+  archived: 'produit-archive',
+}
+
+export async function setProductStatus(formData: FormData): Promise<void> {
+  const parsed = productStatusSchema.safeParse({
+    id: formData.get('id'),
+    status: formData.get('status'),
+  })
+  if (!parsed.success) return
+
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase
+    .schema('shop')
+    .from('products')
+    .update({ status: parsed.data.status })
+    .eq('id', parsed.data.id)
+    .select('id')
+
+  const fait = !data || data.length === 0 ? 'refus' : (PRODUCT_OUTCOME[parsed.data.status] ?? 'refus')
+  revalidatePath(routes.adminShop())
+  redirect(`${routes.adminShop()}?produit=${parsed.data.id}&fait=${fait}`)
+}
+
+export async function deleteProduct(formData: FormData): Promise<void> {
+  const parsed = z.object({ id: z.uuid() }).safeParse({ id: formData.get('id') })
+  if (!parsed.success) return
+
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase
+    .schema('shop')
+    .from('products')
+    .delete()
+    .eq('id', parsed.data.id)
+    .select('id, image_path')
+
+  const deleted = data?.[0]
+  if (deleted?.image_path) {
+    await supabase.storage.from('shop-images').remove([deleted.image_path])
+  }
+
+  revalidatePath(routes.adminShop())
+  redirect(`${routes.adminShop()}?fait=${deleted ? 'produit-supprime' : 'refus'}`)
 }

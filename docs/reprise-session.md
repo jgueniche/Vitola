@@ -7,6 +7,11 @@
 > Deux arbitrages du porteur sont tombés le même jour : **l'ADR 0003 est acceptée** (« boutique
 > propre d'abord » — Checkout, la marketplace partenaires reste une v2) et le **modèle
 > « stock des civettes contre abonnement » est refusé** (loi Évin — voir la note de la 0003).
+> La même journée a livré, sur ses commandes : **la navigation en quatre univers** (hubs
+> `/decouvrir`, `/chez-moi`, `/cercle`, `/autour` — l'en-tête ne lit plus aucun drapeau) et
+> **le catalogue de la boutique** (ADR 0015, migration `0021`, schéma `shop` exposé,
+> `/admin/boutique` : le porteur alimente ses produits sans développeur ; les avis clients ont
+> leur table et AUCUNE porte d'écriture avant la caisse).
 > La session du 23 au soir avait accepté les **ADR 0008 et 0009 par délégation** (« je te laisse
 > maître à bord ») et appliqué la 0009 pièces 1 et 2 — migration `0019` (le `status` de
 > `ref.lines`), `line_id` proposable au wiki, parcours `gammes.ts`.
@@ -39,10 +44,11 @@ dessous), et le travail de la session de reprise du 23 août au soir — arbitra
 `claude/vitola-reprise-92foh2`, poussée, en attente de PR ou fusionnée depuis. Vérifie l'état
 d'un coup d'œil plutôt que de le supposer, et `/api/health` sert le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **vingt migrations**, toutes dans
-`supabase/migrations/` **et** appliquées sur le projet — la 0019 (le `status` de `ref.lines`) est
-enregistrée sous `20260823210941`, la 0020 (l'administration) sous `20260825104447`.
-`lib/supabase/database.types.ts` les porte et le contrôle de dérive passe (93 objets).
+Le code du dépôt et l'état de la base concordent : **vingt et une migrations**, toutes dans
+`supabase/migrations/` **et** appliquées sur le projet — la 0019 (le `status` de `ref.lines`)
+sous `20260823210941`, la 0020 (l'administration) sous `20260825104447`, la 0021 (le catalogue)
+sous `20260825140004`. `lib/supabase/database.types.ts` les porte, schéma `shop` compris, et le
+contrôle de dérive passe (97 objets, étendu aux quatre schémas).
 
 Et cette concordance n'est plus une promesse : `tooling/scripts/check-types-drift.ts` compare, à
 chaque CI, l'inventaire des objets exposés à `lib/supabase/database.types.ts`, **dans les deux
@@ -204,8 +210,8 @@ si elle est entrée ; si oui, repars de `master`, sinon la branche assignée por
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Vingt migrations**
-appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Vingt et une
+migrations** appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
 |---|---|---|
@@ -229,16 +235,17 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0018` | `moderation` | `supabase/migrations/0018_moderation.sql` |
 | `0019` | `ref_lines_status` | `supabase/migrations/0019_ref_lines_status.sql` |
 | `0020` | `admin` | `supabase/migrations/0020_admin.sql` |
+| `0021` | `shop_catalogue` | `supabase/migrations/0021_shop_catalogue.sql` |
 
-**Huit sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009`, `0015`, `0016`, `0017`, `0018`, `0019` et `0020` : `20260822222420`, `20260822232400`,
-`20260823083729`, `20260823103622`, `20260823115404`, `20260823174500`, `20260823210941` et
-`20260825104447`. C'est l'outil
+**Neuf sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015` à `0021` : `20260822222420`, `20260822232400`, `20260823083729`,
+`20260823103622`, `20260823115404`, `20260823174500`, `20260823210941`, `20260825104447` et
+`20260825140004`. C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
-Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref`.
-`mod` en est délibérément **absent**.
+Schémas exposés à PostgREST : `db_schema = public,graphql_public,ref,shop` — `shop` depuis la
+0021 (le catalogue se lit et s'écrit par la session). `mod` en est délibérément **absent**.
 
 Extensions ajoutées : **`pg_cron`**, pour une seule tâche — `vitola-refresh-cigar-stats`, toutes
 les cinq minutes — et **`postgis`** (0016), dans le schéma `extensions` comme les autres. La CI
@@ -282,6 +289,8 @@ ref.cigar_revisions         0      public.cigar_stats     3 lignes (vue matéria
                                    public.venue_reviews        0
                                    public.articles             2  ← brouillons d'amorçage (0017)
                                    public.article_links        1  ← le guide gated → une fiche
+                                   shop.products               0  ← 0021 — s'alimente par
+                                   shop.product_reviews        0     /admin/boutique, sans script
 ```
 
 **Le site est utilisé pour de bon, et rien de ce qui suit n'est d'un parcours.** `test_deux`
@@ -483,7 +492,10 @@ public.event_kind          degustation | rencontre | visite | autre
 public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 186 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 198 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
+
+Mesuré sur la base construite par les migrations : 141 `public`, 34 `ref`, 4 `mod`, 8 `shop`,
+11 `storage` — le total historique de ce fichier incluait déjà storage.
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -715,7 +727,7 @@ objets** : le jour où un téléversement existe, il ship avec son `storage.remo
 Documentés dans `docs/setup/supabase.md`, non exécutables. Si le projet est recréé, rien ne les
 reconstruit.
 
-1. **`db_schema` doit valoir `public,graphql_public,ref`** — et surtout **jamais `mod`**. Par défaut
+1. **`db_schema` doit valoir `public,graphql_public,ref,shop`** — et surtout **jamais `mod`**. Par défaut
    un projet n'expose que `public, graphql_public` : sans ce réglage aucune requête client ne
    résout, quel que soit le code. C'est le blocage qui a fait perdre le plus de temps.
 2. **`site_url` + `uri_allow_list`** doivent couvrir localhost, la production et les préversions
@@ -1489,6 +1501,10 @@ pnpm tsx tooling/parcours/gammes.ts          # 19 assertions, TROIS PHASES — l
 pnpm tsx tooling/parcours/admin.ts           # 28 assertions — fixtures SQL privilégiées (une
                                              #   marque, une fiche), voir son en-tête ; ses
                                              #   bascules de drapeau restent dans audit_log
+pnpm tsx tooling/parcours/navigation.ts      # 13 assertions — les quatre univers, sans écriture
+pnpm tsx tooling/parcours/boutique.ts        # 16 assertions — nettoie PAR LE PRODUIT (le DELETE
+                                             #   direct sur storage.objects est refusé par
+                                             #   Supabase : l'API Storage est le seul chemin)
 pnpm tsx tooling/audit/a11y.ts               # 24 écrans, 0 violation attendu (critère P8)
 ```
 

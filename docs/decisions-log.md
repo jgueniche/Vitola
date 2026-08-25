@@ -2,6 +2,72 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Le catalogue avant la caisse — la boutique s'alimente sans développeur
+
+### Ce qui est livré
+
+L'ADR 0015 avant le SQL, la migration `0021` (le schéma `shop` : `products`,
+`product_reviews`, l'enum fermé des catégories, le trigger lexical, le bucket privé
+`shop-images`), **7 assertions SQL** (`16_shop_rls.sql`), le test de dérive du lexique
+(`shop-lexicon-drift.test.ts`, les deux sens), `/admin/boutique` (créer, éditer, publier,
+archiver, supprimer, image), et **16 assertions de parcours** contre la vraie base — dont le
+refus lexical à l'écran, la virgule française dans le prix, et l'image en URL signée. Comptes
+finaux : 0 produit, 0 avis, 0 objet au bucket. Le schéma est **exposé à PostgREST**
+(`db_schema += shop`) — le quatrième réglage de console qu'aucun fichier ne rejoue.
+
+### Quatre décisions qui ne méritaient pas d'ADR
+
+**La virgule française est acceptée dans le prix.** La personne qui alimente ce catalogue tape
+`24,90` ; refuser la virgule au profit du point lui ferait ressaisir chaque prix. Le
+prétraitement remplace, la borne vérifie.
+
+**L'image s'attache dans l'ordre qui ne casse rien** : téléverser, pointer, puis seulement
+retirer l'ancienne — un échec au milieu laisse un produit dont l'image se rend encore. Et un
+échec de téléversement après la création laisse un produit **sans** image : un état visible
+(« Sans image ») et réparable depuis le panneau, jamais un silence.
+
+**La suppression d'un produit emporte son image, par l'API Storage.** Le `DELETE` direct sur
+`storage.objects` est refusé par Supabase (`protect_delete`) — appris en nettoyant : le seul
+chemin est `storage.remove()`, donc l'action du produit le fait, et un parcours qui nettoie
+« en SQL » ne peut pas nettoyer un bucket.
+
+**`06_service_role_reads` est rejoué après la 0021 en CI.** Sa première exécution précède la
+naissance de `shop`, donc sa clause `shop` y est vide — un test étendu qui ne tourne qu'avant
+l'objet qu'il couvre est un test qui ne couvre rien. Même geste pour `02_function_grants` et le
+contrôle de dérive des types, étendus aux quatre schémas.
+
+## La navigation en quatre univers — dix-sept entrées deviennent quatre
+
+### Ce qui est livré
+
+Sur arbitrage du porteur (« c'est principalement l'organisation des pages, un peu foutoir ») :
+l'en-tête passe de dix-sept entrées à plat à **quatre univers** — Découvrir (le référentiel),
+Chez moi (carnet, cave, statistiques), Le cercle (fil, membres, clubs, agenda, messages), Autour
+(lieux, journal) — plus notifications, « Mon compte » et la session. Chaque univers a son hub
+(`/decouvrir`, `/chez-moi`, `/cercle`, `/autour`) : une carte par section, une phrase chacune,
+**aucune requête** — un hub est sur le chemin de tout, il doit ne rien coûter. Aucune URL
+existante ne change. 13 assertions de parcours (`navigation.ts`), 0 violation axe-core sur les
+33 écrans (hubs et `/admin` ajoutés à l'audit), 56 e2e sur identifiants bidon.
+
+### Trois décisions qui ne méritaient pas d'ADR
+
+**La règle de la promesse survit au regroupement.** Un visiteur du portail voit Découvrir et
+Autour ; Chez moi et Le cercle n'apparaissent que connecté, parce que leurs sections renvoient un
+visiteur à la connexion — une entrée dont le seul comportement est de rebondir est une promesse
+cassée (la règle du premier en-tête, inchangée). Et aucun hub ne liste la boutique : elle
+n'existe pas encore, et une carte vers un 404 est le bug que la nav de P0 a déjà payé.
+
+**L'en-tête ne lit plus aucun drapeau.** L'entrée « Lieux » suivait `venues_enabled` depuis P5,
+donc l'en-tête interrogeait la base sur toutes les pages — le coût qui avait fait rougir dix e2e.
+La promesse déménage avec son drapeau dans le hub Autour, la seule page qui la fait : la
+restriction juridique de Q6 reste un `UPDATE` d'une ligne, et le chemin chaud ne paie plus rien.
+
+**Un clic de plus, dix-sept choses de moins à balayer.** Aller de `/cigares` à `/marques` passe
+désormais par le hub. C'est le prix assumé du regroupement ; les chemins fréquents restent des
+liens directs dans les pages elles-mêmes (une fiche pointe sa marque, le carnet sa fiche), et si
+un trajet précis se révèle pénible à l'usage, une sous-navigation par univers est un ajout, pas
+une refonte.
+
 ## L'administration — et deux arbitrages du porteur rendus le même jour
 
 ### Ce qui est livré
