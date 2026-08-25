@@ -1058,7 +1058,9 @@
       "accountsLink": "Parcourir les comptes",
       "flagsTitle": "Les drapeaux",
       "flagsLede": "Ce que le site offre ou retient, sans déploiement.",
-      "flagsLink": "Régler les drapeaux"
+      "flagsLink": "Régler les drapeaux",
+      "shopLabel": "produits au catalogue ({draft} en brouillon)",
+      "shopLink": "Alimenter le catalogue"
     },
     "flagsScreen": {
       "title": "Les drapeaux de fonctionnalité",
@@ -1166,7 +1168,11 @@
       "gammePubliee": "Gamme publiée. Elle est désormais proposable au wiki.",
       "gammeDepubliee": "Gamme dépubliée. Les fiches déjà rattachées ne l'affichent plus.",
       "gammeSupprimee": "Gamme supprimée. Les fiches rattachées ont été détachées.",
-      "refus": "La base a refusé ce geste : il demande un rôle que ce compte n'a pas."
+      "refus": "La base a refusé ce geste : il demande un rôle que ce compte n'a pas.",
+      "produitPublie": "Produit publié. Il sera au rayon le jour où la boutique ouvre.",
+      "produitDepublie": "Produit dépublié, revenu en brouillon.",
+      "produitArchive": "Produit archivé.",
+      "produitSupprime": "Produit supprimé, image comprise."
     },
     "errors": {
       "notAdmin": "Ce geste demande le rôle d'administrateur.",
@@ -1176,7 +1182,58 @@
       "lineNameNeeded": "Une gamme demande un nom avec au moins une lettre ou un chiffre.",
       "lineExists": "Cette marque a déjà une gamme à cette adresse.",
       "tooLong": "Ce champ est trop long.",
-      "unknown": "Cette action n'a pas abouti."
+      "unknown": "Cette action n'a pas abouti.",
+      "titleRefused": "Ce titre ou cette description nomme un produit du tabac : le catalogue ne vend que des accessoires (§2).",
+      "priceRange": "Le prix se compte en euros, entre 0,01 et 99 999.",
+      "stockRange": "Le stock est un entier positif.",
+      "imageInvalid": "L'image doit être WebP, JPEG, PNG ou AVIF, et peser 8 Mo au plus.",
+      "productExists": "Un produit porte déjà ce titre — son adresse serait la même.",
+      "productTitleNeeded": "Un produit demande un titre d'au moins deux caractères, avec des lettres ou des chiffres.",
+      "categoryNeeded": "Choisissez une catégorie."
+    },
+    "shop": {
+      "title": "Le catalogue de la boutique",
+      "lede": "Des accessoires, rien d'autre : la catégorie fermée est la première barrière du §2, le contrôle lexical la seconde — un produit qui nomme le tabac est refusé à l'écran et par la base. Un produit naît en brouillon ; « publié » veut dire prêt pour l'ouverture, la boutique publique arrivant avec le paiement.",
+      "createTitle": "Nouveau produit",
+      "editTitle": "Modifier le produit",
+      "closePanel": "Fermer",
+      "categoryLabel": "Catégorie",
+      "titleLabel": "Titre",
+      "descriptionLabel": "Description",
+      "priceLabel": "Prix (€)",
+      "stockLabel": "Stock",
+      "stockHint": "Déclaratif jusqu'au paiement : le décompte automatique arrive avec la première vente.",
+      "imageLabel": "Image",
+      "imageHint": "WebP, JPEG, PNG ou AVIF, 8 Mo au plus. Elle remplace l'actuelle.",
+      "create": "Créer en brouillon",
+      "save": "Enregistrer",
+      "saved": "Enregistré.",
+      "publish": "Publier",
+      "unpublish": "Dépublier",
+      "archive": "Archiver",
+      "restore": "Ressortir de l'archive",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce produit et son image ? Le jour où des commandes existeront, la suppression deviendra un archivage — aujourd'hui rien n'y fait référence.",
+      "edit": "Modifier",
+      "statusDraft": "Brouillon",
+      "statusPublished": "Publié",
+      "statusArchived": "Archivé",
+      "listTitle": "Les produits",
+      "emptyTitle": "Le catalogue est vide",
+      "emptyBody": "Le premier produit se crée ci-dessus : un titre, une catégorie, un prix. La boutique publique n'ouvre qu'avec le paiement — rien de ce que vous préparez ici n'est encore visible.",
+      "noImage": "Sans image",
+      "categories": {
+        "coupe": "Coupe-cigares",
+        "briquet": "Briquets",
+        "cendrier": "Cendriers",
+        "cave": "Caves de conservation",
+        "hygrometre": "Hygromètres",
+        "etui": "Étuis",
+        "humidification": "Humidification",
+        "livre": "Livres",
+        "entretien": "Entretien",
+        "autre": "Autres accessoires"
+      }
     }
   },
   "aromas": {

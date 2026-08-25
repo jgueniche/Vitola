@@ -2057,6 +2057,125 @@ export type Database = {
       [_ in never]: never
     }
   }
+  shop: {
+    Tables: {
+      product_reviews: {
+        Row: {
+          author_id: string
+          body: string | null
+          created_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          hidden_reason: string | null
+          id: string
+          product_id: string
+          rating: number
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body?: string | null
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          product_id: string
+          rating: number
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string | null
+          created_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          hidden_reason?: string | null
+          id?: string
+          product_id?: string
+          rating?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: Database["shop"]["Enums"]["product_category"]
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          image_path: string | null
+          price_eur: number
+          slug: string
+          status: Database["shop"]["Enums"]["product_status"]
+          stock_qty: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["shop"]["Enums"]["product_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_path?: string | null
+          price_eur: number
+          slug: string
+          status?: Database["shop"]["Enums"]["product_status"]
+          stock_qty?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["shop"]["Enums"]["product_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_path?: string | null
+          price_eur?: number
+          slug?: string
+          status?: Database["shop"]["Enums"]["product_status"]
+          stock_qty?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      product_category:
+        | "coupe"
+        | "briquet"
+        | "cendrier"
+        | "cave"
+        | "hygrometre"
+        | "etui"
+        | "humidification"
+        | "livre"
+        | "entretien"
+        | "autre"
+      product_status: "draft" | "published" | "archived"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
@@ -2268,6 +2387,23 @@ export const Constants = {
         "maduro",
         "oscuro",
       ],
+    },
+  },
+  shop: {
+    Enums: {
+      product_category: [
+        "coupe",
+        "briquet",
+        "cendrier",
+        "cave",
+        "hygrometre",
+        "etui",
+        "humidification",
+        "livre",
+        "entretien",
+        "autre",
+      ],
+      product_status: ["draft", "published", "archived"],
     },
   },
 } as const

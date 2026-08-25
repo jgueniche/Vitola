@@ -47,6 +47,7 @@ export const SEGMENTS = {
   adminAccounts: 'comptes',
   adminSheets: 'fiches',
   adminLines: 'gammes',
+  adminShop: 'boutique',
   compare: 'comparer',
   history: 'historique',
   legalNotice: 'mentions-legales',
@@ -153,6 +154,7 @@ export const routes = {
   adminAccounts: () => `/${SEGMENTS.admin}/${SEGMENTS.adminAccounts}`,
   adminSheets: () => `/${SEGMENTS.admin}/${SEGMENTS.adminSheets}`,
   adminLines: () => `/${SEGMENTS.admin}/${SEGMENTS.adminLines}`,
+  adminShop: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}`,
 
   legalNotice: () => `/${SEGMENTS.legalNotice}`,
   privacy: () => `/${SEGMENTS.privacy}`,

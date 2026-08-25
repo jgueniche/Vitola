@@ -23,7 +23,7 @@
 \pset tuples_only on
 \pset format unaligned
 
-\echo '=== G1  la clé de service lit public et ref en entier'
+\echo '=== G1  la clé de service lit public, ref et shop en entier'
 do $$
 declare offender text;
 begin
@@ -32,7 +32,7 @@ begin
     from pg_class c
     join pg_namespace n on n.oid = c.relnamespace
    where c.relkind = 'r'
-     and n.nspname in ('public', 'ref')
+     and n.nspname in ('public', 'ref', 'shop')
      and not has_table_privilege('service_role', c.oid, 'SELECT');
   if offender is not null then
     raise exception
@@ -41,7 +41,7 @@ begin
   raise notice 'PASS';
 end $$;
 
-\echo '=== G2  elle n''écrit pas dans ref'
+\echo '=== G2  elle n''écrit ni dans ref ni dans shop'
 do $$
 declare offender text;
 begin
@@ -53,7 +53,7 @@ begin
     from pg_class c
     join pg_namespace n on n.oid = c.relnamespace
    where c.relkind = 'r'
-     and n.nspname = 'ref'
+     and n.nspname in ('ref', 'shop')
      and (has_table_privilege('service_role', c.oid, 'INSERT')
        or has_table_privilege('service_role', c.oid, 'DELETE'));
   if offender is not null then

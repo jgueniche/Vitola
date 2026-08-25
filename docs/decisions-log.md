@@ -2,6 +2,40 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Le catalogue avant la caisse — la boutique s'alimente sans développeur
+
+### Ce qui est livré
+
+L'ADR 0015 avant le SQL, la migration `0021` (le schéma `shop` : `products`,
+`product_reviews`, l'enum fermé des catégories, le trigger lexical, le bucket privé
+`shop-images`), **7 assertions SQL** (`16_shop_rls.sql`), le test de dérive du lexique
+(`shop-lexicon-drift.test.ts`, les deux sens), `/admin/boutique` (créer, éditer, publier,
+archiver, supprimer, image), et **16 assertions de parcours** contre la vraie base — dont le
+refus lexical à l'écran, la virgule française dans le prix, et l'image en URL signée. Comptes
+finaux : 0 produit, 0 avis, 0 objet au bucket. Le schéma est **exposé à PostgREST**
+(`db_schema += shop`) — le quatrième réglage de console qu'aucun fichier ne rejoue.
+
+### Quatre décisions qui ne méritaient pas d'ADR
+
+**La virgule française est acceptée dans le prix.** La personne qui alimente ce catalogue tape
+`24,90` ; refuser la virgule au profit du point lui ferait ressaisir chaque prix. Le
+prétraitement remplace, la borne vérifie.
+
+**L'image s'attache dans l'ordre qui ne casse rien** : téléverser, pointer, puis seulement
+retirer l'ancienne — un échec au milieu laisse un produit dont l'image se rend encore. Et un
+échec de téléversement après la création laisse un produit **sans** image : un état visible
+(« Sans image ») et réparable depuis le panneau, jamais un silence.
+
+**La suppression d'un produit emporte son image, par l'API Storage.** Le `DELETE` direct sur
+`storage.objects` est refusé par Supabase (`protect_delete`) — appris en nettoyant : le seul
+chemin est `storage.remove()`, donc l'action du produit le fait, et un parcours qui nettoie
+« en SQL » ne peut pas nettoyer un bucket.
+
+**`06_service_role_reads` est rejoué après la 0021 en CI.** Sa première exécution précède la
+naissance de `shop`, donc sa clause `shop` y est vide — un test étendu qui ne tourne qu'avant
+l'objet qu'il couvre est un test qui ne couvre rien. Même geste pour `02_function_grants` et le
+contrôle de dérive des types, étendus aux quatre schémas.
+
 ## La navigation en quatre univers — dix-sept entrées deviennent quatre
 
 ### Ce qui est livré

@@ -24,7 +24,7 @@ import type { Database } from '@/lib/supabase/database.types'
  */
 type RowKeys<T> = T extends { Row: infer R } ? keyof R & string : never
 
-type SourceIn<S extends 'public' | 'ref'> = {
+type SourceIn<S extends 'public' | 'ref' | 'shop'> = {
   [T in keyof Database[S]['Tables']]: {
     key: string
     schema: S
@@ -125,6 +125,7 @@ type EmbeddedSourceIn<S extends 'public'> = {
 export type PersonalDataSource =
   | SourceIn<'public'>
   | SourceIn<'ref'>
+  | SourceIn<'shop'>
   | EmbeddedSourceIn<'public'>
   | RpcSource
   | UnreachableSource
@@ -463,6 +464,34 @@ export const PERSONAL_DATA_SOURCES = [
     schema: 'public',
     table: 'articles',
     column: 'author_id',
+    erasure: 'anonymised',
+  },
+
+  /* The shop catalogue (migration 0021, ADR 0015). A product survives its
+     author anonymised — the catalogue is the house's, like a wiki sheet. A
+     review is the member's own words and goes with the account; nobody can
+     write one yet (D3: no write grant until the checkout exists), and the
+     declaration precedes the first row on purpose — an inventory that waits
+     for data to be true is an inventory that gets caught lying. */
+  {
+    key: 'productsCreated',
+    schema: 'shop',
+    table: 'products',
+    column: 'created_by',
+    erasure: 'anonymised',
+  },
+  {
+    key: 'productReviews',
+    schema: 'shop',
+    table: 'product_reviews',
+    column: 'author_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'productReviewsHidden',
+    schema: 'shop',
+    table: 'product_reviews',
+    column: 'hidden_by',
     erasure: 'anonymised',
   },
 

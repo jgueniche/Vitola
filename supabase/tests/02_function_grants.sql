@@ -20,7 +20,7 @@ begin
   -- 1. Personne n'appelle une fonction de `public` au titre de PUBLIC.
   select string_agg(format('%I.%I', n.nspname, p.proname), ', ' order by 1) into offender
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname in ('public', 'ref', 'mod')
+   where n.nspname in ('public', 'ref', 'mod', 'shop')
      -- une entrée PUBLIC s'écrit `=X/grantor` : grantee vide avant le `=`
      and array_to_string(coalesce(p.proacl, '{}')::text[], ' ') ~ '(^| )=X/';
   if offender is not null then
@@ -30,7 +30,7 @@ begin
   -- 2. Aucune fonction de trigger n'est appelable par un client.
   select string_agg(format('%I.%I', n.nspname, p.proname), ', ' order by 1) into offender
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname in ('public', 'ref', 'mod')
+   where n.nspname in ('public', 'ref', 'mod', 'shop')
      and pg_get_function_result(p.oid) = 'trigger'
      and (has_function_privilege('anon', p.oid, 'EXECUTE')
        or has_function_privilege('authenticated', p.oid, 'EXECUTE'));
@@ -109,6 +109,6 @@ begin
     end if;
   end loop;
 
-  raise notice 'Droits d''appel : PUBLIC fermé sur public/ref/mod, triggers fermés, fonctions de policy exposées comme prévu.';
+  raise notice 'Droits d''appel : PUBLIC fermé sur public/ref/mod/shop, triggers fermés, fonctions de policy exposées comme prévu.';
 end;
 $$;

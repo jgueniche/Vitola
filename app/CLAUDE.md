@@ -8,7 +8,7 @@ La recherche facettée n'en est pas un : ses facettes sont des liens et son cham
 raison — ni celle des lieux, dont le seul code client est le bouton de géolocalisation, ni la
 liste du journal, qui n'en charge aucun — ni la file de modération, dont le seul code client est
 le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les actions naviguent
-(`?fait=…`) plutôt que de rendre un état. Trente-neuf existent :
+(`?fait=…`) plutôt que de rendre un état. Quarante existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -51,6 +51,7 @@ le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les a
 | `moderation/[id]/decide-form.tsx` | `useActionState`, plus `window.confirm` — trancher ne se refait pas |
 | `admin/drapeaux/flag-form.tsx` | `useActionState` — un refus se lit à côté du drapeau qu'il concerne ; la bascule est un bouton, jamais une case (le reset de React 19) |
 | `admin/gammes/line-forms.tsx` | `useActionState` pour la création (le refus garde la saisie), `window.confirm` pour la suppression |
+| `admin/boutique/product-forms.tsx` | `useActionState` — le refus lexical §2 se lit sans perdre la fiche produit ; `window.confirm` pour la suppression |
 
 Les règles apprises en les écrivant :
 

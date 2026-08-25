@@ -337,7 +337,30 @@ jobs:
             exit 1
           fi
 
-      - name: Function grants, sur les trois schémas
+      # 0021 pose le catalogue (ADR 0015). Ce qui ne se voit qu'à l'exécution :
+      # le trigger lexical refuse un produit du tabac et laisse passer les
+      # composés d'accessoires, un brouillon est invisible du public, et
+      # PERSONNE n'écrit un avis tant que la caisse n'existe pas.
+      - name: Apply 0021 — le catalogue
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0021_shop_catalogue.sql
+
+      - name: Catalogue — trois barrières, brouillons invisibles, avis sans porte
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/16_shop_rls.sql 2>&1 \
+            | tee "$RUNNER_TEMP/catalogue.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/catalogue.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # Rejoué APRÈS 0021 : sa première exécution (après 0007) précède la
+      # naissance de shop, donc sa clause shop y est vide — c'est ici qu'elle
+      # mord (l'export RGPD lira shop.product_reviews).
+      - name: Lecture par la clé de service, shop compris
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/06_service_role_reads.sql
+
+      - name: Function grants, sur les quatre schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 
       # §0.5: a table without RLS breaks the build. Belt and braces — the

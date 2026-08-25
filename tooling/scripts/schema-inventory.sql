@@ -18,7 +18,7 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json)
       from pg_class c
       join pg_namespace n on n.oid = c.relnamespace
      where c.relkind = 'r'
-       and n.nspname in ('public', 'ref')
+       and n.nspname in ('public', 'ref', 'shop')
 
     union all
 
@@ -26,7 +26,7 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json)
       from pg_class c
       join pg_namespace n on n.oid = c.relnamespace
      where c.relkind in ('v', 'm')
-       and n.nspname in ('public', 'ref')
+       and n.nspname in ('public', 'ref', 'shop')
 
     union all
 
@@ -34,14 +34,14 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json)
       from pg_type t
       join pg_namespace n on n.oid = t.typnamespace
      where t.typtype = 'e'
-       and n.nspname in ('public', 'ref')
+       and n.nspname in ('public', 'ref', 'shop')
 
     union all
 
     select n.nspname, 'function', p.proname
       from pg_proc p
       join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname in ('public', 'ref')
+     where n.nspname in ('public', 'ref', 'shop')
        and p.prokind = 'f'
        and p.prorettype <> 'trigger'::regtype
        and (has_function_privilege('anon', p.oid, 'EXECUTE')

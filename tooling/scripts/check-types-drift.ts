@@ -35,7 +35,7 @@ type Inventory = {
 const TYPES_PATH = join(process.cwd(), 'lib/supabase/database.types.ts')
 
 /** Schemas PostgREST exposes, which are the only ones the types describe. */
-const EXPOSED = ['public', 'ref']
+const EXPOSED = ['public', 'ref', 'shop']
 
 function fail(lines: string[]): never {
   console.error('\ncheck-types-drift: la base et database.types.ts ne se correspondent plus.\n')

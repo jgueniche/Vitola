@@ -27,6 +27,8 @@ export type AdminCounts = {
   linesTotal: number
   linesDraft: number
   accounts: number
+  productsTotal: number
+  productsDraft: number
 }
 
 export async function adminCounts(): Promise<AdminCounts> {
@@ -45,6 +47,8 @@ export async function adminCounts(): Promise<AdminCounts> {
     linesTotal,
     linesDraft,
     accounts,
+    productsTotal,
+    productsDraft,
   ] = await Promise.all([
     count(ref.from('cigar_revisions').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     count(db.from('venues').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
@@ -61,6 +65,10 @@ export async function adminCounts(): Promise<AdminCounts> {
     count(ref.from('lines').select('id', { count: 'exact', head: true })),
     count(ref.from('lines').select('id', { count: 'exact', head: true }).eq('status', 'draft')),
     count(db.from('profiles').select('id', { count: 'exact', head: true })),
+    count(db.schema('shop').from('products').select('id', { count: 'exact', head: true })),
+    count(
+      db.schema('shop').from('products').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+    ),
   ])
 
   return {
@@ -73,6 +81,8 @@ export async function adminCounts(): Promise<AdminCounts> {
     linesTotal,
     linesDraft,
     accounts,
+    productsTotal,
+    productsDraft,
   }
 }
 
@@ -200,4 +210,51 @@ export async function listBrandOptions(): Promise<BrandOption[]> {
   const { data, error } = await ref.from('brands').select('id, name').order('name')
   if (error) throw new Error(`Could not read the brands: ${error.message}`)
   return (data ?? []) as BrandOption[]
+}
+
+/* -------------------------------------------------------------------------- */
+/* Shop catalogue (ADR 0015)                                                   */
+/* -------------------------------------------------------------------------- */
+
+export type ProductRow = {
+  id: string
+  category: string
+  title: string
+  slug: string
+  description: string | null
+  price_eur: number
+  stock_qty: number
+  image_path: string | null
+  status: string
+  created_at: string
+}
+
+/**
+ * The whole catalogue, newest first — `products_select_admin` is why drafts
+ * and archived rows come back at all. With an image, a signed URL rides along:
+ * the bucket is private (§8 admits no public bucket), so a path alone renders
+ * nothing.
+ */
+export async function listProducts(): Promise<Array<ProductRow & { imageUrl: string | null }>> {
+  const db = await createSupabaseServerClient()
+  const { data, error } = await db
+    .schema('shop')
+    .from('products')
+    .select('id, category, title, slug, description, price_eur, stock_qty, image_path, status, created_at')
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(`Could not read the catalogue: ${error.message}`)
+
+  const rows = (data ?? []) as ProductRow[]
+  const paths = rows.map((row) => row.image_path).filter((p): p is string => p !== null)
+  const urls = new Map<string, string>()
+  if (paths.length > 0) {
+    const { data: signed } = await db.storage.from('shop-images').createSignedUrls(paths, 3600)
+    for (const entry of signed ?? []) {
+      if (entry.path && entry.signedUrl) urls.set(entry.path, entry.signedUrl)
+    }
+  }
+  return rows.map((row) => ({
+    ...row,
+    imageUrl: row.image_path ? (urls.get(row.image_path) ?? null) : null,
+  }))
 }
