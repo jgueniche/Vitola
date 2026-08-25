@@ -9,6 +9,7 @@ const copy = m.contributions
 const FIELD_LABELS: Record<string, string> = {
   commercial_name: copy.fieldCommercialName,
   vitola_id: copy.fieldVitolaId,
+  line_id: copy.fieldLineId,
   origin_country: copy.fieldOriginCountry,
   wrapper_origin: copy.fieldWrapperOrigin,
   binder_origin: copy.fieldBinderOrigin,
@@ -42,10 +43,12 @@ export function DiffValueText({
   column,
   value,
   vitolaNames,
+  lineNames,
 }: {
   column: string
   value: DiffValue
   vitolaNames?: Map<string, string>
+  lineNames?: Map<string, string>
 }) {
   if (value === null) return <span className="text-ink-faint italic">{copy.emptyValue}</span>
 
@@ -53,6 +56,12 @@ export function DiffValueText({
 
   if (field?.kind === 'vitola') {
     const name = vitolaNames?.get(String(value))
+    return <span>{name ?? String(value)}</span>
+  }
+  /* Same fallback as the vitola: a uuid whose line the caller may not read
+     (unpublished since) renders as itself rather than pretending to be empty. */
+  if (field?.kind === 'line') {
+    const name = lineNames?.get(String(value))
     return <span>{name ?? String(value)}</span>
   }
   if (field?.kind === 'country') return <span>{countryLabel(String(value))}</span>
@@ -74,7 +83,15 @@ export function DiffValueText({
  * change right" — and those differ whenever the current value is also
  * defensible.
  */
-export function DiffView({ diff, vitolaNames }: { diff: Diff; vitolaNames?: Map<string, string> }) {
+export function DiffView({
+  diff,
+  vitolaNames,
+  lineNames,
+}: {
+  diff: Diff
+  vitolaNames?: Map<string, string>
+  lineNames?: Map<string, string>
+}) {
   const entries = Object.entries(diff)
   if (entries.length === 0) return null
 
@@ -84,13 +101,23 @@ export function DiffView({ diff, vitolaNames }: { diff: Diff; vitolaNames?: Map<
         <div key={column} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
           <dt className="eyebrow w-40 shrink-0">{fieldLabel(column)}</dt>
           <dd className="text-ink-faint line-through">
-            <DiffValueText column={column} value={entry.from} vitolaNames={vitolaNames} />
+            <DiffValueText
+              column={column}
+              value={entry.from}
+              vitolaNames={vitolaNames}
+              lineNames={lineNames}
+            />
           </dd>
           <dd aria-hidden="true" className="text-ink-faint">
             {copy.arrow}
           </dd>
           <dd className="text-ink">
-            <DiffValueText column={column} value={entry.to} vitolaNames={vitolaNames} />
+            <DiffValueText
+              column={column}
+              value={entry.to}
+              vitolaNames={vitolaNames}
+              lineNames={lineNames}
+            />
           </dd>
         </div>
       ))}

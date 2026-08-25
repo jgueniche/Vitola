@@ -298,18 +298,26 @@ s'en passe sinon ; la page marque n'en dépend pas.
 de fait qu'un contributeur connaît et qu'un relecteur vérifie — c'est le bon chemin, et il existera
 bientôt. Y verser une liste devinée maintenant, c'est se priver du seul contrôle qu'on a.
 
-**Le déclencheur est arrivé, et la relecture est écrite** :
-[`docs/adr/0009-rouvrir-ref-lines.md`](docs/adr/0009-rouvrir-ref-lines.md), en attente d'arbitrage.
-Elle trouve un fait que la décision d'origine avait vu sans le suivre jusqu'au bout — `ref.lines`
-n'a pas de colonne `status`, donc une gamme est publique **dès son insertion**, là où corriger la
-longueur d'un cigare passe par une file de relecture. L'asymétrie est à l'envers, et c'est elle qui
-décide : la table gagne un `status` avant de gagner des lignes.
+**Le déclencheur est arrivé, la relecture est écrite, et l'arbitrage est rendu** :
+[`docs/adr/0009-rouvrir-ref-lines.md`](docs/adr/0009-rouvrir-ref-lines.md), **acceptée le 23 août
+2026 par délégation** (« je te laisse maître à bord »). Elle trouve un fait que la décision
+d'origine avait vu sans le suivre jusqu'au bout — `ref.lines` n'avait pas de colonne `status`,
+donc une gamme était publique **dès son insertion**, là où corriger la longueur d'un cigare passe
+par une file de relecture. L'asymétrie était à l'envers, et c'est elle qui a décidé : **la 0019
+donne le `status` à la table avant qu'elle ne gagne des lignes**, et `line_id` est la douzième
+colonne proposable du wiki — bornée aux gammes publiées de la marque de la fiche, revérifiée au
+dépôt et à l'application. La création de gamme par les membres (pièce 3) attend que le
+rattachement ait du trafic ; d'ici là une gamme naît d'un `editor`, en brouillon, et se publie par
+lui. Pas de facette « gamme » sous 5 % de rattachement. **La table reste vide** : l'amorcer par un
+script reste interdit (PROVENANCE), seul le chemin de contribution la remplit.
 
 La création d'une **fiche** entièrement nouvelle a sa propre ADR,
 [`0008`](docs/adr/0008-proposer-une-fiche-nouvelle.md), pour une raison voisine : la colonne qui
 bloque est `created_by`, hors de tout `GRANT UPDATE`, et la seule façon qu'elle porte le nom du
 proposeur est qu'il insère la ligne lui-même — donc un brouillon de `ref.cigars`, pas une table à
-part.
+part. **Acceptée le 23 août 2026 par la même délégation, et rien ne se construit** avant la
+relecture des 862 fiches : le déclencheur est la résorption du stock, conformément à la
+proposition du document.
 
 ## Commandes
 

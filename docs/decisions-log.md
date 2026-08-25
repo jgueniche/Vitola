@@ -2,6 +2,59 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## ADR 0009 appliquée — `ref.lines` a son `status`, et la gamme se propose
+
+### Ce qui est livré
+
+Session du 23 août au soir, sous délégation explicite du porteur (« fais comme tu le sens pour
+cette session, je te laisse maître à bord ») — les ADR 0008 et 0009 passent **Acceptées par
+délégation**, avec la provenance consignée dans chacune. La 0008 n'ouvre **rien** (sa propre
+recommandation : après la relecture des 862 fiches). La 0009 est appliquée pièces 1 et 2 :
+
+- migration `0019` (appliquée en base, version `20260823210941`) : `ref.lines.status
+  ref.entry_status` défaut `draft`, `lines_select_all` remplacée par `lines_select_published`
+  (bornée) + `lines_select_editor` (les brouillons), auto-contrôle ;
+- `supabase/tests/14_ref_lines_status.sql`, **6 assertions** qui n'accordent rien, jouées en CI
+  après la 0019 ;
+- `line_id` douzième colonne proposable du wiki : sélecteur sur la fiche, nom de gamme dans les
+  diffs (`/contributions`, `/cigares/[slug]/historique`), validation au dépôt **et** à
+  l'application ;
+- `tooling/parcours/gammes.ts`, **19 assertions en trois phases**, contre la vraie base, deux
+  comptes — nettoyage compté à zéro (gammes, révisions, rattachements).
+
+### Quatre décisions qui ne méritaient pas d'ADR
+
+**Le sélecteur de gamme ne se rend que si tous ses choix sont réels.** Un `<select>` soumet
+toujours : une fiche dont la gamme enregistrée n'est pas dans les options offertes (dépubliée
+depuis) verrait un envoi intact proposer de la **vider**, en silence. Sans gamme offerte, le champ
+est une phrase qui dit où naissent les gammes — un état vide est un écran.
+
+**La borne « publiée, et de la même marque » vit dans la requête d'options ET dans l'action, deux
+fois.** Aucune contrainte de base ne dit qu'une gamme et une fiche partagent une marque ; le
+menu déroulant est une commodité qu'un POST forgé ignore. `lineIsProposable()` revérifie au dépôt
+et à l'application — l'application aussi, parce qu'approuver une proposition ne doit pas être le
+geste qui republie une gamme dépubliée à travers une fiche publique. Le parcours le met en scène :
+dépôt, dépublication en contexte privilégié, approbation **refusée avec sa raison**, republication,
+approbation.
+
+**`brand_id` voyage dans `currentValues()` sans être proposable.** La vérification de marque a
+besoin de la marque de la fiche ; `buildDiff()` itère l'allowlist, donc une clé de plus ne peut
+jamais entrer dans un diff.
+
+**Le parcours a trois phases, et c'est une contrainte assumée.** Dépublier une gamme entre le
+dépôt et la décision est un geste que seul un contexte privilégié sait faire — la pièce 3 de
+l'ADR n'existe pas, aucun écran ne touche une gamme. Le parcours s'interrompt donc deux fois et
+la session joue le SQL entre les phases. Même famille que le lot périmé de la cave : le seul
+chemin qu'aucun test unitaire n'atteint.
+
+### Un piège d'outillage, pour la prochaine fois
+
+**`execute_sql` du MCP est en lecture seule** — `cannot execute INSERT in a read-only
+transaction` — alors qu'`apply_migration` écrit. Les fixtures et le nettoyage d'un parcours
+passent par l'API de gestion (`POST /v1/projects/{ref}/database/query`, `SUPABASE_ACCESS_TOKEN`
+dans l'environnement), en `curl` : le `urllib` de Python prend un 403 Cloudflare (code 1010) sur
+`api.supabase.com`, `curl` passe.
+
 ## P8 — la file se relève enfin, et le parcours a trouvé le trou avant l'audit
 
 ### Ce qui est livré

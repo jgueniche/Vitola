@@ -12,7 +12,7 @@ import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
-import { listForCigar, listVitolaOptions } from '@/lib/wiki/queries'
+import { listForCigar, listLineNames, listVitolaOptions } from '@/lib/wiki/queries'
 
 export const metadata: Metadata = { title: m.contributions.historyTitle }
 
@@ -40,9 +40,10 @@ export default async function HistoryPage({ params }: Params) {
   const [cigar, user] = await Promise.all([getCigarBySlug(slug), currentUser()])
   if (!cigar) notFound()
 
-  const [revisions, vitolas] = await Promise.all([
+  const [revisions, vitolas, lineNames] = await Promise.all([
     user ? listForCigar(cigar.id) : Promise.resolve([]),
     listVitolaOptions(),
+    listLineNames(),
   ])
 
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
@@ -89,7 +90,7 @@ export default async function HistoryPage({ params }: Params) {
                 </span>
               </div>
 
-              <DiffView diff={revision.diff} vitolaNames={vitolaNames} />
+              <DiffView diff={revision.diff} vitolaNames={vitolaNames} lineNames={lineNames} />
 
               {revision.comment ? (
                 <p className="text-ink-muted measure mt-3 text-sm leading-relaxed">

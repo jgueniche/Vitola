@@ -77,6 +77,13 @@ describe('what the allowlist deliberately leaves out', () => {
   it('does propose a vitola, which is the referential’s largest hole', () => {
     expect(EDITABLE_COLUMNS).toContain('vitola_id')
   })
+
+  it('does propose a line since ADR 0009, and never a brand', () => {
+    // Attaching a sheet to a published line of its own brand is piece 2 of
+    // ADR 0009. A sheet that changes brand is a different sheet.
+    expect(EDITABLE_COLUMNS).toContain('line_id')
+    expect(EDITABLE_COLUMNS).not.toContain('brand_id')
+  })
 })
 
 describe('normalising a value', () => {

@@ -16,7 +16,7 @@ import {
   staleFields,
   type DiffValue,
 } from '@/lib/wiki/model'
-import { currentValues, getRevision } from '@/lib/wiki/queries'
+import { currentValues, getRevision, lineIsProposable } from '@/lib/wiki/queries'
 
 /**
  * The four writes of the contribution queue (F3).
@@ -118,7 +118,10 @@ function validate(submitted: Record<string, DiffValue>): string | null {
     if (field.kind === 'enum' && !field.values?.includes(String(value))) {
       return copy.unknown
     }
-    if (field.kind === 'vitola' && !z.uuid().safeParse(String(value)).success) {
+    if (
+      (field.kind === 'vitola' || field.kind === 'line') &&
+      !z.uuid().safeParse(String(value)).success
+    ) {
       return copy.unknown
     }
     if (field.maxLength && String(value).length > field.maxLength) {
@@ -169,6 +172,12 @@ export async function proposeRevision(
      `cigar_revisions_diff_not_empty`: the constraint says 23514, which is not a
      sentence, and "vous n'avez rien changé" is the whole of what happened. */
   if (Object.keys(diff).length === 0) return { error: copy.nothingChanged }
+
+  /* A line must be published and of this sheet's brand. The dropdown already
+     enforces both, but a form post is not bound by a dropdown, and no database
+     constraint holds either half — ADR 0009. */
+  const lineRefused = await refuseForeignLine(diff.line_id?.to, current.brand_id)
+  if (lineRefused) return { error: lineRefused }
 
   const supabase = await createSupabaseServerClient()
   const { data: session } = await supabase.auth.getUser()
@@ -249,6 +258,12 @@ export async function approveRevision(
 
   const stale = staleFields(revision.diff, current)
   if (stale.length > 0) return { error: copy.stale, stale }
+
+  /* Re-checked on apply, not only on proposal: the line may have been
+     unpublished since, and approving must not be the act that republishes it
+     through a public sheet. */
+  const lineRefused = await refuseForeignLine(revision.diff.line_id?.to, current.brand_id)
+  if (lineRefused) return { error: lineRefused }
 
   const supabase = await createSupabaseServerClient()
   const { data: session } = await supabase.auth.getUser()
@@ -349,6 +364,16 @@ export async function rejectRevision(
 
   revalidatePath(routes.contributions())
   redirect(`${routes.contributions()}?decidee=refusee`)
+}
+
+/** Null when the proposed line may land; the refusal sentence otherwise. */
+async function refuseForeignLine(
+  proposed: DiffValue | undefined,
+  brandId: unknown,
+): Promise<string | null> {
+  if (proposed === undefined || proposed === null) return null
+  if (typeof brandId !== 'string') return copy.lineUnknown
+  return (await lineIsProposable(String(proposed), brandId)) ? null : copy.lineUnknown
 }
 
 function refusalMessage(code: string | undefined): string {

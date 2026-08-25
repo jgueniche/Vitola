@@ -1897,6 +1897,7 @@ export type Database = {
           id: string
           name: string
           slug: string
+          status: Database["ref"]["Enums"]["entry_status"]
           updated_at: string
         }
         Insert: {
@@ -1907,6 +1908,7 @@ export type Database = {
           id?: string
           name: string
           slug: string
+          status?: Database["ref"]["Enums"]["entry_status"]
           updated_at?: string
         }
         Update: {
@@ -1917,6 +1919,7 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+          status?: Database["ref"]["Enums"]["entry_status"]
           updated_at?: string
         }
         Relationships: [

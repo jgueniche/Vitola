@@ -1,6 +1,6 @@
 # 0009 — Rouvrir `ref.lines` par la contribution, jamais par un import, et lui donner le `status` qu'elle n'a pas
 
-- **Statut** : **Proposée** — attend arbitrage
+- **Statut** : **Acceptée** le 23 août 2026 — par délégation, voir l'arbitrage en fin de document
 - **Date** : 2026-08-23
 - **Décideur** : @jgueniche
 - **Concerne** : P1 (référentiel, contribution wiki) · `ref.lines` · `ref.cigars.line_id`
@@ -140,3 +140,24 @@ son absence.
 Je propose de ne pas l'ajouter maintenant, et de la reconsidérer au seuil de 5 % ci-dessus. Mais
 c'est un choix d'interface autant que de données, et si vous voyez la gamme comme une entrée
 principale du référentiel plutôt que comme un attribut, l'ordre des trois pièces change.
+
+### Arbitrage rendu — 23 août 2026
+
+**Acceptée par délégation.** Présentée au porteur en tête des arbitrages en attente, la décision a
+reçu pour toute réponse « fais comme tu le sens pour cette session, je te laisse maître à bord ».
+La session applique donc la décision telle qu'écrite, et cette note en garde la provenance : c'est
+une délégation explicite, pas un avis rendu sur le fond — elle se rouvre d'un mot du porteur.
+
+Ce qui est appliqué : **les pièces 1 et 2.** La migration `0019` (le `status`, la policy `select`
+publique bornée à `published`, une policy `select` relecteur pour les brouillons, l'auto-contrôle,
+et `supabase/tests/14_ref_lines_status.sql` qui n'accorde rien), puis `line_id` dans les colonnes
+proposables de `lib/wiki/model.ts` — le sélecteur n'offre que les gammes **publiées de la marque de
+la fiche**, et l'action revérifie les deux au dépôt comme à l'application, parce qu'aucune
+contrainte de base ne dit qu'une gamme et une fiche partagent une marque.
+
+**La pièce 3 — créer une gamme — reste différée**, aux termes mêmes de la décision : elle attend
+que le rattachement ait du trafic, et elle porte le problème de l'ADR 0008 (qui insère, sous quel
+nom). D'ici là, une gamme naît d'un `editor`, en brouillon par défaut, et se publie par lui.
+
+La question ouverte suit la proposition du document : **pas de facette « gamme »** tant que le
+rattachement n'atteint pas le seuil de 5 %.

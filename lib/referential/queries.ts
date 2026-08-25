@@ -22,6 +22,7 @@ import { referential } from '@/lib/supabase/server'
 export type CigarDetail = {
   id: string
   slug: string
+  brand_id: string
   commercial_name: string
   origin_country: string | null
   wrapper_origin: string | null
@@ -54,7 +55,7 @@ export async function getCigarBySlug(slug: string): Promise<CigarDetail | null> 
   const { data, error } = await db
     .from('cigars')
     .select(
-      `id, slug, commercial_name, origin_country, wrapper_origin, binder_origin,
+      `id, slug, brand_id, commercial_name, origin_country, wrapper_origin, binder_origin,
        filler_origins, strength, wrapper_shade, release_year, release_type,
        discontinued_year, msrp_eur, msrp_effective_on, msrp_source, verified_at,
        brands(name, slug, is_cuban, country),

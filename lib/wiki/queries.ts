@@ -134,6 +134,63 @@ export async function listVitolaOptions(): Promise<VitolaOption[]> {
   return (data ?? []) as VitolaOption[]
 }
 
+export type LineOption = { id: string; name: string }
+
+/**
+ * The lines a proposal may point at: **published**, and of this brand.
+ *
+ * `status = 'published'` here is a statement of what the field offers, not a
+ * visibility filter doubling RLS — an editor's session can read drafts, and a
+ * draft in the dropdown would let a proposal publish a line by referencing it.
+ * The brand bound is the guard nothing in the schema holds: no constraint says
+ * a line and a sheet share a brand, so the option list is where it starts.
+ */
+export async function listLineOptions(brandId: string): Promise<LineOption[]> {
+  const db = await referential()
+  const { data } = await db
+    .from('lines')
+    .select('id, name')
+    .eq('brand_id', brandId)
+    .eq('status', 'published')
+    .order('name', { ascending: true })
+
+  return (data ?? []) as LineOption[]
+}
+
+/**
+ * Whether a proposed `line_id` may land on a sheet of this brand.
+ *
+ * Re-checked by the action on proposal **and** on apply, because the dropdown
+ * is a convenience and a crafted form post is not bound by it. The published
+ * bound matters on apply too: approving a proposal must not be the act that
+ * effectively publishes a draft line by making a public sheet point at it.
+ */
+export async function lineIsProposable(lineId: string, brandId: string): Promise<boolean> {
+  const db = await referential()
+  const { data } = await db
+    .from('lines')
+    .select('id')
+    .eq('id', lineId)
+    .eq('brand_id', brandId)
+    .eq('status', 'published')
+    .maybeSingle()
+
+  return data !== null
+}
+
+/**
+ * Every line name the caller may read, for rendering a stored diff.
+ *
+ * No status filter: RLS decides. A member sees published names; an editor also
+ * sees drafts, which is right for a reviewer reading an old proposal whose
+ * line has since been withdrawn from publication.
+ */
+export async function listLineNames(): Promise<Map<string, string>> {
+  const db = await referential()
+  const { data } = await db.from('lines').select('id, name')
+  return new Map(((data ?? []) as LineOption[]).map((line) => [line.id, line.name]))
+}
+
 /**
  * The sheet as the allowlist sees it: raw columns, no embeds.
  *
@@ -144,9 +201,12 @@ export async function listVitolaOptions(): Promise<VitolaOption[]> {
  */
 export async function currentValues(cigarId: string): Promise<Record<string, unknown> | null> {
   const db = await referential()
+  /* `brand_id` rides along without being proposable: the line check needs the
+     sheet's brand, and `buildDiff` iterates the allowlist, so an extra key can
+     never enter a diff. */
   const { data } = await db
     .from('cigars')
-    .select(EDITABLE_COLUMNS.join(', '))
+    .select(['brand_id', ...EDITABLE_COLUMNS].join(', '))
     .eq('id', cigarId)
     .maybeSingle()
 

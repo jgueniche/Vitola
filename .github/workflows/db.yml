@@ -303,6 +303,23 @@ jobs:
             exit 1
           fi
 
+      # 0019 donne à ref.lines le status qui lui manquait (ADR 0009, pièce 1).
+      # Ce qui ne se voit qu'à l'exécution : une gamme naît en brouillon,
+      # invisible de tous sauf des relecteurs, et se publie par un editor —
+      # l'asymétrie du wiki, remise à l'endroit.
+      - name: Apply 0019 — le status de ref.lines
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0019_ref_lines_status.sql
+
+      - name: Gammes — brouillon invisible, publication par un relecteur
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/14_ref_lines_status.sql 2>&1 \
+            | tee "$RUNNER_TEMP/gammes.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/gammes.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 

@@ -1,40 +1,44 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026 au soir, après
-> la fusion de la **PR #11** (P5 + P6 → `master`) puis la livraison de **P8** sur la même branche
-> repartie de `master`. **P1, P2, P3, P5, P6 et P8 sont fermées** — P8 par l'ADR 0013 (les portes
-> du modérateur, `/moderation`, critère §9 mesuré : **0 violation axe-core, tous impacts**, sur
-> 24 écrans). L'enjambement de P7 et P4 est **autorisé et acté** : le porteur a dit le 23 août
-> « avance sur ce que tu peux — je mettrai les clés API IA plus tard (**on passera par Gemini**)
-> et les clés Stripe plus tard ». Il reste donc exactement **P7 (boutique + Stripe)** et
-> **P4 (scan de bague, VLM Gemini)**, toutes deux fermées par leurs clés — vérifier
-> l'environnement en début de session : le jour où `STRIPE_*` ou une clé Gemini existe, la phase
-> correspondante s'ouvre, ADR d'abord. Sans clés, il reste du vrai travail : les arbitrages listés
-> sous « À me signaler », les brouillons du journal à publier (geste du porteur), et rien d'autre
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026, tard le soir,
+> après la fusion des **PR #11 et #12** (P5+P6 puis P8 → `master`) et une session de reprise sous
+> **délégation explicite du porteur** (« fais comme tu le sens, je te laisse maître à bord ») qui
+> a accepté les **ADR 0008 et 0009 par délégation** et appliqué la 0009 pièces 1 et 2 — migration
+> `0019` (le `status` de `ref.lines`), `line_id` proposable au wiki, parcours `gammes.ts`.
+> **P1, P2, P3, P5, P6 et P8 sont fermées.** L'enjambement de P7 et P4 est **autorisé et acté** :
+> le porteur a dit le 23 août « avance sur ce que tu peux — je mettrai les clés API IA plus tard
+> (**on passera par Gemini**) et les clés Stripe plus tard ». Il reste donc exactement
+> **P7 (boutique + Stripe)** et **P4 (scan de bague, VLM Gemini)**, toutes deux fermées par leurs
+> clés — vérifier l'environnement en début de session : le jour où `STRIPE_*` ou une clé Gemini
+> existe, la phase correspondante s'ouvre, ADR d'abord. Sans clés, il reste du vrai travail : les
+> arbitrages listés sous « À me signaler », les brouillons du journal à publier (geste du
+> porteur), les premières gammes à publier si vous les voulez (geste d'`editor`), et rien d'autre
 > qui vaille d'être inventé.
 
 ---
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
 `docs/decisions-log.md` (la première section est celle de P8, de la dernière session),
-`docs/adr/` : **0004 à 0007 et 0010 à 0013 sont Acceptées**, **0008 et 0009 attendent votre
-arbitrage** et ne doivent pas être appliquées sans lui. Puis `supabase/seed/PROVENANCE.md` et
+`docs/adr/` : **0004 à 0013 sont Acceptées** — 0008 et 0009 le 23 août **par délégation**, avec la
+provenance consignée dans chacune : la 0009 est appliquée (pièces 1 et 2, la création de gamme par
+les membres reste différée), la 0008 est actée **sans rien construire** avant la relecture des
+862 fiches. Les deux se rouvrent d'un mot du porteur. Puis `supabase/seed/PROVENANCE.md` et
 `docs/phase-0/05-questions-ouvertes.md`. Un `CLAUDE.md` par domaine complète le racine :
 `app/`, `lib/`, `supabase/` — leurs paragraphes récents sont exactement ceux qu'on regrette de ne
 pas avoir lus.
 
-**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. **Les PR #10 et #11
-sont fusionnées, et P8 est parti en PR #12** depuis la même branche repartie de `master`.
-Vérifie l'état d'un coup d'œil plutôt que de le supposer — `git log --oneline origin/master -3`
-dit si #12 est entrée, et `/api/health` sert le commit réellement déployé. **Si #12 est
-fusionnée, repars de `master`** ; sinon, la branche `claude/vitola-v1-p5-lieux-ejti1n` porte
-l'état le plus avancé et #12 attend sa CI ou son arbitrage.
+**Branche de travail** : celle qui t'est assignée, à créer depuis `master`. **Les PR #10 à #12
+sont fusionnées** (`git log --oneline origin/master -3` doit montrer `132057f` en tête ou en
+dessous), et le travail de la session de reprise du 23 août au soir — arbitrage délégué des ADR
+0008/0009, migration 0019, `line_id` au wiki, `gammes.ts` — vit sur la branche
+`claude/vitola-reprise-92foh2`, poussée, en attente de PR ou fusionnée depuis. Vérifie l'état
+d'un coup d'œil plutôt que de le supposer, et `/api/health` sert le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **dix-huit migrations**, toutes dans
+Le code du dépôt et l'état de la base concordent : **dix-neuf migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet — la 0018 (les portes du modérateur) est
-enregistrée sous la version `20260823174500`. `lib/supabase/database.types.ts` est régénéré et le
-contrôle de dérive passe.
+enregistrée sous la version `20260823174500`, la 0019 (le `status` de `ref.lines`) sous
+`20260823210941`. `lib/supabase/database.types.ts` porte la colonne et le contrôle de dérive passe.
 
 Et cette concordance n'est plus une promesse : `tooling/scripts/check-types-drift.ts` compare, à
 chaque CI, l'inventaire des objets exposés à `lib/supabase/database.types.ts`, **dans les deux
@@ -196,7 +200,7 @@ si elle est entrée ; si oui, repars de `master`, sinon la branche assignée por
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Dix-sept migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Dix-neuf migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -219,10 +223,12 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0016` | `lieux` | `supabase/migrations/0016_lieux.sql` |
 | `0017` | `editorial` | `supabase/migrations/0017_editorial.sql` |
 | `0018` | `moderation` | `supabase/migrations/0018_moderation.sql` |
+| `0019` | `ref_lines_status` | `supabase/migrations/0019_ref_lines_status.sql` |
 
-**Six sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009`, `0015`, `0016`, `0017` et `0018` : `20260822222420`, `20260822232400`, `20260823083729`,
-`20260823103622`, `20260823115404` et `20260823174500`. C'est l'outil
+**Sept sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015`, `0016`, `0017`, `0018` et `0019` : `20260822222420`, `20260822232400`,
+`20260823083729`, `20260823103622`, `20260823115404`, `20260823174500` et `20260823210941`.
+C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
@@ -291,8 +297,10 @@ zéro. Une exception connue de longue date — **`public.conversations` n'a aucu
 pour personne** (rétention : question ouverte de l'ADR 0010).
 
 Les entrées écrites en parcourant sont effacées derrière la vérification, comme le demande
-« Nettoie derrière une vérification » plus bas. `ref.lines` à zéro est une **décision de v1**,
-écrite dans `CLAUDE.md` avec son déclencheur — ne la rouvre pas sans la lire. `verified_by` à zéro
+« Nettoie derrière une vérification » plus bas. `ref.lines` reste à zéro, mais le régime a changé le 23 août au soir :
+la **0019** lui a donné son `status` (ADR 0009, acceptée par délégation), une gamme naît en
+brouillon d'un `editor` et se publie par lui, `line_id` est proposable au wiki — et **l'amorcer
+par un script reste interdit** (PROVENANCE). `verified_by` à zéro
 est une dette de relecture, voir « À me signaler ».
 
 `audit_log` contient dix-neuf lignes — les vérifications d'endpoints des sessions, plus l'usage
@@ -470,7 +478,7 @@ public.event_kind          degustation | rencontre | visite | autre
 public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 184 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 185 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -485,7 +493,9 @@ public.audit_log         1  (admin) · public.feature_flags 1 (lecture pour tous
 mod.reports              3  select_own, select_moderator, update_moderator
 mod.moderation_actions   1  select_moderator
 ref.cigars               5  · ref.cigar_revisions 7 · ref.cigar_images 5
-ref.brands / lines / vitolas / manufacturers / box_codes  3 chacune
+ref.brands / vitolas / manufacturers / box_codes  3 chacune
+ref.lines                4  select_published (anon+auth), select_editor (les
+                            brouillons — 0019), insert_editor, update_editor
 public.humidors          5  select_own, select_shown (P3), insert/update/delete_own
 public.humidor_items     5  · public.humidor_events 3 · public.humidor_readings 4
                             — dont UNE RESTRICTIVE chacune, voir plus bas
@@ -972,9 +982,15 @@ accessoires, quels prix, quel stock — une décision commerciale qu'aucune sess
   défaut pour un dépôt fermé et une impasse le jour où quelqu'un contribue. **À trancher avant
   l'ouverture** : qui promeut, sur quel critère, et par quel écran — parce qu'il n'y en a aucun,
   passer quelqu'un `editor` est aujourd'hui un `update` à la main.
-- **Proposer une fiche entièrement nouvelle n'existe pas**, et rouvrir `ref.lines` non plus. Les
-  deux raisons sont sous l'item 5 : ce sont des décisions de schéma, pas des écrans manquants.
-  **À me dire si l'une des deux est attendue en v1**, parce que chacune vaut une ADR.
+- **Les ADR 0008 et 0009 ont été acceptées par délégation le 23 août au soir** (« je te laisse
+  maître à bord ») — chacune porte la provenance, et se rouvre d'un mot. La **0009 est
+  appliquée** : `ref.lines` a son `status` (0019), `line_id` se propose au wiki, la création de
+  gamme par les membres attend que le rattachement ait du trafic. **Personne ne peut créer une
+  gamme depuis un écran** : c'est un `INSERT` d'`editor` en SQL ou l'écran de la pièce 3, à
+  venir — **à me dire si vous voulez amorcer les premières gammes**, et lesquelles (une source
+  vérifiable par gamme, PROVENANCE oblige). La **0008 est actée sans construction** : une fiche
+  nouvelle sera un brouillon de `ref.cigars` inséré par son proposeur, mais rien ne s'ouvre avant
+  la relecture des 862 fiches.
 - **`show_indicative_prices` est réglable et rien ne le lit** (Q19). Les 900 prix sont en base,
   `lib/flags.ts` sait interroger le drapeau, aucun écran n'affiche `msrp_eur`. Afficher un prix de
   tabac est exactement le genre de geste que le §2 regarde de près : je ne l'ai pas branché seul.
@@ -1067,8 +1083,8 @@ Les 23 questions de `docs/phase-0/05-questions-ouvertes.md` ont chacune une rép
 **Applique le défaut et signale-le**, ou pose la question si le défaut ne tient plus — c'est arrivé
 pour la Q12, qui est annotée deux fois. Les quatre règles non négociables sont en tête de
 `CLAUDE.md`. Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 à 0003 attendent
-toujours validation ; **0004, 0005, 0006, 0007 et 0010 sont acceptées ; 0008 et 0009 attendent un
-arbitrage et ne doivent pas être appliquées sans lui.**
+toujours validation ; **0004 à 0013 sont acceptées** — 0008 et 0009 par délégation du 23 août,
+0008 sans construction avant la relecture des 862 fiches, 0009 appliquée pièces 1 et 2.
 
 ## PIÈGES DE CET ENVIRONNEMENT, APPRIS À NOS DÉPENS
 
@@ -1126,6 +1142,11 @@ arbitrage et ne doivent pas être appliquées sans lui.**
   `/majorite`. La vérification est remontée dans `next.config.ts` et casse désormais le build.
 - **Pour les gros payloads SQL**, passe par l'API de gestion en `curl` plutôt que par le MCP.
   Attention : **un appel = une transaction**, donc retire le `begin;`/`commit;` du fichier.
+- **`execute_sql` du MCP est en lecture seule** (`cannot execute INSERT in a read-only
+  transaction`) alors qu'`apply_migration` écrit. Toute écriture privilégiée — fixtures d'un
+  parcours, nettoyage, promotion d'un rôle — passe par l'API de gestion
+  (`POST /v1/projects/{ref}/database/query`), **en `curl`** : le `urllib` de Python prend un
+  403 Cloudflare (code 1010) sur `api.supabase.com`.
 - **`pnpm check` et le commit doivent être dans la MÊME commande** (`&&`) — et sans `| tail` sur
   le `pnpm check` : le tube remplace le code de sortie par celui de `tail`, et un commit est passé
   ainsi sur un check rouge avant d'être amendé.
@@ -1452,6 +1473,9 @@ pnpm tsx tooling/parcours/groupes.ts         # 37 assertions
 pnpm tsx tooling/parcours/lieux.ts           # 36 assertions
 pnpm tsx tooling/parcours/journal.ts         # 24 assertions
 pnpm tsx tooling/parcours/moderation.ts      # 22 assertions
+pnpm tsx tooling/parcours/gammes.ts          # 19 assertions, TROIS PHASES — lire son en-tête :
+                                             #   depot, puis refus, puis fin, avec deux gestes
+                                             #   SQL privilégiés entre elles (fixtures comprises)
 pnpm tsx tooling/audit/a11y.ts               # 24 écrans, 0 violation attendu (critère P8)
 ```
 
