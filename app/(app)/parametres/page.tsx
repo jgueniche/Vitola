@@ -16,6 +16,7 @@ import {
 } from '@/lib/settings/model'
 import { getAccount } from '@/lib/settings/queries'
 import { hasMinRole } from '@/lib/settings/roles'
+import { getMyVendor } from '@/lib/shop/queries'
 import { relationConfirmation } from '@/lib/social/confirmations'
 import { listBlockedPeople } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -71,7 +72,11 @@ export default async function SettingsPage({
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.settings())}`)
   }
 
-  const [account, blocked] = await Promise.all([getAccount(user.id), listBlockedPeople()])
+  const [account, blocked, vendor] = await Promise.all([
+    getAccount(user.id),
+    listBlockedPeople(),
+    getMyVendor(user.id),
+  ])
   /* `tg_handle_new_user()` creates the profile with the account. Its absence is
      a broken trigger, not an empty state, and a 404 says so loudly. */
   if (!account) notFound()
@@ -110,6 +115,17 @@ export default async function SettingsPage({
               {m.admin.settingsLink}
             </Link>{' '}
             <span className="text-ink-faint text-xs">{m.admin.settingsLede}</span>
+          </p>
+        ) : null}
+        {/* Not a role: a vendor is attached, never promoted (ADR 0016, D2).
+            Same placement rule as the desk — the link lives where the account
+            is already loaded, never in the header. */}
+        {vendor ? (
+          <p className="text-sm">
+            <Link href={routes.vendorSpace()} className="text-ink underline">
+              {m.vendor.settingsLink}
+            </Link>{' '}
+            <span className="text-ink-faint text-xs">{m.vendor.settingsLede}</span>
           </p>
         ) : null}
       </div>

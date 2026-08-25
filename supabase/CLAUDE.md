@@ -191,6 +191,15 @@ l'ajout d'un lot de rester une seule requête — un trigger `after insert` en t
 `add` — donc atomique sans fonction. Les deux sens sont assertés : que `qty` reste insérable et
 qu'elle ne soit jamais modifiable.
 
+Depuis 0022, quatre de plus, dont trois d'une famille nouvelle : `shop.products.vendor_id` est
+dans le `GRANT INSERT` et dans aucun `GRANT UPDATE` (un produit ne change pas de vendeur — le
+motif de `reviews.user_id`), et **`vendors.status`, `vendors.owner_id` et
+`products.review_note` sont dans le `GRANT UPDATE` mais gardés par un trigger** : un grant de
+colonne ne sait pas distinguer deux rôles applicatifs (`admin` et vendeur) du même rôle
+PostgreSQL (`authenticated`). Les triggers de garde suivent la lettre de la 0009 — prédicat de
+privilège inline, `SECURITY INVOKER`, `has_min_role()` appelable par l'appelant — parce que
+chacun des trois écarts de cette recette a déjà coûté son bug.
+
 ## Seed
 
 Aucun scraping, jamais (§2, art. L341-1 CPI). Chaque ligne de `seed/*.csv` doit être justifiable

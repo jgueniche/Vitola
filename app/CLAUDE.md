@@ -52,6 +52,9 @@ le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les a
 | `admin/drapeaux/flag-form.tsx` | `useActionState` — un refus se lit à côté du drapeau qu'il concerne ; la bascule est un bouton, jamais une case (le reset de React 19) |
 | `admin/gammes/line-forms.tsx` | `useActionState` pour la création (le refus garde la saisie), `window.confirm` pour la suppression |
 | `admin/boutique/product-forms.tsx` | `useActionState` — le refus lexical §2 se lit sans perdre la fiche produit ; `window.confirm` pour la suppression |
+| `admin/boutique/vendeurs/vendor-forms.tsx` | `useActionState` — pseudo inconnu ou nom pris se lisent à côté du champ ; `window.confirm` pour suspendre et supprimer |
+| `components/shop/product-fields.tsx` | les champs du formulaire produit, partagés entre l'admin et l'espace vendeur (ADR 0016) — client parce que ses parents le sont |
+| `vendeur/forms.tsx` | `useActionState` — vitrine et fiches produit du vendeur ; `window.confirm` pour retirer de la vente et supprimer |
 
 Les règles apprises en les écrivant :
 

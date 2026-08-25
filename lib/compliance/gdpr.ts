@@ -495,6 +495,19 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'anonymised',
   },
 
+  /* The marketplace (migration 0022, ADR 0016). A shopfront survives its
+     manager anonymised: the catalogue and the vendor identity are the shop's,
+     not the account's — the admin re-attaches or suspends an orphaned vendor.
+     The traceability columns (legal name, registration…) describe the
+     business, not the member, and carry no link to auth.users. */
+  {
+    key: 'vendorsManaged',
+    schema: 'shop',
+    table: 'vendors',
+    column: 'owner_id',
+    erasure: 'anonymised',
+  },
+
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same
      strings: a rename on one side has to be a rename on both. */

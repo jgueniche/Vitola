@@ -312,6 +312,45 @@ d'abord » — Checkout, option A) ; sa note d'arbitrage consigne aussi le **ref
 « stock des civettes contre abonnement des buralistes » — deux fois ce que la loi Évin interdit,
 désigner où acheter un produit du tabac et être payé pour cette mise en avant.
 
+## La marketplace d'accessoires — livrée le 25 août 2026, derrière un drapeau fermé
+
+GO du porteur le 25 août (l'option B de la discussion consignée dans « Quand rouvrir » de
+l'ADR 0015). [ADR 0016](docs/adr/0016-la-marketplace-d-accessoires.md) avant le SQL, migration
+`0022` (`shop.vendors`, `products.vendor_id`, la marque d'accessoire, `submitted_at`,
+`review_note`), 10 assertions SQL (`17_marketplace_rls`), l'espace vendeur `/vendeur`, la
+relecture dans `/admin/boutique` et `/admin/boutique/vendeurs`, les deux entrées publiques —
+`/boutique` (recherche à facettes, le motif de `/cigares`) et `/boutique/vendeurs/[slug]`
+(la vitrine) — **60 assertions de parcours, quatre rôles, 0 échec**, 0 violation axe-core sur
+41 écrans.
+
+**Six règles qui ne se contournent pas, héritées de l'ADR 0016 :**
+
+1. **L'entrée est humaine.** Aucune inscription vendeur : l'admin crée (`pending`), l'admin
+   active. La traçabilité DSA art. 30 a ses colonnes, nullables ; le CHECK dur arrive avec la
+   caisse — l'imposer aujourd'hui exigerait un numéro au registre que la boutique propre n'a
+   pas (Q10).
+2. **Un vendeur n'est pas un rôle.** Le rattachement est `vendors.owner_id` (unique,
+   `set null`), jamais une valeur d'`app_role` — un vendeur n'est ni au-dessus ni au-dessous
+   d'un membre.
+3. **Le vendeur ne publie pas : son WITH CHECK n'aboutit qu'à `draft`.** `submitted_at` est la
+   soumission, l'admin publie ou refuse avec `review_note`. Conséquence assumée : **modifier,
+   c'est retirer** — corriger une fiche publiée la repasse en relecture.
+4. **Suspendre coupe tout en un UPDATE.** La lecture publique d'un produit exige un vendeur
+   `active` (l'EXISTS de la policy, soumis à la RLS de `vendors`) : vitrine et produits
+   disparaissent ensemble, réversiblement.
+5. **La marque d'accessoire ne touche pas `ref.brands`** — c'est une colonne `products.brand`,
+   sous le trigger lexical (élargi par la 0022 à `brand` et au nom du vendeur).
+6. **Rien de monétaire.** La D7 (commission Connect contre abonnement-vitrine) est la question
+   ouverte de l'ADR — intranchable sans clés Stripe ni structure juridique — et **DAC7 est le
+   prérequis consigné du premier euro reversé**. Les avis produits restent sans porte
+   d'écriture (ADR 0015 D3, inchangée).
+
+**Le drapeau `shop_enabled` est né fermé dans la 0022** : tout `/boutique` répond 404 tant que
+le porteur ne l'ouvre pas depuis `/admin/drapeaux` — c'est le renversement conscient de
+l'ADR 0015 D1 (« aucune route publique »), tenu en laisse par le drapeau. Trois colonnes se
+gardent par trigger parce qu'un grant ne sait pas séparer deux rôles applicatifs :
+`vendors.status`, `vendors.owner_id`, `products.review_note` (le motif de `profiles`).
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent

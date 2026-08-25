@@ -5,97 +5,22 @@
 
 import { useActionState } from 'react'
 
+import { ProductFields, type VendorChoice } from '@/components/shop/product-fields'
 import { Button } from '@/components/ui/button'
-import { FieldError, FieldStatus, Input, Label, Select, Textarea } from '@/components/ui/field'
+import { FieldError, FieldStatus } from '@/components/ui/field'
 import type { ProductRow } from '@/lib/admin/queries'
 import { m } from '@/lib/i18n'
-import { Constants } from '@/lib/supabase/database.types'
 
 import { createProduct, deleteProduct, updateProduct, type AdminState } from '../actions'
 
 const copy = m.admin.shop
-const CATEGORY_LABELS = copy.categories as Record<string, string>
 
-function ProductFields({ product }: { product?: ProductRow }) {
-  return (
-    <>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="category">{copy.categoryLabel}</Label>
-          <Select
-            id="category"
-            name="category"
-            defaultValue={product?.category ?? ''}
-            key={`category-${product?.category ?? 'none'}`}
-          >
-            {product ? null : <option value="" />}
-            {Constants.shop.Enums.product_category.map((value) => (
-              <option key={value} value={value}>
-                {CATEGORY_LABELS[value] ?? value}
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="title">{copy.titleLabel}</Label>
-          <Input id="title" name="title" maxLength={140} defaultValue={product?.title ?? ''} />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">{copy.descriptionLabel}</Label>
-        <Textarea
-          id="description"
-          name="description"
-          maxLength={4000}
-          rows={4}
-          defaultValue={product?.description ?? ''}
-        />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="price">{copy.priceLabel}</Label>
-          <Input
-            id="price"
-            name="price"
-            inputMode="decimal"
-            defaultValue={product ? product.price_eur.toFixed(2).replace('.', ',') : ''}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="stock">{copy.stockLabel}</Label>
-          <Input
-            id="stock"
-            name="stock"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            defaultValue={product?.stock_qty ?? 0}
-          />
-          <p className="text-ink-muted text-xs">{copy.stockHint}</p>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="image">{copy.imageLabel}</Label>
-          <Input
-            id="image"
-            name="image"
-            type="file"
-            accept="image/webp,image/jpeg,image/png,image/avif"
-          />
-          <p className="text-ink-muted text-xs">{copy.imageHint}</p>
-        </div>
-      </div>
-    </>
-  )
-}
-
-export function CreateProductForm() {
+export function CreateProductForm({ vendorOptions }: { vendorOptions: VendorChoice[] }) {
   const [state, action, pending] = useActionState<AdminState, FormData>(createProduct, {})
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <ProductFields />
+      <ProductFields vendorOptions={vendorOptions} />
       {state.error ? <FieldError>{state.error}</FieldError> : null}
       {state.done ? <FieldStatus>{copy.saved}</FieldStatus> : null}
       <div>
@@ -117,7 +42,7 @@ export function EditProductForm({ product }: { product: ProductRow }) {
     <form
       action={action}
       className="flex flex-col gap-4"
-      key={`${product.id}-${product.title}-${product.price_eur}-${product.stock_qty}-${product.category}`}
+      key={`${product.id}-${product.title}-${product.brand ?? ''}-${product.price_eur}-${product.stock_qty}-${product.category}`}
     >
       <input type="hidden" name="id" value={product.id} />
       <ProductFields product={product} />

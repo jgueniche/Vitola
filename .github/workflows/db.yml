@@ -354,9 +354,27 @@ jobs:
             exit 1
           fi
 
-      # Rejoué APRÈS 0021 : sa première exécution (après 0007) précède la
-      # naissance de shop, donc sa clause shop y est vide — c'est ici qu'elle
-      # mord (l'export RGPD lira shop.product_reviews).
+      # 0022 pose la marketplace (ADR 0016). Ce qui ne se voit qu'à
+      # l'exécution : le WITH CHECK vendeur exige draft (un vendeur ne publie
+      # jamais), la suspension d'un vendeur coupe ses produits de la lecture
+      # publique, et les triggers de garde tiennent status, owner_id et
+      # review_note — des colonnes qu'un grant ne sait pas séparer par rôle.
+      - name: Apply 0022 — la marketplace
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0022_marketplace_vendors.sql
+
+      - name: Marketplace — le vendeur ecrit des brouillons, l admin publie
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/17_marketplace_rls.sql 2>&1 \
+            | tee "$RUNNER_TEMP/marketplace.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/marketplace.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
+      # la naissance de shop, donc sa clause shop y est vide — c'est ici
+      # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).
       - name: Lecture par la clé de service, shop compris
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/06_service_role_reads.sql
 

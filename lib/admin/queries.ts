@@ -221,12 +221,17 @@ export type ProductRow = {
   category: string
   title: string
   slug: string
+  brand: string | null
   description: string | null
   price_eur: number
   stock_qty: number
   image_path: string | null
   status: string
+  submitted_at: string | null
+  review_note: string | null
+  vendor_id: string
   created_at: string
+  vendor: { name: string; slug: string } | null
 }
 
 /**
@@ -240,11 +245,13 @@ export async function listProducts(): Promise<Array<ProductRow & { imageUrl: str
   const { data, error } = await db
     .schema('shop')
     .from('products')
-    .select('id, category, title, slug, description, price_eur, stock_qty, image_path, status, created_at')
+    .select(
+      'id, category, title, slug, brand, description, price_eur, stock_qty, image_path, status, submitted_at, review_note, vendor_id, created_at, vendor:vendors(name, slug)',
+    )
     .order('created_at', { ascending: false })
   if (error) throw new Error(`Could not read the catalogue: ${error.message}`)
 
-  const rows = (data ?? []) as ProductRow[]
+  const rows = (data ?? []) as unknown as ProductRow[]
   const paths = rows.map((row) => row.image_path).filter((p): p is string => p !== null)
   const urls = new Map<string, string>()
   if (paths.length > 0) {
@@ -257,4 +264,77 @@ export async function listProducts(): Promise<Array<ProductRow & { imageUrl: str
     ...row,
     imageUrl: row.image_path ? (urls.get(row.image_path) ?? null) : null,
   }))
+}
+
+/* -------------------------------------------------------------------------- */
+/* Marketplace vendors (ADR 0016)                                              */
+/* -------------------------------------------------------------------------- */
+
+export type AdminVendorRow = {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  logo_path: string | null
+  contact_email: string | null
+  contact_phone: string | null
+  legal_name: string | null
+  registration: string | null
+  address: string | null
+  status: string
+  owner_id: string | null
+  created_at: string
+  ownerHandle: string | null
+  productCount: number
+}
+
+/**
+ * Every vendor, for /admin/boutique/vendeurs — `vendors_select_admin` is why
+ * pending and suspended rows come back. The owner handle is hydrated in a
+ * second query (owner_id points at auth.users, not profiles, so no embed),
+ * under `profiles_select_directory` — the notebook pattern, never an N+1.
+ */
+export async function listVendors(): Promise<AdminVendorRow[]> {
+  const db = await createSupabaseServerClient()
+  const { data, error } = await db
+    .schema('shop')
+    .from('vendors')
+    .select('*, products(count)')
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(`Could not read the vendors: ${error.message}`)
+
+  const rows = (data ?? []) as unknown as Array<
+    Omit<AdminVendorRow, 'ownerHandle' | 'productCount'> & { products: Array<{ count: number }> }
+  >
+
+  const ownerIds = rows.map((row) => row.owner_id).filter((id): id is string => id !== null)
+  const handles = new Map<string, string>()
+  if (ownerIds.length > 0) {
+    const { data: profiles } = await db.from('profiles').select('id, handle').in('id', ownerIds)
+    for (const profile of profiles ?? []) handles.set(profile.id, profile.handle)
+  }
+
+  return rows.map(({ products, ...row }) => ({
+    ...row,
+    ownerHandle: row.owner_id ? (handles.get(row.owner_id) ?? null) : null,
+    productCount: products[0]?.count ?? 0,
+  }))
+}
+
+export type VendorOption = { id: string; name: string; slug: string }
+
+/**
+ * The create-product select: which shopfront receives the product. The house
+ * comes first — it is the default an admin means when feeding the catalogue,
+ * and a default that silently lands products on a partner's shelf would be a
+ * gift nobody asked for.
+ */
+export async function listVendorOptions(): Promise<VendorOption[]> {
+  const db = await createSupabaseServerClient()
+  const { data, error } = await db.schema('shop').from('vendors').select('id, name, slug').order('name')
+  if (error) throw new Error(`Could not read the vendor options: ${error.message}`)
+  const options = (data ?? []) as VendorOption[]
+  return options.sort((a, b) =>
+    a.slug === 'vitola' ? -1 : b.slug === 'vitola' ? 1 : a.name.localeCompare(b.name, 'fr'),
+  )
 }

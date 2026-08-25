@@ -24,6 +24,7 @@ import { chromium, type Browser, type Page } from '@playwright/test'
 const BASE = process.env.PARCOURS_BASE ?? 'http://127.0.0.1:3100'
 const PASSWORD = process.env.PARCOURS_PASSWORD ?? 'cigardeur'
 const MEMBER = process.env.PARCOURS_USER_ONE ?? 'test1@cigardeur.com'
+const VENDOR = process.env.PARCOURS_VENDOR ?? 'vendeur@cigardeur.com'
 const MODERATOR = process.env.PARCOURS_EDITOR ?? 'jgueniche06@gmail.com'
 
 /** Un gabarit par ligne — pas toutes les pages, tous les écrans. */
@@ -52,7 +53,24 @@ const MEMBER_PAGES = [
   '/contributions',
   '/codes-de-boite',
 ]
-const MODERATOR_PAGES = ['/moderation', '/admin', '/admin/drapeaux', '/admin/fiches', '/admin/gammes']
+const MODERATOR_PAGES = [
+  '/moderation',
+  '/admin',
+  '/admin/drapeaux',
+  '/admin/fiches',
+  '/admin/gammes',
+  '/admin/boutique',
+  '/admin/boutique/vendeurs',
+]
+
+/**
+ * La boutique publique (ADR 0016) vit derrière `shop_enabled`, fermé par
+ * défaut : l'audit **lit seulement**, donc il n'ouvre pas le drapeau — il
+ * audite ce qui est joignable et NOMME ce qu'il saute. Pour mesurer ces
+ * gabarits-là, ouvrir le drapeau depuis /admin/drapeaux (et publier un
+ * produit), puis rejouer : la fiche produit est trouvée depuis le rayon.
+ */
+const SHOP_PAGES = ['/boutique', '/boutique/vendeurs/comptoir-du-cedre']
 
 type Finding = { page: string; impact: string; id: string; help: string; nodes: number }
 
@@ -119,10 +137,32 @@ async function main(): Promise<void> {
     await signIn(member, MEMBER)
     for (const path of MEMBER_PAGES) await audit(member, path)
 
+    console.log('— l’espace vendeur, en vendeur')
+    const vendor = await (await browser.newContext()).newPage()
+    await signIn(vendor, VENDOR)
+    await audit(vendor, '/vendeur')
+
     console.log('— la file, en modérateur')
     const moderator = await (await browser.newContext()).newPage()
     await signIn(moderator, MODERATOR)
     for (const path of MODERATOR_PAGES) await audit(moderator, path)
+
+    console.log('— la boutique publique, si le drapeau l’ouvre')
+    const probe = await member.goto(`${BASE}/boutique`)
+    if (probe?.status() === 404) {
+      console.log('  (—) shop_enabled fermé — gabarits /boutique non audités (nommé, pas caché)')
+    } else {
+      for (const path of SHOP_PAGES) await audit(member, path)
+      await member.goto(`${BASE}/boutique`)
+      await settle(member)
+      const sheet = await member
+        .locator('main ul a[href^="/boutique/"]')
+        .first()
+        .getAttribute('href')
+        .catch(() => null)
+      if (sheet) await audit(member, sheet)
+      else console.log('  (—) aucun produit publié — le gabarit de la fiche produit attend')
+    }
   } finally {
     if (browser) await browser.close()
   }

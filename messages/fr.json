@@ -90,6 +90,10 @@
       "journal": {
         "title": "Le journal",
         "body": "Articles, lexique, guides. La partie du site qui se lit sans compte."
+      },
+      "shop": {
+        "title": "La boutique",
+        "body": "Les bons accessoires, choisis par des vendeurs que nous relisons — coupes, caves, hygromètres. Jamais de tabac."
       }
     }
   },
@@ -1102,6 +1106,11 @@
       "venues_enabled": {
         "label": "Les lieux",
         "description": "Toute la section /lieux, entrée de navigation comprise. La charge utile liste les types offerts ; la restreindre après avis juridique (Q6) se fait ici — les types, eux, s'éditent en migration."
+      },
+      "shop_enabled": {
+        "label": "La boutique publique",
+        "description": "Toute la section /boutique : recherche, fiches produit et vitrines de vendeurs. Fermé jusqu'à l'ouverture commerciale (ADR 0016).",
+        "warning": "L'ouvrir est le geste d'ouverture commerciale : les vitrines deviennent visibles de tout visiteur majeur, sans caisse tant que les clés de paiement n'existent pas."
       }
     },
     "accounts": {
@@ -1172,7 +1181,13 @@
       "produitPublie": "Produit publié. Il sera au rayon le jour où la boutique ouvre.",
       "produitDepublie": "Produit dépublié, revenu en brouillon.",
       "produitArchive": "Produit archivé.",
-      "produitSupprime": "Produit supprimé, image comprise."
+      "produitSupprime": "Produit supprimé, image comprise.",
+      "produitRefuse": "Produit refusé, motif transmis au vendeur.",
+      "vendeurCree": "Boutique créée, en attente d’activation.",
+      "vendeurActive": "Boutique activée : sa vitrine vivra dès l’ouverture de la boutique publique.",
+      "vendeurSuspendu": "Boutique suspendue : vitrine et produits retirés.",
+      "compteRattache": "Compte rattaché à la boutique.",
+      "vendeurSupprime": "Boutique supprimée."
     },
     "errors": {
       "notAdmin": "Ce geste demande le rôle d'administrateur.",
@@ -1183,13 +1198,21 @@
       "lineExists": "Cette marque a déjà une gamme à cette adresse.",
       "tooLong": "Ce champ est trop long.",
       "unknown": "Cette action n'a pas abouti.",
-      "titleRefused": "Ce titre ou cette description nomme un produit du tabac : le catalogue ne vend que des accessoires (§2).",
+      "titleRefused": "Ce titre, cette marque ou cette description nomme un produit du tabac : le catalogue ne vend que des accessoires (§2).",
       "priceRange": "Le prix se compte en euros, entre 0,01 et 99 999.",
       "stockRange": "Le stock est un entier positif.",
       "imageInvalid": "L'image doit être WebP, JPEG, PNG ou AVIF, et peser 8 Mo au plus.",
       "productExists": "Un produit porte déjà ce titre — son adresse serait la même.",
       "productTitleNeeded": "Un produit demande un titre d'au moins deux caractères, avec des lettres ou des chiffres.",
-      "categoryNeeded": "Choisissez une catégorie."
+      "categoryNeeded": "Choisissez une catégorie.",
+      "brandLen": "La marque fait entre 2 et 80 caractères.",
+      "vendorNameNeeded": "Une boutique demande un nom avec au moins une lettre ou un chiffre.",
+      "vendorExists": "Une boutique porte déjà ce nom — son adresse serait la même.",
+      "handleUnknown": "Ce pseudo n'existe pas, ou son profil n'est pas visible.",
+      "handleTaken": "Ce compte gère déjà une autre boutique : une seule vitrine par compte (ADR 0016).",
+      "refuseNoteNeeded": "Un refus se motive : le vendeur doit savoir quoi corriger.",
+      "vendorNeeded": "Choisissez le vendeur qui porte ce produit.",
+      "vendorHasProducts": "Cette boutique a encore des produits : suspendre est le verbe normal, supprimer est le geste d'une boutique vide."
     },
     "shop": {
       "title": "Le catalogue de la boutique",
@@ -1233,7 +1256,58 @@
         "livre": "Livres",
         "entretien": "Entretien",
         "autre": "Autres accessoires"
-      }
+      },
+      "vendorLabel": "Vendeur",
+      "vendorHint": "La boutique qui vend. La maison est le premier vendeur ; les partenaires se créent dans « Les vendeurs ».",
+      "brandLabel": "Marque (fabricant)",
+      "brandHint": "Qui fabrique — facultatif. Le vendeur, lui, est la boutique qui vend : deux questions, deux colonnes.",
+      "queueTitle": "Soumissions à relire",
+      "queueEmpty": "Rien à relire : aucun vendeur n'a soumis de produit. Une soumission arrive ici du plus ancien au plus récent.",
+      "queueSubmittedOn": "Soumis le {date}",
+      "refuse": "Refuser",
+      "refuseNoteLabel": "Motif du refus",
+      "refuseNoteHint": "Le vendeur le lit sur son brouillon. Un refus sans motif est une porte qui claque.",
+      "statusSubmitted": "Soumis à relecture",
+      "vendorsLink": "Les vendeurs",
+      "vendorsLede": "Créer une boutique partenaire, rattacher un compte, activer, suspendre.",
+      "reviewNotePrefix": "Motif du refus"
+    },
+    "vendors": {
+      "title": "Les vendeurs",
+      "lede": "L'entrée est humaine (ADR 0016) : pas d'inscription libre — une boutique se crée ici, se rattache à un compte, et s'active après vérification. Suspendre une boutique retire sa vitrine et ses produits de la boutique publique, en un geste.",
+      "createTitle": "Nouvelle boutique",
+      "nameLabel": "Nom de la boutique",
+      "ownerLabel": "Pseudo du gestionnaire (facultatif)",
+      "ownerHint": "Le compte qui gérera cette vitrine depuis son espace vendeur. Il se rattache aussi plus tard.",
+      "create": "Créer (en attente)",
+      "created": "Boutique créée, en attente d’activation.",
+      "listTitle": "Les boutiques",
+      "emptyTitle": "Aucune boutique partenaire",
+      "emptyBody": "La maison est le premier vendeur ; les partenaires se créent ci-dessus, un par un.",
+      "statusPending": "En attente",
+      "statusActive": "Active",
+      "statusSuspended": "Suspendue",
+      "activate": "Activer",
+      "suspend": "Suspendre",
+      "reinstate": "Réactiver",
+      "suspendConfirm": "Suspendre cette boutique ? Sa vitrine et tous ses produits publiés disparaissent de la boutique publique immédiatement. Réversible.",
+      "attachLabel": "Rattacher un compte (pseudo)",
+      "attach": "Rattacher",
+      "ownerNone": "Aucun compte rattaché",
+      "ownerNoneHouse": "La maison — se gère depuis ce back-office, jamais depuis un espace vendeur.",
+      "ownerPrefix": "Gérée par",
+      "traceTitle": "Traçabilité (DSA art. 30)",
+      "traceComplete": "Complète.",
+      "traceMissing": "Manquent : {fields}",
+      "traceHint": "Nom légal, numéro au registre, adresse, contact : exigés avant que le premier contrat se conclue sur la plateforme. La contrainte dure arrive avec la caisse (ADR 0016) ; d'ici là, l'écran dit ce qui manque.",
+      "traceLegalName": "raison sociale",
+      "traceRegistration": "numéro au registre",
+      "traceAddress": "adresse",
+      "traceContactEmail": "courriel de contact",
+      "productsCount": "{n} produit(s)",
+      "shopfrontLink": "Voir la vitrine",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette boutique vide ? Une boutique qui a des produits se suspend, elle ne se supprime pas."
     }
   },
   "aromas": {
@@ -2360,5 +2434,104 @@
       "read": "Conversation marquée comme lue.",
       "deleted": "Message supprimé."
     }
+  },
+  "vendor": {
+    "eyebrow": "Espace vendeur",
+    "title": "Ma boutique",
+    "lede": "Vos produits et votre vitrine. Un produit naît en brouillon, se soumet à relecture, et c'est la maison qui publie — modifier une fiche publiée la retire de la vente et la renvoie en relecture.",
+    "restrictedTitle": "Réservé aux vendeurs partenaires",
+    "restrictedBody": "Cet espace gère une boutique de la marketplace, et aucun compte vendeur n'est rattaché au vôtre. L'entrée est humaine : les boutiques partenaires se créent sur invitation — écrivez-nous depuis la page contact si vous vendez des accessoires du cigare.",
+    "pendingNotice": "Votre boutique est en attente d'activation : vous pouvez préparer votre vitrine et vos fiches, rien n'est visible du public.",
+    "suspendedNotice": "Votre boutique est suspendue : votre vitrine et vos produits ne sont plus visibles, et l'écriture est fermée.",
+    "storefrontTitle": "Ma vitrine",
+    "storefrontLede": "Ce que la page publique de votre boutique montre : le nom, la présentation, le contact, le logo.",
+    "nameLabel": "Nom de la boutique",
+    "descriptionLabel": "Présentation",
+    "contactEmailLabel": "Courriel de contact",
+    "contactPhoneLabel": "Téléphone",
+    "logoLabel": "Logo",
+    "logoHint": "WebP, JPEG, PNG ou AVIF, 8 Mo au plus. Il remplace l’actuel.",
+    "legalTitle": "Identité professionnelle",
+    "legalLede": "Demandée par le règlement européen sur les services numériques (art. 30) avant toute vente sur la plateforme. Renseignez-la dès maintenant : le jour de l'ouverture, elle sera exigée.",
+    "legalNameLabel": "Raison sociale",
+    "registrationLabel": "Numéro au registre (SIREN)",
+    "addressLabel": "Adresse professionnelle",
+    "saved": "Enregistré.",
+    "productsTitle": "Mes produits",
+    "createTitle": "Nouveau produit",
+    "createLede": "Il naît en brouillon, invisible du public. Soumettez-le quand la fiche est prête.",
+    "emptyTitle": "Aucun produit pour l’instant",
+    "emptyBody": "Votre premier produit se crée ci-dessus : une catégorie, un titre, un prix. Il naîtra en brouillon.",
+    "editTitle": "Modifier le produit",
+    "closePanel": "Fermer",
+    "statusDraft": "Brouillon",
+    "statusSubmitted": "Soumis à relecture",
+    "statusPublished": "En vente",
+    "statusArchived": "Archivé",
+    "submit": "Soumettre à relecture",
+    "submitHint": "La maison relit, publie ou refuse avec un motif.",
+    "withdraw": "Retirer la soumission",
+    "retract": "Retirer de la vente",
+    "retractConfirm": "Retirer cette fiche de la vente ? Elle repasse en brouillon et devra être relue pour revenir.",
+    "editWarning": "Modifier une fiche publiée la retire de la vente : l'enregistrement la repasse en brouillon, à re-soumettre.",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce brouillon et son image ?",
+    "deleteHint": "Une fiche publiée se retire d’abord de la vente, puis se supprime.",
+    "reviewNotePrefix": "Motif du refus",
+    "edit": "Modifier",
+    "saveDraft": "Enregistrer le brouillon",
+    "create": "Créer en brouillon",
+    "settingsLink": "Gérer ma boutique",
+    "settingsLede": "Votre espace vendeur : vos produits, votre vitrine.",
+    "confirmations": {
+      "produit-soumis": "Fiche soumise à relecture.",
+      "soumission-retiree": "Soumission retirée : la fiche reste en brouillon.",
+      "produit-retire": "Fiche retirée de la vente.",
+      "produit-supprime": "Brouillon supprimé.",
+      "refus": "Ce geste n'a pas abouti — la fiche n'est peut-être plus dans l'état où vous l'avez ouverte."
+    },
+    "errors": {
+      "notVendor": "Aucune boutique n'est rattachée à ce compte.",
+      "suspended": "Votre boutique est suspendue : l’écriture est fermée.",
+      "unknown": "Cette action n'a pas abouti."
+    }
+  },
+  "shop": {
+    "eyebrow": "Boutique",
+    "title": "La boutique",
+    "lede": "Les accessoires du cigare, et rien d’autre : coupes, briquets, caves, hygromètres, livres. Chaque produit est relu avant d’être mis en vente.",
+    "searchLabel": "Chercher un accessoire",
+    "searchPlaceholder": "Coupe, cave, hygromètre…",
+    "searchSubmit": "Chercher",
+    "facetCategory": "Catégorie",
+    "facetBrand": "Marque",
+    "facetVendor": "Vendeur",
+    "facetPrice": "Prix",
+    "facetAll": "Tout",
+    "clearFilters": "Effacer les filtres",
+    "priceBrackets": {
+      "moins-25": "Moins de 25 €",
+      "25-50": "25 à 50 €",
+      "50-100": "50 à 100 €",
+      "plus-100": "Plus de 100 €"
+    },
+    "resultCount": "{n} produits",
+    "resultOne": "1 produit",
+    "emptyTitle": "Aucun produit ne correspond",
+    "emptyBody": "Élargissez la recherche, ou effacez un filtre : la boutique est encore jeune.",
+    "shelfEmptyTitle": "La boutique prépare son ouverture",
+    "shelfEmptyBody": "Les premières vitrines se remplissent. Revenez bientôt.",
+    "soldBy": "Vendu par",
+    "madeBy": "Marque",
+    "inStock": "En stock",
+    "outOfStock": "Épuisé",
+    "noCheckout": "La commande en ligne n’est pas encore ouverte : la boutique prépare son ouverture.",
+    "reviewsTitle": "Avis",
+    "reviewsEmpty": "Aucun avis. Un avis demandera un achat vérifié — la promesse vaut d’attendre.",
+    "vendorShelfTitle": "Les produits de cette boutique",
+    "vendorShelfEmpty": "Cette vitrine est vide pour l’instant.",
+    "vendorContact": "Contact",
+    "backToShop": "Toute la boutique",
+    "noImage": "Sans image"
   }
 }
