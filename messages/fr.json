@@ -95,12 +95,21 @@
         "title": "La boutique",
         "body": "Les bons accessoires, choisis par des vendeurs que nous relisons — coupes, caves, hygromètres. Jamais de tabac."
       }
+    },
+    "shop": {
+      "label": "Boutique"
+    },
+    "admin": {
+      "label": "Administration"
+    },
+    "vendor": {
+      "label": "Espace vendeur"
     }
   },
   "home": {
     "eyebrow": "Comprendre ce que l'on fume",
     "title": "Le référentiel du cigare, écrit par ceux qui le fument.",
-    "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré et une cave numérique. Rien à vendre, rien à promouvoir.",
+    "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré, une cave numérique et une boutique d’accessoires. Le tabac ne s’y vend pas — les accessoires, si.",
     "enter": "Entrer",
     "enterHint": "L'accès est réservé aux personnes majeures."
   },
@@ -248,9 +257,11 @@
     },
     "hero": {
       "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré et une cave numérique. Le réseau des amateurs francophones, les lieux où l'on fume, une boutique d'accessoires.",
-      "ledeEmphasis": "Rien à vendre, rien à promouvoir.",
+      "ledeEmphasis": "Le tabac ne s’y vend pas — les accessoires, si.",
       "tocTitle": "Ce que contient le site",
-      "tocShortcuts": "Aller à une section"
+      "tocShortcuts": "Aller à une section",
+      "shopCta": "Parcourir la boutique",
+      "shopCtaHint": "Accessoires uniquement, en accès libre."
     },
     "plate": {
       "emberLabel": "La braise",
@@ -286,7 +297,7 @@
     },
     "modules": {
       "referentiel": {
-        "number": "01",
+        "number": "02",
         "name": "Le référentiel",
         "kind": "Wiki",
         "title": "Toutes les vitoles, sourcées et versionnées.",
@@ -332,7 +343,7 @@
         }
       },
       "scan": {
-        "number": "02",
+        "number": "03",
         "name": "La reconnaissance de bague",
         "kind": "Scan",
         "title": "Photographiez la bague. Sachez ce que vous fumez.",
@@ -370,7 +381,7 @@
         }
       },
       "degustation": {
-        "number": "03",
+        "number": "04",
         "name": "La dégustation",
         "kind": "Carnet",
         "title": "Des notes comparables, pas des impressions.",
@@ -412,7 +423,7 @@
         }
       },
       "cave": {
-        "number": "04",
+        "number": "05",
         "name": "La cave",
         "kind": "Inventaire",
         "title": "Savoir ce que l'on a, et depuis quand.",
@@ -449,7 +460,7 @@
         }
       },
       "reseau": {
-        "number": "05",
+        "number": "06",
         "name": "Le réseau et la communauté",
         "kind": "Communauté",
         "title": "Un réseau d'amateurs, pas un forum de 2004.",
@@ -498,7 +509,7 @@
         }
       },
       "lieux": {
-        "number": "06",
+        "number": "07",
         "name": "Les lieux",
         "kind": "Carte",
         "title": "Où fumer, où acheter, où se faire conseiller.",
@@ -530,9 +541,9 @@
         }
       },
       "boutique": {
-        "number": "07",
+        "number": "01",
         "name": "La boutique",
-        "kind": "Accessoires",
+        "kind": "Accessoires · Ouverte",
         "title": "Des accessoires, et rien d'autre.",
         "body": "Coupes, briquets, cendriers, caves, hygromètres, étuis, solutions d'humidification, ouvrages, produits d'entretien. La vente à distance de tabac est interdite en France : le catalogue est fermé sur ces neuf catégories, une contrainte de base de données le garantit, et la compilation échoue si un produit du tabac y entre.",
         "points": [],
@@ -546,7 +557,9 @@
           "currency": "€",
           "payment": "Paiement hébergé — aucune donnée de carte ne transite par le site.",
           "enum": "9 catégories · énumération fermée"
-        }
+        },
+        "cta": "Parcourir la boutique",
+        "ctaHint": "En accès libre, sans compte — le paiement est en mode démonstration."
       },
       "partenaires": {
         "number": "08",
@@ -1064,7 +1077,18 @@
       "flagsLede": "Ce que le site offre ou retient, sans déploiement.",
       "flagsLink": "Régler les drapeaux",
       "shopLabel": "produits au catalogue ({draft} en brouillon)",
-      "shopLink": "Alimenter le catalogue"
+      "shopLink": "Alimenter le catalogue",
+      "shopTitle": "La boutique",
+      "shopLede": "L’état de la marketplace d’un coup d’œil : le drapeau, la file de relecture, les vendeurs. Tout se gère depuis les deux écrans ci-dessous.",
+      "shopFlagOpen": "Boutique ouverte au public",
+      "shopFlagClosed": "Boutique fermée — tout /boutique répond 404",
+      "shopFlagLink": "Basculer depuis les drapeaux",
+      "shopQueueLabel": "produits soumis, en attente de relecture",
+      "shopQueueLink": "Relire le catalogue",
+      "shopVendorsLabel": "vendeurs — {active} actifs · {pending} en attente · {suspended} suspendus",
+      "shopVendorsLink": "Gérer les vendeurs",
+      "shopSeePublic": "Voir la boutique publique",
+      "shopCatalogueLabel": "produits au catalogue, dont {published} publiés"
     },
     "flagsScreen": {
       "title": "Les drapeaux de fonctionnalité",
@@ -1270,7 +1294,8 @@
       "statusSubmitted": "Soumis à relecture",
       "vendorsLink": "Les vendeurs",
       "vendorsLede": "Créer une boutique partenaire, rattacher un compte, activer, suspendre.",
-      "reviewNotePrefix": "Motif du refus"
+      "reviewNotePrefix": "Motif du refus",
+      "seePublic": "Voir la boutique publique"
     },
     "vendors": {
       "title": "Les vendeurs",
@@ -1308,6 +1333,16 @@
       "shopfrontLink": "Voir la vitrine",
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer cette boutique vide ? Une boutique qui a des produits se suspend, elle ne se supprime pas."
+    },
+    "nav": {
+      "label": "Navigation de l’administration",
+      "dashboard": "Tableau de bord",
+      "shop": "Boutique",
+      "vendors": "Vendeurs",
+      "flags": "Drapeaux",
+      "accounts": "Comptes",
+      "sheets": "Fiches",
+      "lines": "Gammes"
     }
   },
   "aromas": {
@@ -2494,12 +2529,15 @@
       "notVendor": "Aucune boutique n'est rattachée à ce compte.",
       "suspended": "Votre boutique est suspendue : l’écriture est fermée.",
       "unknown": "Cette action n'a pas abouti."
-    }
+    },
+    "publicStorefront": "Voir ma vitrine publique",
+    "viewShop": "Voir la boutique",
+    "storefrontPendingHint": "La vitrine sera visible quand la boutique sera activée par la maison."
   },
   "shop": {
     "eyebrow": "Boutique",
     "title": "La boutique",
-    "lede": "Les accessoires du cigare, et rien d’autre : coupes, briquets, caves, hygromètres, livres. Chaque produit est relu avant d’être mis en vente.",
+    "lede": "Les accessoires du cigare, et rien d’autre : coupes, briquets, caves, hygromètres, livres. Chaque produit est relu avant d’être mis en vente, et la commande va jusqu’au paiement — de démonstration.",
     "searchLabel": "Chercher un accessoire",
     "searchPlaceholder": "Coupe, cave, hygromètre…",
     "searchSubmit": "Chercher",
@@ -2525,13 +2563,98 @@
     "madeBy": "Marque",
     "inStock": "En stock",
     "outOfStock": "Épuisé",
-    "noCheckout": "La commande en ligne n’est pas encore ouverte : la boutique prépare son ouverture.",
     "reviewsTitle": "Avis",
     "reviewsEmpty": "Aucun avis. Un avis demandera un achat vérifié — la promesse vaut d’attendre.",
     "vendorShelfTitle": "Les produits de cette boutique",
     "vendorShelfEmpty": "Cette vitrine est vide pour l’instant.",
     "vendorContact": "Contact",
     "backToShop": "Toute la boutique",
-    "noImage": "Sans image"
+    "noImage": "Sans image",
+    "demo": {
+      "badge": "Démo",
+      "banner": "Boutique en mode démonstration — le paiement est fictif : rien n’est débité, rien n’est expédié."
+    },
+    "nav": {
+      "label": "Navigation de la boutique",
+      "all": "Tous les produits",
+      "cart": "Panier"
+    },
+    "addToCart": "Ajouter au panier",
+    "qtyLabel": "Quantité",
+    "demoPriceNote": "Commande de démonstration : rien n’est débité, rien n’est expédié.",
+    "cart": {
+      "eyebrow": "Boutique",
+      "title": "Le panier",
+      "lede": "Ce que vous vous apprêtez à commander. Tout se modifie ici, jusqu’au paiement de démonstration.",
+      "emptyTitle": "Le panier est vide",
+      "emptyBody": "Parcourez la boutique : chaque produit s’ajoute ici, et la commande s’essaie jusqu’au bout.",
+      "browse": "Parcourir la boutique",
+      "unitPrice": "Prix unitaire",
+      "qty": "Quantité",
+      "update": "Mettre à jour",
+      "remove": "Retirer",
+      "clear": "Vider le panier",
+      "clearConfirm": "Vider le panier ?",
+      "itemsTotal": "Sous-total",
+      "shipping": "Livraison — démonstration",
+      "shippingFree": "Offerte",
+      "shippingFreeFrom": "Offerte dès {n}",
+      "total": "Total",
+      "checkout": "Passer la commande",
+      "unavailable": "Des articles de ce panier ne sont plus en vente ; ils ont été ignorés.",
+      "confirmations": {
+        "ajout": "Ajouté au panier.",
+        "maj": "Panier mis à jour.",
+        "retrait": "Article retiré du panier.",
+        "vide": "Panier vidé."
+      }
+    },
+    "checkout": {
+      "eyebrow": "Commande",
+      "title": "Vos coordonnées",
+      "lede": "L’adresse de livraison de cette commande de démonstration — rien ne sera expédié, et rien n’est conservé au-delà de la confirmation.",
+      "nameLabel": "Nom complet",
+      "emailLabel": "Adresse e-mail",
+      "addressLabel": "Adresse",
+      "postalCodeLabel": "Code postal",
+      "cityLabel": "Ville",
+      "continue": "Continuer vers le paiement",
+      "backToCart": "Revenir au panier",
+      "recapTitle": "Récapitulatif",
+      "errors": {
+        "name": "Un nom complet, entre 2 et 80 caractères.",
+        "email": "Une adresse e-mail valable.",
+        "address": "Une adresse, entre 5 et 200 caractères.",
+        "postalCode": "Un code postal français : cinq chiffres.",
+        "city": "Une ville, entre 2 et 80 caractères.",
+        "cartEmpty": "Le panier est vide — la commande n’a rien à contenir."
+      }
+    },
+    "payment": {
+      "eyebrow": "Paiement",
+      "title": "Le paiement — démonstration",
+      "lede": "Aucun prestataire de paiement n’est branché : la carte n’est pas débitée, aucune donnée de carte n’est conservée ni transmise. Toute carte au bon format est acceptée.",
+      "cardNumberLabel": "Numéro de carte",
+      "expiryLabel": "Expiration (MM/AA)",
+      "cvcLabel": "Cryptogramme",
+      "pay": "Payer {total} — démonstration",
+      "backToCheckout": "Modifier les coordonnées",
+      "errors": {
+        "cardNumber": "Seize chiffres, comme sur la carte.",
+        "expiry": "Une expiration au format MM/AA.",
+        "cvc": "Trois chiffres, au dos de la carte.",
+        "cartGone": "Le panier ou l’adresse ont expiré — reprenez la commande depuis le panier."
+      }
+    },
+    "confirmation": {
+      "eyebrow": "Commande",
+      "title": "Commande de démonstration enregistrée",
+      "status": "Commande de démonstration enregistrée : rien n’a été débité, rien ne sera expédié.",
+      "reference": "Référence",
+      "linesTitle": "Les articles",
+      "shippingTitle": "Livraison — fictive",
+      "totalsTitle": "Le total",
+      "backToShop": "Revenir à la boutique"
+    }
   }
 }

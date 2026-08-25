@@ -3,6 +3,7 @@ import Link from 'next/link'
 
 import { Band } from '@/components/band/band'
 import { adminCounts } from '@/lib/admin/queries'
+import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
 import { modQueueWithAge, reportSlaHours } from '@/lib/moderation/queries'
 import { routes } from '@/lib/routes'
@@ -26,9 +27,10 @@ export default async function AdminPage() {
   if (!isAdmin) return <AdminRestricted />
 
   const slaHours = await reportSlaHours()
-  const [counts, openReports] = await Promise.all([
+  const [counts, openReports, shopOpen] = await Promise.all([
     adminCounts(),
     modQueueWithAge('open', slaHours),
+    isFeatureEnabled('shop_enabled'),
   ])
   const oldest = openReports[0]
 
@@ -39,6 +41,58 @@ export default async function AdminPage() {
         <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
+
+      {/* The shop first — QA said its administration was invisible, and a
+          dashboard is where an admin looks first. State, queue, vendors: each
+          number links to the screen that owns the work. */}
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="font-display text-2xl">{copy.dash.shopTitle}</h2>
+          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.dash.shopLede}</p>
+        </div>
+        <p
+          className={`rounded-[3px] border px-4 py-3 text-sm ${shopOpen ? 'border-accent text-ink' : 'border-rule-strong text-ink'}`}
+        >
+          <span className="font-semibold">
+            {shopOpen ? copy.dash.shopFlagOpen : copy.dash.shopFlagClosed}
+          </span>{' '}
+          <Link href={routes.adminFlags()} className="text-accent underline">
+            {copy.dash.shopFlagLink}
+          </Link>
+          {' · '}
+          <Link href={routes.shop()} className="text-accent underline">
+            {copy.dash.shopSeePublic}
+          </Link>
+        </p>
+        <ul className="grid gap-3 sm:grid-cols-3">
+          <Queue
+            count={counts.productsSubmitted}
+            label={copy.dash.shopQueueLabel}
+            href={routes.adminShop()}
+            link={copy.dash.shopQueueLink}
+          />
+          <Queue
+            count={counts.productsTotal}
+            label={copy.dash.shopCatalogueLabel.replace(
+              '{published}',
+              String(counts.productsPublished),
+            )}
+            href={routes.adminShop()}
+            link={copy.dash.shopLink}
+          />
+          <Queue
+            count={counts.vendorsActive + counts.vendorsPending + counts.vendorsSuspended}
+            label={copy.dash.shopVendorsLabel
+              .replace('{active}', String(counts.vendorsActive))
+              .replace('{pending}', String(counts.vendorsPending))
+              .replace('{suspended}', String(counts.vendorsSuspended))}
+            href={routes.adminShopVendors()}
+            link={copy.dash.shopVendorsLink}
+          />
+        </ul>
+      </section>
+
+      <Band variant="divider" />
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-2xl">{copy.dash.queuesTitle}</h2>
@@ -98,12 +152,6 @@ export default async function AdminPage() {
             label={copy.dash.accountsLabel}
             href={routes.adminAccounts()}
             link={copy.dash.accountsLink}
-          />
-          <Queue
-            count={counts.productsTotal}
-            label={copy.dash.shopLabel.replace('{draft}', String(counts.productsDraft))}
-            href={routes.adminShop()}
-            link={copy.dash.shopLink}
           />
         </ul>
       </section>

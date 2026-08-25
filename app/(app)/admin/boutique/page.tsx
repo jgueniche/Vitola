@@ -78,6 +78,10 @@ export default async function AdminShopPage({ searchParams }: Props) {
             {copy.vendorsLink}
           </Link>{' '}
           <span className="text-ink-faint text-xs">{copy.vendorsLede}</span>
+          {' · '}
+          <Link href={routes.shop()} className="text-ink underline">
+            {copy.seePublic}
+          </Link>
         </p>
       </div>
 

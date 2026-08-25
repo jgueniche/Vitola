@@ -36,6 +36,18 @@ export type Account = {
   consents: ConsentRow[]
 }
 
+/**
+ * The role alone — one indexed row, for the call sites that render a link and
+ * nothing else (the header). `getAccount` below reads three tables; paying
+ * that on every page to decide whether « Administration » appears would be
+ * the header buying a settings screen.
+ */
+export async function getRole(userId: string): Promise<AppRole> {
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase.from('profiles').select('role').eq('id', userId).maybeSingle()
+  return (data?.role as AppRole | undefined) ?? 'member'
+}
+
 export async function getAccount(userId: string): Promise<Account | null> {
   const supabase = await createSupabaseServerClient()
 

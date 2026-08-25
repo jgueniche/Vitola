@@ -24,6 +24,24 @@ Une entrée porte toujours les trois mêmes choses : ce qui est assumé, ce qui 
 Un point sans déclencheur n'est pas une décision reportée, c'est une inquiétude — et une liste
 d'inquiétudes finit par noyer les vraies.
 
+### Boutique publique et paiement de démonstration
+
+**Assumé.** Depuis le 25 août 2026, sur instruction du porteur (« fais comme si on vendait
+déjà, sinon impossible de faire de la QA »), la boutique est **entièrement publique** —
+`/boutique` est le second préfixe public après le journal, devant le portail 18+ — et un
+**tunnel d'achat de démonstration** va du panier à une confirmation `QA-` : paiement fictif,
+bandeau « démonstration » sur chaque écran, aucune donnée de carte conservée, aucune commande
+en base (le panier est un cookie). La frontière §2 ne bouge pas : accessoires seulement, l'enum
+fermé et le trigger lexical la tiennent, et le référentiel tabac reste derrière le portail.
+
+**Ce qui rouvre.** La parole du porteur — c'est lui qui dira quand la commercialisation
+approche — ou l'arrivée des clés Stripe (ADR 0016, D7 : commission ou abonnement, DAC7 avant le
+premier euro reversé). Le vrai paiement exigera `shop.orders` sous RLS, et le paiement de
+démonstration se retire le même jour.
+
+**Quand.** Avant l'ouverture commerciale. D'ici là on ne s'en inquiète plus : l'état de QA est
+l'état voulu.
+
 ### Cigare allumé en page publique
 
 **Assumé.** L'accueil montre une illustration de cigare allumé, visible **avant** le portail 18+.
@@ -312,7 +330,7 @@ d'abord » — Checkout, option A) ; sa note d'arbitrage consigne aussi le **ref
 « stock des civettes contre abonnement des buralistes » — deux fois ce que la loi Évin interdit,
 désigner où acheter un produit du tabac et être payé pour cette mise en avant.
 
-## La marketplace d'accessoires — livrée le 25 août 2026, derrière un drapeau fermé
+## La marketplace d'accessoires — livrée le 25 août 2026, ouverte au public le même jour
 
 GO du porteur le 25 août (l'option B de la discussion consignée dans « Quand rouvrir » de
 l'ADR 0015). [ADR 0016](docs/adr/0016-la-marketplace-d-accessoires.md) avant le SQL, migration
@@ -345,11 +363,16 @@ relecture dans `/admin/boutique` et `/admin/boutique/vendeurs`, les deux entrée
    prérequis consigné du premier euro reversé**. Les avis produits restent sans porte
    d'écriture (ADR 0015 D3, inchangée).
 
-**Le drapeau `shop_enabled` est né fermé dans la 0022** : tout `/boutique` répond 404 tant que
-le porteur ne l'ouvre pas depuis `/admin/drapeaux` — c'est le renversement conscient de
-l'ADR 0015 D1 (« aucune route publique »), tenu en laisse par le drapeau. Trois colonnes se
-gardent par trigger parce qu'un grant ne sait pas séparer deux rôles applicatifs :
-`vendors.status`, `vendors.owner_id`, `products.review_note` (le motif de `profiles`).
+**Le drapeau `shop_enabled` est né fermé dans la 0022, et la 0023 l'a ouvert le même jour** sur
+instruction du porteur : la boutique est publique (devant le portail — voir « Boutique publique
+et paiement de démonstration » ci-dessus), le tunnel d'achat de démonstration va du panier à la
+confirmation `QA-`, l'accueil la met en module 01 et l'en-tête la nomme pour tout le monde.
+Couper le drapeau depuis `/admin/drapeaux` reste le coupe-circuit — tout `/boutique` répond
+alors 404, l'entrée de navigation reste. Trois colonnes se gardent par trigger parce qu'un
+grant ne sait pas séparer deux rôles applicatifs : `vendors.status`, `vendors.owner_id`,
+`products.review_note` (le motif de `profiles`). Le panier est un cookie et le paiement valide
+la forme sans rien encaisser — les deux décisions sont motivées dans `docs/decisions-log.md`,
+et `lib/shop/cart.ts` est la source unique du tunnel.
 
 ## `ref.lines` : décision de v1
 

@@ -7,19 +7,22 @@
  *   pnpm build && pnpm start --port 3100
  *   pnpm tsx tooling/parcours/marketplace.ts
  *
- * Ce qu'il met en scène, dans l'ordre où la vie le fera : le drapeau fermé
- * (tout /boutique répond 404, même à un produit publié), l'espace vendeur
- * refusé à qui n'a pas de boutique, le cycle brouillon → soumission → refus
- * motivé → re-soumission → publication, l'ouverture du drapeau PAR L'ÉCRAN
- * des drapeaux, les deux entrées publiques (recherche facettée et vitrine),
- * la suspension qui coupe tout, le retrait puis la suppression par le
- * vendeur, et la fermeture du drapeau.
+ * Ce qu'il met en scène, dans l'ordre où la vie le fera : le coupe-circuit
+ * d'abord (drapeau fermé PAR L'ÉCRAN, tout /boutique répond 404, même à un
+ * produit publié), l'espace vendeur refusé à qui n'a pas de boutique, le
+ * cycle brouillon → soumission → refus motivé → re-soumission → publication,
+ * la réouverture du drapeau, les deux entrées publiques (recherche facettée
+ * et vitrine) SANS portail — la boutique est publique depuis le 25 août
+ * 2026 —, le tunnel d'achat de démonstration de bout en bout (panier,
+ * coordonnées refusées puis acceptées, carte refusée puis acceptée,
+ * confirmation QA-), la suspension qui coupe tout, le retrait puis la
+ * suppression par le vendeur.
  *
  * Il nettoie derrière lui : le produit part par l'espace vendeur (ligne et
- * image), la boutique jetable par l'écran des vendeurs, le drapeau se
- * referme. Les bascules du drapeau restent dans audit_log — un journal ne se
- * nettoie pas. Ce qui reste en base : les deux vendeurs durables (« Vitola »
- * et « Comptoir du Cèdre »), zéro produit.
+ * image), la boutique jetable par l'écran des vendeurs, et le drapeau
+ * REVIENT À OUVERT — c'est son état de repos depuis la 0023. Les bascules
+ * restent dans audit_log — un journal ne se nettoie pas. Ce qui reste en
+ * base : les vendeurs durables et le catalogue de QA.
  */
 
 import { chromium, type Browser, type Page } from '@playwright/test'
@@ -126,6 +129,21 @@ async function toggleShopFlag(admin: Page, direction: 'Activer' | 'Couper'): Pro
 }
 
 /**
+ * Idempotent variant for the walkthrough's opening move: since 0023 the
+ * flag's resting state is OPEN, and a rerun after a failed run may find it
+ * either way. The button's label says which state the flag is in.
+ */
+async function ensureShopFlag(admin: Page, want: 'Activer' | 'Couper'): Promise<boolean> {
+  await admin.goto(`${BASE}/admin/drapeaux`)
+  await settle(admin)
+  const form = admin.locator('form:has(input[name="key"][value="shop_enabled"])')
+  if ((await form.getByRole('button', { name: want, exact: true }).count()) === 0) return true
+  await form.getByRole('button', { name: want, exact: true }).click()
+  const result = await settled(admin)
+  return result.ok
+}
+
+/**
  * Le formulaire produit, borné : la page du vendeur porte AUSSI le formulaire
  * de vitrine, et deux `textarea[name="description"]` cohabitent — le mode
  * strict de Playwright refuse un sélecteur non borné (la leçon des deux
@@ -148,8 +166,10 @@ async function main(): Promise<void> {
   admin.on('dialog', (dialog) => void dialog.accept())
 
   try {
-    console.log('\n1. Drapeau fermé : toute la boutique publique répond 404')
+    console.log('\n1. Le coupe-circuit : drapeau fermé, toute la boutique répond 404')
     await passGate(visitor)
+    await signIn(admin, ADMIN)
+    check('le drapeau se ferme depuis l’écran', await ensureShopFlag(admin, 'Couper'))
     check('/boutique est un 404', await is404(visitor, `${BASE}/boutique`))
     check(
       'la vitrine du vendeur de QA aussi',
@@ -165,11 +185,15 @@ async function main(): Promise<void> {
       contains(await text(member), 'Réservé aux vendeurs partenaires'),
     )
 
-    console.log('\n3. Le vendeur entre chez lui par /parametres')
+    console.log('\n3. Le vendeur entre chez lui par /parametres — et par l’en-tête')
     await signIn(vendor, VENDOR)
     await vendor.goto(`${BASE}/parametres`)
     await settle(vendor)
     check('le lien « Gérer ma boutique » est là', contains(await text(vendor), 'Gérer ma boutique'))
+    check(
+      'l’en-tête porte « Espace vendeur »',
+      (await vendor.locator('header a', { hasText: 'Espace vendeur' }).count()) > 0,
+    )
     await vendor.goto(`${BASE}/vendeur`)
     await settle(vendor)
     check(
@@ -222,7 +246,6 @@ async function main(): Promise<void> {
     check('le badge dit « Soumis à relecture »', contains(await text(vendor), 'Soumis à relecture'))
 
     console.log('\n7. L’admin refuse, avec un motif que le vendeur lira')
-    await signIn(admin, ADMIN)
     await admin.goto(`${BASE}/admin/boutique`)
     await settle(admin)
     const queue = await text(admin)
@@ -261,10 +284,29 @@ async function main(): Promise<void> {
       await is404(visitor, `${BASE}/boutique`),
     )
 
-    console.log('\n10. L’admin ouvre le drapeau depuis /admin/drapeaux')
+    console.log('\n10. L’admin rouvre le drapeau depuis /admin/drapeaux')
     check('la bascule confirme', await toggleShopFlag(admin, 'Activer'))
+    check(
+      'le tableau de bord dit « Boutique ouverte »',
+      await (async () => {
+        await admin.goto(`${BASE}/admin`)
+        await settle(admin)
+        return contains(await text(admin), 'Boutique ouverte au public')
+      })(),
+    )
 
-    console.log('\n11. La recherche transversale : facettes et texte')
+    console.log('\n11. La boutique est PUBLIQUE : un passant sans portail y entre')
+    const passerby = await (await browser.newContext()).newPage()
+    await passerby.goto(`${BASE}/boutique`)
+    await settle(passerby)
+    check('pas de détour par /majorite', !passerby.url().includes('majorite'), passerby.url())
+    check('le rayon se lit sans cookie', contains(await text(passerby), PRODUCT))
+    check(
+      'le bandeau de démonstration est posé',
+      contains((await passerby.locator('body').innerText()) ?? '', 'démonstration'),
+    )
+
+    console.log('\n11 bis. La recherche transversale : facettes et texte')
     await visitor.goto(`${BASE}/boutique`)
     await settle(visitor)
     const shelf = await text(visitor)
@@ -284,7 +326,7 @@ async function main(): Promise<void> {
     await settle(visitor)
     check('une facette vide est un écran', contains(await text(visitor), 'Aucun produit ne correspond'))
 
-    console.log('\n12. La fiche produit : prix, liens, pas de promesse d’achat')
+    console.log('\n12. La fiche produit : prix, liens, et le bouton d’achat')
     await visitor.goto(`${BASE}/boutique`)
     await settle(visitor)
     const href = await visitor.locator(`main a:has-text("${PRODUCT}")`).first().getAttribute('href')
@@ -295,9 +337,58 @@ async function main(): Promise<void> {
     check('le prix français', contains(sheet, '34,50'))
     check('« Vendu par » en lien', contains(sheet, 'Vendu par'))
     check('l’état du stock', contains(sheet, 'En stock'))
-    check('la commande n’est pas promise', contains(sheet, 'pas encore ouverte'))
+    check(
+      '« Ajouter au panier » est là',
+      (await visitor.getByRole('button', { name: 'Ajouter au panier' }).count()) > 0,
+    )
+    check('la fiche dit que la commande est une démonstration', contains(sheet, 'démonstration'))
     check('les avis attendent la caisse', contains(sheet, 'achat vérifié'))
-    check('aucun bouton d’achat', (await visitor.locator('main button').count()) === 0)
+
+    console.log('\n12 bis. Le tunnel d’achat de démonstration, de bout en bout, sans portail')
+    await passerby.goto(`${BASE}${href}`)
+    await settle(passerby)
+    await passerby.locator('main input[name="qty"]').fill('2')
+    await passerby.getByRole('button', { name: 'Ajouter au panier' }).click()
+    await passerby.waitForURL(/\/boutique\/panier\?fait=ajout/, { timeout: 15000 })
+    await settle(passerby)
+    const cart = await text(passerby)
+    check('le panier porte la ligne', contains(cart, PRODUCT))
+    check('le total ligne est juste (2 × 34,50)', contains(cart, '69,00'))
+    check('la livraison démo est comptée', contains(cart, 'Livraison'))
+    await passerby.getByRole('link', { name: 'Passer la commande' }).click()
+    await passerby.waitForURL(/\/boutique\/commande/, { timeout: 15000 })
+    await settle(passerby)
+    await passerby.locator('input[name="fullName"]').fill('Camille Parcours')
+    await passerby.locator('input[name="email"]').fill('camille@example.org')
+    await passerby.locator('input[name="address"]').fill('1 rue du Parcours')
+    await passerby.locator('input[name="postalCode"]').fill('75')
+    await passerby.locator('input[name="city"]').fill('Paris')
+    await passerby.getByRole('button', { name: 'Continuer vers le paiement' }).click()
+    const badPostal = await settled(passerby)
+    check('un code postal à deux chiffres se refuse en place', !badPostal.ok, badPostal.message)
+    await passerby.locator('input[name="postalCode"]').fill('75017')
+    await passerby.getByRole('button', { name: 'Continuer vers le paiement' }).click()
+    await passerby.waitForURL(/\/boutique\/commande\/paiement/, { timeout: 15000 })
+    await settle(passerby)
+    check(
+      'le paiement se dit fictif avant tout champ',
+      contains(await text(passerby), 'Aucun prestataire de paiement'),
+    )
+    await passerby.locator('input[name="cardNumber"]').fill('4242')
+    await passerby.getByRole('button', { name: /^Payer / }).click()
+    const badCard = await settled(passerby)
+    check('une carte à quatre chiffres se refuse en place', !badCard.ok, badCard.message)
+    await passerby.locator('input[name="cardNumber"]').fill('4242 4242 4242 4242')
+    await passerby.getByRole('button', { name: /^Payer / }).click()
+    await passerby.waitForURL(/\/boutique\/commande\/confirmation/, { timeout: 15000 })
+    await settle(passerby)
+    const confirmation = await text(passerby)
+    check('la confirmation se dit démonstration', contains(confirmation, 'démonstration'))
+    check('la référence est marquée QA-', contains(confirmation, 'QA-'))
+    check('les articles y sont', contains(confirmation, PRODUCT))
+    await passerby.goto(`${BASE}/boutique/panier`)
+    await settle(passerby)
+    check('payer a vidé le panier', contains(await text(passerby), 'Le panier est vide'))
 
     console.log('\n13. La vitrine — la seconde entrée')
     await visitor.goto(`${BASE}/boutique/vendeurs/comptoir-du-cedre`)
@@ -392,9 +483,11 @@ async function main(): Promise<void> {
     check('la suppression confirme', await landed(vendor, 'produit-supprime'), vendor.url())
     check('l’atelier est revenu à vide', contains(await text(vendor), 'Aucun produit'))
 
-    console.log('\n20. L’admin referme le drapeau — la porte retombe')
-    check('la bascule confirme', await toggleShopFlag(admin, 'Couper'))
-    check('/boutique est de nouveau un 404', await is404(visitor, `${BASE}/boutique`))
+    console.log('\n20. Le coupe-circuit joue dans les deux sens — et l’état de repos est OUVERT')
+    check('la coupure confirme', await toggleShopFlag(admin, 'Couper'))
+    check('/boutique répond 404, coupée', await is404(visitor, `${BASE}/boutique`))
+    check('la réouverture confirme', await toggleShopFlag(admin, 'Activer'))
+    check('/boutique répond de nouveau', !(await is404(visitor, `${BASE}/boutique`)))
   } catch (cause) {
     failures.push(`exception : ${String(cause)}`)
     console.log(`  FAIL exception : ${String(cause)}`)
@@ -405,7 +498,7 @@ async function main(): Promise<void> {
   console.log(`\n${passed} assertions passées, ${failures.length} échec(s)`)
   for (const failure of failures) console.log(`  - ${failure}`)
   console.log(
-    '\n→ La session compte en base : 0 produit, 2 vendeurs (Vitola, Comptoir du Cèdre), 0 objet dans shop-images.',
+    '\n→ La session rend la base comme elle l’a trouvée : le produit de parcours est parti, les vendeurs durables et le catalogue de QA restent, le drapeau est revenu à OUVERT (son état de repos depuis la 0023).',
   )
   console.log('→ Les bascules de shop_enabled restent dans audit_log : un journal ne se nettoie pas.')
   process.exit(failures.length === 0 ? 0 : 1)
