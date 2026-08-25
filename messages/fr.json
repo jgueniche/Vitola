@@ -938,6 +938,158 @@
       "settingsLede": "La file DSA de /moderation, réservée aux comptes modérateurs."
     }
   },
+  "admin": {
+    "eyebrow": "Administration",
+    "title": "Administration",
+    "lede": "Ce que le site ne sait pas encore faire tout seul : les drapeaux, les comptes, la relecture des fiches et les gammes. Les files de travail — modération, wiki, lieux, journal — gardent chacune leur écran ; d'ici, on y va.",
+    "restrictedTitle": "Réservé aux administrateurs",
+    "restrictedBody": "Cette section demande le rôle d'administrateur. Chaque geste qu'elle permet est de toute façon revérifié par la base : y accéder sans le rôle ne permettrait d'écrire nulle part.",
+    "settingsLink": "Administrer le site",
+    "settingsLede": "Drapeaux, comptes, relecture des fiches, gammes.",
+    "dash": {
+      "queuesTitle": "Les files à relever",
+      "moderationLabel": "signalements ouverts",
+      "moderationSla": "délai publié : {hours} h",
+      "moderationOldest": "le plus ancien : il y a {age}",
+      "moderationLink": "Relever la file de modération",
+      "revisionsLabel": "propositions wiki en attente",
+      "revisionsLink": "Ouvrir la file de relecture",
+      "venuesLabel": "lieux proposés en attente",
+      "venuesLink": "Ouvrir les lieux",
+      "articlesLabel": "brouillons du journal",
+      "articlesLink": "Ouvrir le journal",
+      "stateTitle": "L'état du référentiel",
+      "sheetsUnreviewed": "fiches publiées jamais relues",
+      "sheetsPublished": "fiches publiées",
+      "sheetsDraft": "fiches en brouillon",
+      "sheetsLink": "Suivre la relecture",
+      "linesLabel": "gammes ({draft} en brouillon)",
+      "linesLink": "Gérer les gammes",
+      "accountsLabel": "comptes",
+      "accountsLink": "Parcourir les comptes",
+      "flagsTitle": "Les drapeaux",
+      "flagsLede": "Ce que le site offre ou retient, sans déploiement.",
+      "flagsLink": "Régler les drapeaux"
+    },
+    "flagsScreen": {
+      "title": "Les drapeaux de fonctionnalité",
+      "lede": "Chaque changement passe par une porte qui écrit sa trace au journal d'audit, dans la même transaction — un drapeau changé sans histoire n'existe pas ici. Un drapeau naît dans une migration, avec le code qui le lit : rien ne se crée sur cet écran.",
+      "stateOn": "Activé",
+      "stateOff": "Coupé",
+      "turnOn": "Activer",
+      "turnOff": "Couper",
+      "save": "Enregistrer",
+      "saved": "Enregistré, et tracé au journal d'audit.",
+      "updatedOn": "Dernier changement le {date}",
+      "unknownFlag": "Drapeau non répertorié par l'écran — sa description d'origine :"
+    },
+    "flags": {
+      "public_signup_open": {
+        "label": "Inscriptions publiques",
+        "description": "Ouvre la création de compte à tout visiteur majeur. Fermé tant que l'avis juridique (Q1) n'est pas rendu.",
+        "warning": "L'ouvrir change qui peut entrer : c'est une décision d'ouverture, pas un réglage. Resserrez d'abord le seuil des commentaires, et assurez-vous que quelqu'un relève la file de modération."
+      },
+      "show_indicative_prices": {
+        "label": "Prix indicatifs",
+        "description": "Affiche le prix homologué (msrp_eur) sur les fiches. Coupé par défaut : un prix mis en avant est un appel à l'achat au sens de la loi Évin."
+      },
+      "wiki_contributions_open": {
+        "label": "Contribution wiki",
+        "description": "Ouvre la file de propositions de corrections sur les fiches."
+      },
+      "comments_min_role": {
+        "label": "Seuil des commentaires",
+        "description": "Le rôle minimal pour commenter une fiche. À resserrer en « contributor » le jour où l'inscription s'ouvre.",
+        "roleLabel": "Rôle minimal"
+      },
+      "dsa_report_sla_hours": {
+        "label": "Délai de traitement des signalements",
+        "description": "Le délai annoncé dans les mentions légales, lu à chaque rendu.",
+        "warning": "Ce nombre est un engagement publié : le changer change ce que le site promet, immédiatement et sans déploiement.",
+        "hoursLabel": "Délai (heures)"
+      },
+      "venues_enabled": {
+        "label": "Les lieux",
+        "description": "Toute la section /lieux, entrée de navigation comprise. La charge utile liste les types offerts ; la restreindre après avis juridique (Q6) se fait ici — les types, eux, s'éditent en migration."
+      }
+    },
+    "accounts": {
+      "title": "Les comptes",
+      "lede": "Tous les profils, découvrables ou non — c'est la policy des modérateurs qui l'ouvre. La promotion d'un rôle se fait sur le profil du membre, où le panneau existe déjà ; suspendre n'a pas encore de bras (ADR 0013), et l'effacement reste le geste RGPD de son titulaire.",
+      "searchLabel": "Chercher un compte",
+      "searchPlaceholder": "pseudo ou nom affiché",
+      "search": "Chercher",
+      "colHandle": "Pseudo",
+      "colRole": "Rôle",
+      "colReputation": "Réputation",
+      "colCreated": "Créé le",
+      "colDiscoverable": "Découvrable",
+      "discoverableYes": "oui",
+      "discoverableNo": "non",
+      "openProfile": "Voir le profil",
+      "emptyTitle": "Aucun compte ne correspond",
+      "emptyBody": "La recherche porte sur le pseudo et le nom affiché.",
+      "countNote": "Les {count} comptes les plus récents. Affinez par la recherche au-delà."
+    },
+    "sheets": {
+      "title": "La relecture des fiches",
+      "lede": "862 fiches ont été publiées pour la QA sans relecture humaine. Relire, c'est vérifier une fiche contre sa source et le dire : « marquer relue » signe verified_by et horodate verified_at. Dépublier retire une fiche de la lecture publique sans rien effacer ; l'historique wiki reste.",
+      "filterUnreviewed": "Non relues",
+      "filterDrafts": "Brouillons",
+      "filterPublished": "Publiées",
+      "searchLabel": "Chercher une fiche",
+      "search": "Chercher",
+      "countUnreviewed": "{count} fiches publiées jamais relues",
+      "statusPublished": "Publiée",
+      "statusDraft": "Brouillon",
+      "reviewedOn": "relue le {date}",
+      "neverReviewed": "jamais relue",
+      "markReviewed": "Marquer relue",
+      "unpublish": "Dépublier",
+      "republish": "Republier",
+      "openSheet": "Voir la fiche",
+      "emptyTitle": "Rien sous ce filtre",
+      "emptyBody": "C'est le bon état pour « non relues » : il voudra dire que le stock est résorbé — et que proposer une fiche nouvelle (ADR 0008) peut s'ouvrir."
+    },
+    "lines": {
+      "title": "Les gammes",
+      "lede": "Une gamme naît ici en brouillon, invisible du public, et se publie en un geste séparé — même pour la personne qui vient de la créer. Elle se rattache aux fiches par la file de contribution, jamais en masse. Une source vérifiable par gamme : c'est la règle de provenance du référentiel.",
+      "createTitle": "Nouvelle gamme",
+      "brandLabel": "Marque",
+      "brandPlaceholder": "Choisir une marque",
+      "nameLabel": "Nom de la gamme",
+      "create": "Créer en brouillon",
+      "created": "Gamme créée, en brouillon. La publier est le geste d'à côté.",
+      "listTitle": "Toutes les gammes",
+      "statusPublished": "Publiée",
+      "statusDraft": "Brouillon",
+      "publish": "Publier",
+      "unpublish": "Dépublier",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette gamme ? Les fiches qui y sont rattachées seront simplement détachées.",
+      "emptyTitle": "Aucune gamme",
+      "emptyBody": "La table est vide par décision de v1, rouverte par l'ADR 0009 : les premières gammes se créent ici, avec une source vérifiable, et se publient une fois relues."
+    },
+    "confirmations": {
+      "relue": "Fiche marquée relue, signée de votre compte.",
+      "depubliee": "Fiche dépubliée. Elle reste dans le référentiel, invisible du public.",
+      "republiee": "Fiche republiée.",
+      "gammePubliee": "Gamme publiée. Elle est désormais proposable au wiki.",
+      "gammeDepubliee": "Gamme dépubliée. Les fiches déjà rattachées ne l'affichent plus.",
+      "gammeSupprimee": "Gamme supprimée. Les fiches rattachées ont été détachées.",
+      "refus": "La base a refusé ce geste : il demande un rôle que ce compte n'a pas."
+    },
+    "errors": {
+      "notAdmin": "Ce geste demande le rôle d'administrateur.",
+      "flagUnknown": "Ce drapeau n'existe pas. Un drapeau naît dans une migration, avec le code qui le lit.",
+      "hoursRange": "Le délai se compte en heures, entre 1 et 720.",
+      "brandNeeded": "Choisissez la marque de la gamme.",
+      "lineNameNeeded": "Une gamme demande un nom avec au moins une lettre ou un chiffre.",
+      "lineExists": "Cette marque a déjà une gamme à cette adresse.",
+      "tooLong": "Ce champ est trop long.",
+      "unknown": "Cette action n'a pas abouti."
+    }
+  },
   "aromas": {
     "eyebrow": "Nomenclature",
     "title": "Roue des arômes",

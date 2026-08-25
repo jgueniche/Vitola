@@ -8,7 +8,7 @@ dans `docs/decisions-log.md`, pas ici.
 |---|---|---|---|
 | [0001](./0001-supabase-vs-backend-dedie.md) | Supabase managé plutôt qu'un backend dédié | **Proposée** — attend validation | 2026-08-21 |
 | [0002](./0002-strategie-de-recherche-hybride.md) | Toute la recherche dans PostgreSQL | **Proposée** — attend validation | 2026-08-21 |
-| [0003](./0003-stripe-checkout-vs-payment-element.md) | Stripe Checkout hébergé en v1 | **Proposée** — attend validation | 2026-08-21 |
+| [0003](./0003-stripe-checkout-vs-payment-element.md) | Stripe Checkout hébergé en v1 | **Acceptée** — boutique propre d'abord, arbitrage du 25 août | 2026-08-21 |
 | [0004](./0004-portee-des-entrees-du-carnet.md) | Une portée par entrée de carnet, appliquée par la RLS seule | **Acceptée** | 2026-08-22 |
 | [0005](./0005-cible-des-commentaires.md) | Les commentaires s'accrochent à la fiche cigare | **Acceptée** | 2026-08-22 |
 | [0006](./0006-atomicite-de-la-cave.md) | Fumer depuis la cave est un seul geste ; le stock est une somme d'événements | **Acceptée** | 2026-08-22 |
@@ -19,6 +19,7 @@ dans `docs/decisions-log.md`, pas ici.
 | [0011](./0011-les-lieux.md) | Les lieux : seed depuis le registre officiel des buralistes, avis à trois critères structurels | **Acceptée** | 2026-08-23 |
 | [0012](./0012-le-journal.md) | Un article est du contenu, jamais du code ; la frontière passe entre deux audiences | **Acceptée** | 2026-08-23 |
 | [0013](./0013-le-back-office-de-moderation.md) | Le modérateur entre dans `mod` par des portes de la taille du geste ; la décision emporte son acte | **Acceptée** | 2026-08-23 |
+| [0014](./0014-le-back-office-d-administration.md) | L'administration regroupe ce qui existe ; le drapeau devient un acte tracé | **Acceptée** | 2026-08-25 |
 
 ## Statuts
 

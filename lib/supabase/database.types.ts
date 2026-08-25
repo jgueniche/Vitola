@@ -1327,6 +1327,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_set_flag: {
+        Args: { p_key: string; p_enabled: boolean; p_payload?: Json }
+        Returns: Json
+      }
       blocked_user_ids: { Args: never; Returns: string[] }
       blockers_of_me: { Args: never; Returns: string[] }
       blocks_between: { Args: { other: string }; Returns: boolean }
