@@ -2,6 +2,38 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La navigation en quatre univers — dix-sept entrées deviennent quatre
+
+### Ce qui est livré
+
+Sur arbitrage du porteur (« c'est principalement l'organisation des pages, un peu foutoir ») :
+l'en-tête passe de dix-sept entrées à plat à **quatre univers** — Découvrir (le référentiel),
+Chez moi (carnet, cave, statistiques), Le cercle (fil, membres, clubs, agenda, messages), Autour
+(lieux, journal) — plus notifications, « Mon compte » et la session. Chaque univers a son hub
+(`/decouvrir`, `/chez-moi`, `/cercle`, `/autour`) : une carte par section, une phrase chacune,
+**aucune requête** — un hub est sur le chemin de tout, il doit ne rien coûter. Aucune URL
+existante ne change. 13 assertions de parcours (`navigation.ts`), 0 violation axe-core sur les
+33 écrans (hubs et `/admin` ajoutés à l'audit), 56 e2e sur identifiants bidon.
+
+### Trois décisions qui ne méritaient pas d'ADR
+
+**La règle de la promesse survit au regroupement.** Un visiteur du portail voit Découvrir et
+Autour ; Chez moi et Le cercle n'apparaissent que connecté, parce que leurs sections renvoient un
+visiteur à la connexion — une entrée dont le seul comportement est de rebondir est une promesse
+cassée (la règle du premier en-tête, inchangée). Et aucun hub ne liste la boutique : elle
+n'existe pas encore, et une carte vers un 404 est le bug que la nav de P0 a déjà payé.
+
+**L'en-tête ne lit plus aucun drapeau.** L'entrée « Lieux » suivait `venues_enabled` depuis P5,
+donc l'en-tête interrogeait la base sur toutes les pages — le coût qui avait fait rougir dix e2e.
+La promesse déménage avec son drapeau dans le hub Autour, la seule page qui la fait : la
+restriction juridique de Q6 reste un `UPDATE` d'une ligne, et le chemin chaud ne paie plus rien.
+
+**Un clic de plus, dix-sept choses de moins à balayer.** Aller de `/cigares` à `/marques` passe
+désormais par le hub. C'est le prix assumé du regroupement ; les chemins fréquents restent des
+liens directs dans les pages elles-mêmes (une fiche pointe sa marque, le carnet sa fiche), et si
+un trajet précis se révèle pénible à l'usage, une sous-navigation par univers est un ajout, pas
+une refonte.
+
 ## L'administration — et deux arbitrages du porteur rendus le même jour
 
 ### Ce qui est livré

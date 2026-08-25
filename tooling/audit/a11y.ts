@@ -29,6 +29,10 @@ const MODERATOR = process.env.PARCOURS_EDITOR ?? 'jgueniche06@gmail.com'
 /** Un gabarit par ligne — pas toutes les pages, tous les écrans. */
 const PUBLIC_PAGES = ['/', '/majorite', '/journal', '/mentions-legales', '/sante']
 const MEMBER_PAGES = [
+  '/decouvrir',
+  '/chez-moi',
+  '/cercle',
+  '/autour',
   '/cigares',
   '/cigares/undercrown-10-robusto',
   '/cigares/undercrown-10-robusto/degustation',
@@ -48,7 +52,7 @@ const MEMBER_PAGES = [
   '/contributions',
   '/codes-de-boite',
 ]
-const MODERATOR_PAGES = ['/moderation']
+const MODERATOR_PAGES = ['/moderation', '/admin', '/admin/drapeaux', '/admin/fiches', '/admin/gammes']
 
 type Finding = { page: string; impact: string; id: string; help: string; nodes: number }
 

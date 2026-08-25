@@ -38,6 +38,10 @@ export const SEGMENTS = {
   shop: 'boutique',
   settings: 'parametres',
   moderation: 'moderation',
+  hubDiscover: 'decouvrir',
+  hubMine: 'chez-moi',
+  hubCircle: 'cercle',
+  hubAround: 'autour',
   admin: 'admin',
   adminFlags: 'drapeaux',
   adminAccounts: 'comptes',
@@ -138,6 +142,11 @@ export const routes = {
   settings: () => `/${SEGMENTS.settings}`,
   moderation: () => `/${SEGMENTS.moderation}`,
   moderationReport: (id: string) => `/${SEGMENTS.moderation}/${id}`,
+
+  hubDiscover: () => `/${SEGMENTS.hubDiscover}`,
+  hubMine: () => `/${SEGMENTS.hubMine}`,
+  hubCircle: () => `/${SEGMENTS.hubCircle}`,
+  hubAround: () => `/${SEGMENTS.hubAround}`,
 
   admin: () => `/${SEGMENTS.admin}`,
   adminFlags: () => `/${SEGMENTS.admin}/${SEGMENTS.adminFlags}`,

@@ -4,6 +4,95 @@
     "back": "Retour",
     "search": "Rechercher"
   },
+  "nav": {
+    "mainLabel": "Navigation principale",
+    "discover": {
+      "label": "Découvrir",
+      "title": "Découvrir",
+      "lede": "Le référentiel : ce que le site sait des cigares — vérifié, sourcé, et corrigeable par vous."
+    },
+    "mine": {
+      "label": "Chez moi",
+      "title": "Chez moi",
+      "lede": "Votre carnet, votre cave, vos chiffres. Tout y naît privé ; rien ne s'y partage sans votre geste."
+    },
+    "circle": {
+      "label": "Le cercle",
+      "title": "Le cercle",
+      "lede": "Le fil, les membres, les clubs, l'agenda, les messages. On s'y abonne librement, et on s'en retire pareil."
+    },
+    "around": {
+      "label": "Autour",
+      "title": "Autour",
+      "lede": "Ce qui existe hors de l'écran : les lieux où fumer, et le journal — lisible sans compte."
+    },
+    "cards": {
+      "cigars": {
+        "title": "Les cigares",
+        "body": "940 fiches, la recherche par force, cape et origine, le comparateur."
+      },
+      "brands": {
+        "title": "Les marques",
+        "body": "Les maisons et leurs manufactures."
+      },
+      "vitolas": {
+        "title": "Les vitoles",
+        "body": "Les formats — cepo, module, et leurs noms d'usine."
+      },
+      "aromas": {
+        "title": "La roue des arômes",
+        "body": "Onze familles, 76 descripteurs, le vocabulaire de la dégustation."
+      },
+      "boxCodes": {
+        "title": "Les codes de boîte",
+        "body": "Le décodeur — qui dit « inconnu » plutôt que de deviner."
+      },
+      "contributions": {
+        "title": "Contribuer",
+        "body": "Proposer une correction ; un relecteur l'applique. L'historique reste."
+      },
+      "notebook": {
+        "title": "Le carnet",
+        "body": "Ce que vous avez fumé, quand, la note et le mot. Privé par défaut."
+      },
+      "humidor": {
+        "title": "La cave",
+        "body": "Vos lots, leur âge, l'hygrométrie, ce qui est à faire tourner."
+      },
+      "statistics": {
+        "title": "Les statistiques",
+        "body": "Votre rythme sur douze mois, les cigares qui reviennent."
+      },
+      "feed": {
+        "title": "Le fil",
+        "body": "Les publications des gens que vous suivez, et la découverte."
+      },
+      "members": {
+        "title": "Les membres",
+        "body": "L'annuaire, les profils, les abonnements — libres et révocables."
+      },
+      "clubs": {
+        "title": "Les clubs",
+        "body": "Des groupes et leurs calendriers. Jamais un second fil."
+      },
+      "events": {
+        "title": "L'agenda",
+        "body": "Dégustations et rencontres, annoncées à une heure qui tient."
+      },
+      "messages": {
+        "title": "Les messages",
+        "body": "Écrire à quelqu'un que vous suivez. Pas chiffré de bout en bout, et dit."
+      },
+      "venues": {
+        "title": "Les lieux",
+        "body": "Civettes, caves et fumoirs autour de vous — sans prix, jamais."
+      },
+      "journal": {
+        "title": "Le journal",
+        "body": "Articles, lexique, guides. La partie du site qui se lit sans compte."
+      }
+    }
+  },
   "home": {
     "eyebrow": "Comprendre ce que l'on fume",
     "title": "Le référentiel du cigare, écrit par ceux qui le fument.",
