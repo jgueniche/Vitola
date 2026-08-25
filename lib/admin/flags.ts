@@ -22,6 +22,7 @@ export const KNOWN_FLAGS = [
   'comments_min_role',
   'dsa_report_sla_hours',
   'venues_enabled',
+  'shop_enabled',
 ] as const
 
 export type KnownFlag = (typeof KNOWN_FLAGS)[number]

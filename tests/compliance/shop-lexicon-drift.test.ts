@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -18,12 +18,21 @@ import {
  * Both directions are asserted: a term added to one list must be added to the
  * other, and the extraction guards itself — an empty parse would make every
  * assertion vacuous (the T8 lesson).
+ *
+ * The lexicon is read from the LAST migration that defines it — the
+ * mod.reports lesson: 0022 redefines the trigger function (brand, vendors),
+ * so a test pinned to 0021 would compare the screen against a function the
+ * database no longer runs.
  */
 
-const MIGRATION = readFileSync(
-  join(process.cwd(), 'supabase/migrations/0021_shop_catalogue.sql'),
-  'utf8',
-)
+const MIGRATIONS_DIR = join(process.cwd(), 'supabase/migrations')
+
+const MIGRATION = readdirSync(MIGRATIONS_DIR)
+  .filter((file) => file.endsWith('.sql'))
+  .sort()
+  .map((file) => readFileSync(join(MIGRATIONS_DIR, file), 'utf8'))
+  .filter((content) => content.includes('compounds constant text[]'))
+  .at(-1)!
 
 function sqlArray(name: string): string[] {
   const match = new RegExp(`${name} constant text\\[\\] := array\\[([\\s\\S]*?)\\];`).exec(

@@ -1328,7 +1328,7 @@ export type Database = {
     }
     Functions: {
       admin_set_flag: {
-        Args: { p_key: string; p_enabled: boolean; p_payload?: Json }
+        Args: { p_enabled: boolean; p_key: string; p_payload?: Json }
         Returns: Json
       }
       blocked_user_ids: { Args: never; Returns: string[] }
@@ -2108,6 +2108,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brand: string | null
           category: Database["shop"]["Enums"]["product_category"]
           created_at: string
           created_by: string | null
@@ -2115,13 +2116,17 @@ export type Database = {
           id: string
           image_path: string | null
           price_eur: number
+          review_note: string | null
           slug: string
           status: Database["shop"]["Enums"]["product_status"]
           stock_qty: number
+          submitted_at: string | null
           title: string
           updated_at: string
+          vendor_id: string
         }
         Insert: {
+          brand?: string | null
           category: Database["shop"]["Enums"]["product_category"]
           created_at?: string
           created_by?: string | null
@@ -2129,13 +2134,17 @@ export type Database = {
           id?: string
           image_path?: string | null
           price_eur: number
+          review_note?: string | null
           slug: string
           status?: Database["shop"]["Enums"]["product_status"]
           stock_qty?: number
+          submitted_at?: string | null
           title: string
           updated_at?: string
+          vendor_id: string
         }
         Update: {
+          brand?: string | null
           category?: Database["shop"]["Enums"]["product_category"]
           created_at?: string
           created_by?: string | null
@@ -2143,10 +2152,72 @@ export type Database = {
           id?: string
           image_path?: string | null
           price_eur?: number
+          review_note?: string | null
           slug?: string
           status?: Database["shop"]["Enums"]["product_status"]
           stock_qty?: number
+          submitted_at?: string | null
           title?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          id: string
+          legal_name: string | null
+          logo_path: string | null
+          name: string
+          owner_id: string | null
+          registration: string | null
+          slug: string
+          status: Database["shop"]["Enums"]["vendor_status"]
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          legal_name?: string | null
+          logo_path?: string | null
+          name: string
+          owner_id?: string | null
+          registration?: string | null
+          slug: string
+          status?: Database["shop"]["Enums"]["vendor_status"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          legal_name?: string | null
+          logo_path?: string | null
+          name?: string
+          owner_id?: string | null
+          registration?: string | null
+          slug?: string
+          status?: Database["shop"]["Enums"]["vendor_status"]
           updated_at?: string
         }
         Relationships: []
@@ -2171,6 +2242,7 @@ export type Database = {
         | "entretien"
         | "autre"
       product_status: "draft" | "published" | "archived"
+      vendor_status: "pending" | "active" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2404,6 +2476,7 @@ export const Constants = {
         "autre",
       ],
       product_status: ["draft", "published", "archived"],
+      vendor_status: ["pending", "active", "suspended"],
     },
   },
 } as const

@@ -36,6 +36,12 @@ export const SEGMENTS = {
   venues: 'lieux',
   journal: 'journal',
   shop: 'boutique',
+  /* La vitrine d'un vendeur pend sous la boutique (`/boutique/vendeurs/…`),
+     parce que c'est une entrée de la boutique ; l'espace de GESTION du
+     vendeur, lui, est `/vendeur` — le motif de /moderation : un espace de
+     travail, pas une page de la section publique. */
+  shopVendors: 'vendeurs',
+  vendorSpace: 'vendeur',
   settings: 'parametres',
   moderation: 'moderation',
   hubDiscover: 'decouvrir',
@@ -140,6 +146,14 @@ export const routes = {
   venue: (slug: string) => `/${SEGMENTS.venues}/${slug}`,
   venuePropose: () => `/${SEGMENTS.venues}/proposer`,
   shop: () => `/${SEGMENTS.shop}`,
+  /* Un produit se lit par son slug, comme un lieu ou un club : le nom d'un
+     accessoire est durable et son adresse se partage. Le segment `vendeurs`
+     vit ENTRE la boutique et le slug pour que les deux familles d'adresses ne
+     puissent pas se marcher dessus — un produit nommé « vendeurs » garderait
+     son adresse sous /boutique/vendeurs/… : impossible, le segment est pris. */
+  shopProduct: (slug: string) => `/${SEGMENTS.shop}/${slug}`,
+  shopVendor: (slug: string) => `/${SEGMENTS.shop}/${SEGMENTS.shopVendors}/${slug}`,
+  vendorSpace: () => `/${SEGMENTS.vendorSpace}`,
   settings: () => `/${SEGMENTS.settings}`,
   moderation: () => `/${SEGMENTS.moderation}`,
   moderationReport: (id: string) => `/${SEGMENTS.moderation}/${id}`,
@@ -155,6 +169,7 @@ export const routes = {
   adminSheets: () => `/${SEGMENTS.admin}/${SEGMENTS.adminSheets}`,
   adminLines: () => `/${SEGMENTS.admin}/${SEGMENTS.adminLines}`,
   adminShop: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}`,
+  adminShopVendors: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}/${SEGMENTS.shopVendors}`,
 
   legalNotice: () => `/${SEGMENTS.legalNotice}`,
   privacy: () => `/${SEGMENTS.privacy}`,
