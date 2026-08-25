@@ -1,8 +1,12 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 25 août 2026, après la
-> fusion des **PR #11 à #13** et la livraison de **l'administration** (ADR 0014, migration
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 25 août 2026 au soir,
+> après la livraison de **la marketplace d'accessoires** sur GO du porteur (ADR 0016, migration
+> `0022`, l'espace vendeur `/vendeur`, la relecture dans `/admin/boutique`, les écrans publics
+> `/boutique` derrière `shop_enabled` **fermé** — 60 assertions de parcours, quatre rôles ; rien
+> de monétaire, la D7 reste ouverte). Le compte `vendeur` est rattaché à la boutique de QA
+> « Comptoir du Cèdre ». La même journée avait livré **l'administration** (ADR 0014, migration
 > `0020`, `/admin` en cinq écrans, 28 assertions de parcours) sur commande directe du porteur.
 > Deux arbitrages du porteur sont tombés le même jour : **l'ADR 0003 est acceptée** (« boutique
 > propre d'abord » — Checkout, la marketplace partenaires reste une v2) et le **modèle
@@ -29,7 +33,7 @@
 
 Reprise du projet Vitola. Le contexte est dans le dépôt : lis `CLAUDE.md`, `BRIEF.md`, puis
 `docs/decisions-log.md` (la première section est celle de P8, de la dernière session),
-`docs/adr/` : **0004 à 0013 sont Acceptées** — 0008 et 0009 le 23 août **par délégation**, avec la
+`docs/adr/` : **0004 à 0016 sont Acceptées** — 0008 et 0009 le 23 août **par délégation**, avec la
 provenance consignée dans chacune : la 0009 est appliquée (pièces 1 et 2, la création de gamme par
 les membres reste différée), la 0008 est actée **sans rien construire** avant la relecture des
 862 fiches. Les deux se rouvrent d'un mot du porteur. Puis `supabase/seed/PROVENANCE.md` et
@@ -198,13 +202,14 @@ si elle est entrée ; si oui, repars de `master`, sinon la branche assignée por
   10 000 lignes plus loin**. Et parcouru : 21 publications, 20 sur la première page, une seconde
   page qui ne partage aucune ligne avec la première.
 
-### Comptes de QA — mot de passe `cigardeur` pour les trois
+### Comptes de QA — mot de passe `cigardeur` pour les quatre
 
-| pseudo | courriel | rôle | réputation |
-|---|---|---|---|
-| `jeremy` | jgueniche06@gmail.com | `admin` | 0 |
-| `test_un` | test1@cigardeur.com | `member` | 0 |
-| `test_deux` | test2@cigardeur.com | `member` | 0 |
+| pseudo | courriel | rôle | réputation | particularité |
+|---|---|---|---|---|
+| `jeremy` | jgueniche06@gmail.com | `admin` | 0 | |
+| `test_un` | test1@cigardeur.com | `member` | 0 | |
+| `test_deux` | test2@cigardeur.com | `member` | 0 | |
+| `vendeur` | vendeur@cigardeur.com | `member` | 0 | gère la boutique de QA « Comptoir du Cèdre » (`shop.vendors.owner_id`, ADR 0016 — un vendeur n'est pas un rôle) |
 
 ---
 
@@ -236,11 +241,12 @@ migrations** appliquées et enregistrées dans `supabase_migrations.schema_migra
 | `0019` | `ref_lines_status` | `supabase/migrations/0019_ref_lines_status.sql` |
 | `0020` | `admin` | `supabase/migrations/0020_admin.sql` |
 | `0021` | `shop_catalogue` | `supabase/migrations/0021_shop_catalogue.sql` |
+| `0022` | `marketplace_vendors` | `supabase/migrations/0022_marketplace_vendors.sql` |
 
-**Neuf sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009`, `0015` à `0021` : `20260822222420`, `20260822232400`, `20260823083729`,
-`20260823103622`, `20260823115404`, `20260823174500`, `20260823210941`, `20260825104447` et
-`20260825140004`. C'est l'outil
+**Dix sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015` à `0022` : `20260822222420`, `20260822232400`, `20260823083729`,
+`20260823103622`, `20260823115404`, `20260823174500`, `20260823210941`, `20260825104447`,
+`20260825140004` et `20260825151134`. C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
@@ -291,6 +297,10 @@ ref.cigar_revisions         0      public.cigar_stats     3 lignes (vue matéria
                                    public.article_links        1  ← le guide gated → une fiche
                                    shop.products               0  ← 0021 — s'alimente par
                                    shop.product_reviews        0     /admin/boutique, sans script
+                                   shop.vendors                2  ← 0022 — « Vitola » (la maison,
+                                                                    owner_id null) et « Comptoir
+                                                                    du Cèdre » (QA, owner `vendeur`),
+                                                                    toutes deux actives, durables
 ```
 
 **Le site est utilisé pour de bon, et rien de ce qui suit n'est d'un parcours.** `test_deux`
@@ -492,10 +502,10 @@ public.event_kind          degustation | rencontre | visite | autre
 public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 198 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 213 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
 
-Mesuré sur la base construite par les migrations : 141 `public`, 34 `ref`, 4 `mod`, 8 `shop`,
-11 `storage` — le total historique de ce fichier incluait déjà storage.
+Mesuré sur le projet réel après la 0022 : 141 `public`, 34 `ref`, 4 `mod`, 19 `shop`,
+13 `storage` — le total historique de ce fichier incluait déjà storage.
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -541,6 +551,18 @@ public.articles          5  select_published (anon compris), select_editor,
                             insert_editor, update_editor, delete_editor
 public.article_links     3  select_visible (EXISTS sous la RLS d'articles),
                             insert_editor, delete_editor
+shop.vendors             7  select_active (anon+auth — la vitrine publique),
+                            select_own, select_admin, insert_admin (l'entrée
+                            est humaine), update_own, update_admin,
+                            delete_admin (FK products RESTRICT : une boutique
+                            pleine se suspend, ne se supprime pas)
+shop.products            9  select_published (exige AUSSI un vendeur actif —
+                            suspendre coupe tout), select_admin,
+                            select_vendor, insert_admin, insert_vendor
+                            (WITH CHECK : draft seulement), update_admin,
+                            update_vendor (idem — modifier, c'est retirer),
+                            delete_admin, delete_vendor (brouillons seuls)
+shop.product_reviews     3  lecture seule — AUCUNE porte d'écriture (0015 D3)
 ```
 
 **Huit policies `RESTRICTIVE` de blocage**, sur `posts`, `post_comments`, `reviews`, `comments`,
@@ -703,6 +725,7 @@ le seul endroit d'où une régression se voit, l'auto-contrôle d'une migration 
 | `comments_min_role` | oui | `{"min_role":"member"}` | **À resserrer en `contributor` le jour où l'inscription s'ouvre.** |
 | `dsa_report_sla_hours` | oui | `{"hours":72}` | Publié dans les mentions légales, **lu à chaque rendu**. Le changer change ce qu'on promet, sans déploiement. Épinglé par `tests/compliance/dsa.test.ts`. |
 | `venues_enabled` | oui | `{"types":[…7 types]}` | Q6, ADR 0011. La charge utile liste les types offerts : restreindre l'annuaire après avis juridique est un UPDATE de cette ligne — écrans, formulaire de proposition et entrée de nav compris. |
+| `shop_enabled` | **non** | `{}` | ADR 0016. Toute la boutique publique (`/boutique`, fiches, vitrines) et la carte du hub Autour. **L'ouvrir est le geste d'ouverture commerciale du porteur**, depuis `/admin/drapeaux`, tracé dans `audit_log`. |
 
 ### Buckets de stockage
 
@@ -949,6 +972,16 @@ accessoires, quels prix, quel stock — une décision commerciale qu'aucune sess
 
 ## À ME SIGNALER, PAS À TRANCHER SEUL
 
+- **La marketplace est livrée derrière `shop_enabled`, FERMÉ — trois gestes restent les vôtres.**
+  (1) Remplir les vitrines réelles : créer les vendeurs partenaires dans `/admin/boutique/vendeurs`
+  (l'entrée est humaine — ADR 0016), rattacher leurs comptes, relire et publier leurs produits ;
+  votre boutique propre s'alimente comme avant dans `/admin/boutique`, elle est le vendeur
+  « Vitola ». (2) **Ouvrir le drapeau à l'ouverture commerciale** — un clic dans
+  `/admin/drapeaux`, tracé ; tant qu'il est fermé, tout `/boutique` répond 404, produits publiés
+  compris. (3) Les clés Stripe pour la caisse : leur arrivée rouvre l'ADR 0016 (D7 — commission
+  Connect contre abonnement-vitrine, intranchable aujourd'hui), pose le CHECK de traçabilité
+  DSA art. 30 sur l'activation, arme DAC7, et ouvre les avis (achat vérifié, ADR 0015 D3).
+  **Rien de monétaire n'existe dans le schéma**, et c'est voulu.
 - **Vous avez utilisé le site, et rien de ce que vous avez écrit n'a été touché** : un abonnement
   `jeremy` → `test_un`, quatre entrées de carnet publiques de `test_deux`, sa cave « LA cave »,
   et une publication « Publier au fil ». Le détail est sous « Volumes réels ». Un point mérite
@@ -1104,9 +1137,11 @@ pour la Q12, qui est annotée deux fois. Les quatre règles non négociables son
 `CLAUDE.md`. Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 et 0002
 attendent toujours validation ; **0003 est acceptée** (arbitrage du 25 août : boutique propre
 d'abord, et le refus du modèle « stock des civettes contre abonnement » est consigné dans sa
-note) ; **0004 à 0014 sont acceptées** — 0008 et 0009 par délégation du 23 août, 0008 sans
+note) ; **0004 à 0016 sont acceptées** — 0008 et 0009 par délégation du 23 août, 0008 sans
 construction avant la relecture des 862 fiches, 0009 appliquée pièces 1 et 2, 0014
-(l'administration) sur commande du 25 août.
+(l'administration) et 0015 (le catalogue) sur commande du 25 août, 0016 (la marketplace) sur GO
+du même jour — sa D7 (le modèle d'argent) est la seule question ouverte, intranchable sans clés
+Stripe ni structure juridique.
 
 ## PIÈGES DE CET ENVIRONNEMENT, APPRIS À NOS DÉPENS
 
@@ -1479,6 +1514,35 @@ modérateur — il n'existe aucun compte `moderator` à proprement parler).
 
 ---
 
+## LES URL À OUVRIR POUR RECETTER LA MARKETPLACE (livrée le 25 août au soir)
+
+Quatre onglets : un en navigation privée (portail passé, sans compte), `vendeur`
+(vendeur@cigardeur.com / `cigardeur`), `jeremy` (admin), et `test_un` pour le refus. **Le
+drapeau `shop_enabled` est fermé** : la moitié de la recette se joue fermé, l'autre après
+l'avoir ouvert dans `/admin/drapeaux` — et on le referme en partant.
+
+| URL | Ce qu'on doit y voir |
+|---|---|
+| `/boutique`, drapeau fermé | **404** — même pour un produit publié : le drapeau décide, pas le statut. |
+| En `test_un` : `/vendeur` | « Réservé aux vendeurs partenaires », et comment on le devient — jamais une page blanche. |
+| En `vendeur` : `/parametres` | Le lien « Gérer ma boutique » (un vendeur n'est pas un rôle : le lien vient de `owner_id`). |
+| `/vendeur` | « Ma boutique — Comptoir du Cèdre », l'atelier (vide), le formulaire de création, la vitrine avec l'identité professionnelle (DSA art. 30) en bas. |
+| ⟶ créer « Boîte de 25 havanes » | Refusé en français, §2 à l'appui — le lexique s'applique au vendeur comme à l'admin, marque comprise. |
+| ⟶ créer un accessoire, puis « Soumettre à relecture » | Il naît en brouillon — **aucun bouton « Publier » n'existe ici** — puis passe « Soumis à relecture ». |
+| En `jeremy` : `/admin/boutique` | La file « Soumissions à relire », le produit, son vendeur, sa date. « Refuser » avec un motif → le produit repasse en brouillon. |
+| En `vendeur` : `/vendeur` | **Le motif du refus se lit sur le brouillon.** Corriger, re-soumettre. |
+| En `jeremy` : publier depuis la file | « Produit publié. » — et `/boutique` répond **toujours 404** tant que le drapeau est fermé. |
+| `/admin/drapeaux` → « La boutique publique » → Activer | La bascule confirme, la trace part dans `audit_log`. |
+| `/boutique` en navigation privée | Le rayon : le produit, sa marque, son vendeur, son prix. Facettes catégorie/marque/vendeur/prix **en liens**, recherche en `<form method="get">`, accents repliés (`?q=hygrometre` trouve « Hygromètre »). |
+| `/boutique/<slug>` | La fiche : prix français, « Vendu par » et la marque **en liens**, l'état du stock, « la commande n'est pas encore ouverte », les avis qui attendent l'achat vérifié — **aucun bouton d'achat**. |
+| `/boutique/vendeurs/comptoir-du-cedre` | La vitrine : nom, présentation, contact, ses produits publiés. |
+| `/autour` | La carte « La boutique » — elle disparaît avec le drapeau. |
+| En `jeremy` : `/admin/boutique/vendeurs` → Suspendre | **Vitrine ET produits disparaissent du public en un geste** (404 partout), le vendeur lit sa suspension et n'écrit plus. Réactiver rend tout. |
+| En `vendeur` : « Retirer de la vente », puis « Supprimer » | Une fiche publiée se retire (elle repasse en brouillon, à re-relire), puis un brouillon se supprime — l'écran prévient que **modifier, c'est retirer**. |
+| `/admin/drapeaux` → Couper | `/boutique` redevient un 404. La recette est finie, la porte est refermée. |
+
+---
+
 ## REJOUER TOUS LES PARCOURS
 
 Chacun se rejoue d'une commande, contre la vraie base, et **nettoie derrière lui** :
@@ -1505,7 +1569,13 @@ pnpm tsx tooling/parcours/navigation.ts      # 13 assertions — les quatre univ
 pnpm tsx tooling/parcours/boutique.ts        # 16 assertions — nettoie PAR LE PRODUIT (le DELETE
                                              #   direct sur storage.objects est refusé par
                                              #   Supabase : l'API Storage est le seul chemin)
-pnpm tsx tooling/audit/a11y.ts               # 24 écrans, 0 violation attendu (critère P8)
+pnpm tsx tooling/parcours/marketplace.ts     # 60 assertions, QUATRE rôles (visiteur, membre,
+                                             #   vendeur, admin) — ouvre et referme shop_enabled
+                                             #   par l'écran des drapeaux (les bascules restent
+                                             #   dans audit_log) ; laisse les 2 vendeurs durables
+pnpm tsx tooling/audit/a11y.ts               # 41 écrans, 4 rôles, 0 violation attendu (critère
+                                             #   P8) — les gabarits /boutique ne s'auditent que
+                                             #   drapeau ouvert, et l'audit NOMME ce qu'il saute
 ```
 
 Le mot de passe se surcharge par `PARCOURS_PASSWORD`. Ces parcours **écrivent dans la vraie base** :

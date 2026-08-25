@@ -9,7 +9,12 @@ import { routes } from '@/lib/routes'
 
 import { setVendorStatus } from '../../actions'
 import { AdminRestricted, adminView } from '../../shell'
-import { AttachOwnerForm, CreateVendorForm, SuspendVendorForm } from './vendor-forms'
+import {
+  AttachOwnerForm,
+  CreateVendorForm,
+  DeleteVendorForm,
+  SuspendVendorForm,
+} from './vendor-forms'
 
 export const metadata: Metadata = { title: m.admin.vendors.title }
 
@@ -18,6 +23,8 @@ const copy = m.admin.vendors
 const CONFIRMATIONS: Record<string, string> = {
   'vendeur-active': m.admin.confirmations.vendeurActive,
   'vendeur-suspendu': m.admin.confirmations.vendeurSuspendu,
+  'vendeur-supprime': m.admin.confirmations.vendeurSupprime,
+  'vendeur-plein': m.admin.errors.vendorHasProducts,
   refus: m.admin.confirmations.refus,
 }
 
@@ -128,6 +135,9 @@ export default async function AdminVendorsPage({ searchParams }: Props) {
                       <SuspendVendorForm vendorId={vendor.id} />
                     )}
                     {vendor.slug !== 'vitola' ? <AttachOwnerForm vendorId={vendor.id} /> : null}
+                    {vendor.slug !== 'vitola' && vendor.productCount === 0 ? (
+                      <DeleteVendorForm vendorId={vendor.id} />
+                    ) : null}
                     {vendor.status === 'active' ? (
                       <Link
                         href={routes.shopVendor(vendor.slug)}

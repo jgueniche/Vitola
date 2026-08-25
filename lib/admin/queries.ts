@@ -323,10 +323,18 @@ export async function listVendors(): Promise<AdminVendorRow[]> {
 
 export type VendorOption = { id: string; name: string; slug: string }
 
-/** The create-product select: which shopfront receives the product. */
+/**
+ * The create-product select: which shopfront receives the product. The house
+ * comes first — it is the default an admin means when feeding the catalogue,
+ * and a default that silently lands products on a partner's shelf would be a
+ * gift nobody asked for.
+ */
 export async function listVendorOptions(): Promise<VendorOption[]> {
   const db = await createSupabaseServerClient()
   const { data, error } = await db.schema('shop').from('vendors').select('id, name, slug').order('name')
   if (error) throw new Error(`Could not read the vendor options: ${error.message}`)
-  return (data ?? []) as VendorOption[]
+  const options = (data ?? []) as VendorOption[]
+  return options.sort((a, b) =>
+    a.slug === 'vitola' ? -1 : b.slug === 'vitola' ? 1 : a.name.localeCompare(b.name, 'fr'),
+  )
 }

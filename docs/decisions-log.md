@@ -2,6 +2,57 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La marketplace — le vendeur écrit, la maison publie, le drapeau attend
+
+### Ce qui est livré
+
+Session du 25 août, sur GO du porteur (l'option B de la discussion du même jour). L'ADR 0016
+avant le SQL, la migration `0022` (appliquée en base : `shop.vendors`, `vendor_id`, `brand`,
+`submitted_at`, `review_note`, le drapeau `shop_enabled` né fermé), **10 assertions SQL**
+(`17_marketplace_rls.sql`), l'espace vendeur `/vendeur`, la file de relecture et le bureau des
+vendeurs sous `/admin/boutique`, les deux entrées publiques (`/boutique` facetté,
+`/boutique/vendeurs/[slug]`), et **60 assertions de parcours, quatre rôles (visiteur, membre,
+vendeur, admin), 0 échec** — drapeau fermé prouvé des deux côtés d'un produit publié, cycle
+soumission → refus motivé → re-soumission → publication, suspension qui coupe tout,
+nettoyage compté à zéro. 0 violation axe-core sur 41 écrans, fiche produit et vitrine comprises.
+Le compte de QA `vendeur` est rattaché à la boutique durable « Comptoir du Cèdre ».
+
+### Cinq décisions qui ne méritaient pas d'ADR
+
+**« Soumettre » est un horodatage, pas un statut.** Un quatrième état d'enum demandait
+`ALTER TYPE ADD VALUE` — inutilisable dans la même transaction, donc inapplicable par l'API de
+gestion où un appel EST une transaction. `submitted_at` dit la même chose, donne à la file son
+ordre (le plus ancien d'abord, l'ordre de `mod_queue`), et se retire d'un `null`.
+
+**Le refus se motive dans le même geste.** `review_note` est écrite par l'admin en refusant,
+lue par le vendeur sur son brouillon, gardée par un trigger — un grant de colonne ne sait pas
+séparer deux rôles applicatifs du même rôle PostgreSQL. Publier efface la note et la
+soumission : une réponse rendue n'est pas un reproche qui traîne.
+
+**La maison passe première dans le sélecteur de vendeur.** `listVendorOptions()` trie
+« Vitola » en tête : le défaut d'un admin qui alimente le catalogue est sa propre boutique, et
+un défaut qui poserait des produits chez un partenaire serait un cadeau que personne n'a
+demandé.
+
+**La recherche publique tient en une requête, plafond assumé.** Facettes, texte (accents
+repliés en TS) et tranches de prix se calculent en mémoire sur le rayon entier — le seuil des
+~200 produits de l'ADR 0015 rouvrira la recherche et la pagination, pas avant.
+
+**L'image d'un produit de vendeur part AVANT sa ligne.** La policy storage du vendeur prouve la
+propriété par la ligne de `products` : supprimer la ligne d'abord rendait le `remove()` muet, et
+**seul le compte du bucket après un parcours vert l'a dit** — 2 objets orphelins sur 0 attendu,
+troisième fois que ce compte attrape ce qu'aucune assertion ne voit. L'ordre inverse (la règle
+« téléverser, pointer, retirer » de l'ADR 0015) reste vrai pour le remplacement ; la
+suppression, elle, lit la ligne, retire l'image, puis supprime.
+
+### Un piège de parcours, pour la prochaine fois
+
+**Le `next-route-announcer` de Next porte `role="alert"`** et annonce le titre de la page après
+une navigation côté client : un `settled()` qui poll les alertes après un clic sur un `<Link>`
+lit « Ma boutique — … » comme un refus. L'annonceur s'exclut du sélecteur
+(`[role="alert"]:not(#__next-route-announcer__)`) — le retirer du DOM serait retirer une
+annonce qu'un lecteur d'écran attend.
+
 ## Le catalogue avant la caisse — la boutique s'alimente sans développeur
 
 ### Ce qui est livré

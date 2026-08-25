@@ -1186,7 +1186,8 @@
       "vendeurCree": "Boutique créée, en attente d’activation.",
       "vendeurActive": "Boutique activée : sa vitrine vivra dès l’ouverture de la boutique publique.",
       "vendeurSuspendu": "Boutique suspendue : vitrine et produits retirés.",
-      "compteRattache": "Compte rattaché à la boutique."
+      "compteRattache": "Compte rattaché à la boutique.",
+      "vendeurSupprime": "Boutique supprimée."
     },
     "errors": {
       "notAdmin": "Ce geste demande le rôle d'administrateur.",
@@ -1304,7 +1305,9 @@
       "traceAddress": "adresse",
       "traceContactEmail": "courriel de contact",
       "productsCount": "{n} produit(s)",
-      "shopfrontLink": "Voir la vitrine"
+      "shopfrontLink": "Voir la vitrine",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette boutique vide ? Une boutique qui a des produits se suspend, elle ne se supprime pas."
     }
   },
   "aromas": {

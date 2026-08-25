@@ -521,6 +521,28 @@ export async function setVendorStatus(formData: FormData): Promise<void> {
   redirect(`${routes.adminShopVendors()}?fait=${fait}`)
 }
 
+/**
+ * Deleting a vendor is the rare gesture of an empty shop: the FK on products
+ * is ON DELETE RESTRICT, so a stocked shop refuses with its reason —
+ * suspending is the normal verb (ADR 0016, D4).
+ */
+export async function deleteVendor(formData: FormData): Promise<void> {
+  const parsed = z.object({ id: z.uuid() }).safeParse({ id: formData.get('id') })
+  if (!parsed.success) return
+
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .schema('shop')
+    .from('vendors')
+    .delete()
+    .eq('id', parsed.data.id)
+    .select('id')
+
+  const fait = error?.code === '23503' ? 'vendeur-plein' : data && data.length > 0 ? 'vendeur-supprime' : 'refus'
+  revalidatePath(routes.adminShopVendors())
+  redirect(`${routes.adminShopVendors()}?fait=${fait}`)
+}
+
 const attachOwnerSchema = z.object({
   id: z.uuid(),
   handle: z

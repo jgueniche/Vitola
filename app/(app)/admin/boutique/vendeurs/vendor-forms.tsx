@@ -9,7 +9,13 @@ import { Button } from '@/components/ui/button'
 import { FieldError, FieldStatus, Input, Label } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 
-import { attachVendorOwner, createVendor, setVendorStatus, type AdminState } from '../../actions'
+import {
+  attachVendorOwner,
+  createVendor,
+  deleteVendor,
+  setVendorStatus,
+  type AdminState,
+} from '../../actions'
 
 const copy = m.admin.vendors
 
@@ -55,6 +61,22 @@ export function AttachOwnerForm({ vendorId }: { vendorId: string }) {
       </Button>
       {state.error ? <FieldError>{state.error}</FieldError> : null}
       {state.done ? <FieldStatus>{m.admin.confirmations.compteRattache}</FieldStatus> : null}
+    </form>
+  )
+}
+
+export function DeleteVendorForm({ vendorId }: { vendorId: string }) {
+  return (
+    <form
+      action={deleteVendor}
+      onSubmit={(event) => {
+        if (!window.confirm(copy.deleteConfirm)) event.preventDefault()
+      }}
+    >
+      <input type="hidden" name="id" value={vendorId} />
+      <Button type="submit" variant="ghost" size="sm">
+        {copy.delete}
+      </Button>
     </form>
   )
 }

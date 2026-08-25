@@ -297,15 +297,29 @@ export async function actOnMyProduct(formData: FormData): Promise<void> {
   let written = 0
 
   if (parsed.data.gesture === 'supprimer') {
-    const { data } = await supabase
+    /* The image goes FIRST: the vendor's storage-delete policy proves
+       ownership through the product row, so removing it after the DELETE is
+       refused in silence — measured by counting the bucket after a green
+       walkthrough, not by reading this code. The row is read before anything
+       so a non-draft (which the delete policy would refuse) loses nothing. */
+    const { data: rows } = await supabase
       .schema('shop')
       .from('products')
-      .delete()
+      .select('id, image_path, status')
       .eq('id', parsed.data.id)
-      .select('id, image_path')
-    written = data?.length ?? 0
-    const imagePath = data?.[0]?.image_path
-    if (imagePath) await supabase.storage.from('shop-images').remove([imagePath])
+    const target = rows?.[0]
+    if (target?.status === 'draft') {
+      if (target.image_path) {
+        await supabase.storage.from('shop-images').remove([target.image_path])
+      }
+      const { data } = await supabase
+        .schema('shop')
+        .from('products')
+        .delete()
+        .eq('id', parsed.data.id)
+        .select('id')
+      written = data?.length ?? 0
+    }
   } else {
     const patch =
       parsed.data.gesture === 'soumettre'
