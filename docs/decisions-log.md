@@ -2,6 +2,53 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La boutique s'ouvre au public, tunnel de démonstration compris
+
+### Ce qui est livré
+
+Session du 25 août, sur instruction du porteur (« la boutique entièrement publique, tout doit
+être visible, jusqu'au process de paiement — fais comme si on vendait déjà, sinon impossible de
+faire de la QA »). La migration `0023` ouvre `shop_enabled` avec sa trace `audit_log` dans la
+même transaction ; `/boutique` entre dans `PUBLIC_PATHS` et `PUBLIC_PREFIXES` — la boutique est
+le second préfixe public du site après le journal — ; le tunnel d'achat de démonstration existe
+de bout en bout (`/boutique/panier`, `/boutique/commande`, `/boutique/commande/paiement`,
+`/boutique/commande/confirmation`) ; l'accueil met la boutique en module 01 avec le CTA du
+héros ; l'en-tête porte « Boutique » pour tout le monde, « Espace vendeur » pour un vendeur,
+« Administration » pour un admin ; `/admin` gagne une barre de navigation sur ses sept écrans
+et une section Boutique en tête de tableau de bord.
+
+### Les décisions qui ne méritaient pas d'ADR
+
+**Le panier est un cookie, pas une table.** Le visiteur n'a pas de compte à qui accrocher des
+lignes (la boutique est devant le portail), et une commande de démonstration que personne
+n'expédiera n'a rien à faire dans une ligne durable. Le jour de la vraie caisse (Stripe,
+ADR 0016 D7), la table `shop.orders` arrive avec elle, RLS d'abord — et le cookie redevient une
+zone de transit. `lib/shop/cart.ts` traite le cookie en entrée attaquant-typée : du JSON cassé
+dégrade en panier vide, jamais en erreur.
+
+**Le paiement valide la FORME et rien d'autre.** La QA a besoin d'états de refus (code postal à
+deux chiffres, carte à quatre), donc les schémas existent ; un contrôle de Luhn ou un
+prestataire simulé serait un mensonge sur ce qu'est cette étape. Chaque écran du tunnel porte le
+bandeau « démonstration », le paiement le redit avant le premier champ, la référence est
+préfixée `QA-`, et les champs de carte ne survivent pas à l'action — l'instantané de commande
+garde titres, prix, quantités et adresse, jamais la carte.
+
+**Une seule dérogation §2, déjà écrite ailleurs.** Rendre `/boutique` publique ne déplace pas la
+frontière tabac : l'enum fermé de `shop.products.category` et le trigger lexical restent la
+barrière, et `tests/unit/routes.test.ts` continue d'affirmer que tout le référentiel tabac est
+derrière le portail. Ce qu'un mineur atteint ici, c'est un coupe-cigare — l'objet que n'importe
+quelle vitrine expose.
+
+**L'entrée « Boutique » de l'en-tête est statique, sans lecture de drapeau.** La leçon des lieux
+tient (un drapeau dans l'en-tête est une requête par page) ; l'état de repos du drapeau est
+désormais OUVERT, et le couper depuis `/admin/drapeaux` reste le coupe-circuit — sa description
+en base dit que l'entrée de navigation, elle, ne disparaît pas.
+
+**L'en-tête lit désormais le rôle et le rattachement vendeur d'un membre connecté.** Deux
+lectures d'une ligne indexée par page, contre le constat de QA : personne ne trouvait où
+administrer la boutique. Le renversement de l'économie « le lien vit dans /parametres » est
+consigné dans le composant ; `/parametres` garde ses versions annotées des mêmes portes.
+
 ## La marketplace — le vendeur écrit, la maison publie, le drapeau attend
 
 ### Ce qui est livré

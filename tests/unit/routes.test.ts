@@ -49,6 +49,14 @@ describe('routes', () => {
          * directions.
          */
         '/journal',
+        /*
+         * The shop (owner's decision, 25 août 2026): accessories only, never
+         * tobacco — the closed `shop.products.category` enum and the §2
+         * lexical trigger hold that line, not this list. What a minor can
+         * reach here is a cutter, a lighter, a hygrometer: objects any street
+         * shopfront displays. The tobacco referential stays gated below.
+         */
+        '/boutique',
       ].sort(),
     )
   })
@@ -59,13 +67,27 @@ describe('routes', () => {
     expect(isPublicPath('/journalx')).toBe(false)
   })
 
-  it('treats every product route as gated', () => {
+  it('treats everything under the shop prefix as public, checkout included', () => {
+    for (const path of [
+      routes.shopProduct('coupe-cigare-guillotine'),
+      routes.shopVendor('comptoir-du-cedre'),
+      routes.shopCart(),
+      routes.shopCheckout(),
+      routes.shopCheckoutPayment(),
+      routes.shopCheckoutDone(),
+    ]) {
+      expect(isPublicPath(path)).toBe(true)
+    }
+    // A prefix is not a substring: /boutiquex is not the shop.
+    expect(isPublicPath('/boutiquex')).toBe(false)
+  })
+
+  it('treats every tobacco route as gated', () => {
     for (const path of [
       routes.cigars(),
       routes.cigar('x'),
       routes.humidor(),
       routes.scanner(),
-      routes.shop(),
       routes.venues(),
     ]) {
       expect(isPublicPath(path)).toBe(false)

@@ -8,7 +8,8 @@ La recherche facettée n'en est pas un : ses facettes sont des liens et son cham
 raison — ni celle des lieux, dont le seul code client est le bouton de géolocalisation, ni la
 liste du journal, qui n'en charge aucun — ni la file de modération, dont le seul code client est
 le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les actions naviguent
-(`?fait=…`) plutôt que de rendre un état. Quarante existent :
+(`?fait=…`) plutôt que de rendre un état — ni le panier de la boutique, dont chaque ligne est
+deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-trois existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -55,6 +56,9 @@ le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les a
 | `admin/boutique/vendeurs/vendor-forms.tsx` | `useActionState` — pseudo inconnu ou nom pris se lisent à côté du champ ; `window.confirm` pour suspendre et supprimer |
 | `components/shop/product-fields.tsx` | les champs du formulaire produit, partagés entre l'admin et l'espace vendeur (ADR 0016) — client parce que ses parents le sont |
 | `vendeur/forms.tsx` | `useActionState` — vitrine et fiches produit du vendeur ; `window.confirm` pour retirer de la vente et supprimer |
+| `boutique/commande/checkout-form.tsx` | `useActionState` — un champ d'adresse refusé se relit en place, sans perdre le reste |
+| `boutique/commande/paiement/payment-form.tsx` | `useActionState` — une carte malformée se refuse en place ; la QA vit de ces refus |
+| `admin/admin-nav.tsx` | `usePathname` — un layout serveur ne sait pas lequel de ses écrans se rend, et l'écran courant doit se lire courant |
 
 Les règles apprises en les écrivant :
 
@@ -137,8 +141,14 @@ Les règles apprises en les écrivant :
   non bloquant — il est inscrit sous « À trancher avant commercialisation » dans le `CLAUDE.md` racine,
   pour avis juridique avant l'ouverture commerciale.
 
-- `app/(app)/` — derrière le portail. Le middleware garantit un cookie signé valide et pose
-  `X-Robots-Tag: noindex`.
+- `app/(app)/` — derrière le portail, à une exception près. Le middleware garantit un cookie
+  signé valide et pose `X-Robots-Tag: noindex`.
+
+  L'exception est `/boutique` (décision du porteur, 25 août 2026) : la boutique et son tunnel
+  d'achat de démonstration sont dans `PUBLIC_PATHS`/`PUBLIC_PREFIXES`, donc joignables sans
+  portail, tout en restant dans ce groupe pour son chrome. La frontière tabac ne bouge pas —
+  accessoires seulement, enum fermé, trigger lexical — et `tests/unit/routes.test.ts` affirme
+  toujours que le référentiel tabac entier est derrière le portail.
 
 Le `matcher` du middleware est une négation : une route nouvelle est protégée **par défaut**.
 Oublier de l'ajouter échoue en fermant, pas en ouvrant.

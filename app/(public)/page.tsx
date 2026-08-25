@@ -68,14 +68,17 @@ const SHADE_SWATCH = [
   'bg-shade-oscuro',
 ] as const
 
+/* The shop leads (owner's decision, 25 août 2026): it is the one module a
+   visitor can walk into from this very page, no date of birth asked, cart
+   and demo payment included. The numbers in fr.json follow this order. */
 const MODULE_ORDER = [
+  'boutique',
   'referentiel',
   'scan',
   'degustation',
   'cave',
   'reseau',
   'lieux',
-  'boutique',
   'partenaires',
   'cercle',
 ] as const
@@ -140,13 +143,21 @@ export default function HomePage() {
                 </p>
                 <div className="mt-9 flex flex-wrap items-center gap-4">
                   <Link
-                    href={routes.ageGate()}
+                    href={routes.shop()}
                     className="bg-accent text-on-accent hover:bg-accent-bright rounded-band inline-flex h-12 items-center px-6 text-base font-medium transition-colors duration-(--duration-quick)"
+                  >
+                    {m.landing.hero.shopCta}
+                  </Link>
+                  <Link
+                    href={routes.ageGate()}
+                    className="border-rule-strong text-ink hover:bg-surface-raised rounded-band inline-flex h-12 items-center border px-6 text-base transition-colors duration-(--duration-quick)"
                   >
                     {m.home.enter}
                   </Link>
-                  <span className="text-ink-muted text-xs">{m.home.enterHint}</span>
                 </div>
+                <p className="text-ink-muted mt-3 text-xs">
+                  {m.landing.hero.shopCtaHint} {m.home.enterHint}
+                </p>
               </div>
 
               {/* The page's own table of contents. It doubles as navigation on
@@ -214,58 +225,10 @@ export default function HomePage() {
           </div>
         </Section>
 
-        {/* ------------------------------------------------------ 01 le wiki */}
-        <Section id="referentiel">
-          <Split figure={<ReferentialFigure />}>
-            <ModuleHead {...mods.referentiel} />
-            <Points
-              points={mods.referentiel.points}
-              icons={[ListFilter, Columns2, Hash, GitBranch]}
-            />
-          </Split>
-        </Section>
-
-        {/* --------------------------------------------------- 02 la reconnaissance */}
-        <Section id="scan">
-          <Split reversed figure={<ScanFigure />}>
-            <ModuleHead {...mods.scan} />
-            <Points points={mods.scan.points} icons={[ScanLine, Layers, Target, PencilLine]} />
-          </Split>
-        </Section>
-
-        {/* ------------------------------------------------------ 03 la dégustation */}
-        <Section id="degustation">
-          <Split figure={<TastingFigure />}>
-            <ModuleHead {...mods.degustation} />
-            <Points points={mods.degustation.points} icons={[ChartColumn, Compass, Timer]} />
-          </Split>
-        </Section>
-
-        {/* ------------------------------------------------------------- 04 la cave */}
-        <Section id="cave">
-          <Split reversed figure={<HumidorFigure />}>
-            <ModuleHead {...mods.cave} />
-            <Points points={mods.cave.points} icons={[Archive, Droplet, FileCheck2]} />
-          </Split>
-        </Section>
-
-        {/* ----------------------------------------------------------- 05 le réseau */}
-        <Section id="reseau">
-          <Split figure={<NetworkFigure />}>
-            <ModuleHead {...mods.reseau} />
-            <Points points={mods.reseau.points} icons={[Users, ShieldCheck, Award, Flag]} />
-          </Split>
-        </Section>
-
-        {/* ------------------------------------------------------------ 06 les lieux */}
-        <Section id="lieux">
-          <ModuleHead {...mods.lieux} className="max-w-3xl" />
-          <div className="mt-12">
-            <VenuesFigure />
-          </div>
-        </Section>
-
-        {/* --------------------------------------------------------- 07 la boutique */}
+        {/* ------------------------------------------------------ 01 la boutique
+            First among the modules (owner's decision, 25 août 2026): the one
+            section whose CTA is a real destination for the visitor reading
+            this page — /boutique is public, cart and demo payment included. */}
         <Section id="boutique">
           <div className="grid items-end gap-10 lg:grid-cols-2 lg:gap-18">
             <ModuleHead
@@ -277,6 +240,67 @@ export default function HomePage() {
           </div>
           <div className="mt-12">
             <ShopFigure />
+          </div>
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <Link
+              href={routes.shop()}
+              className="bg-accent text-on-accent hover:bg-accent-bright rounded-band inline-flex h-12 items-center px-6 text-base font-medium transition-colors duration-(--duration-quick)"
+            >
+              {mods.boutique.cta}
+              <ChevronRight aria-hidden="true" className="ml-1.5 size-4" strokeWidth={1.5} />
+            </Link>
+            <span className="text-ink-muted text-xs">{mods.boutique.ctaHint}</span>
+          </div>
+        </Section>
+
+        {/* ------------------------------------------------------ 02 le wiki */}
+        <Section id="referentiel">
+          <Split figure={<ReferentialFigure />}>
+            <ModuleHead {...mods.referentiel} />
+            <Points
+              points={mods.referentiel.points}
+              icons={[ListFilter, Columns2, Hash, GitBranch]}
+            />
+          </Split>
+        </Section>
+
+        {/* --------------------------------------------------- 03 la reconnaissance */}
+        <Section id="scan">
+          <Split reversed figure={<ScanFigure />}>
+            <ModuleHead {...mods.scan} />
+            <Points points={mods.scan.points} icons={[ScanLine, Layers, Target, PencilLine]} />
+          </Split>
+        </Section>
+
+        {/* ------------------------------------------------------ 04 la dégustation */}
+        <Section id="degustation">
+          <Split figure={<TastingFigure />}>
+            <ModuleHead {...mods.degustation} />
+            <Points points={mods.degustation.points} icons={[ChartColumn, Compass, Timer]} />
+          </Split>
+        </Section>
+
+        {/* ------------------------------------------------------------- 05 la cave */}
+        <Section id="cave">
+          <Split reversed figure={<HumidorFigure />}>
+            <ModuleHead {...mods.cave} />
+            <Points points={mods.cave.points} icons={[Archive, Droplet, FileCheck2]} />
+          </Split>
+        </Section>
+
+        {/* ----------------------------------------------------------- 06 le réseau */}
+        <Section id="reseau">
+          <Split figure={<NetworkFigure />}>
+            <ModuleHead {...mods.reseau} />
+            <Points points={mods.reseau.points} icons={[Users, ShieldCheck, Award, Flag]} />
+          </Split>
+        </Section>
+
+        {/* ------------------------------------------------------------ 07 les lieux */}
+        <Section id="lieux">
+          <ModuleHead {...mods.lieux} className="max-w-3xl" />
+          <div className="mt-12">
+            <VenuesFigure />
           </div>
         </Section>
 

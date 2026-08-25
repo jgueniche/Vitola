@@ -98,9 +98,10 @@ export default async function SettingsPage({
           {' · '}
           {copy.reputation} : {account.reputation}
         </p>
-        {/* The desk has no global nav entry — the header would pay a role read
-            on every page for a link two accounts can use. It lives here, where
-            the role is already loaded. */}
+        {/* The desk has no global nav entry; it lives here, where the role is
+            already loaded. The header DOES now carry « Administration » and
+            « Espace vendeur » (QA of 25 août 2026: nobody found them) — these
+            lines stay as the annotated versions of the same doors. */}
         {hasMinRole(account.role, 'moderator') ? (
           <p className="text-sm">
             <Link href={routes.moderation()} className="text-ink underline">

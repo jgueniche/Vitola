@@ -64,13 +64,14 @@ const MODERATOR_PAGES = [
 ]
 
 /**
- * La boutique publique (ADR 0016) vit derrière `shop_enabled`, fermé par
- * défaut : l'audit **lit seulement**, donc il n'ouvre pas le drapeau — il
- * audite ce qui est joignable et NOMME ce qu'il saute. Pour mesurer ces
- * gabarits-là, ouvrir le drapeau depuis /admin/drapeaux (et publier un
- * produit), puis rejouer : la fiche produit est trouvée depuis le rayon.
+ * La boutique publique (ADR 0016) vit derrière `shop_enabled` — OUVERT au
+ * repos depuis la 0023, mais l'audit **lit seulement**, donc il ne touche
+ * pas le drapeau : il audite ce qui est joignable et NOMME ce qu'il saute.
+ * Le panier s'audite vide (son état sans cookie) ; les trois écrans du
+ * tunnel (commande, paiement, confirmation) redirigent sans panier et
+ * demandent un parcours, pas un audit à froid — marketplace.ts les traverse.
  */
-const SHOP_PAGES = ['/boutique', '/boutique/vendeurs/comptoir-du-cedre']
+const SHOP_PAGES = ['/boutique', '/boutique/panier', '/boutique/vendeurs/comptoir-du-cedre']
 
 type Finding = { page: string; impact: string; id: string; help: string; nodes: number }
 

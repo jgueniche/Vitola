@@ -29,6 +29,11 @@ export type AdminCounts = {
   accounts: number
   productsTotal: number
   productsDraft: number
+  productsPublished: number
+  productsSubmitted: number
+  vendorsActive: number
+  vendorsPending: number
+  vendorsSuspended: number
 }
 
 export async function adminCounts(): Promise<AdminCounts> {
@@ -49,6 +54,11 @@ export async function adminCounts(): Promise<AdminCounts> {
     accounts,
     productsTotal,
     productsDraft,
+    productsPublished,
+    productsSubmitted,
+    vendorsActive,
+    vendorsPending,
+    vendorsSuspended,
   ] = await Promise.all([
     count(ref.from('cigar_revisions').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     count(db.from('venues').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
@@ -69,6 +79,32 @@ export async function adminCounts(): Promise<AdminCounts> {
     count(
       db.schema('shop').from('products').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
     ),
+    count(
+      db.schema('shop').from('products').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    ),
+    /* The review queue of the vendor flow (ADR 0016, D3): a draft that has
+       been submitted and not yet decided. */
+    count(
+      db
+        .schema('shop')
+        .from('products')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'draft')
+        .not('submitted_at', 'is', null),
+    ),
+    count(
+      db.schema('shop').from('vendors').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    ),
+    count(
+      db.schema('shop').from('vendors').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    ),
+    count(
+      db
+        .schema('shop')
+        .from('vendors')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'suspended'),
+    ),
   ])
 
   return {
@@ -83,6 +119,11 @@ export async function adminCounts(): Promise<AdminCounts> {
     accounts,
     productsTotal,
     productsDraft,
+    productsPublished,
+    productsSubmitted,
+    vendorsActive,
+    vendorsPending,
+    vendorsSuspended,
   }
 }
 

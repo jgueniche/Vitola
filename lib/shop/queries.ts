@@ -167,6 +167,26 @@ export async function searchShopProducts(filters: ShopSearchFilters): Promise<{
 }
 
 /**
+ * The cart's lines, resolved: the products a cookie names, restricted to what
+ * is actually on sale — published, active vendor, the shelf's own tab filter.
+ * A cart line whose product was retracted since it was added simply comes
+ * back missing, and the screens say so instead of selling a ghost.
+ */
+export async function getShopProductsByIds(ids: readonly string[]): Promise<ShopProductRow[]> {
+  if (ids.length === 0) return []
+  const db = await createSupabaseServerClient()
+  const { data, error } = await db
+    .schema('shop')
+    .from('products')
+    .select(`${PRODUCT_COLUMNS}, vendor:vendors!inner(name, slug, status)`)
+    .in('id', [...ids])
+    .eq('status', 'published')
+    .eq('vendor.status', 'active')
+  if (error) throw new Error(`Could not read the cart products: ${error.message}`)
+  return (data ?? []) as unknown as ShopProductRow[]
+}
+
+/**
  * One product at its address. The published tab filter is deliberate: the
  * public address shows what is on sale — a vendor rereads their draft in
  * /vendeur, not here. The vendor embed is not `!inner` on status: the RLS of

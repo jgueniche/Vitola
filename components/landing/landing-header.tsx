@@ -15,10 +15,13 @@ import { routes } from '@/lib/routes'
  * everywhere, and where it fails a translucent bar leaves the section titles
  * legible straight through the navigation.
  *
- * Every nav item is an in-page anchor, deliberately. Linking "Cigares" to
- * /cigares from a page seen BEFORE the gate would promise a destination the
- * middleware immediately refuses; the section below is the honest answer to
- * the same question.
+ * Every gated destination is an in-page anchor, deliberately. Linking
+ * "Cigares" to /cigares from a page seen BEFORE the gate would promise a
+ * destination the middleware immediately refuses; the section below is the
+ * honest answer to the same question. The shop is the exception since the
+ * owner's decision of 25 août 2026: /boutique is public, so its entry is a
+ * real link — and it leads, not trails, because the shop is what a visitor
+ * can actually walk into without handing over a date of birth.
  */
 
 const NAV = [
@@ -27,7 +30,6 @@ const NAV = [
   { label: m.landing.nav.vitolas, href: '#referentiel' },
   { label: m.landing.nav.venues, href: '#lieux' },
   { label: m.landing.nav.journal, href: '#reseau' },
-  { label: m.landing.nav.shop, href: '#boutique' },
 ] as const
 
 export function LandingHeader() {
@@ -41,6 +43,14 @@ export function LandingHeader() {
             screen-reader user cannot tell apart. */}
         <nav aria-label={m.landing.hero.tocShortcuts} className="flex items-center gap-5">
           <ul className="hidden items-center gap-x-5 text-sm lg:flex">
+            <li>
+              <Link
+                href={routes.shop()}
+                className="text-accent hover:text-accent-bright font-medium transition-colors duration-(--duration-quick)"
+              >
+                {m.landing.nav.shop}
+              </Link>
+            </li>
             {NAV.map((item, index) => (
               <li key={`${item.href}-${index}`}>
                 <a

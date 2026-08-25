@@ -37,6 +37,7 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `venues/model.ts` | Les bornes d'un lieu et d'un avis, les trois critères du §5.7, la forme de `hours`, le slug d'un lieu. |
 | `journal/model.ts` | Les bornes d'un article, les six catégories, le temps de lecture calculé. |
 | `journal/markdown.ts` | **Le sous-ensemble Markdown de l'ADR 0012**, parsé en arbre typé — jamais en HTML. Ses tests portent les cas d'injection. |
+| `shop/cart.ts` | **Le tunnel d'achat de démonstration** : le panier-cookie et ses bornes, les totaux en centimes, l'adresse, la carte fictive, la commande `QA-`. Un cookie y est une entrée attaquant-typée. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 

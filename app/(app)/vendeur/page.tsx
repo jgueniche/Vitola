@@ -89,6 +89,21 @@ export default async function VendorSpacePage({ searchParams }: Props) {
           {copy.title} — {vendor.name}
         </h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        {/* The two addresses a vendor keeps asking for: their own shopfront as
+            the public reads it, and the shelf their products sit on. */}
+        <p className="text-sm">
+          {vendor.status === 'active' ? (
+            <>
+              <Link href={routes.shopVendor(vendor.slug)} className="text-accent underline">
+                {copy.publicStorefront}
+              </Link>
+              {' · '}
+            </>
+          ) : null}
+          <Link href={routes.shop()} className="text-ink underline">
+            {copy.viewShop}
+          </Link>
+        </p>
         {vendor.status === 'pending' ? (
           <p className="border-rule text-ink measure border-l-2 pl-3 text-sm leading-relaxed">
             {copy.pendingNotice}

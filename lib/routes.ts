@@ -41,6 +41,10 @@ export const SEGMENTS = {
      vendeur, lui, est `/vendeur` — le motif de /moderation : un espace de
      travail, pas une page de la section publique. */
   shopVendors: 'vendeurs',
+  shopCart: 'panier',
+  shopCheckout: 'commande',
+  shopCheckoutPayment: 'paiement',
+  shopCheckoutDone: 'confirmation',
   vendorSpace: 'vendeur',
   settings: 'parametres',
   moderation: 'moderation',
@@ -153,6 +157,14 @@ export const routes = {
      son adresse sous /boutique/vendeurs/… : impossible, le segment est pris. */
   shopProduct: (slug: string) => `/${SEGMENTS.shop}/${slug}`,
   shopVendor: (slug: string) => `/${SEGMENTS.shop}/${SEGMENTS.shopVendors}/${slug}`,
+  /* Le tunnel d'achat pend sous la boutique, en segments statiques — le motif
+     de `vendeurs` : un produit nommé « panier » ou « commande » ne peut pas
+     voler ces adresses, le segment est pris avant le slug dynamique. */
+  shopCart: () => `/${SEGMENTS.shop}/${SEGMENTS.shopCart}`,
+  shopCheckout: () => `/${SEGMENTS.shop}/${SEGMENTS.shopCheckout}`,
+  shopCheckoutPayment: () =>
+    `/${SEGMENTS.shop}/${SEGMENTS.shopCheckout}/${SEGMENTS.shopCheckoutPayment}`,
+  shopCheckoutDone: () => `/${SEGMENTS.shop}/${SEGMENTS.shopCheckout}/${SEGMENTS.shopCheckoutDone}`,
   vendorSpace: () => `/${SEGMENTS.vendorSpace}`,
   settings: () => `/${SEGMENTS.settings}`,
   moderation: () => `/${SEGMENTS.moderation}`,
@@ -195,15 +207,27 @@ export const PUBLIC_PATHS: readonly string[] = [
   routes.cookies(),
   routes.health(),
   routes.journal(),
+  /* La boutique (accessoires uniquement, jamais de tabac — l'enum fermé de
+     `shop.products.category` et le trigger lexical §2 tiennent la frontière).
+     Publique par décision du porteur du 25 août 2026 : la QA du parcours
+     d'achat exige de tout voir, catalogue, panier et paiement de
+     démonstration compris. Le §2 vise le tabac ; un coupe-cigare est un objet
+     que n'importe quelle vitrine de centre-ville expose. */
+  routes.shop(),
 ]
 
 /**
- * The one public *prefix* (ADR 0012, D3): article slugs are rows, not routes,
- * so they cannot be enumerated here. Everything under it is reachable without
- * the gate — which is exactly why a `gated` article's page checks the cookie
- * itself, and why the walkthrough crosses that guard in both directions.
+ * The public *prefixes*. The journal first (ADR 0012, D3): article slugs are
+ * rows, not routes, so they cannot be enumerated here — which is exactly why
+ * a `gated` article's page checks the cookie itself, and why the walkthrough
+ * crosses that guard in both directions. The shop since the owner's decision
+ * of 25 août 2026: product sheets, shopfronts and the whole checkout funnel
+ * are rows and static segments under `/boutique/`, all accessory-only.
  */
-export const PUBLIC_PREFIXES: readonly string[] = [`/${SEGMENTS.journal}/`]
+export const PUBLIC_PREFIXES: readonly string[] = [
+  `/${SEGMENTS.journal}/`,
+  `/${SEGMENTS.shop}/`,
+]
 
 export function isPublicPath(pathname: string): boolean {
   return (
@@ -246,15 +270,18 @@ export function safeSuite(suite: string | null | undefined): string | null {
   const [path] = suite.split('?')
   if (!path) return null
 
-  /* The journal prefix is public AND worth coming back to: a `gated` article
-     lives under it and sends its reader through the gate (ADR 0012, D3) —
-     refusing the return trip would drop them on the default page for nothing.
-     Every other public path is still refused: bouncing a visitor through the
-     gate toward a page that never needed it is the pointless loop this guard
-     exists to cut. */
-  const isJournal =
-    path === routes.journal() || PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix))
-  if (isPublicPath(path) && !isJournal) return null
+  /* The journal and shop prefixes are public AND worth coming back to: a
+     `gated` article sends its reader through the gate (ADR 0012, D3), and the
+     shop sends a signed-out visitor through `/connexion` (the vendor space,
+     an admin checking the shelf) — refusing the return trip would drop them
+     on the default page for nothing. Every other public path is still
+     refused: bouncing a visitor through the gate toward a page that never
+     needed it is the pointless loop this guard exists to cut. */
+  const isSection =
+    path === routes.journal() ||
+    path === routes.shop() ||
+    PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix))
+  if (isPublicPath(path) && !isSection) return null
 
   return suite
 }

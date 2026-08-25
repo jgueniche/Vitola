@@ -2,11 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { Button } from '@/components/ui/button'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
+import { MAX_LINE_QTY } from '@/lib/shop/cart'
 import { formatPrice } from '@/lib/shop/model'
 import { getShopProductBySlug, signShopImages } from '@/lib/shop/queries'
+
+import { addToCartAction } from '../actions'
 
 const copy = m.shop
 const CATEGORY_LABELS = m.admin.shop.categories as Record<string, string>
@@ -20,10 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * One product sheet (ADR 0016). No buy button by design: the checkout does
- * not exist, and a control that promises one would be the on-screen promise
- * the ADR 0015 refused. The vendor and the brand are both links — the two
- * entries of the marketplace, on every sheet.
+ * One product sheet (ADR 0016). The buy button arrived with the demo funnel
+ * (owner's decision, 25 août 2026): a plain form posting to a Server Action,
+ * zero client JavaScript, landing on the cart with its confirmation in the
+ * URL. It only renders while there is stock — a button toward a refusal is a
+ * promise the shelf cannot keep. The vendor and the brand are both links —
+ * the two entries of the marketplace, on every sheet.
  */
 export default async function ShopProductPage({ params }: Props) {
   if (!(await isFeatureEnabled('shop_enabled'))) notFound()
@@ -93,7 +99,28 @@ export default async function ShopProductPage({ params }: Props) {
           <p className="text-ink-muted text-sm">
             {product.stock_qty > 0 ? copy.inStock : copy.outOfStock}
           </p>
-          <p className="text-ink-faint measure text-xs leading-relaxed">{copy.noCheckout}</p>
+
+          {product.stock_qty > 0 ? (
+            <form action={addToCartAction} className="flex flex-wrap items-end gap-3">
+              <input type="hidden" name="productId" value={product.id} />
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="qty" className="eyebrow">
+                  {copy.qtyLabel}
+                </label>
+                <input
+                  id="qty"
+                  name="qty"
+                  type="number"
+                  min={1}
+                  max={MAX_LINE_QTY}
+                  defaultValue={1}
+                  className="border-rule-strong bg-surface text-ink h-10 w-20 rounded-[3px] border px-3 text-sm tabular-nums"
+                />
+              </div>
+              <Button type="submit">{copy.addToCart}</Button>
+            </form>
+          ) : null}
+          <p className="text-ink-faint measure text-xs leading-relaxed">{copy.demoPriceNote}</p>
 
           {product.description ? (
             <div className="measure flex flex-col gap-2 text-sm leading-relaxed">
