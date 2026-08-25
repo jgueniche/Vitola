@@ -1,6 +1,6 @@
 # 0003 — Utiliser Stripe Checkout hébergé en v1, Payment Element seulement si la conversion l'exige
 
-- **Statut** : Proposée — attend validation
+- **Statut** : **Acceptée** le 25 août 2026 — arbitrage du porteur, voir en fin de document
 - **Date** : 2026-08-21
 - **Décideur** : @jgueniche
 - **Concerne** : P7 · `shop.*` · `app/api/stripe/webhook/route.ts`
@@ -96,3 +96,22 @@ Element devient alors un changement d'interface, pas une migration.
    transport ; l'UE entière impose l'OSS dès la première commande transfrontalière.
 3. **Qui traite les retours et sous quel délai ?** Le droit de rétractation de 14 jours est
    opposable et doit apparaître dans les CGV **avant** l'ouverture de la boutique.
+
+### Arbitrage rendu — 25 août 2026
+
+**Boutique propre d'abord, Checkout hébergé — l'option A telle qu'écrite.** Le porteur a tranché
+entre trois ambitions qui lui étaient présentées : (A) la boutique du brief, (B) une place de
+marché de partenaires d'emblée (Stripe Connect, KYC, DAC7), (C) une vitrine partenaires sans
+paiement. Sa réponse : « boutique propre d'abord ». La marketplace reste une v2 possible, et
+c'est précisément ce que cette ADR préservait — le modèle de commande ignore Stripe.
+
+La construction attend toujours ses trois clés : les clés Stripe, **le catalogue réel**
+(accessoires, prix, stock — une décision commerciale qu'aucune session n'invente), et la
+structure juridique qui encaisse (Q10). Les trois questions ouvertes ci-dessus restent dues
+avant l'ouverture de la boutique.
+
+**Un périmètre a été refusé au passage, et il faut le retrouver ici** : l'idée d'afficher le
+stock des civettes par cigare contre un abonnement payant des buralistes cumule ce que la loi
+Évin interdit — désigner où acheter un produit du tabac précis, et être rémunéré pour cette mise
+en avant. Elle n'entre ni dans cette ADR ni dans aucune autre ; le détail est dans
+`docs/decisions-log.md` et la règle n° 1 de `CLAUDE.md` la couvre déjà.

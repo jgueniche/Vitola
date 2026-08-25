@@ -320,6 +320,23 @@ jobs:
             exit 1
           fi
 
+      # 0020 pose l'administration (ADR 0014). Ce qui ne se voit qu'à
+      # l'exécution : la porte des drapeaux est gardée admin à l'intérieur,
+      # elle refuse une clé inconnue, et le changement emporte sa trace
+      # audit_log dans la même transaction.
+      - name: Apply 0020 — l'administration
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0020_admin.sql
+
+      - name: Administration — la porte des drapeaux, et qui supprime une gamme
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/15_admin_rls.sql 2>&1 \
+            | tee "$RUNNER_TEMP/admin.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/admin.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       - name: Function grants, sur les trois schémas
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/02_function_grants.sql
 

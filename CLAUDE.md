@@ -282,6 +282,36 @@ consentements à l'envers.
 la file — la question ouverte de l'ADR 0013. L'écran existe, le goulot est humain : `jeremy` est
 le seul compte qui passe la garde.
 
+## L'administration — livrée le 25 août 2026
+
+ADR 0014 avant le SQL, migration `0020`, cinq écrans sous `/admin` (tableau de bord, drapeaux,
+comptes, fiches, gammes), le lien depuis `/parametres`, 6 assertions SQL, 28 assertions de
+parcours. L'administration **regroupe** ce qui existait (modération, file wiki, lieux, journal,
+promotion des rôles sur le profil) et n'ajoute que ce qui n'avait pas d'écran.
+
+**Trois règles qui ne se contournent pas, héritées de l'ADR 0014 :**
+
+1. **Un drapeau ne se change que par `admin_set_flag`**, la porte qui écrit sa trace `audit_log`
+   dans la même transaction — le renversement conscient de la position de la 0001 (« un drapeau
+   est un événement de déploiement »). Elle refuse une clé inconnue : un drapeau naît dans une
+   migration, avec le code qui le lit.
+2. **Pas de porte quand une policy suffit.** Comptes, fiches et gammes s'écrivent par la session,
+   sous `profiles_select_directory`, `cigars_update_editor` et `lines_*` — le rôle lu à l'écran
+   décide de ce qui se rend, jamais de ce qui peut se produire.
+3. **`warn`, `suspend`, `delete` restent sans bras** (ADR 0013, D4) : une interface n'est pas une
+   raison de les armer. `/admin` ne supprime aucun compte, ne suspend personne, et ne réécrit pas
+   une fiche — l'admin **relit** (marquer relue, dépublier, republier), le wiki corrige.
+
+**Marquer une fiche relue écrase `verified_at`** : l'horodatage de publication devient un
+horodatage de relecture, et `verified_by` porte enfin ce que le comparateur attendait. La
+résorption des 862 non relues passe par `/admin/fiches`, et son achèvement est le déclencheur de
+l'ADR 0008.
+
+**L'ADR 0003 est acceptée depuis le même jour** (arbitrage du porteur : « boutique propre
+d'abord » — Checkout, option A) ; sa note d'arbitrage consigne aussi le **refus** du modèle
+« stock des civettes contre abonnement des buralistes » — deux fois ce que la loi Évin interdit,
+désigner où acheter un produit du tabac et être payé pour cette mise en avant.
+
 ## `ref.lines` : décision de v1
 
 **La table reste vide en v1, et ce n'est pas un oubli.** Les gammes (Cohíba > Línea 1492) existent

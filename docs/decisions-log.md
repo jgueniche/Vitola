@@ -2,6 +2,50 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## L'administration — et deux arbitrages du porteur rendus le même jour
+
+### Ce qui est livré
+
+Session du 25 août, sur commande directe (« interface admin, tu peux la lancer quand tu veux »).
+L'ADR 0014 avant le SQL, la migration `0020` (appliquée en base : la porte `admin_set_flag`,
+`lines_delete_admin`), `supabase/tests/15_admin_rls.sql` (**6 assertions** qui n'accordent rien),
+cinq écrans — `/admin` (tableau de bord), `/admin/drapeaux`, `/admin/comptes`, `/admin/fiches`
+(la relecture des 862), `/admin/gammes` — le lien depuis `/parametres` (pas d'entrée de nav
+globale, la leçon de P8), et `tooling/parcours/admin.ts` : **28 assertions, deux rôles, contre la
+vraie base**, fixtures posées et retirées en contexte privilégié, comptes vérifiés à zéro.
+
+**Deux arbitrages du porteur, consignés où ils vivent** : l'ADR 0003 passe Acceptée (« boutique
+propre d'abord » — option A, Checkout ; la marketplace partenaires reste une v2 possible), et le
+compte `jeremy` était **déjà** `admin` depuis P1 — vérifié, rien à changer. Un périmètre a été
+refusé le même jour : afficher le stock des civettes par cigare contre abonnement payant des
+buralistes cumule ce que la loi Évin interdit (désigner où acheter un produit du tabac précis, et
+être rémunéré pour cette mise en avant) — le détail est dans la note d'arbitrage de la 0003.
+
+### Trois décisions qui ne méritaient pas d'ADR
+
+**La bascule d'un drapeau est un bouton, jamais une case à cocher.** React 19 rend à une case son
+`defaultChecked` du montage après le retour de l'action — le bug du sélecteur de portée, qui
+aurait ici republié un drapeau qu'on venait de couper. Un bouton ne porte aucun état qui puisse
+mentir ; la page re-rendue dit la vérité, et le second bouton (« Enregistrer » la charge utile
+sans basculer) passe par la valeur du *submitter*, pas par un second formulaire.
+
+**Les actions de fiches et de gammes naviguent, les drapeaux rendent un état.** Marquer une fiche
+relue la retire de la liste filtrée où on a cliqué — le formulaire qui tenait l'état de retour est
+démonté dans le même rendu, donc la confirmation voyage dans l'URL (`?fait=…`), refus compris
+(`?fait=refus` : l'action lit les lignes écrites, et zéro ligne est un refus de policy, pas un
+succès). Un drapeau, lui, survit à sa bascule : l'état a un endroit où s'afficher.
+
+**Le drapeau du parcours est `show_indicative_prices`**, choisi parce que rien ne le lit (Q19) :
+l'aller-retour est sans effet visible ailleurs, et ses bascules laissent dans `audit_log` la trace
+qu'on vérifie précisément — six lignes `flag_set` à ce jour, et un journal ne se nettoie pas.
+
+### Un piège de parcours, pour la prochaine fois
+
+**`networkidle` ne s'établit JAMAIS sur `/admin/fiches`** — mesuré : la page rend en 944 ms et le
+signal n'arrive pas en 15 s, un préchargement de liens gardant une connexion ouverte. Le parcours
+admin attend `load` + une seconde. Un signal qui ne vient jamais n'est pas un signal, et 30 s de
+timeout sur une page qui marche est le pire des diagnostics.
+
 ## ADR 0009 appliquée — `ref.lines` a son `status`, et la gamme se propose
 
 ### Ce qui est livré

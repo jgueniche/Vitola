@@ -104,6 +104,14 @@ export default async function SettingsPage({
             <span className="text-ink-faint text-xs">{m.moderation.desk.settingsLede}</span>
           </p>
         ) : null}
+        {hasMinRole(account.role, 'admin') ? (
+          <p className="text-sm">
+            <Link href={routes.admin()} className="text-ink underline">
+              {m.admin.settingsLink}
+            </Link>{' '}
+            <span className="text-ink-faint text-xs">{m.admin.settingsLede}</span>
+          </p>
+        ) : null}
       </div>
 
       <section className="flex flex-col gap-4">

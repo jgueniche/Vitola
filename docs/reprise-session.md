@@ -1,11 +1,15 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 23 août 2026, tard le soir,
-> après la fusion des **PR #11 et #12** (P5+P6 puis P8 → `master`) et une session de reprise sous
-> **délégation explicite du porteur** (« fais comme tu le sens, je te laisse maître à bord ») qui
-> a accepté les **ADR 0008 et 0009 par délégation** et appliqué la 0009 pièces 1 et 2 — migration
-> `0019` (le `status` de `ref.lines`), `line_id` proposable au wiki, parcours `gammes.ts`.
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 25 août 2026, après la
+> fusion des **PR #11 à #13** et la livraison de **l'administration** (ADR 0014, migration
+> `0020`, `/admin` en cinq écrans, 28 assertions de parcours) sur commande directe du porteur.
+> Deux arbitrages du porteur sont tombés le même jour : **l'ADR 0003 est acceptée** (« boutique
+> propre d'abord » — Checkout, la marketplace partenaires reste une v2) et le **modèle
+> « stock des civettes contre abonnement » est refusé** (loi Évin — voir la note de la 0003).
+> La session du 23 au soir avait accepté les **ADR 0008 et 0009 par délégation** (« je te laisse
+> maître à bord ») et appliqué la 0009 pièces 1 et 2 — migration `0019` (le `status` de
+> `ref.lines`), `line_id` proposable au wiki, parcours `gammes.ts`.
 > **P1, P2, P3, P5, P6 et P8 sont fermées.** L'enjambement de P7 et P4 est **autorisé et acté** :
 > le porteur a dit le 23 août « avance sur ce que tu peux — je mettrai les clés API IA plus tard
 > (**on passera par Gemini**) et les clés Stripe plus tard ». Il reste donc exactement
@@ -35,10 +39,10 @@ dessous), et le travail de la session de reprise du 23 août au soir — arbitra
 `claude/vitola-reprise-92foh2`, poussée, en attente de PR ou fusionnée depuis. Vérifie l'état
 d'un coup d'œil plutôt que de le supposer, et `/api/health` sert le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **dix-neuf migrations**, toutes dans
-`supabase/migrations/` **et** appliquées sur le projet — la 0018 (les portes du modérateur) est
-enregistrée sous la version `20260823174500`, la 0019 (le `status` de `ref.lines`) sous
-`20260823210941`. `lib/supabase/database.types.ts` porte la colonne et le contrôle de dérive passe.
+Le code du dépôt et l'état de la base concordent : **vingt migrations**, toutes dans
+`supabase/migrations/` **et** appliquées sur le projet — la 0019 (le `status` de `ref.lines`) est
+enregistrée sous `20260823210941`, la 0020 (l'administration) sous `20260825104447`.
+`lib/supabase/database.types.ts` les porte et le contrôle de dérive passe (93 objets).
 
 Et cette concordance n'est plus une promesse : `tooling/scripts/check-types-drift.ts` compare, à
 chaque CI, l'inventaire des objets exposés à `lib/supabase/database.types.ts`, **dans les deux
@@ -200,7 +204,7 @@ si elle est entrée ; si oui, repars de `master`, sinon la branche assignée por
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Dix-neuf migrations**
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Vingt migrations**
 appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
@@ -224,11 +228,12 @@ appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 | `0017` | `editorial` | `supabase/migrations/0017_editorial.sql` |
 | `0018` | `moderation` | `supabase/migrations/0018_moderation.sql` |
 | `0019` | `ref_lines_status` | `supabase/migrations/0019_ref_lines_status.sql` |
+| `0020` | `admin` | `supabase/migrations/0020_admin.sql` |
 
-**Sept sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
-`0009`, `0015`, `0016`, `0017`, `0018` et `0019` : `20260822222420`, `20260822232400`,
-`20260823083729`, `20260823103622`, `20260823115404`, `20260823174500` et `20260823210941`.
-C'est l'outil
+**Huit sont enregistrées sous un horodatage** plutôt que sous leur numéro de fichier — `0008`,
+`0009`, `0015`, `0016`, `0017`, `0018`, `0019` et `0020` : `20260822222420`, `20260822232400`,
+`20260823083729`, `20260823103622`, `20260823115404`, `20260823174500`, `20260823210941` et
+`20260825104447`. C'est l'outil
 d'application qui numérote, pas le fichier. `list_migrations` affiche donc des versions qui ne
 ressemblent pas au dépôt, et c'est normal — l'ordre et le contenu sont les bons.
 
@@ -478,7 +483,7 @@ public.event_kind          degustation | rencontre | visite | autre
 public.attendee_status     going | maybe | declined
 ```
 
-### Policies RLS — 185 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
+### Policies RLS — 186 au total (dont 11 RESTRICTIVE), toutes les tables couvertes
 
 ```
 public.reviews           8  select_public, select_own, select_shared, select_moderator,
@@ -494,8 +499,9 @@ mod.reports              3  select_own, select_moderator, update_moderator
 mod.moderation_actions   1  select_moderator
 ref.cigars               5  · ref.cigar_revisions 7 · ref.cigar_images 5
 ref.brands / vitolas / manufacturers / box_codes  3 chacune
-ref.lines                4  select_published (anon+auth), select_editor (les
-                            brouillons — 0019), insert_editor, update_editor
+ref.lines                5  select_published (anon+auth), select_editor (les
+                            brouillons — 0019), insert_editor, update_editor,
+                            delete_admin (0020)
 public.humidors          5  select_own, select_shown (P3), insert/update/delete_own
 public.humidor_items     5  · public.humidor_events 3 · public.humidor_readings 4
                             — dont UNE RESTRICTIVE chacune, voir plus bas
@@ -593,6 +599,7 @@ le même jour : elle exige maintenant que la branche existe **et** que l'avertis
 | `public.mod_report(uuid)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
 | `public.mod_acknowledge(uuid)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
 | `public.mod_decide(uuid,text,text,text,text)` | **oui** — gardée moderator | ✗ | ✓ | ✗ |
+| `public.admin_set_flag(text,boolean,jsonb)` | **oui** — gardée admin | ✗ | ✓ | ✗ |
 
 **Les quatre `mod_*` (0018) sont l'inverse assumé : `DEFINER`, parce que `mod` est injoignable
 autrement** — l'exception de `file_report()`, appliquée au troisième acteur qui devait entrer
@@ -1082,9 +1089,12 @@ accessoires, quels prix, quel stock — une décision commerciale qu'aucune sess
 Les 23 questions de `docs/phase-0/05-questions-ouvertes.md` ont chacune une réponse par défaut.
 **Applique le défaut et signale-le**, ou pose la question si le défaut ne tient plus — c'est arrivé
 pour la Q12, qui est annotée deux fois. Les quatre règles non négociables sont en tête de
-`CLAUDE.md`. Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 à 0003 attendent
-toujours validation ; **0004 à 0013 sont acceptées** — 0008 et 0009 par délégation du 23 août,
-0008 sans construction avant la relecture des 862 fiches, 0009 appliquée pièces 1 et 2.
+`CLAUDE.md`. Une ambiguïté d'architecture → une ADR + une question. Les ADR 0001 et 0002
+attendent toujours validation ; **0003 est acceptée** (arbitrage du 25 août : boutique propre
+d'abord, et le refus du modèle « stock des civettes contre abonnement » est consigné dans sa
+note) ; **0004 à 0014 sont acceptées** — 0008 et 0009 par délégation du 23 août, 0008 sans
+construction avant la relecture des 862 fiches, 0009 appliquée pièces 1 et 2, 0014
+(l'administration) sur commande du 25 août.
 
 ## PIÈGES DE CET ENVIRONNEMENT, APPRIS À NOS DÉPENS
 
@@ -1476,6 +1486,9 @@ pnpm tsx tooling/parcours/moderation.ts      # 22 assertions
 pnpm tsx tooling/parcours/gammes.ts          # 19 assertions, TROIS PHASES — lire son en-tête :
                                              #   depot, puis refus, puis fin, avec deux gestes
                                              #   SQL privilégiés entre elles (fixtures comprises)
+pnpm tsx tooling/parcours/admin.ts           # 28 assertions — fixtures SQL privilégiées (une
+                                             #   marque, une fiche), voir son en-tête ; ses
+                                             #   bascules de drapeau restent dans audit_log
 pnpm tsx tooling/audit/a11y.ts               # 24 écrans, 0 violation attendu (critère P8)
 ```
 
@@ -1490,6 +1503,9 @@ Les pièges d'écriture de ces parcours sont dans « PIÈGES DE CET ENVIRONNEMEN
 d'en écrire un huitième, ils coûtent une heure chacun la première fois. Le dernier en date :
 **une Server Action qui redirige rend la main avant que le routeur ait navigué**, donc `page.url()`
 lu après un délai fixe rend encore l'adresse d'avant. On attend `waitForURL`, jamais un délai.
+Et **`networkidle` peut ne JAMAIS s'établir** — mesuré sur `/admin/fiches`, qui rend en 944 ms
+pendant qu'un préchargement de liens garde une connexion ouverte : le parcours admin attend
+`load` + une seconde. Un signal qui ne vient jamais n'est pas un signal.
 
 ---
 
