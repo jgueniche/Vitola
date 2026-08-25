@@ -48,11 +48,12 @@ dessous), et le travail de la session de reprise du 23 août au soir — arbitra
 `claude/vitola-reprise-92foh2`, poussée, en attente de PR ou fusionnée depuis. Vérifie l'état
 d'un coup d'œil plutôt que de le supposer, et `/api/health` sert le commit réellement déployé.
 
-Le code du dépôt et l'état de la base concordent : **vingt et une migrations**, toutes dans
+Le code du dépôt et l'état de la base concordent : **vingt-deux migrations**, toutes dans
 `supabase/migrations/` **et** appliquées sur le projet — la 0019 (le `status` de `ref.lines`)
 sous `20260823210941`, la 0020 (l'administration) sous `20260825104447`, la 0021 (le catalogue)
-sous `20260825140004`. `lib/supabase/database.types.ts` les porte, schéma `shop` compris, et le
-contrôle de dérive passe (97 objets, étendu aux quatre schémas).
+sous `20260825140004`, la 0022 (la marketplace) sous `20260825151134`.
+`lib/supabase/database.types.ts` les porte, schéma `shop` compris, et le contrôle de dérive
+passe (99 objets, étendu aux quatre schémas).
 
 Et cette concordance n'est plus une promesse : `tooling/scripts/check-types-drift.ts` compare, à
 chaque CI, l'inventaire des objets exposés à `lib/supabase/database.types.ts`, **dans les deux
@@ -215,7 +216,7 @@ si elle est entrée ; si oui, repars de `master`, sinon la branche assignée por
 
 ## LA BASE, EN ENTIER — NE LA REQUÊTE PAS, ELLE EST ICI
 
-Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Vingt et une
+Projet `vitola`, ref `upbewqsmgcrogoapubyz`, région `eu-west-3` (Paris). **Vingt-deux
 migrations** appliquées et enregistrées dans `supabase_migrations.schema_migrations` :
 
 | Version | Nom | Fichier |
