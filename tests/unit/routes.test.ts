@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { PUBLIC_PATHS, isApiPath, isPublicPath, routes, SEGMENTS } from '@/lib/routes'
+import { PUBLIC_PATHS, isApiPath, isPublicPath, routes, safeSuite, SEGMENTS } from '@/lib/routes'
 
 describe('routes', () => {
   it('builds French URL segments from English identifiers', () => {
@@ -80,6 +80,23 @@ describe('routes', () => {
     }
     // A prefix is not a substring: /boutiquex is not the shop.
     expect(isPublicPath('/boutiquex')).toBe(false)
+  })
+
+  /*
+   * The shop is public and reportable (migration 0024), and the notice route
+   * did not follow it in front of the gate: the mechanism asks for a session
+   * anyway, so exempting the route would have opened nothing a passer-by can
+   * use. What the shop needs is the way back — a shop address is a `suite`
+   * that both the gate and the sign-in page honour. See docs/decisions-log.md,
+   * « La boutique se signale, et la route ne bouge pas ».
+   */
+  it('keeps the notice route behind the gate although the shop is public', () => {
+    expect(isPublicPath('/api/signalements')).toBe(false)
+    expect(isApiPath('/api/signalements')).toBe(true)
+    expect(safeSuite(routes.shopProduct('coupe-guillotine'))).toBe('/boutique/coupe-guillotine')
+    expect(safeSuite(routes.shopVendor('comptoir-du-cedre'))).toBe(
+      '/boutique/vendeurs/comptoir-du-cedre',
+    )
   })
 
   it('treats every tobacco route as gated', () => {

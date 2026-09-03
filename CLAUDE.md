@@ -363,6 +363,17 @@ relecture dans `/admin/boutique` et `/admin/boutique/vendeurs`, les deux entrée
    prérequis consigné du premier euro reversé**. Les avis produits restent sans porte
    d'écriture (ADR 0015 D3, inchangée).
 
+**La boutique est signalable depuis le 3 septembre 2026** (migration `0024`, deux surfaces de plus
+dans le CHECK de `mod.reports` et rien d'autre) : « Signaler ce produit » sur la fiche, « Signaler
+cette boutique » sur la vitrine, `tobacco_promotion` proposé en premier — un accessoire dont la
+fiche vante la consommation est exactement le cas §2 —, et `/moderation` rend le dossier avec le
+titre, le vendeur, le lien et, pour un admin, le bras de l'acte. **Deux règles, consignées dans
+`docs/decisions-log.md`** : le mécanisme reste derrière une session (la décision se communique à
+qui signale, le frein et la déduplication sont clés sur lui) et la route reste derrière le
+portail — c'est le **bouton** qui fait le détour, 401 vers la connexion et 403 vers le portail,
+chacun avec le retour à la fiche. Aucun verbe de masquage sur un produit : l'acte est celui de
+l'admin, dépublier ou suspendre, sous les policies de la 0021 et de la 0022.
+
 **Le drapeau `shop_enabled` est né fermé dans la 0022, et la 0023 l'a ouvert le même jour** sur
 instruction du porteur : la boutique est publique (devant le portail — voir « Boutique publique
 et paiement de démonstration » ci-dessus), le tunnel d'achat de démonstration va du panier à la

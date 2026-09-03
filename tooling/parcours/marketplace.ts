@@ -15,14 +15,20 @@
  * et vitrine) SANS portail — la boutique est publique depuis le 25 août
  * 2026 —, le tunnel d'achat de démonstration de bout en bout (panier,
  * coordonnées refusées puis acceptées, carte refusée puis acceptée,
- * confirmation QA-), la suspension qui coupe tout, le retrait puis la
- * suppression par le vendeur.
+ * confirmation QA-), le signalement DSA de la fiche produit (migration 0024 :
+ * un passant lit le lien de connexion, un membre connecté DEPUIS la boutique
+ * bute sur le portail et y revient, le dossier arrive dans /moderation avec
+ * le titre, le vendeur, le lien et le bras de l'administration, sans verbe
+ * de masquage), la suspension qui coupe tout, le retrait puis la suppression
+ * par le vendeur.
  *
  * Il nettoie derrière lui : le produit part par l'espace vendeur (ligne et
  * image), la boutique jetable par l'écran des vendeurs, et le drapeau
  * REVIENT À OUVERT — c'est son état de repos depuis la 0023. Les bascules
- * restent dans audit_log — un journal ne se nettoie pas. Ce qui reste en
- * base : les vendeurs durables et le catalogue de QA.
+ * restent dans audit_log — un journal ne se nettoie pas, et le dossier de
+ * signalement tranché non plus : `mod.reports` n'a aucun DELETE client, par
+ * construction. Ce qui reste en base : les vendeurs durables, le catalogue
+ * de QA, et un dossier tranché de plus.
  */
 
 import { chromium, type Browser, type Page } from '@playwright/test'
@@ -36,6 +42,8 @@ const ADMIN = process.env.PARCOURS_ADMIN ?? 'jgueniche06@gmail.com'
 const PRODUCT = 'Hygromètre à cheveu Parcours'
 const BRAND = 'Les Fines Lames'
 const THROWAWAY = 'Éphémère Parcours'
+const STAMP = Date.now()
+const REPORT_DETAIL = `Signalement de produit parcours ${STAMP}`
 
 const PNG_1PX = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
@@ -65,7 +73,31 @@ async function settle(page: Page): Promise<void> {
 }
 
 async function text(page: Page): Promise<string> {
-  return (await page.locator('main').innerText().catch(() => '')) ?? ''
+  return (
+    (await page
+      .locator('main')
+      .innerText()
+      .catch(() => '')) ?? ''
+  )
+}
+
+/** Polls the main text for a sentence: a fetch answer lands after the click. */
+async function seen(page: Page, needle: string, timeoutMs = 15000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs
+  for (;;) {
+    if (contains(await text(page), needle)) return true
+    if (Date.now() > deadline) return false
+    await page.waitForTimeout(400)
+  }
+}
+
+/** Opens the report panel on the current page and sends the §2 reason. */
+async function reportProduct(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Signaler ce produit' }).click()
+  await page.waitForTimeout(400)
+  await page.locator('select[name="reason"]').selectOption('tobacco_promotion')
+  await page.locator('textarea[name="detail"]').fill(REPORT_DETAIL)
+  await page.getByRole('button', { name: 'Envoyer le signalement' }).click()
 }
 
 async function settled(page: Page, timeoutMs = 20000): Promise<{ ok: boolean; message: string }> {
@@ -104,7 +136,10 @@ async function passGate(page: Page): Promise<void> {
   await page.goto(`${BASE}/majorite`)
   await settle(page)
   await page.locator('input[name="birthDate"]').fill('1985-04-02')
-  await page.getByRole('button', { name: /entrer|valider|confirmer/i }).first().click()
+  await page
+    .getByRole('button', { name: /entrer|valider|confirmer/i })
+    .first()
+    .click()
   await settle(page)
 }
 
@@ -217,7 +252,9 @@ async function main(): Promise<void> {
     console.log('\n5. Un accessoire naît en brouillon, avec sa marque et son image')
     await vendor.goto(`${BASE}/vendeur`)
     await settle(vendor)
-    await productForm(vendor).locator('select[name="category"]').selectOption({ value: 'hygrometre' })
+    await productForm(vendor)
+      .locator('select[name="category"]')
+      .selectOption({ value: 'hygrometre' })
     await productForm(vendor).locator('input[name="title"]').fill(PRODUCT)
     await productForm(vendor).locator('input[name="brand"]').fill(BRAND)
     await productForm(vendor)
@@ -254,7 +291,10 @@ async function main(): Promise<void> {
     await admin
       .locator(`main li:has-text("${PRODUCT}") textarea[name="note"]`)
       .fill('Précisez le diamètre du cadran.')
-    await admin.locator(`main li:has-text("${PRODUCT}")`).getByRole('button', { name: 'Refuser' }).click()
+    await admin
+      .locator(`main li:has-text("${PRODUCT}")`)
+      .getByRole('button', { name: 'Refuser' })
+      .click()
     check('le refus confirme', await landed(admin, 'produit-refuse'), admin.url())
 
     console.log('\n8. Le vendeur lit le motif, corrige, re-soumet')
@@ -277,7 +317,10 @@ async function main(): Promise<void> {
     console.log('\n9. L’admin publie — et le drapeau fermé tient toujours la porte')
     await admin.goto(`${BASE}/admin/boutique`)
     await settle(admin)
-    await admin.locator(`main li:has-text("${PRODUCT}")`).getByRole('button', { name: 'Publier' }).click()
+    await admin
+      .locator(`main li:has-text("${PRODUCT}")`)
+      .getByRole('button', { name: 'Publier' })
+      .click()
     check('la publication confirme', await landed(admin, 'produit-publie'), admin.url())
     check(
       'produit publié, boutique toujours 404 : le drapeau décide',
@@ -324,7 +367,10 @@ async function main(): Promise<void> {
     check('la recherche replie les accents', contains(await text(visitor), PRODUCT))
     await visitor.goto(`${BASE}/boutique?categorie=coupe`)
     await settle(visitor)
-    check('une facette vide est un écran', contains(await text(visitor), 'Aucun produit ne correspond'))
+    check(
+      'une facette vide est un écran',
+      contains(await text(visitor), 'Aucun produit ne correspond'),
+    )
 
     console.log('\n12. La fiche produit : prix, liens, et le bouton d’achat')
     await visitor.goto(`${BASE}/boutique`)
@@ -390,12 +436,114 @@ async function main(): Promise<void> {
     await settle(passerby)
     check('payer a vidé le panier', contains(await text(passerby), 'Le panier est vide'))
 
+    console.log('\n12 ter. Le signalement DSA d’un produit — trois personnes, trois portes')
+    /* Le passant n'a pas de session : la phrase et le lien de connexion, avec
+       le chemin de retour, tiennent lieu de bouton. Le mécanisme demande une
+       session parce que la décision se communique à qui signale (ADR 0013). */
+    await passerby.goto(`${BASE}${href}`)
+    await settle(passerby)
+    check(
+      'un passant lit « connectez-vous pour le signaler »',
+      contains(await text(passerby), 'Connectez-vous pour le signaler'),
+    )
+    check(
+      'le lien de connexion porte le retour vers la fiche',
+      (await passerby
+        .locator(`main a[href="/connexion?suite=${encodeURIComponent(href ?? '')}"]`)
+        .count()) > 0,
+    )
+    check(
+      'et aucun bouton Signaler pour un passant',
+      (await passerby.getByRole('button', { name: 'Signaler ce produit' }).count()) === 0,
+    )
+
+    /* Le retardataire se connecte DEPUIS la boutique — /connexion est public,
+       la fiche aussi — donc il n'a jamais franchi le portail. La route répond
+       403, le dialogue tend le portail avec le retour, et le second envoi
+       passe. C'est la décision consignée : la route ne bouge pas, le bouton
+       fait le détour. */
+    const sheetPath = href ?? ''
+    const latecomer = await (await browser.newContext()).newPage()
+    await latecomer.goto(`${BASE}/connexion?suite=${encodeURIComponent(sheetPath)}`)
+    await settle(latecomer)
+    await latecomer.locator('input[name="email"]').fill(MEMBER)
+    await latecomer.locator('input[name="password"]').fill(PASSWORD)
+    await latecomer.getByRole('button', { name: 'Se connecter' }).click()
+    await latecomer.waitForURL(`**${sheetPath}`, { timeout: 15000 })
+    await settle(latecomer)
+    check(
+      'connecté depuis la boutique, sans détour par le portail',
+      !latecomer.url().includes('majorite'),
+    )
+    await reportProduct(latecomer)
+    check('la route refuse : le portail d’abord', await seen(latecomer, 'portail 18+'))
+    check(
+      'jamais « connectez-vous » à quelqu’un qui l’est déjà',
+      !contains(await text(latecomer), 'Connectez-vous pour signaler'),
+    )
+    await latecomer.getByRole('link', { name: 'Passer le portail' }).click()
+    await latecomer.waitForURL(/\/majorite\?suite=/, { timeout: 15000 })
+    await settle(latecomer)
+    await latecomer.locator('input[name="birthDate"]').fill('1985-04-02')
+    await latecomer
+      .getByRole('button', { name: /entrer|valider|confirmer/i })
+      .first()
+      .click()
+    await latecomer.waitForURL(`**${sheetPath}`, { timeout: 15000 })
+    await settle(latecomer)
+    check('le portail ramène sur la fiche', latecomer.url().endsWith(sheetPath), latecomer.url())
+    await reportProduct(latecomer)
+    check('le signalement est transmis', await seen(latecomer, 'Signalement transmis'))
+
+    /* L'admin relève la file — c'est le seul compte qui passe la garde
+       has_min_role('moderator'). Titre, vendeur, lien : le dossier se lit sans
+       ouvrir la boutique, et l'acte est tendu vers l'administration parce
+       qu'un produit n'a pas de colonnes de masquage (0024). */
+    await admin.goto(`${BASE}/moderation`)
+    await settle(admin)
+    const queueDesk = await text(admin)
+    check('la file porte le dossier', contains(queueDesk, REPORT_DETAIL))
+    check('nommé « Produit de la boutique »', contains(queueDesk, 'Produit de la boutique'))
+    check('avec le motif §2', contains(queueDesk, 'Incite à consommer du tabac'))
+    await admin
+      .locator(`main li:has-text("${REPORT_DETAIL}")`)
+      .getByRole('link', { name: 'Ouvrir le dossier' })
+      .click()
+    await admin.waitForURL(/\/moderation\/[0-9a-f-]+/, { timeout: 15000 })
+    await settle(admin)
+    const dossier = await text(admin)
+    check('le dossier cite le titre du produit', contains(dossier, PRODUCT))
+    check('et son vendeur', contains(dossier, 'Vendu par Comptoir du Cèdre'))
+    check(
+      '« Voir en situation » pointe sur la fiche',
+      (await admin.locator(`main a[href="${href}"]`).count()) > 0,
+    )
+    check(
+      'l’acte est tendu vers l’administration',
+      (await admin.locator('main a[href^="/admin/boutique?produit="]').count()) > 0,
+    )
+    check(
+      'aucun verbe de masquage sur un produit',
+      (await admin.getByRole('radio', { name: 'Masquer le contenu' }).count()) === 0,
+    )
+    await admin.getByRole('radio', { name: /Rejeté/ }).check()
+    await admin.locator('textarea[name="note"]').fill(`Fiche de QA, rien a reprocher ${STAMP}`)
+    await admin.getByRole('button', { name: 'Enregistrer la décision' }).click()
+    await admin.waitForURL('**/moderation?fait=dossier-tranche', { timeout: 15000 })
+    check('le dossier se tranche sans acte', await seen(admin, 'Dossier tranché'))
+
     console.log('\n13. La vitrine — la seconde entrée')
     await visitor.goto(`${BASE}/boutique/vendeurs/comptoir-du-cedre`)
     await settle(visitor)
     const front = await text(visitor)
     check('la vitrine porte le nom', contains(front, 'Comptoir du Cèdre'))
     check('et le produit', contains(front, PRODUCT))
+    await member.goto(`${BASE}/boutique/vendeurs/comptoir-du-cedre`)
+    await settle(member)
+    check(
+      'un membre y trouve « Signaler cette boutique »',
+      (await member.getByRole('button', { name: 'Signaler cette boutique' }).count()) > 0,
+    )
 
     console.log('\n14. Le hub Autour offre la carte, drapeau ouvert')
     await member.goto(`${BASE}/autour`)
@@ -408,7 +556,9 @@ async function main(): Promise<void> {
     const storefrontForm = vendor.locator('form:has(input[name="legalName"])')
     await storefrontForm.locator('input[name="legalName"]').fill('Comptoir du Cèdre SARL (QA)')
     await storefrontForm.locator('input[name="registration"]').fill('000000000')
-    await storefrontForm.locator('input[name="address"]').fill('1 rue du Parcours, 75000 Paris (QA)')
+    await storefrontForm
+      .locator('input[name="address"]')
+      .fill('1 rue du Parcours, 75000 Paris (QA)')
     await storefrontForm.locator('input[name="contactEmail"]').fill('vendeur@cigardeur.com')
     await storefrontForm.getByRole('button', { name: 'Enregistrer', exact: true }).click()
     const storefront = await settled(vendor)
@@ -426,7 +576,10 @@ async function main(): Promise<void> {
       .getByRole('button', { name: 'Suspendre' })
       .click()
     check('la suspension confirme', await landed(admin, 'vendeur-suspendu'), admin.url())
-    check('la vitrine répond 404', await is404(visitor, `${BASE}/boutique/vendeurs/comptoir-du-cedre`))
+    check(
+      'la vitrine répond 404',
+      await is404(visitor, `${BASE}/boutique/vendeurs/comptoir-du-cedre`),
+    )
     check('le produit publié aussi', await is404(visitor, `${BASE}${href}`))
     await visitor.goto(`${BASE}/boutique`)
     await settle(visitor)
@@ -441,7 +594,10 @@ async function main(): Promise<void> {
       .getByRole('button', { name: 'Réactiver' })
       .click()
     check('la réactivation confirme', await landed(admin, 'vendeur-active'), admin.url())
-    check('la vitrine revit', !(await is404(visitor, `${BASE}/boutique/vendeurs/comptoir-du-cedre`)))
+    check(
+      'la vitrine revit',
+      !(await is404(visitor, `${BASE}/boutique/vendeurs/comptoir-du-cedre`)),
+    )
 
     console.log('\n18. Une boutique jetable : créer, activer, supprimer vide')
     await admin.goto(`${BASE}/admin/boutique/vendeurs`)
@@ -475,7 +631,10 @@ async function main(): Promise<void> {
     await vendor.locator('main a', { hasText: 'Modifier' }).first().click()
     await vendor.waitForURL(/produit=/, { timeout: 15000 })
     await settle(vendor)
-    check('l’écran prévient : modifier, c’est retirer', contains(await text(vendor), 'retire de la vente'))
+    check(
+      'l’écran prévient : modifier, c’est retirer',
+      contains(await text(vendor), 'retire de la vente'),
+    )
     await vendor.getByRole('button', { name: 'Retirer de la vente' }).click()
     check('le retrait confirme', await landed(vendor, 'produit-retire'), vendor.url())
     await settle(vendor)
@@ -500,7 +659,12 @@ async function main(): Promise<void> {
   console.log(
     '\n→ La session rend la base comme elle l’a trouvée : le produit de parcours est parti, les vendeurs durables et le catalogue de QA restent, le drapeau est revenu à OUVERT (son état de repos depuis la 0023).',
   )
-  console.log('→ Les bascules de shop_enabled restent dans audit_log : un journal ne se nettoie pas.')
+  console.log(
+    '→ Les bascules de shop_enabled restent dans audit_log : un journal ne se nettoie pas.',
+  )
+  console.log(
+    '→ Le dossier de signalement tranché reste dans mod.reports : aucun DELETE client, par construction — retrait privilégié à faire en partant, et à compter.',
+  )
   process.exit(failures.length === 0 ? 0 : 1)
 }
 

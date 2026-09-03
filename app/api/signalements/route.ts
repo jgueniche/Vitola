@@ -55,6 +55,19 @@ const schema = z.object({
  * would be a write into the moderation queue from the open internet, with no
  * rate limiter (Upstash lands in P4) and no way to come back to the notifier
  * with a decision, which art. 16(5) requires.
+ *
+ * **The shop moved in front of the age gate on 25 août 2026, and this route
+ * did not follow it.** `/boutique` is public; `/api/signalements` stays behind
+ * the gate like every other `/api/` path, and behind a session like before.
+ * Moving the route in front of the gate would have bought nothing a passer-by
+ * can use — the 401 still stands, for the reasons above — at the price of the
+ * first `/api/` exception to a boundary `tests/unit/routes.test.ts` asserts
+ * exhaustively. What the shop needs is the way *back*: a member who signed in
+ * from a public page and never crossed the portal gets the middleware's 403
+ * here, and the dialog turns it into the portal with `suite` pointing at the
+ * product they were reporting. The decision and its reasons are recorded in
+ * `docs/decisions-log.md` (« La boutique se signale, et la route ne bouge
+ * pas »).
  */
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient()
@@ -236,6 +249,35 @@ async function isVisibleToCaller(kind: ReportableKind, id: string): Promise<bool
     case 'venueReview': {
       const supabase = await createSupabaseServerClient()
       const { data } = await supabase.from('venue_reviews').select('id').eq('id', id).maybeSingle()
+      return data !== null
+    }
+
+    /* The shop (ADR 0016, migration 0024): the two surfaces the public section
+       lists, read through the `shop` schema under the session. The policies
+       say it all — `products_select_published` wants a published row AND an
+       active vendor, `vendors_select_active` an active one — so a notice about
+       a retracted product or a suspended shopfront comes back 404, exactly as
+       one about a hidden comment does. A vendor reading their own draft can
+       report it; that is the RLS's answer, not a case for a branch here. */
+    case 'product': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase
+        .schema('shop')
+        .from('products')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle()
+      return data !== null
+    }
+
+    case 'vendor': {
+      const supabase = await createSupabaseServerClient()
+      const { data } = await supabase
+        .schema('shop')
+        .from('vendors')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle()
       return data !== null
     }
 

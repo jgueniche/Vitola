@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { moderationConfirmation } from '@/lib/moderation/confirmations'
-import { isHideable } from '@/lib/moderation/model'
+import { adminActFor, isHideable } from '@/lib/moderation/model'
 import { modReport, reportSlaHours, targetPreview } from '@/lib/moderation/queries'
 import { routes } from '@/lib/routes'
 import { getAccount } from '@/lib/settings/queries'
@@ -46,7 +46,8 @@ export default async function ModerationCasePage({ params, searchParams }: Props
   }
 
   const account = await getAccount(user.id)
-  if (!hasMinRole(account?.role ?? 'member', 'moderator')) {
+  const role = account?.role ?? 'member'
+  if (!hasMinRole(role, 'moderator')) {
     redirect(routes.moderation())
   }
 
@@ -64,6 +65,13 @@ export default async function ModerationCasePage({ params, searchParams }: Props
   const reasons = m.moderation.report.reasons as Record<string, string>
   const open = report.status === 'open' || report.status === 'reviewing'
   const hideable = isHideable(report.entity_schema, report.entity_table)
+  /* The shop surfaces have no verb on this desk (0024): the act is the
+     admin's, under the policies of /admin/boutique. Offered as a link only to
+     someone the policy will let through — a door drawn for a moderator who
+     cannot open it is the kind of control ADR 0014 refuses. */
+  const adminAct = hasMinRole(role, 'admin')
+    ? adminActFor(report.entity_schema, report.entity_table, report.entity_id)
+    : null
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -80,9 +88,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
             ? ` · ${copy.case.acknowledgedAt.replace('{date}', formatDateTime(new Date(report.acknowledged_at)))}`
             : null}
         </p>
-        <p className="text-ink-muted text-xs">
-          {copy.lede.replace('{hours}', String(slaHours))}
-        </p>
+        <p className="text-ink-muted text-xs">{copy.lede.replace('{hours}', String(slaHours))}</p>
       </div>
 
       {confirmation ? (
@@ -105,6 +111,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
         {target ? (
           <>
             {target.title ? <p className="text-ink text-sm font-medium">{target.title}</p> : null}
+            {target.byline ? <p className="text-ink-muted text-xs">{target.byline}</p> : null}
             {target.excerpt ? (
               <blockquote className="text-ink-muted measure border-rule border-l-2 pl-3 text-sm leading-relaxed">
                 {target.excerpt}
@@ -122,6 +129,13 @@ export default async function ModerationCasePage({ params, searchParams }: Props
         ) : (
           <p className="text-ink-muted text-sm">{copy.case.targetGone}</p>
         )}
+        {adminAct && open ? (
+          <p>
+            <Link href={adminAct.href} className="text-ink text-sm underline">
+              {adminAct.label}
+            </Link>
+          </p>
+        ) : null}
       </section>
 
       {open ? (

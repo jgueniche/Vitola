@@ -1,12 +1,12 @@
 import { DSA_SLA_HOURS } from '@/lib/compliance/dsa'
+import { m } from '@/lib/i18n'
 import type { ModScope } from '@/lib/moderation/model'
 import { MOD_LIMITS, reportAge } from '@/lib/moderation/model'
 import { routes } from '@/lib/routes'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/database.types'
 
-export type ModReportRow =
-  Database['public']['Functions']['mod_queue']['Returns'][number]
+export type ModReportRow = Database['public']['Functions']['mod_queue']['Returns'][number]
 
 /**
  * The announced processing deadline, in hours.
@@ -77,13 +77,15 @@ export async function modReport(id: string): Promise<ModReportRow | null> {
  * already carries decide what comes back; a row RLS withholds renders as
  * "introuvable ou retirée", which is itself information.
  *
- * One query per case screen, switching on the nine reportable surfaces. The
+ * One query per case screen, switching on the eleven reportable surfaces. The
  * `hidden` flag is only meaningful on the four hideable ones; elsewhere it
  * stays false.
  */
 export type TargetPreview = {
   /** A short line identifying the thing — a handle, a name, a title. */
   title: string | null
+  /** A second line under the title — who sells it, or the state it is in. */
+  byline: string | null
   /** The reported text itself, when the surface has one. */
   excerpt: string | null
   /** Where to see it in situ, when it has an address. */
@@ -116,6 +118,7 @@ export async function targetPreview(
       .maybeSingle()
     return {
       title: null,
+      byline: null,
       excerpt: data.body,
       href: cigar ? routes.cigar(cigar.slug) : null,
       hidden: data.hidden_at !== null,
@@ -129,7 +132,13 @@ export async function targetPreview(
       .eq('id', id)
       .maybeSingle()
     if (!data) return null
-    return { title: null, excerpt: data.body, href: routes.post(id), hidden: data.hidden_at !== null }
+    return {
+      title: null,
+      byline: null,
+      excerpt: data.body,
+      href: routes.post(id),
+      hidden: data.hidden_at !== null,
+    }
   }
 
   if (surface === 'public.post_comments') {
@@ -141,6 +150,7 @@ export async function targetPreview(
     if (!data) return null
     return {
       title: null,
+      byline: null,
       excerpt: data.body,
       href: routes.post(data.post_id),
       hidden: data.hidden_at !== null,
@@ -161,6 +171,7 @@ export async function targetPreview(
       .maybeSingle()
     return {
       title: venue?.name ?? null,
+      byline: null,
       excerpt: data.body,
       href: venue ? routes.venue(venue.slug) : null,
       hidden: data.hidden_at !== null,
@@ -182,6 +193,7 @@ export async function targetPreview(
       .maybeSingle()
     return {
       title: cigar?.commercial_name ?? null,
+      byline: null,
       excerpt: data.body,
       href: routes.notebookEntry(id),
       hidden: false,
@@ -197,6 +209,7 @@ export async function targetPreview(
     if (!data) return null
     return {
       title: data.display_name ?? data.handle,
+      byline: null,
       excerpt: data.bio,
       href: routes.member(data.handle),
       hidden: false,
@@ -206,7 +219,7 @@ export async function targetPreview(
   if (surface === 'public.messages') {
     const { data } = await supabase.from('messages').select('body').eq('id', id).maybeSingle()
     if (!data) return null
-    return { title: null, excerpt: data.body, href: null, hidden: false }
+    return { title: null, byline: null, excerpt: data.body, href: null, hidden: false }
   }
 
   if (surface === 'public.venues') {
@@ -218,6 +231,7 @@ export async function targetPreview(
     if (!data) return null
     return {
       title: `${data.name} — ${data.city}`,
+      byline: null,
       excerpt: null,
       href: routes.venue(data.slug),
       hidden: false,
@@ -234,8 +248,61 @@ export async function targetPreview(
     if (!data) return null
     return {
       title: data.commercial_name,
+      byline: null,
       excerpt: null,
       href: routes.cigar(data.slug),
+      hidden: false,
+    }
+  }
+
+  /* The shop (migration 0024), read through the `shop` schema under the
+     caller's rights like everything above. `products_select_published` wants
+     a published row AND an active vendor, `vendors_select_active` an active
+     one, and only `has_min_role('admin')` reads past that — so a moderator
+     who is not an admin sees a retracted product or a suspended shopfront as
+     « introuvable ou retirée », which says the act already happened, and is
+     the right thing to read. The vendor comes back on the same query: the
+     embed follows `products_vendor_id_fkey` inside one schema, which
+     PostgREST does join. */
+  if (surface === 'shop.products') {
+    const { data } = await supabase
+      .schema('shop')
+      .from('products')
+      .select('title, description, slug, status, vendor:vendors(name)')
+      .eq('id', id)
+      .maybeSingle()
+    if (!data) return null
+    const vendor = data.vendor as { name: string } | null
+    const parts = [
+      vendor ? m.moderation.desk.case.targetSoldBy.replace('{vendor}', vendor.name) : null,
+      data.status === 'published' ? null : m.moderation.desk.case.targetOffSale,
+    ].filter((part): part is string => part !== null)
+    return {
+      title: data.title,
+      byline: parts.length > 0 ? parts.join(' · ') : null,
+      excerpt: data.description,
+      href: routes.shopProduct(data.slug),
+      hidden: false,
+    }
+  }
+
+  if (surface === 'shop.vendors') {
+    const { data } = await supabase
+      .schema('shop')
+      .from('vendors')
+      .select('name, description, slug, status')
+      .eq('id', id)
+      .maybeSingle()
+    if (!data) return null
+    const statuses: Record<string, string> = {
+      pending: m.admin.vendors.statusPending,
+      suspended: m.admin.vendors.statusSuspended,
+    }
+    return {
+      title: data.name,
+      byline: data.status === 'active' ? null : (statuses[data.status] ?? data.status),
+      excerpt: data.description,
+      href: routes.shopVendor(data.slug),
       hidden: false,
     }
   }
@@ -256,9 +323,7 @@ export async function reportSlaHours(): Promise<number> {
 
     const payload = data.payload as { hours?: unknown } | null
     const hours = payload?.hours
-    return typeof hours === 'number' && Number.isFinite(hours) && hours > 0
-      ? hours
-      : DSA_SLA_HOURS
+    return typeof hours === 'number' && Number.isFinite(hours) && hours > 0 ? hours : DSA_SLA_HOURS
   } catch {
     return DSA_SLA_HOURS
   }

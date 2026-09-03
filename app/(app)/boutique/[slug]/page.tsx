@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { ReportDialog } from '@/components/moderation/report-dialog'
 import { Button } from '@/components/ui/button'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
+import { reportSlaHours } from '@/lib/moderation/queries'
 import { routes } from '@/lib/routes'
 import { MAX_LINE_QTY } from '@/lib/shop/cart'
 import { formatPrice } from '@/lib/shop/model'
 import { getShopProductBySlug, signShopImages } from '@/lib/shop/queries'
+import { currentUser } from '@/lib/supabase/server'
 
 import { addToCartAction } from '../actions'
 
@@ -30,6 +33,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * URL. It only renders while there is stock — a button toward a refusal is a
  * promise the shelf cannot keep. The vendor and the brand are both links —
  * the two entries of the marketplace, on every sheet.
+ *
+ * « Signaler ce produit » is the DSA art. 16 mechanism on the one section
+ * that lists third-party content in front of the age gate (migration 0024).
+ * A member gets the dialog; a visitor gets the sentence and the sign-in link
+ * with the way back here — the mechanism asks for a session, because the
+ * decision is communicated to whoever notified (docs/decisions-log.md).
  */
 export default async function ShopProductPage({ params }: Props) {
   if (!(await isFeatureEnabled('shop_enabled'))) notFound()
@@ -38,8 +47,13 @@ export default async function ShopProductPage({ params }: Props) {
   const product = await getShopProductBySlug(slug)
   if (!product) notFound()
 
-  const images = await signShopImages([product.image_path])
+  const [images, user, slaHours] = await Promise.all([
+    signShopImages([product.image_path]),
+    currentUser(),
+    reportSlaHours(),
+  ])
   const imageUrl = product.image_path ? images.get(product.image_path) : undefined
+  const here = routes.shopProduct(product.slug)
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
@@ -129,6 +143,26 @@ export default async function ShopProductPage({ params }: Props) {
               ))}
             </div>
           ) : null}
+
+          <div className="mt-2">
+            {user ? (
+              <ReportDialog
+                kind="product"
+                id={product.id}
+                slaHours={slaHours}
+                label={m.moderation.report.triggerProduct}
+              />
+            ) : (
+              <p className="text-ink-muted text-sm">
+                <Link
+                  href={`${routes.signIn()}?suite=${encodeURIComponent(here)}`}
+                  className="text-accent hover:underline"
+                >
+                  {copy.reportProductSignedOut}
+                </Link>
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

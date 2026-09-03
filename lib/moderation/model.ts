@@ -1,3 +1,6 @@
+import { m } from '@/lib/i18n'
+import { routes } from '@/lib/routes'
+
 /**
  * The moderation vocabulary, in one place (ADR 0013).
  *
@@ -40,6 +43,37 @@ export const HIDEABLE_SURFACES = [
 
 export function isHideable(schema: string, table: string): boolean {
   return (HIDEABLE_SURFACES as readonly string[]).includes(`${schema}.${table}`)
+}
+
+/**
+ * Where the act lives for the two shop surfaces the desk cannot hide
+ * (migration 0024).
+ *
+ * A product or a shopfront carries no `hidden_*` columns, so `mod_decide()`
+ * refuses `hide` there — a verb without an arm (ADR 0013, D4). The arm exists
+ * elsewhere and belongs to the admin: unpublish the product from
+ * `/admin/boutique`, suspend the vendor from `/admin/boutique/vendeurs`, each
+ * under its own policy of 0021 and 0022 (ADR 0014: no door when a policy
+ * suffices). The desk links there for an admin; for a moderator who is not
+ * one, the sentence under the verbs is the honest answer, and the decision
+ * still gets recorded with its reasons.
+ */
+export function adminActFor(
+  schema: string,
+  table: string,
+  id: string,
+): { href: string; label: string } | null {
+  const surface = `${schema}.${table}`
+  if (surface === 'shop.products') {
+    return {
+      href: `${routes.adminShop()}?produit=${encodeURIComponent(id)}`,
+      label: m.moderation.desk.case.actAdminProduct,
+    }
+  }
+  if (surface === 'shop.vendors') {
+    return { href: routes.adminShopVendors(), label: m.moderation.desk.case.actAdminVendor }
+  }
+  return null
 }
 
 /** Bounds duplicated from the CHECKs of migration 0004, because `23514` is not

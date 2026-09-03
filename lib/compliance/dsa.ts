@@ -87,6 +87,18 @@ export const REPORTABLE = {
      guardrail — a review inciting consumption is `tobacco_promotion`. */
   venue: { schema: 'public', table: 'venues' },
   venueReview: { schema: 'public', table: 'venue_reviews' },
+  /* The shop (ADR 0016), public since 25 août 2026 — the one section that
+     lists third-party content IN FRONT of the age gate. A product sheet is a
+     vendor's text about an accessory, readable by anyone; the case §2 watches
+     for is the accessory whose sheet praises the consumption it serves, which
+     is why `tobacco_promotion` is offered here like everywhere else, and
+     first. A shopfront is the vendor's own presentation, and the DSA art. 30
+     traceability behind it is what a notice about it questions. Neither
+     surface carries `hidden_*` columns: the act on an upheld notice is the
+     admin's — unpublish the product, suspend the vendor — under the policies
+     of 0021 and 0022, never a moderation verb (migration 0024). */
+  product: { schema: 'shop', table: 'products' },
+  vendor: { schema: 'shop', table: 'vendors' },
 } as const
 
 export type ReportableKind = keyof typeof REPORTABLE

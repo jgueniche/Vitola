@@ -3,12 +3,7 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  DSA_SLA_HOURS,
-  REPORTABLE,
-  REPORT_REASONS,
-  type ReportReason,
-} from '@/lib/compliance/dsa'
+import { DSA_SLA_HOURS, REPORTABLE, REPORT_REASONS, type ReportReason } from '@/lib/compliance/dsa'
 
 /**
  * The reporting mechanism, checked against the SQL that defines it.
@@ -117,6 +112,48 @@ describe('the surfaces that can be reported', () => {
   })
 })
 
+describe('the shop surfaces (migration 0024)', () => {
+  /*
+   * The shop is the one section that lists third-party content in front of
+   * the age gate, and until 0024 it was the one section nothing could report:
+   * the CHECK bounded the queue to nine surfaces and `REPORTABLE` mirrored it
+   * faithfully. The two assertions above already pin the pair in both
+   * directions; what is pinned here is that the pair names the two tables the
+   * public shop actually renders — and nothing the shop cannot render yet.
+   */
+  it('names the two tables the public shop renders', () => {
+    expect(REPORTABLE.product).toEqual({ schema: 'shop', table: 'products' })
+    expect(REPORTABLE.vendor).toEqual({ schema: 'shop', table: 'vendors' })
+  })
+
+  it('keeps product reviews out until they have a write path (ADR 0015, D3)', () => {
+    // No client can write a review before the checkout decides « achat
+    // vérifié », so there is no row to report. A surface in the queue with
+    // nothing behind it would be the map's own rule broken the other way.
+    const block = lastCheck('reports_entity_known') ?? ''
+    expect(block).not.toContain('shop.product_reviews')
+    expect(Object.values(REPORTABLE).map(({ table }) => table)).not.toContain('product_reviews')
+  })
+
+  it('offers the §2 reason on a product, and first', () => {
+    // One list for every surface: the dialog renders REPORT_REASONS whatever
+    // the kind, and an accessory whose sheet praises the consumption it
+    // serves is the exact §2 case. The rendered <select> is checked in
+    // tests/unit/report-dialog.test.tsx; the order is checked here.
+    expect(REPORT_REASONS[0]).toBe('tobacco_promotion')
+  })
+
+  it('has a desk label for every reportable surface, shop included', async () => {
+    // The queue falls back to the raw table name when a label is missing —
+    // legible to a developer, not to the person relieving the queue.
+    const fr = (await import('@/messages/fr.json')).default
+    const surfaces = fr.moderation.desk.surfaces as Record<string, string>
+    for (const { schema, table } of Object.values(REPORTABLE)) {
+      expect(surfaces[`${schema}.${table}`], `no desk label for ${schema}.${table}`).toBeTruthy()
+    }
+  })
+})
+
 describe('the door onto the mod schema', () => {
   /*
    * The whole point of migration 0006 is that it opens one function and not a
@@ -127,9 +164,13 @@ describe('the door onto the mod schema', () => {
    */
   it('is granted to the service role and revoked from everyone else', () => {
     for (const fn of ['file_report', 'moderation_records_for_subject']) {
-      expect(M0006).toMatch(new RegExp(`revoke execute on function public\\.${fn}[\\s\\S]{0,120}from public`))
       expect(M0006).toMatch(
-        new RegExp(`revoke execute on function public\\.${fn}[\\s\\S]{0,120}from anon, authenticated`),
+        new RegExp(`revoke execute on function public\\.${fn}[\\s\\S]{0,120}from public`),
+      )
+      expect(M0006).toMatch(
+        new RegExp(
+          `revoke execute on function public\\.${fn}[\\s\\S]{0,120}from anon, authenticated`,
+        ),
       )
       expect(M0006).toMatch(
         new RegExp(`grant execute on function public\\.${fn}[\\s\\S]{0,120}to service_role`),
