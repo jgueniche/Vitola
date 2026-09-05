@@ -502,6 +502,15 @@ pnpm storybook      # galerie des primitives
   commentaires ordinaires, `isShopTextAllowed()` en refuse quatre. Le critère d'un commentaire est
   l'incitation, pas le vocabulaire — voir `docs/editorial-guidelines.md`, § « Contenu versé par des
   tiers ».
+- **Un parcours qui lève une exception saute son propre nettoyage.** `marketplace.ts` rejoué le
+  5 septembre 2026 : un sélecteur a expiré à l'étape 12 ter, le `catch` global a sauté les
+  treize étapes suivantes, le produit de parcours est resté **publié sur la boutique publique**,
+  et l'épilogue affirmait que la base était rendue propre. Une étape s'isole (`step()`), le
+  nettoyage vit dans un `finally` et se rejoue à l'ouverture, et l'épilogue dit ce que le
+  nettoyage a trouvé — jamais ce qu'il aurait dû trouver. La même session a montré qu'une
+  assertion « vide » vieillit avec le catalogue : « la catégorie `coupe` est vide » était vraie
+  le 25 août et fausse dès que le catalogue de QA a eu des coupe-cigares. Une vacuité se
+  construit (un texte introuvable), elle ne se suppose pas.
 
 ## Style
 
