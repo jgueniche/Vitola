@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Marcellus&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+/* ==================================================================
+   VITOLA — refonte des pages cigare
+   Tokens lifted verbatim from app/globals.css (§4.2 à §4.5 du brief).
+   Dark is the brand ground, so every artboard paints #161210.
+   ================================================================== */
+body { margin: 0; background: #161210; color: #ede6d8; font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 20px; font-feature-settings: 'tnum' 1, 'cv05' 1; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+a { color: #d9bc72; text-decoration: none; }
+a:hover { color: #c9a227; }
+* { box-sizing: border-box; }
+
+.page {
+  --oscuro: #161210; --maduro: #221b17; --raised: #2c231d;
+  --ink: #ede6d8; --muted: #9c948a; --faint: #a47c5a;
+  --accent: #c9a227; --accent-bright: #d9bc72; --on-accent: #161210;
+  --rule: rgb(237 230 216 / 0.07); --rule-strong: rgb(237 230 216 / 0.16);
+  --positive: #6d8d5f; --caution: #b8863b; --negative: #ca675b;
+  --shade-1: #e0c48f; --shade-2: #c9975a; --shade-3: #ac6a3c; --shade-4: #8d4e2c; --shade-5: #6f3a24; --shade-6: #55291b;
+  --brass: linear-gradient(90deg, transparent 0%, rgb(122 92 67 / 0.35) 8%, #c9a227 34%, #d9bc72 50%, #c9a227 66%, rgb(122 92 67 / 0.35) 92%, transparent 100%);
+  background: var(--oscuro); color: var(--ink);
+}
+
+/* --- Type roles, §4.3 -------------------------------------------- */
+.display { font-family: 'Bodoni Moda', 'Didot', 'Times New Roman', serif; letter-spacing: -0.02em; font-weight: 400; }
+.eyebrow { font-family: 'Marcellus', 'Optima', 'Palatino', serif; font-size: 12px; line-height: 16px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace; }
+.muted { color: var(--muted); }
+.faint { color: var(--faint); }
+.accent { color: var(--accent); }
+.xs { font-size: 12px; line-height: 16px; }
+.sm { font-size: 14px; line-height: 20px; }
+.base { font-size: 16px; line-height: 24px; }
+.relaxed { line-height: 1.625; }
+.measure { max-width: 68ch; }
+
+/* --- The band, §4.4 ------------------------------------------------ */
+.brass-rule { height: 1px; width: 100%; background-image: var(--brass); }
+.band { position: relative; width: 100%; }
+.band-lockup { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 16px; text-align: center; }
+.band-lockup .dot { color: var(--accent); font-size: 12px; }
+
+/* --- Primitives, as implemented in components/ui ------------------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 3px; font-weight: 500; font-size: 14px; line-height: 20px; border: 1px solid transparent; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-secondary { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-sm { height: 32px; padding: 0 12px; }
+.btn-md { height: 40px; padding: 0 16px; }
+.btn-lg { height: 48px; padding: 0 24px; font-size: 16px; }
+.input { height: 40px; width: 100%; border: 1px solid var(--rule-strong); background: var(--maduro); color: var(--ink); border-radius: 3px; padding: 0 12px; font-size: 14px; display: flex; align-items: center; }
+.input .ph { color: var(--muted); }
+.textarea { min-height: 96px; width: 100%; border: 1px solid var(--rule-strong); background: var(--maduro); color: var(--muted); border-radius: 3px; padding: 8px 12px; font-size: 14px; line-height: 1.625; }
+.card { border: 1px solid var(--rule); background: var(--maduro); border-radius: 3px; }
+.chip { display: inline-flex; align-items: center; white-space: nowrap; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 12px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.chip-on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.badge { display: inline-flex; align-items: center; border: 1px solid var(--rule-strong); border-radius: 3px; padding: 2px 8px; }
+.hr { height: 1px; width: 100%; background: var(--rule); }
+
+/* --- Data components, as implemented in components/data ----------- */
+.meter { display: flex; align-items: flex-end; gap: 2px; }
+.meter i { display: block; width: 6px; border-radius: 1px; background: var(--rule-strong); }
+.meter i.on { background: var(--accent); }
+.scale { display: flex; align-items: center; gap: 4px; }
+.scale i { display: block; width: 10px; height: 10px; border-radius: 999px; box-shadow: 0 0 0 1px var(--rule-strong); background: transparent; }
+
+/* --- Chrome: health notice + header, as implemented ---------------- */
+.health { border-bottom: 1px solid var(--rule); background: var(--maduro); color: var(--muted); padding: 8px 16px; text-align: center; font-size: 12px; line-height: 1.625; }
+.header { border-bottom: 1px solid var(--rule); }
+.header-in { max-width: 1152px; margin: 0 auto; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.nav { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--muted); }
+.nav a { color: var(--muted); }
+.nav .sep { border-left: 1px solid var(--rule); padding-left: 20px; margin-left: 4px; }
+.nav .pill { border: 1px solid var(--accent); color: var(--accent); border-radius: 3px; padding: 2px 8px; }
+.nav .count { border: 1px solid var(--accent); color: var(--accent); border-radius: 3px; padding: 0 6px; font-size: 12px; margin-left: 6px; }
+
+/* --- Audit callouts ----------------------------------------------- */
+.callout { position: absolute; width: 24px; height: 24px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #161210; }
+
+/* --- Low-fi sketch vocabulary ------------------------------------- */
+.wf { border: 1px dashed var(--rule-strong); border-radius: 3px; color: var(--muted); font-size: 12px; line-height: 16px; padding: 8px 10px; }
+.wf-solid { border: 1px solid var(--rule-strong); border-radius: 3px; background: var(--maduro); font-size: 12px; line-height: 16px; padding: 8px 10px; color: var(--ink); }
+.wf-accent { border: 1px solid var(--accent); border-radius: 3px; background: var(--accent); color: var(--on-accent); font-size: 12px; line-height: 16px; padding: 8px 10px; font-weight: 500; text-align: center; }
+.wf-title { font-family: 'Bodoni Moda', serif; font-size: 32px; line-height: 36px; letter-spacing: -0.02em; }
+.wf-lines { display: flex; flex-direction: column; gap: 6px; }
+.wf-lines i { display: block; height: 6px; border-radius: 3px; background: var(--rule-strong); }
+
+  </style>
+</helmet>
+<div class="page" style="width: 1100px; min-height: 1180px; display: flex; flex-direction: column;">
+  <div class="health">Fumer nuit gravement à votre santé et à celle de votre entourage.</div>
+  <div class="header">
+    <div class="header-in" style="max-width: 1100px; gap: 32px;">
+      <span class="display" style="font-size: 24px; line-height: 1;">Vitola</span>
+      <div class="input" style="max-width: 320px; flex: 1; gap: 10px; height: 36px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9c948a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span class="ph">Marque, nom commercial, vitole…</span></div>
+      <div class="nav"><a>Boutique</a><a>Cigares</a><a>Découvrir</a><a style="color: #ede6d8;">Chez moi</a><a>Le cercle</a><a>Autour</a><span class="sep"><a>Paramètres</a></span></div>
+    </div>
+  </div>
+
+  <div style="width: 880px; margin: 0 auto; padding: 40px 16px 80px; display: flex; flex-direction: column; gap: 32px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="eyebrow">Chez moi · Carnet</span>
+      <h1 class="display" style="margin: 0; font-size: 48px; line-height: 52px;">Mon carnet</h1>
+      <span class="muted sm relaxed measure">Ce que vous avez fumé, quand, et ce que vous en avez pensé. Chaque entrée choisit qui peut la lire.</span>
+    </div>
+
+    <!-- one toolbar, on two hairlined rows -->
+    <div style="display: flex; flex-direction: column; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0;">
+        <div style="display: flex; gap: 4px;"><span class="chip chip-on" style="padding: 4px 10px;">Toutes</span><span class="chip" style="padding: 4px 10px;">Notes de carnet</span><span class="chip" style="padding: 4px 10px;">Dégustations</span></div>
+        <div class="xs muted" style="display: flex; gap: 8px; align-items: center;"><span>12 entrées</span><span class="faint">·</span><span>sur 100</span><a style="color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">sur 20</a></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 0 0 12px;"><span class="eyebrow">Portée</span><div style="display: flex; gap: 4px;"><span class="chip chip-on" style="padding: 4px 10px;">Toutes</span><span class="chip" style="padding: 4px 10px;">Moi seul</span><span class="chip" style="padding: 4px 10px;">Des personnes</span><span class="chip" style="padding: 4px 10px;">Mes abonnés</span><span class="chip" style="padding: 4px 10px;">Tout le monde</span></div></div>
+    </div>
+
+    <!-- grouped by month, rows with the score in the margin -->
+    <div style="display: flex; flex-direction: column; gap: 28px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <span class="eyebrow" style="color: #c9a227;">Septembre 2026</span>
+        <div style="display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); align-items: start;">
+          <div style="display: flex; flex-direction: column;"><span class="mono" style="font-size: 24px; line-height: 28px;">86</span><span class="faint mono xs">/100</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <a style="color: #ede6d8; font-size: 16px; line-height: 20px;"><span class="muted">Hoyo de Monterrey</span> Epicure No. 2</a>
+            <div class="xs faint" style="display: flex; gap: 10px; align-items: center;"><span>Fumé le 4 septembre</span><span class="eyebrow" style="font-size: 11px; color: #a47c5a;">Note de carnet</span><span class="badge eyebrow" style="border-color: var(--accent); color: var(--accent); font-size: 11px;">Tout le monde</span></div>
+            <p class="sm relaxed muted" style="margin: 0; max-width: 60ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Retrouvé le miel du premier tiers ; la boîte a encore gagné. Meilleur qu'en mai.</p>
+          </div>
+          <a class="xs" style="justify-self: end; color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Ouvrir</a>
+        </div>
+        <div style="display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); align-items: start;">
+          <div style="display: flex; flex-direction: column;"><span class="mono" style="font-size: 24px; line-height: 28px;">91</span><span class="faint mono xs">/100</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <a style="color: #ede6d8; font-size: 16px; line-height: 20px;"><span class="muted">Trinidad</span> Reyes</a>
+            <div class="xs faint" style="display: flex; gap: 10px; align-items: center;"><span>Fumé le 1<sup>er</sup> septembre</span><span class="eyebrow" style="font-size: 11px; color: #a47c5a;">Dégustation</span><span class="badge eyebrow" style="border-color: var(--rule); color: #a47c5a; font-size: 11px;">Moi seul</span><span>Dégusté à l'aveugle</span></div>
+            <div style="display: flex; gap: 16px; max-width: 480px;"><span style="display: flex; flex-direction: column; gap: 4px; flex: 1;"><span class="faint xs">Construction</span><span style="height: 3px; background: var(--raised);"><span style="display: block; height: 3px; width: 90%; background: var(--faint);"></span></span></span><span style="display: flex; flex-direction: column; gap: 4px; flex: 1;"><span class="faint xs">Tirage</span><span style="height: 3px; background: var(--raised);"><span style="display: block; height: 3px; width: 95%; background: var(--faint);"></span></span></span><span style="display: flex; flex-direction: column; gap: 4px; flex: 1;"><span class="faint xs">Combustion</span><span style="height: 3px; background: var(--raised);"><span style="display: block; height: 3px; width: 85%; background: var(--faint);"></span></span></span><span style="display: flex; flex-direction: column; gap: 4px; flex: 1;"><span class="faint xs">Arômes</span><span style="height: 3px; background: var(--raised);"><span style="display: block; height: 3px; width: 95%; background: var(--faint);"></span></span></span><span style="display: flex; flex-direction: column; gap: 4px; flex: 1;"><span class="faint xs">Évolution</span><span style="height: 3px; background: var(--raised);"><span style="display: block; height: 3px; width: 90%; background: var(--faint);"></span></span></span><span style="display: flex; flex-direction: column; gap: 4px; flex: 1;"><span class="faint xs">Finale</span><span style="height: 3px; background: var(--raised);"><span style="display: block; height: 3px; width: 90%; background: var(--faint);"></span></span></span></div>
+          </div>
+          <a class="xs" style="justify-self: end; color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Ouvrir</a>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <span class="eyebrow" style="color: #c9a227;">Mai 2026</span>
+        <div style="display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); align-items: start;">
+          <div style="display: flex; flex-direction: column;"><span class="mono" style="font-size: 24px; line-height: 28px;">84</span><span class="faint mono xs">/100</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <a style="color: #ede6d8; font-size: 16px; line-height: 20px;"><span class="muted">Hoyo de Monterrey</span> Epicure No. 2</a>
+            <div class="xs faint" style="display: flex; gap: 10px; align-items: center;"><span>Fumé le 3 mai</span><span class="eyebrow" style="font-size: 11px; color: #a47c5a;">Note de carnet</span><span class="badge eyebrow" style="border-color: var(--rule); color: #a47c5a; font-size: 11px;">Moi seul</span><span>Sortie de la cave</span></div>
+            <p class="sm relaxed muted" style="margin: 0; max-width: 60ch;">Tirage un peu serré au premier tiers, puis très rond. Cèdre, miel, une pointe de poivre blanc en finale.</p>
+          </div>
+          <a class="xs" style="justify-self: end; color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Ouvrir</a>
+        </div>
+        <div style="display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); align-items: start;">
+          <div><span class="faint sm">Sans note</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <a style="color: #ede6d8; font-size: 16px; line-height: 20px;"><span class="muted">Quai d'Orsay</span> Coronas Claro</a>
+            <div class="xs faint" style="display: flex; gap: 10px; align-items: center;"><span>Fumé le 1<sup>er</sup> mai</span><span class="eyebrow" style="font-size: 11px; color: #a47c5a;">Note de carnet</span><span class="badge eyebrow" style="border-color: var(--caution); color: var(--caution); font-size: 11px;">Mes abonnés</span></div>
+            <p class="sm relaxed muted" style="margin: 0; max-width: 60ch;">Apéritif. Léger, propre, un peu court.</p>
+          </div>
+          <a class="xs" style="justify-self: end; color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Ouvrir</a>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <span class="eyebrow" style="color: #c9a227;">Janvier 2026</span>
+        <div style="display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--rule); align-items: start;">
+          <div style="display: flex; flex-direction: column;"><span class="mono" style="font-size: 24px; line-height: 28px;">88</span><span class="faint mono xs">/100</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <a style="color: #ede6d8; font-size: 16px; line-height: 20px;"><span class="muted">Hoyo de Monterrey</span> Epicure No. 2</a>
+            <div class="xs faint" style="display: flex; gap: 10px; align-items: center;"><span>Fumé le 12 janvier</span><span class="eyebrow" style="font-size: 11px; color: #a47c5a;">Dégustation</span><span class="badge eyebrow" style="border-color: var(--rule); color: #a47c5a; font-size: 11px;">Moi seul</span></div>
+          </div>
+          <a class="xs" style="justify-self: end; color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Ouvrir</a>
+        </div>
+      </div>
+      <a class="sm" style="color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Les 7 entrées plus anciennes</a>
+    </div>
+
+    <!-- shared with me stays a second section: it is not mine to edit -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="band"><div class="brass-rule"></div><div class="band-lockup" style="padding: 10px 16px;"><span class="eyebrow">Partagées avec moi</span></div><div class="brass-rule"></div></div>
+      <span class="muted sm relaxed measure">Les entrées que d'autres membres vous ont nommément ouvertes. Vous les lisez ; vous ne les modifiez ni ne les repartagez.</span>
+      <div style="display: grid; grid-template-columns: 72px 1fr 120px; gap: 16px; padding: 16px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); align-items: start;">
+        <div style="display: flex; flex-direction: column;"><span class="mono" style="font-size: 24px; line-height: 28px;">79</span><span class="faint mono xs">/100</span></div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <a style="color: #ede6d8; font-size: 16px; line-height: 20px;"><span class="muted">Romeo y Julieta</span> Churchill</a>
+          <div class="xs faint" style="display: flex; gap: 10px; align-items: center;"><span>Par Marc L.</span><span>Fumé le 28 août</span><span class="eyebrow" style="font-size: 11px; color: #a47c5a;">Note de carnet</span></div>
+          <p class="sm relaxed muted" style="margin: 0; max-width: 60ch;">Un peu sec, je crois que ma boîte a souffert. À revoir avec la tienne.</p>
+        </div>
+        <a class="xs" style="justify-self: end; color: #9c948a; text-decoration: underline; text-underline-offset: 4px;">Ouvrir</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+</body>
+</html>

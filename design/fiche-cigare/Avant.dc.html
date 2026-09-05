@@ -1,0 +1,321 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Marcellus&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+/* ==================================================================
+   VITOLA — refonte des pages cigare
+   Tokens lifted verbatim from app/globals.css (§4.2 à §4.5 du brief).
+   Dark is the brand ground, so every artboard paints #161210.
+   ================================================================== */
+body { margin: 0; background: #161210; color: #ede6d8; font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 20px; font-feature-settings: 'tnum' 1, 'cv05' 1; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+a { color: #d9bc72; text-decoration: none; }
+a:hover { color: #c9a227; }
+* { box-sizing: border-box; }
+
+.page {
+  --oscuro: #161210; --maduro: #221b17; --raised: #2c231d;
+  --ink: #ede6d8; --muted: #9c948a; --faint: #a47c5a;
+  --accent: #c9a227; --accent-bright: #d9bc72; --on-accent: #161210;
+  --rule: rgb(237 230 216 / 0.07); --rule-strong: rgb(237 230 216 / 0.16);
+  --positive: #6d8d5f; --caution: #b8863b; --negative: #ca675b;
+  --shade-1: #e0c48f; --shade-2: #c9975a; --shade-3: #ac6a3c; --shade-4: #8d4e2c; --shade-5: #6f3a24; --shade-6: #55291b;
+  --brass: linear-gradient(90deg, transparent 0%, rgb(122 92 67 / 0.35) 8%, #c9a227 34%, #d9bc72 50%, #c9a227 66%, rgb(122 92 67 / 0.35) 92%, transparent 100%);
+  background: var(--oscuro); color: var(--ink);
+}
+
+/* --- Type roles, §4.3 -------------------------------------------- */
+.display { font-family: 'Bodoni Moda', 'Didot', 'Times New Roman', serif; letter-spacing: -0.02em; font-weight: 400; }
+.eyebrow { font-family: 'Marcellus', 'Optima', 'Palatino', serif; font-size: 12px; line-height: 16px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace; }
+.muted { color: var(--muted); }
+.faint { color: var(--faint); }
+.accent { color: var(--accent); }
+.xs { font-size: 12px; line-height: 16px; }
+.sm { font-size: 14px; line-height: 20px; }
+.base { font-size: 16px; line-height: 24px; }
+.relaxed { line-height: 1.625; }
+.measure { max-width: 68ch; }
+
+/* --- The band, §4.4 ------------------------------------------------ */
+.brass-rule { height: 1px; width: 100%; background-image: var(--brass); }
+.band { position: relative; width: 100%; }
+.band-lockup { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 16px; text-align: center; }
+.band-lockup .dot { color: var(--accent); font-size: 12px; }
+
+/* --- Primitives, as implemented in components/ui ------------------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 3px; font-weight: 500; font-size: 14px; line-height: 20px; border: 1px solid transparent; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-secondary { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-sm { height: 32px; padding: 0 12px; }
+.btn-md { height: 40px; padding: 0 16px; }
+.btn-lg { height: 48px; padding: 0 24px; font-size: 16px; }
+.input { height: 40px; width: 100%; border: 1px solid var(--rule-strong); background: var(--maduro); color: var(--ink); border-radius: 3px; padding: 0 12px; font-size: 14px; display: flex; align-items: center; }
+.input .ph { color: var(--muted); }
+.textarea { min-height: 96px; width: 100%; border: 1px solid var(--rule-strong); background: var(--maduro); color: var(--muted); border-radius: 3px; padding: 8px 12px; font-size: 14px; line-height: 1.625; }
+.card { border: 1px solid var(--rule); background: var(--maduro); border-radius: 3px; }
+.chip { display: inline-flex; align-items: center; white-space: nowrap; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 12px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.chip-on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.badge { display: inline-flex; align-items: center; border: 1px solid var(--rule-strong); border-radius: 3px; padding: 2px 8px; }
+.hr { height: 1px; width: 100%; background: var(--rule); }
+
+/* --- Data components, as implemented in components/data ----------- */
+.meter { display: flex; align-items: flex-end; gap: 2px; }
+.meter i { display: block; width: 6px; border-radius: 1px; background: var(--rule-strong); }
+.meter i.on { background: var(--accent); }
+.scale { display: flex; align-items: center; gap: 4px; }
+.scale i { display: block; width: 10px; height: 10px; border-radius: 999px; box-shadow: 0 0 0 1px var(--rule-strong); background: transparent; }
+
+/* --- Chrome: health notice + header, as implemented ---------------- */
+.health { border-bottom: 1px solid var(--rule); background: var(--maduro); color: var(--muted); padding: 8px 16px; text-align: center; font-size: 12px; line-height: 1.625; }
+.header { border-bottom: 1px solid var(--rule); }
+.header-in { max-width: 1152px; margin: 0 auto; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.nav { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--muted); }
+.nav a { color: var(--muted); }
+.nav .sep { border-left: 1px solid var(--rule); padding-left: 20px; margin-left: 4px; }
+.nav .pill { border: 1px solid var(--accent); color: var(--accent); border-radius: 3px; padding: 2px 8px; }
+.nav .count { border: 1px solid var(--accent); color: var(--accent); border-radius: 3px; padding: 0 6px; font-size: 12px; margin-left: 6px; }
+
+/* --- Audit callouts ----------------------------------------------- */
+.callout { position: absolute; width: 24px; height: 24px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 3px #161210; }
+
+/* --- Low-fi sketch vocabulary ------------------------------------- */
+.wf { border: 1px dashed var(--rule-strong); border-radius: 3px; color: var(--muted); font-size: 12px; line-height: 16px; padding: 8px 10px; }
+.wf-solid { border: 1px solid var(--rule-strong); border-radius: 3px; background: var(--maduro); font-size: 12px; line-height: 16px; padding: 8px 10px; color: var(--ink); }
+.wf-accent { border: 1px solid var(--accent); border-radius: 3px; background: var(--accent); color: var(--on-accent); font-size: 12px; line-height: 16px; padding: 8px 10px; font-weight: 500; text-align: center; }
+.wf-title { font-family: 'Bodoni Moda', serif; font-size: 32px; line-height: 36px; letter-spacing: -0.02em; }
+.wf-lines { display: flex; flex-direction: column; gap: 6px; }
+.wf-lines i { display: block; height: 6px; border-radius: 3px; background: var(--rule-strong); }
+
+  </style>
+</helmet>
+<div class="page" style="width: 1240px; min-height: 3560px; display: flex; gap: 48px; padding: 0 0 64px 0;">
+
+  <!-- ============ The page as it is today, drawn from the code ============ -->
+  <div style="width: 792px; flex-shrink: 0; display: flex; flex-direction: column;">
+    <div class="health">Fumer nuit gravement à votre santé et à celle de votre entourage.</div>
+    <div class="header">
+      <div class="header-in" style="max-width: 792px; padding: 16px 16px 16px 56px;">
+        <span class="display" style="font-size: 24px; line-height: 1;">Vitola</span>
+        <div class="nav" style="gap: 14px; font-size: 13px;">
+          <a>Boutique</a><a>Découvrir</a><a>Chez moi</a><a>Le cercle</a><a>Autour</a><a>Notifications</a><a>Paramètres</a><span class="sep"><a>Se déconnecter</a></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 32px; padding: 48px 16px 0 56px; position: relative;">
+
+      <!-- identity -->
+      <div style="position: relative; display: flex; flex-direction: column; gap: 8px;">
+        <span class="callout" style="left: -40px; top: 8px;">1</span>
+        <span class="eyebrow">Hoyo de Monterrey</span>
+        <h1 class="display" style="margin: 0; font-size: 36px; line-height: 40px;">Epicure No. 2</h1>
+      </div>
+
+      <div class="brass-rule"></div>
+
+      <!-- meters, unlabeled -->
+      <div style="position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 40px; row-gap: 16px;">
+        <span class="callout" style="left: -40px; top: 0;">2</span>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span class="mono sm" style="letter-spacing: 0.025em;">50 × 124 mm</span>
+          <span style="display: flex; height: 12px; align-items: center;"><span style="display: block; width: 53px; height: 10px; border-radius: 999px; background: #a47c5a;"></span></span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="meter"><i class="on" style="height: 6px"></i><i class="on" style="height: 8px"></i><i style="height: 10px"></i><i style="height: 12px"></i><i style="height: 14px"></i></span>
+          <span class="muted sm">Léger à moyen</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="scale"><i style="background: var(--shade-1)"></i><i style="background: var(--shade-2)"></i><i></i><i></i><i></i><i></i></span>
+          <span class="muted sm">Colorado claro</span>
+        </div>
+      </div>
+
+      <!-- the dl -->
+      <div style="position: relative; display: flex; flex-direction: column;">
+        <span class="callout" style="left: -40px; top: 12px;">3</span>
+        <div style="display: flex; gap: 24px; padding: 12px 0; border-bottom: 1px solid var(--rule);"><span class="muted sm" style="width: 192px; flex-shrink: 0;">Vitole</span><span class="sm"><u style="text-underline-offset: 4px;">Robusto</u><span class="muted"> · Robustos · Parejo</span></span></div>
+        <div style="display: flex; gap: 24px; padding: 12px 0; border-bottom: 1px solid var(--rule);"><span class="muted sm" style="width: 192px; flex-shrink: 0;">Origine</span><span class="sm">Cuba</span></div>
+        <div style="display: flex; gap: 24px; padding: 12px 0; border-bottom: 1px solid var(--rule);"><span class="muted sm" style="width: 192px; flex-shrink: 0;">Année de sortie</span><span class="sm">1960</span></div>
+        <div style="display: flex; gap: 24px; padding: 12px 0;"><span class="muted sm" style="width: 192px; flex-shrink: 0;">Prix homologué</span><span class="sm"><span class="mono">22,00 €</span><span class="faint xs" style="display: block; margin-top: 4px;">Prix de vente au détail homologué, applicable au 1<sup>er</sup> septembre 2026. Source : arrêté publié au Journal officiel. À titre informatif.</span></span></div>
+      </div>
+
+      <!-- wiki doors -->
+      <div style="position: relative; display: flex; gap: 12px;">
+        <span class="callout" style="left: -40px; top: 4px;">4</span>
+        <span class="btn btn-secondary btn-sm">Proposer une correction</span>
+        <span class="btn btn-ghost btn-sm">Historique</span>
+      </div>
+
+      <!-- cave -->
+      <div style="position: relative; display: flex; flex-direction: column; gap: 24px;">
+        <span class="callout" style="left: -40px; top: 40px;">5</span>
+        <div class="brass-rule"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <h2 class="display" style="margin: 0; font-size: 24px; line-height: 32px;">Dans votre cave</h2>
+          <span class="muted sm">Vous en avez 3 en cave.</span>
+        </div>
+        <p class="muted sm relaxed measure" style="margin: 0;">Le stock baisse et l'entrée de carnet s'écrit dans le même mouvement. Vous pouvez ne rien noter : l'événement suffit à dire que vous l'avez fumé.</p>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;"><span class="eyebrow">Quantité</span><span class="input">1</span></div>
+            <div style="display: flex; flex-direction: column; gap: 6px;"><span class="eyebrow">Fumé le</span><span class="input">05/09/2026</span></div>
+            <div style="display: flex; flex-direction: column; gap: 6px;"><span class="eyebrow">Note sur 100</span><span class="input"><span class="ph"></span></span></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;"><span class="eyebrow">Un mot ?</span><span class="textarea">Facultatif. Sans note ni mot, rien n'entre au carnet.</span></div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <span class="eyebrow" style="margin-bottom: 4px;">Qui peut lire cette entrée</span>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="card" style="border-color: var(--accent); background: var(--raised); display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 4px solid var(--accent); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Moi seul</span><span class="muted xs relaxed">Personne d'autre ne la voit. C'est le réglage par défaut.</span></span></div>
+              <div class="card" style="display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Des personnes que je nomme</span><span class="muted xs relaxed">Vous choisissez les membres, un par un. Eux ne peuvent pas la repartager.</span></span></div>
+              <div class="card" style="display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Mes abonnés</span><span class="muted xs relaxed">L'audience est vivante : elle grandit après votre choix.</span></span></div>
+              <div class="card" style="display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Tout le monde</span><span class="muted xs relaxed">Visible sur la fiche du cigare, y compris d'un visiteur non connecté.</span></span></div>
+            </div>
+            <span class="faint xs">Le choix se fait entrée par entrée, et se change à tout moment.</span>
+          </div>
+          <div><span class="btn btn-primary btn-md">J'en fume un</span></div>
+        </div>
+      </div>
+
+      <!-- notebook -->
+      <div style="position: relative; display: flex; flex-direction: column; gap: 32px;">
+        <div class="brass-rule"></div>
+        <div style="position: relative; display: flex; flex-direction: column; gap: 16px;">
+          <span class="callout" style="left: -40px; top: 48px;">6</span>
+          <h2 class="display" style="margin: 0; font-size: 24px; line-height: 32px;">Notes des membres</h2>
+          <div class="card" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 24px; text-align: center;">
+            <span class="eyebrow">Aucune note publique</span>
+            <span class="muted sm relaxed measure">Personne n'a encore publié de note sur ce cigare. La vôtre serait la première — et elle ne compte que si vous la rendez publique.</span>
+          </div>
+        </div>
+        <div style="position: relative; display: flex; flex-direction: column; gap: 16px;">
+          <span class="callout" style="left: -40px; top: 60px;">7</span>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <h2 class="display" style="margin: 0; font-size: 24px; line-height: 32px;">Entrées de carnet</h2>
+            <span class="muted sm">Les entrées publiques, et les vôtres.</span>
+          </div>
+          <div class="card" style="display: flex; flex-direction: column; gap: 12px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;">
+              <div class="faint xs" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;"><span class="eyebrow" style="color: var(--faint);">Note de carnet</span><span>Fumé le 3 mai 2026</span><span class="accent">Votre entrée</span></div>
+              <span class="mono" style="display: inline-flex; align-items: baseline; gap: 4px;"><span class="base">84</span><span class="faint xs">/100</span></span>
+            </div>
+            <p class="sm relaxed measure" style="margin: 0;">Tirage un peu serré au premier tiers, puis très rond. Cèdre, miel, une pointe de poivre blanc en finale.</p>
+            <span class="muted xs" style="text-decoration: underline; text-underline-offset: 4px;">Ouvrir l'entrée</span>
+          </div>
+        </div>
+        <div class="card" style="position: relative; display: flex; flex-direction: column; gap: 20px; padding: 20px;">
+          <span class="callout" style="left: -40px; top: 20px;">5</span>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="display" style="font-size: 20px; line-height: 28px;">Noter ce cigare</span>
+            <span class="muted sm relaxed measure">Une note, un mot, ou les deux. C'est le geste quotidien du carnet ; la dégustation en trois tiers est ailleurs.</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;"><span class="eyebrow">Fumé le</span><span class="input">05/09/2026</span><span class="faint xs">Le jour où vous l'avez fumé, qui n'est pas forcément aujourd'hui.</span></div>
+            <div style="display: flex; flex-direction: column; gap: 8px;"><span class="eyebrow">Note sur 100</span><span class="input"><span class="ph">0 à 100</span></span><span class="faint xs">Facultative si vous écrivez quelque chose.</span></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;"><span class="eyebrow">Ce que vous en retenez</span><span class="textarea"></span><span class="faint xs">4 000 caractères au plus. Facultatif si vous mettez une note.</span></div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <span class="eyebrow" style="margin-bottom: 4px;">Qui peut lire cette entrée</span>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="card" style="border-color: var(--accent); background: var(--raised); display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 4px solid var(--accent); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Moi seul</span><span class="muted xs relaxed">Personne d'autre ne la voit. C'est le réglage par défaut.</span></span></div>
+              <div class="card" style="display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Des personnes que je nomme</span><span class="muted xs relaxed">Vous choisissez les membres, un par un. Eux ne peuvent pas la repartager.</span></span></div>
+              <div class="card" style="display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Mes abonnés</span><span class="muted xs relaxed">L'audience est vivante : elle grandit après votre choix.</span></span></div>
+              <div class="card" style="display: flex; gap: 12px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted); margin-top: 4px; flex-shrink: 0;"></span><span style="display: flex; flex-direction: column; gap: 2px;"><span class="sm">Tout le monde</span><span class="muted xs relaxed">Visible sur la fiche du cigare, y compris d'un visiteur non connecté.</span></span></div>
+            </div>
+            <span class="faint xs">Le choix se fait entrée par entrée, et se change à tout moment.</span>
+          </div>
+          <div style="position: relative; display: flex; align-items: center; gap: 16px;">
+            <span class="callout" style="left: -60px; top: 4px;">11</span>
+            <span class="btn btn-primary btn-sm">Enregistrer dans mon carnet</span>
+            <span class="muted sm" style="text-decoration: underline; text-underline-offset: 4px;">Faire une dégustation complète</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- feed -->
+      <div style="position: relative; display: flex; flex-direction: column; gap: 24px;">
+        <span class="callout" style="left: -40px; top: 40px;">5</span>
+        <div class="brass-rule"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <h2 class="display" style="margin: 0; font-size: 24px; line-height: 32px;">Dire que vous le fumez</h2>
+          <span class="muted sm relaxed measure">Une publication au fil, à propos de ce cigare. Ce n'est pas une note : le carnet est en dessous, et il est privé par défaut.</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;"><span class="eyebrow">Votre publication</span><span class="textarea">Facultatif — le moment, l'accord, ce que vous en attendez.</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px;"><span class="eyebrow">Où ça</span><span class="input">— sans lieu —</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <span class="eyebrow" style="margin-bottom: 4px;">Qui peut lire</span>
+            <div style="display: flex; gap: 24px;" class="sm"><span style="display: inline-flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 4px solid var(--accent);"></span>Mes abonnés</span><span style="display: inline-flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--muted);"></span>Tout le monde</span></div>
+          </div>
+          <div><span class="btn btn-primary btn-sm">Publier au fil</span></div>
+        </div>
+      </div>
+
+      <!-- comments -->
+      <div style="position: relative; display: flex; flex-direction: column; gap: 24px;">
+        <span class="callout" style="left: -40px; top: 40px;">8</span>
+        <div class="brass-rule"></div>
+        <h2 class="display" style="margin: 0; font-size: 24px; line-height: 32px;">Commentaires</h2>
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 24px; text-align: center;">
+          <span class="eyebrow">Personne n'a encore écrit ici</span>
+          <span class="muted sm relaxed measure">Dites ce que vous savez de ce cigare : sa construction, sa fumée, ou ce que cette fiche indique et qui ne correspond pas.</span>
+        </div>
+        <span class="faint xs relaxed measure">Un commentaire informe ; il ne vante pas. Ce qui incite à consommer est retiré.</span>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <span class="eyebrow">Votre commentaire</span>
+          <span class="textarea"></span>
+          <span class="faint xs">2 000 caractères au plus. Ce que vous écrivez est visible de tous.</span>
+          <div><span class="btn btn-primary btn-sm">Publier</span></div>
+        </div>
+        <div style="border-top: 1px solid var(--rule); padding-top: 16px;"><span class="muted sm" style="text-decoration: underline; text-underline-offset: 4px;">Signaler cette fiche</span></div>
+      </div>
+
+      <div style="border-top: 1px solid var(--rule); margin-top: 32px; padding: 32px 0 0; display: flex; flex-direction: column; gap: 16px;">
+        <div class="nav" style="gap: 16px;"><a>Mentions légales</a><a>Confidentialité</a><a>Conditions</a><a>Cookies</a><a>Santé</a></div>
+        <span class="muted xs">Vitola est un site d'information. Aucun produit du tabac n'y est vendu.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ The findings ============ -->
+  <div style="width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; padding-top: 48px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="eyebrow">Audit · fiche cigare telle qu'elle est rendue</span>
+      <span class="display" style="font-size: 32px; line-height: 36px;">Douze constats, lus dans le code</span>
+      <span class="muted sm relaxed">Reproduction de <span class="mono xs">app/(app)/cigares/[slug]</span> pour un membre qui a ce cigare en cave. Le membre est connecté ; un visiteur voit la même page avec trois invitations à se connecter à la place des formulaires.</span>
+    </div>
+    <div class="brass-rule"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">1</span><span class="sm relaxed"><span style="font-weight: 600;">Un seul couloir de 768 px, sept blocs de même poids.</span> <span class="muted">Ce que le site sait, ce que vous faites et ce que disent les membres s'empilent sans distinction, séparés par cinq fois la même bague. Rien ne dit où l'on est, et l'élément signature devient un trait.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">2</span><span class="sm relaxed"><span style="font-weight: 600;">Les jauges parlent sans étiquette.</span> <span class="muted">« 50 × 124 mm », cinq barres, six points — ni « Cepo », ni « Force », ni « Cape ». La silhouette se dessine dans la largeur de son propre libellé, soit ≈ 100 px : elle ne montre rien.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">3</span><span class="sm relaxed"><span style="font-weight: 600;">Le référentiel est un trou pour 862 fiches sur 940.</span> <span class="muted">Mesuré en base : 78 fiches publiées ont une vitole, 123 une force. Pour toutes les autres, la page s'ouvre sur « Vitole non renseignée » et un prix, puis passe aux formulaires.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">4</span><span class="sm relaxed"><span style="font-weight: 600;">Le geste le plus rare a la meilleure place.</span> <span class="muted">« Proposer une correction » et « Historique » sont les premiers boutons de la page ; « Noter ce cigare » arrive au cinquième écran, après les notes et les entrées des autres.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">5</span><span class="sm relaxed"><span style="font-weight: 600;">Trois formulaires pour un seul geste.</span> <span class="muted">« J'en fume un » (cave), « Noter ce cigare » (carnet) et « Dire que vous le fumez » (fil) demandent chacun une date, une note, un mot et une portée. Le sélecteur de portée est déployé deux fois — ≈ 300 px chacun — plus un troisième groupe de radios. Le journal des décisions le note déjà comme un piège de parcours.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">6</span><span class="sm relaxed"><span style="font-weight: 600;">L'état vide des notes est une boîte de 150 px</span> <span class="muted">au milieu de la page — et c'est l'état de 937 fiches sur 940 : trois entrées en base.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">7</span><span class="sm relaxed"><span style="font-weight: 600;">Tout est la même boîte.</span> <span class="muted">Entrée de carnet, commentaire, formulaire, état vide, carte de hub : filet, surface, 3 px, 16 px de marge. Une entrée de deux mots a la carte d'une dégustation de 4 000 signes ; note et dégustation ne diffèrent que par un surtitre de 12 px. La note est reléguée en haut à droite en petit.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">8</span><span class="sm relaxed"><span style="font-weight: 600;">Deux listes de « ce qu'on en dit » sans explication.</span> <span class="muted">Les entrées de carnet (impressions) et les commentaires (la fiche elle-même, ADR 0005) se suivent sans que la page dise pourquoi il y en a deux, ni où écrire quoi.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">9</span><span class="sm relaxed"><span style="font-weight: 600;">Le visiteur reçoit trois invitations à se connecter,</span> <span class="muted">identiques, aux places des trois formulaires.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">10</span><span class="sm relaxed"><span style="font-weight: 600;">La police display descend sous son plancher.</span> <span class="muted">Le brief impose Bodoni ≥ 32 px et <span class="mono xs">globals.css</span> l'encode ; la couche utilitaire de Tailwind gagne, et <span class="mono xs">font-display text-2xl</span> rend à 24 px. 91 occurrences à 18, 20 ou 24 px dans <span class="mono xs">app/</span> et <span class="mono xs">components/</span> — tous les h2 de cette page en font partie.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">11</span><span class="sm relaxed"><span style="font-weight: 600;">Les boutons qui comptent font 32 px.</span> <span class="muted">« Enregistrer dans mon carnet », « Publier au fil », « Publier » sont en taille <span class="mono xs">sm</span> — sous la cible tactile de 44 px, et plus petits que les boutons wiki au-dessus.</span></span></div>
+      <div style="display: flex; gap: 12px;"><span class="callout" style="position: static; flex-shrink: 0;">12</span><span class="sm relaxed"><span style="font-weight: 600;">Trouver une fiche coûte quatre clics depuis n'importe où.</span> <span class="muted">Découvrir → Les cigares → chercher → fiche. Aucune recherche dans l'en-tête, aucune entrée directe « Cigares » : le parcours le plus fréquent du site est le plus lent. (Hors planche : c'est l'en-tête.)</span></span></div>
+    </div>
+
+    <div class="brass-rule" style="margin-top: 8px;"></div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="eyebrow">Ce qui tient, et qu'on garde</span>
+      <span class="muted sm relaxed">La charte : fond oscuro, laiton, Bodoni / Marcellus / Inter / JetBrains, 3 px, filets sans ombre. Les règles de fond : l'état d'interface dans l'URL, zéro JavaScript hors des formulaires, la RLS qui décide seule de la portée, la note pondérée lue depuis la vue et jamais recalculée. Les propositions redistribuent, elles ne réinventent rien.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+</body>
+</html>

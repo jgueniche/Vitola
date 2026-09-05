@@ -1,0 +1,74 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "1 · L'audit" },
+    { "id": "page-2", "name": "2 · La fiche — direction A" },
+    { "id": "page-3", "name": "3 · Trois directions" },
+    { "id": "page-4", "name": "4 · Parcours, carnet, liste, système" }
+  ],
+  "artboards": [
+    { "file": "Avant.dc.html", "page": "page-1", "x": 0, "y": 0, "w": 1240, "h": 4140, "title": "Avant — la fiche telle que le code la rend, et douze constats", "expand": "fill", "print": "flow" },
+
+    { "file": "Main.dc.html", "page": "page-2", "x": 0, "y": 0, "w": 1440, "h": 2000, "title": "Fiche cigare — 1440 · direction A, le rail", "expand": "fill", "print": "flow", "is_interactive": true },
+    { "file": "Mobile.dc.html", "page": "page-2", "x": 1520, "y": 0, "w": 390, "h": 2760, "title": "Fiche cigare — 390", "expand": "fill", "print": "flow" },
+
+    { "file": "DirectionA.dc.html", "page": "page-3", "x": 0, "y": 0, "w": 520, "h": 980, "title": "A · Le rail — retenue" },
+    { "file": "DirectionB.dc.html", "page": "page-3", "x": 600, "y": 0, "w": 520, "h": 980, "title": "B · Les onglets" },
+    { "file": "DirectionC.dc.html", "page": "page-3", "x": 1200, "y": 0, "w": 520, "h": 980, "title": "C · Le carnet d'abord" },
+
+    { "file": "Parcours.dc.html", "page": "page-4", "x": 0, "y": 0, "w": 1240, "h": 1000, "title": "Parcours — quatre gestes, avant et après" },
+    { "file": "Carnet.dc.html", "page": "page-4", "x": 1320, "y": 0, "w": 1100, "h": 1500, "title": "Mon carnet — 1100", "expand": "fill", "print": "flow" },
+    { "file": "Liste.dc.html", "page": "page-4", "x": 0, "y": 1620, "w": 1240, "h": 1250, "title": "Les cigares — la liste en bagues", "expand": "fill", "print": "flow" },
+    { "file": "Composants.dc.html", "page": "page-4", "x": 1320, "y": 1620, "w": 1240, "h": 2350, "title": "Système — les encarts, à leur mesure", "expand": "fill", "print": "flow" }
+  ],
+  "annotations": [
+    {
+      "id": "lecture",
+      "page": "page-1",
+      "x": -400,
+      "y": 0,
+      "w": 340,
+      "text": "Comment lire ce canevas\n\n1 · L'audit (cette page) : la fiche cigare telle que le code la rend aujourd'hui, avec douze constats numérotés.\n\n2 · La fiche : la direction retenue, en 1440 et en 390. Un réglage « visiteur » en haut de la planche bascule le rail entre membre et visiteur.\n\n3 · Trois directions : les plans comparés, chacun avec son pour et son contre.\n\n4 · Parcours, carnet, liste, système : ce que la refonte change ailleurs, et les sept règles de taille.\n\nLes données de fiche sont réelles (Hoyo de Monterrey · Epicure No. 2, référentiel). Les entrées, commentaires et membres sont des exemples."
+    },
+    {
+      "id": "mesures",
+      "page": "page-1",
+      "x": -400,
+      "y": 560,
+      "w": 340,
+      "text": "Trois mesures qui décident\n\n· 940 fiches publiées, 78 avec une vitole, 123 avec une force : pour 92 % des fiches, le haut de la page est vide.\n\n· 3 entrées de carnet et 1 commentaire en base : l'état vide des notes est ce que voit presque tout le monde.\n\n· 91 usages de Bodoni sous 32 px : le plancher du brief est encodé dans globals.css mais perdu dans la cascade."
+    },
+    {
+      "id": "geste",
+      "page": "page-2",
+      "x": -400,
+      "y": 0,
+      "w": 340,
+      "text": "Le geste unique\n\n« J'en fume un » remplace les trois formulaires de la fiche. Il s'ouvre par ?geste=fumer — l'état d'interface vit dans l'URL, règle de app/CLAUDE.md — et n'invente rien en base :\n\n· l'entrée et le décompte du lot passent par smoke_from_lot(), une transaction (ADR 0006) ;\n· « Le dire au fil » crée la publication qui pointe l'entrée (ADR 0007), d'où la case grisée tant que la portée est « moi seul » ou « des personnes » ;\n· sans note ni mot, seul le décompte s'écrit, comme aujourd'hui depuis la cave."
+    },
+    {
+      "id": "invariants",
+      "page": "page-2",
+      "x": -400,
+      "y": 520,
+      "w": 340,
+      "text": "Ce qui ne bouge pas\n\nLa RLS décide seule de ce qui se lit ; la note pondérée vient de la vue cigar_stats et n'est jamais recalculée ; la portée est par entrée ; « mes abonnés » garde son avertissement au moment du choix ; la fiche reste une Server Component sans JavaScript hors des formulaires.\n\nLe rail lit deux choses que la page lit déjà : les lots du cigare et les entrées du membre."
+    },
+    {
+      "id": "choix",
+      "page": "page-3",
+      "x": -400,
+      "y": 0,
+      "w": 340,
+      "text": "Pourquoi A\n\nB cache la note derrière un clic, et un visiteur vient d'abord pour elle. C replie le référentiel — la promesse du §1 — et le dit faible.\n\nA borne chaque zone : un trou s'y voit, et la lacune devient la porte du wiki. C'est aussi la seule des trois qui garde le geste sous la main pendant qu'on lit les autres.\n\nB redevient intéressante le jour où la fiche gagne un onglet « accessoires » avec la commercialisation."
+    },
+    {
+      "id": "chantier",
+      "page": "page-4",
+      "x": -400,
+      "y": 0,
+      "w": 340,
+      "text": "Ordre de chantier proposé\n\n1 · le plancher du display (une ligne de CSS) et les boutons 48 / 40 ;\n2 · la bande de spécifications, lacunes comprises ;\n3 · le rail et le geste unique ;\n4 · les entrées en lignes et la carte des notes ;\n5 · la recherche dans l'en-tête et « Cigares » en entrée directe ;\n6 · le carnet groupé par mois ;\n7 · la liste en bagues.\n\nChacun tient dans une PR, pnpm check vert, sans migration."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}
