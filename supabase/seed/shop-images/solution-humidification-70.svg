@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Solution d'humidification 70 % — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g fill="none" stroke="#181513" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="555" y="150" width="90" height="70" rx="8" fill="#181513"/>
+    <path d="M 540 220 L 660 220 L 660 300 Q 720 330 720 400 L 720 690 Q 720 720 690 720 L 510 720 Q 480 720 480 690 L 480 400 Q 480 330 540 300 Z" fill="#ede6d8"/>
+    <rect x="495" y="420" width="210" height="220" rx="6" fill="#f3eee4"/>
+    <path d="M 500 700 Q 600 640 700 700" stroke="#7a5c43" stroke-width="3"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" text-anchor="middle">
+    <text x="600" y="510" font-size="64" font-weight="bold">70 %</text>
+    <text x="600" y="552" font-size="24" fill="#9c948a">humidité relative</text>
+    <text x="600" y="605" font-size="20">glycol · eau distillée</text>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="760" y1="220" x2="760" y2="720"/><line x1="745" y1="220" x2="775" y2="220"/><line x1="745" y1="720" x2="775" y2="720"/>
+    <line x1="480" y1="690" x2="380" y2="690"/><circle cx="480" cy="690" r="5" fill="#9c948a"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28">
+    <text x="780" y="478">100 ml</text>
+    <text x="370" y="698" text-anchor="end" fill="#9c948a" font-size="22">niveau à mi-hauteur</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Solution d'humidification — 70 % HR · 100 ml · pour humidificateur à mousse ou à billes</text>
+</svg>

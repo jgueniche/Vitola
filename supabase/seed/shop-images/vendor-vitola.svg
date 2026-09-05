@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Logo de démonstration — la boutique de la maison</title>
+  <rect width="512" height="512" fill="#f3eee4"/>
+  <circle cx="256" cy="256" r="220" fill="#ede6d8" stroke="#181513" stroke-width="6"/>
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#c9a227" stroke-width="3"/>
+  <path d="M 150 170 L 256 380 L 362 170" fill="none" stroke="#181513" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M 196 170 L 256 300 L 316 170" fill="none" stroke="#8c4f2e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="256" cy="420" r="8" fill="#c9a227"/>
+</svg>

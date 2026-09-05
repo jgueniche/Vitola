@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Kit d'entretien, brosse et chiffon — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g fill="none" stroke="#181513" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 220 300 L 560 300 L 580 340 L 560 380 L 220 380 Q 190 340 220 300 Z" fill="#7a5c43"/>
+    <rect x="580" y="290" width="240" height="100" rx="12" fill="#ede6d8"/>
+    <g stroke="#9c948a" stroke-width="3">
+      <line x1="600" y1="390" x2="596" y2="470"/><line x1="630" y1="390" x2="626" y2="472"/><line x1="660" y1="390" x2="658" y2="470"/>
+      <line x1="690" y1="390" x2="690" y2="472"/><line x1="720" y1="390" x2="722" y2="470"/><line x1="750" y1="390" x2="754" y2="472"/>
+      <line x1="780" y1="390" x2="786" y2="470"/><line x1="805" y1="390" x2="812" y2="466"/>
+    </g>
+    <path d="M 420 560 L 900 560 L 900 720 L 420 720 Z" fill="#ede6d8"/>
+    <path d="M 420 560 L 480 520 L 960 520 L 900 560" fill="#f3eee4"/>
+    <path d="M 420 640 L 900 640" stroke="#9c948a" stroke-width="2"/>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="220" y1="250" x2="820" y2="250"/><line x1="220" y1="238" x2="220" y2="262"/><line x1="820" y1="238" x2="820" y2="262"/>
+    <line x1="940" y1="560" x2="940" y2="720"/><line x1="925" y1="560" x2="955" y2="560"/><line x1="925" y1="720" x2="955" y2="720"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28">
+    <text x="520" y="230" text-anchor="middle">brosse 180 mm, poils souples</text>
+    <text x="960" y="648">300 mm</text>
+    <text x="660" y="770" text-anchor="middle" fill="#9c948a" font-size="24">chiffon microfibre, plié en deux</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Kit d'entretien — brosse 180 mm · chiffon microfibre 300 × 300 mm · pour cave et cadran</text>
+</svg>

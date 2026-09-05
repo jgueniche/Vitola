@@ -7,7 +7,7 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 
 ---
 
-## 1. Cinq sources, cinq régimes
+## 1. Six sources, six régimes
 
 | Source | Ce qu'elle fournit | Régime |
 |---|---|---|
@@ -16,6 +16,7 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 | **C — Site officiel Habanos S.A.** | Confirmation de 13 vitoles, ajout d'une vitole manquante | Spécifications publiées par le fabricant |
 | **D — Nomenclature rédigée pour ce projet** | 11 familles d'arômes, 76 descripteurs | Vocabulaire de dégustation, écrit ici |
 | **E — Registre des buralistes (DGDDI)** | 200 lieux (`07_venues.csv`) | Donnée publique officielle, exacte à sa date (2018) — voir §7 |
+| **F — Planches de démonstration de la boutique** | 10 visuels de produits, 2 logos (`shop-images/*.svg`) | Dessinés pour ce projet, sans objet réel représenté — voir §8 |
 
 ### Source A — saisie de mémoire
 
@@ -234,7 +235,39 @@ enseignes ont changé. Chaque fiche affiche sa source et sa date ; une fermeture
 (`inaccurate`) et se consigne par le statut `closed`, que le rejeu du seed **ne rouvre jamais**
 (voir l'en-tête de `seed_venues.sql`).
 
+## 8. Source F — les planches de démonstration de la boutique
+
+**Dessinées pour ce projet, le 5 septembre 2026, par Claude (assistant IA), en SVG, à la main.**
+Douze fichiers dans `shop-images/` : un par produit du catalogue de QA (`<slug>.svg`, dix
+planches) et un par vendeur (`vendor-<slug>.svg`, deux logos). Ils sont rendus en PNG et
+téléversés dans le bucket `shop-images` par `tooling/scripts/shop-demo-images.ts`, sous la
+session de l'admin — jamais par une migration, jamais par la clé de service.
+
+Le régime est celui de la source D : une planche n'est ni vraie ni fausse, elle est utile ou
+non. Ce qui la rend nôtre, et ce qui la garde du bon côté du §2 :
+
+- **Aucun objet réel n'est représenté.** Les planches sont des schémas génériques d'accessoires
+  — un cadran, une boîte, un étui, une lame, un livre — cotés en mesures (« Ø 45 mm »,
+  « 300 × 220 mm », « 70 % HR ») et non en adjectifs, dans le style de la planche de l'accueil.
+  Aucune photographie, aucune image tierce, aucun logo existant, aucune marque nommée ni
+  suggérée par sa forme.
+- **Rien qui montre du tabac.** Le coupe-cigare est vide, le cendrier est vide, la cave est
+  vide, l'étui est vide. Les mots de tabac n'apparaissent que dans les composés d'accessoire
+  que `lib/compliance/tobacco-terms.ts` autorise, et dans les mêmes titres que le catalogue.
+- **La palette est celle du site**, `app/globals.css` — papier, parchemin, encre, fumée, cèdre,
+  colorado, claro — pour que la boutique de démonstration ressemble au site qui la porte, pas
+  à un catalogue rapporté.
+- **Le logo de la maison est un monogramme, pas le nom.** Le nom commercial vit dans
+  `lib/brand.ts` et nulle part ailleurs, un SVG compris.
+
+**Ce que cela ne garantit pas, et ce que le script refuse.** Ces visuels sont des tenants de
+place de QA, à remplacer par les photographies des produits réels le jour où il y en aura.
+Pour qu'ils ne recouvrent jamais ce qu'une personne a posé, le script ignore tout produit qui
+a un `created_by` (un produit saisi à l'écran n'est pas un produit seedé), n'écrase une image
+ou un logo déjà en place qu'avec `--replace`, et dit chaque planche qu'il saute. Les deux
+produits versés à l'écran par le porteur gardent leurs propres photographies.
+
 ---
 
-*Dernière mise à jour : au chargement des lieux (P5). Toute modification manuelle des CSV doit être
-consignée ici.*
+*Dernière mise à jour : aux planches de démonstration de la boutique (5 septembre 2026). Toute
+modification manuelle des CSV ou des planches doit être consignée ici.*
