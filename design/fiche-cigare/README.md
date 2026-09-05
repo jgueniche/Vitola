@@ -8,7 +8,7 @@ validée. La charte (§4 du brief) ne change pas ; ce qui change est la distribu
 | Fichier | Contenu | Cadre |
 |---|---|---|
 | `Avant.dc.html` | La fiche telle que le code la rend aujourd'hui, avec douze constats numérotés | 1240 × 4140 |
-| `Main.dc.html` | La fiche refondue, direction A « le rail », en 1440 — un réglage visiteur / membre | 1440 × 2000 |
+| `Main.dc.html` | La fiche refondue, direction A « le rail », en 1440 — un réglage visiteur / membre | 1440 × 2100 |
 | `Mobile.dc.html` | La même fiche à 390 px, le geste sous le pouce | 390 × 2760 |
 | `DirectionA.dc.html`, `DirectionB.dc.html`, `DirectionC.dc.html` | Les trois plans en fil de fer, pour et contre | 520 × 980 |
 | `Parcours.dc.html` | Quatre gestes, avant et après, en clics comptés dans le code | 1240 × 1000 |

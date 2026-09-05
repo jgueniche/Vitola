@@ -96,17 +96,17 @@ a:hover { color: #c9a227; }
 
   </style>
 </helmet>
-<div class="page" style="width: 520px; min-height: 820px; display: flex; flex-direction: column; gap: 20px; padding: 24px;">
+<div class="page" style="width: 520px; min-height: 980px; display: flex; flex-direction: column; gap: 20px; padding: 24px;">
   <div style="display: flex; flex-direction: column; gap: 4px;">
     <span class="eyebrow">Direction B</span>
     <span class="wf-title">Les onglets</span>
-    <span class="muted sm relaxed">Une colonne, un en-tête court, une barre d'action, puis trois onglets dans l'URL : la fiche, les notes, la discussion. On ne défile plus, on choisit.</span>
+    <span class="muted sm relaxed">Une colonne, un en-tête court, une barre d'action, puis trois onglets dans l'URL : la fiche, les notes, la discussion. On ne défile plus, on choisit.</span>
   </div>
 
   <div class="wf-lines" style="gap: 8px; max-width: 420px;">
     <div class="wf" style="text-align: center; border-color: #c9a227; color: #c9a227;">BAGUE · marque · nom</div>
-    <div class="wf-title" style="font-size: 28px; line-height: 32px;">Nom du cigare</div>
-    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;"><div class="wf">CEPO<br>50 × 124</div><div class="wf">FORCE<br>▮▮▯▯▯</div><div class="wf">CAPE<br>●●○○○○</div></div>
+    <div class="wf-title">Nom du cigare</div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;"><div class="wf">CEPO<br>50 × 124</div><div class="wf">FORCE<br>▮▮▯▯▯</div><div class="wf">CAPE<br>●●○○○○</div></div>
     <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px;"><div class="wf-accent">J'en fume un · 3 en cave</div><div class="wf" style="text-align: center;">Dégustation</div><div class="wf" style="text-align: center;">Comparer</div></div>
     <div style="display: flex; gap: 0; border-bottom: 1px solid var(--rule-strong); margin-top: 8px;">
       <span class="xs" style="padding: 8px 12px; border-bottom: 2px solid var(--accent); color: var(--ink);">La fiche</span>
@@ -117,12 +117,12 @@ a:hover { color: #c9a227; }
     <span class="faint xs mono">/cigares/epicure-no-2?onglet=fiche</span>
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px;"><div class="wf">salida</div><div class="wf">galera</div><div class="wf">cape</div><div class="wf">sous-cape</div><div class="wf">tripe</div><div class="wf">sortie</div><div class="wf">prix · date</div><div class="wf">gamme</div></div>
     <div class="wf" style="border-style: dotted;">publiée le · proposer · historique</div>
-    <div class="wf" style="border-color: var(--accent); display: flex; flex-direction: column; gap: 6px; margin-top: 8px;"><span style="color: var(--ink);">?geste=fumer — un panneau sous la barre d'action</span><span class="wf-lines"><i></i><i style="height: 20px"></i></span><span>portée · 4 puces · ☑ décompter · ☐ le dire au fil</span></div>
+    <div class="wf" style="border-color: var(--accent); display: flex; flex-direction: column; gap: 6px; margin-top: 8px;"><span style="color: var(--ink);">?geste=fumer — un panneau sous la barre d'action</span><span class="wf-lines"><i></i><i style="height: 20px"></i></span><span>portée · 4 puces · [×] décompter · [ ] le dire au fil</span></div>
   </div>
 
   <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border-top: 1px solid var(--rule); padding-top: 16px;">
-    <div style="display: flex; flex-direction: column; gap: 4px;"><span class="eyebrow">Pour</span><span class="muted xs relaxed">La page la plus courte des trois ; le geste est au-dessus du pli sur tous les écrans, sans barre collante. Les onglets sont des liens, donc zéro JavaScript et un état partageable — la règle de <span class="mono">app/CLAUDE.md</span>.</span></div>
-    <div style="display: flex; flex-direction: column; gap: 4px;"><span class="eyebrow">Contre</span><span class="muted xs relaxed">Un visiteur venu pour « est-ce qu'il est bon ? » ne voit la note qu'après un clic, et une page qui cache trois quarts de son contenu se lit mal en une passe. Quatre onglets pour trois entrées en base, aujourd'hui, c'est beaucoup de portes pour peu de pièces.</span></div>
+    <div style="display: flex; flex-direction: column; gap: 4px;"><span class="eyebrow">Pour</span><span class="muted xs relaxed">La page la plus courte des trois ; le geste est au-dessus du pli sur tous les écrans, sans barre collante. Les onglets sont des liens, donc zéro JavaScript et un état partageable — la règle de <span class="mono">app/CLAUDE.md</span>.</span></div>
+    <div style="display: flex; flex-direction: column; gap: 4px;"><span class="eyebrow">Contre</span><span class="muted xs relaxed">Un visiteur venu pour « est-ce qu'il est bon ? » ne voit la note qu'après un clic, et une page qui cache trois quarts de son contenu se lit mal en une passe. Quatre onglets pour trois entrées en base, aujourd'hui, c'est beaucoup de portes pour peu de pièces.</span></div>
   </div>
 </div>
 </x-dc>

@@ -8,7 +8,7 @@
   "artboards": [
     { "file": "Avant.dc.html", "page": "page-1", "x": 0, "y": 0, "w": 1240, "h": 4140, "title": "Avant — la fiche telle que le code la rend, et douze constats", "expand": "fill", "print": "flow" },
 
-    { "file": "Main.dc.html", "page": "page-2", "x": 0, "y": 0, "w": 1440, "h": 2000, "title": "Fiche cigare — 1440 · direction A, le rail", "expand": "fill", "print": "flow", "is_interactive": true },
+    { "file": "Main.dc.html", "page": "page-2", "x": 0, "y": 0, "w": 1440, "h": 2100, "title": "Fiche cigare — 1440 · direction A, le rail", "expand": "fill", "print": "flow", "is_interactive": true },
     { "file": "Mobile.dc.html", "page": "page-2", "x": 1520, "y": 0, "w": 390, "h": 2760, "title": "Fiche cigare — 390", "expand": "fill", "print": "flow" },
 
     { "file": "DirectionA.dc.html", "page": "page-3", "x": 0, "y": 0, "w": 520, "h": 980, "title": "A · Le rail — retenue" },
