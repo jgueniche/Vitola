@@ -1,7 +1,19 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 3 septembre 2026, après
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 5 septembre 2026, après
+> **le durcissement de la QA de la boutique publique** (branche `claude/qa-public-shop-pr17-j6nbxd`,
+> section du même nom dans `docs/decisions-log.md`) : `marketplace.ts` **rejoué** contre un build
+> de production et la vraie base — 93 assertions, 88 vertes, les 5 rouges toutes dans 12 ter faute
+> de `SUPABASE_SECRET_KEY` dans le conteneur ; le parcours isole désormais chaque étape et nettoie
+> dans un `finally` ; `a11y.ts` traverse le tunnel d'achat et a trouvé puis fermé une violation
+> `region` sur tout `/boutique` (0 violation tous impacts, 45 écrans et états) ; **le catalogue de
+> QA a ses douze visuels** (dix planches de produits, deux logos — PROVENANCE §8, bucket
+> `shop-images` à 14 objets, les deux photographies du porteur intactes). **Ce qui reste** : les
+> cinq assertions de 12 ter attendent `SUPABASE_SECRET_KEY` dans les variables de l'environnement
+> Claude Code (ou un poste dont le navigateur atteint `vitola-teal.vercel.app`) — une ligne, puis
+> `pnpm tsx tooling/parcours/marketplace.ts`. Le paragraphe suivant décrit l'état du 3 septembre.
+> Mis à jour le 3 septembre 2026, après
 > **le signalement DSA de la boutique** (migration `0024` — deux surfaces de plus dans le CHECK de
 > `mod.reports`, `REPORTABLE` gagne `product` et `vendor`, « Signaler » sur la fiche produit et la
 > vitrine, le dossier lisible dans `/moderation`, 8 assertions SQL, le parcours `marketplace.ts`
@@ -308,12 +320,14 @@ ref.cigar_revisions         0      public.cigar_stats     3 lignes (vue matéria
                                    public.venue_reviews        0
                                    public.articles             2  ← brouillons d'amorçage (0017)
                                    public.article_links        1  ← le guide gated → une fiche
-                                   shop.products               0  ← 0021 — s'alimente par
-                                   shop.product_reviews        0     /admin/boutique, sans script
+                                   shop.products              12  ← 10 seedés sans auteur + 2 du
+                                   shop.product_reviews        0     porteur ; 12 image_path (5 sept.)
                                    shop.vendors                2  ← 0022 — « Vitola » (la maison,
                                                                     owner_id null) et « Comptoir
                                                                     du Cèdre » (QA, owner `vendeur`),
-                                                                    toutes deux actives, durables
+                                                                    toutes deux actives, durables,
+                                                                    avec logo_path (5 sept.) ; bucket
+                                                                    shop-images : 14 objets
 ```
 
 **Le site est utilisé pour de bon, et rien de ce qui suit n'est d'un parcours.** `test_deux`

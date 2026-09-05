@@ -2,6 +2,101 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La QA de la boutique publique se durcit — rejouée, auditée, illustrée
+
+### Ce qui est livré
+
+Session du 5 septembre 2026, sur commande du porteur (« durcis la QA de la boutique publique
+livrée par la PR #17, sans toucher au périmètre »). Quatre pièces, aucune nouvelle route,
+aucune migration.
+
+**Le parcours `marketplace.ts` est rejoué**, contre un build de production local
+(`pnpm build && pnpm start --port 3100`) et la vraie base — c'était le premier geste que la
+session du 3 septembre laissait à la suivante. **93 assertions, 88 vertes** ; les cinq rouges
+sont toutes dans l'étape 12 ter et ont la même cause, dite plus bas. Deux dérives corrigées sans
+affaiblir ce qu'elles vérifient : « une facette vide est un écran » supposait la catégorie
+`coupe` vide, et le catalogue de QA tient deux coupe-cigares depuis le 25 août — la vacuité se
+construit désormais (`categorie=coupe&q=introuvable-<horodatage>`) ; « l'atelier est revenu à
+vide » supposait un atelier vide, et celui de `vendeur` porte un brouillon du porteur — on
+compte à l'entrée, on vérifie qu'on y revient. Et une leçon de structure, consignée dans
+`CLAUDE.md` : la première exécution telle quelle a levé une exception à l'étape 12 ter, le
+`catch` global a sauté treize étapes, et **le produit de parcours est resté publié sur la
+boutique publique** pendant que l'épilogue affirmait la base propre. Chaque étape est
+maintenant isolée (`step()`), le nettoyage vit dans un `finally` et se rejoue à l'ouverture
+(il a effectivement retiré ce produit au lancement suivant), et l'épilogue dit ce que le
+nettoyage a trouvé.
+
+**L'audit `a11y.ts` traverse le tunnel** : en passant, sans portail, il construit un panier
+(la première fiche en stock — le catalogue de QA tient un produit épuisé exprès), puis audite
+le panier plein, la commande, la commande refusée (code postal à deux chiffres), le paiement,
+le paiement refusé (carte à quatre chiffres) et la confirmation — sept états de plus, les refus
+compris parce que c'est là que `aria-invalid` et `aria-describedby` doivent tenir. **Il a
+trouvé** : une violation `region` (impact `moderate`) sur **tous** les écrans de `/boutique`,
+soit dix états — le bandeau « démonstration » du layout était un `<p>` hors de tout landmark.
+Corrigé par un `<aside aria-label>`, le motif de l'avertissement sanitaire ; la barre de P8
+(0 violation, tous impacts) est de nouveau tenue, sur 45 écrans et états.
+
+**Le catalogue de QA a des images.** Douze planches SVG dessinées pour ce projet
+(`supabase/seed/shop-images/`, PROVENANCE §8 — Source F), rendues en PNG par le Chromium de
+Playwright et téléversées dans `shop-images` par `tooling/scripts/shop-demo-images.ts` **sous la
+session de l'admin** (la clé publiable, les policies de la 0021, jamais la clé de service) : les
+dix produits seedés et les deux logos de vendeurs. Le bucket compte 14 objets — les deux
+photographies du porteur, intactes, et les douze planches. L'URL signée d'une planche répond
+`200 image/png` ; le rejeu du script saute les douze (« a déjà une image ») sans `--replace`.
+
+**Deux micro-dettes** : la table de `supabase/migrations/README.md` va jusqu'à la 0024 avec les
+versions sous lesquelles le projet les enregistre, et `admin.dash.shopLabel` — orpheline depuis
+que le tableau de bord lit `shopCatalogueLabel` — quitte `fr.json`.
+
+### Ce qui n'a pas pu être vérifié, et par quelle porte on le vérifiera
+
+**Les cinq assertions de 12 ter qui suivent l'envoi du signalement** (« le signalement est
+transmis », la file, le nom de la surface, le motif, le dossier). `/api/signalements` appelle
+`file_report()` par la clé de service, et `createSupabaseAdminClient()` refuse de démarrer sans
+`SUPABASE_SECRET_KEY` : le conteneur ne l'a pas, la route répond 500, et la clé ne passe ni par
+une conversation ni par le dépôt (`docs/setup/supabase.md`). La seconde porte était le
+déploiement de production (`vitola-teal.vercel.app`, qui sert `23a15be` — exactement le code
+sous test) : le proxy de sortie du conteneur ferme le tunnel au handshake TLS de Chromium
+(`curl` passe, le navigateur non), et la consigne est de le dire, pas de le contourner. **Le
+geste qui ferme cette dette tient en une ligne** : déposer `SUPABASE_SECRET_KEY` dans les
+variables de l'environnement Claude Code (l'endroit de `SUPABASE_ACCESS_TOKEN`), puis rejouer
+le parcours ; ou le lancer depuis un poste dont le navigateur atteint Vercel, avec
+`PARCOURS_BASE=https://vitola-teal.vercel.app`. Les dix-sept autres assertions de 12 ter — le
+passant, le lien de connexion avec retour, le 403 puis le portail puis le retour sur la fiche —
+sont vertes.
+
+**Le rendu des planches à l'écran** n'a été vu qu'en `curl` : le Chromium du conteneur n'a pas
+de sortie HTTPS, donc les `<img>` des captures locales sont cassées pour une raison qui n'est
+pas l'application. Le HTML rendu porte les URL signées, et elles servent le PNG attendu.
+
+### Six décisions qui ne méritaient pas d'ADR
+
+**Une étape de parcours est isolée, et le nettoyage est un `finally` qui se rejoue à
+l'ouverture.** Un parcours qui touche la vraie base et peut s'interrompre à mi-course doit
+pouvoir être relancé sans main humaine : il retire ce qu'il trouve, le dit (« retiré » contre
+« absent »), et compte comme un échec ce qu'il n'a pas pu retirer.
+
+**Une vacuité se construit, elle ne se suppose pas.** Un catalogue vivant finit toujours par
+remplir la catégorie qu'on croyait vide. Un texte horodaté que rien ne porte est vide par
+construction, quel que soit le rayon.
+
+**Le retour à l'état d'avant se mesure, il ne se décrète pas.** « Revenu à vide » était une
+assertion sur la fixture, pas sur le parcours ; « revenu à son compte d'avant » vérifie la même
+chose — que le vendeur a fait son propre ménage — sans rien supposer de l'atelier.
+
+**Le bandeau de démonstration est un landmark.** Un `<p>` posé au-dessus de `<main>` n'est
+lisible qu'à qui voit ; dans un `<aside>` nommé, un lecteur d'écran le trouve, comme il trouve
+l'avertissement sanitaire. Le libellé vit dans `fr.json` (`shop.demo.label`).
+
+**Les visuels de démonstration ont des sources dans le dépôt et passent par l'écran des
+droits.** Le SVG est la source, le PNG un rendu, le téléversement un geste d'admin sous RLS —
+le jour où le porteur remplace une planche par une photographie, il le fait depuis
+`/admin/boutique` et le script ne la recouvrira pas (`created_by`, `--replace`).
+
+**L'audit d'accessibilité audite les refus.** Un formulaire vierge ne montre jamais
+`aria-invalid` ; le tunnel se traverse donc deux fois par écran de saisie, et le compte rendu
+nomme l'état (« code postal refusé »), pas seulement l'adresse.
+
 ## La boutique se signale, et la route ne bouge pas
 
 ### Ce qui est livré
