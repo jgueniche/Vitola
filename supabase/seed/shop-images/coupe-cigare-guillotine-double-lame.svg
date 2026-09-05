@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Coupe-cigare guillotine double lame — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g fill="none" stroke="#181513" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="360" y="280" width="480" height="320" rx="60" fill="#ede6d8"/>
+    <circle cx="600" cy="440" r="88" fill="#f3eee4"/>
+    <path d="M 400 300 L 560 300 L 600 440 L 560 580 L 400 580 Q 380 440 400 300 Z" fill="#9c948a" opacity="0.55"/>
+    <path d="M 800 300 L 640 300 L 600 440 L 640 580 L 800 580 Q 820 440 800 300 Z" fill="#9c948a" opacity="0.55"/>
+    <line x1="560" y1="300" x2="600" y2="440" stroke-width="2"/><line x1="600" y1="440" x2="560" y2="580" stroke-width="2"/>
+    <line x1="640" y1="300" x2="600" y2="440" stroke-width="2"/><line x1="600" y1="440" x2="640" y2="580" stroke-width="2"/>
+    <rect x="300" y="360" width="70" height="160" rx="20" fill="#7a5c43"/>
+    <rect x="830" y="360" width="70" height="160" rx="20" fill="#7a5c43"/>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="512" y1="660" x2="688" y2="660"/><line x1="512" y1="648" x2="512" y2="672"/><line x1="688" y1="648" x2="688" y2="672"/>
+    <line x1="600" y1="352" x2="600" y2="200"/><circle cx="600" cy="352" r="5" fill="#9c948a"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28" text-anchor="middle">
+    <text x="600" y="705">ouverture Ø 22 mm</text>
+    <text x="600" y="185">deux lames en acier, croisement au centre</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Coupe-cigare guillotine — double lame · ouverture Ø 22 mm · corps 90 × 45 mm · ressort de rappel</text>
+</svg>

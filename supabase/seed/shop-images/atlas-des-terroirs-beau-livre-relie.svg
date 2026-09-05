@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Beau livre relié — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g fill="none" stroke="#181513" stroke-width="4" stroke-linejoin="round">
+    <path d="M 420 180 L 820 180 L 820 700 L 420 700 Z" fill="#8c4f2e"/>
+    <path d="M 420 180 L 380 210 L 380 730 L 780 730 L 820 700" fill="#7a5c43"/>
+    <path d="M 380 730 L 420 700"/>
+    <path d="M 385 220 L 385 725 M 395 218 L 395 727 M 405 214 L 405 728" stroke="#ede6d8" stroke-width="2"/>
+    <rect x="470" y="240" width="300" height="400" fill="none" stroke="#c9a227" stroke-width="3"/>
+    <path d="M 520 420 q 100 -120 200 0 q -100 120 -200 0 Z" fill="#ede6d8" stroke="#c9a227" stroke-width="3"/>
+    <path d="M 560 560 h 120 M 580 590 h 80" stroke="#ede6d8" stroke-width="3"/>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="860" y1="180" x2="860" y2="700"/><line x1="845" y1="180" x2="875" y2="180"/><line x1="845" y1="700" x2="875" y2="700"/>
+    <line x1="420" y1="140" x2="820" y2="140"/><line x1="420" y1="128" x2="420" y2="152"/><line x1="820" y1="128" x2="820" y2="152"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28">
+    <text x="880" y="448">300 mm</text>
+    <text x="620" y="120" text-anchor="middle">240 mm</text>
+    <text x="340" y="448" text-anchor="end" fill="#9c948a" font-size="24">dos toilé, tranchefile</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Beau livre relié — 240 × 300 mm · 320 pages · cartes des terroirs et des climats de culture</text>
+</svg>

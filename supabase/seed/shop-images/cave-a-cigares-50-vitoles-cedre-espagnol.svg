@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Cave 50 vitoles en cèdre — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g fill="none" stroke="#181513" stroke-width="4" stroke-linejoin="round">
+    <path d="M 300 500 L 300 640 L 660 740 L 660 600 Z" fill="#8c4f2e"/>
+    <path d="M 660 600 L 660 740 L 960 600 L 960 460 Z" fill="#7a5c43"/>
+    <path d="M 300 500 L 660 600 L 960 460 L 600 360 Z" fill="#7a5c43"/>
+    <path d="M 330 490 L 660 582 L 930 466 L 600 374 Z" fill="#8c4f2e" stroke="none" opacity="0.6"/>
+    <path d="M 300 540 L 660 640 L 960 500" stroke-width="2" stroke="#ede6d8"/>
+    <path d="M 300 552 L 660 652 L 960 512" stroke-width="2" stroke="#181513"/>
+    <path d="M 470 596 l 26 8 l 0 40 l -26 -8 Z" fill="#c9a227" stroke-width="2"/>
+    <circle cx="483" cy="620" r="5" fill="#181513" stroke="none"/>
+    <path d="M 700 500 l 40 -18 l 0 40 l -40 18 Z" fill="none" stroke="#ede6d8" stroke-width="2"/>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="300" y1="680" x2="660" y2="780"/><line x1="300" y1="665" x2="300" y2="695"/><line x1="660" y1="765" x2="660" y2="795"/>
+    <line x1="990" y1="460" x2="990" y2="600"/><line x1="975" y1="460" x2="1005" y2="460"/><line x1="975" y1="600" x2="1005" y2="600"/>
+    <line x1="720" y1="490" x2="820" y2="300"/><circle cx="720" cy="490" r="5" fill="#9c948a"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28">
+    <text x="420" y="790">300 mm</text>
+    <text x="1010" y="538">120 mm</text>
+    <text x="830" y="295">fenêtre d'hygromètre</text>
+    <text x="640" y="220" text-anchor="middle" fill="#9c948a" font-size="24">intérieur cèdre espagnol, deux plateaux · joint de couvercle à lèvre</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Cave 50 vitoles — cèdre espagnol · 300 × 220 × 120 mm · fermoir laiton</text>
+</svg>

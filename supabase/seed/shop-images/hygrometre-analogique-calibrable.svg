@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Hygromètre analogique — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g fill="none" stroke="#181513" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="600" cy="420" r="250" fill="#ede6d8"/>
+    <circle cx="600" cy="420" r="215"/>
+    <line x1="448.0" y1="572.0" x2="465.6" y2="554.4" stroke-width="4"/><line x1="395.5" y1="486.4" x2="409.8" y2="481.8" stroke-width="2"/><line x1="387.6" y1="386.4" x2="402.5" y2="388.7" stroke-width="2"/><line x1="426.1" y1="293.6" x2="438.2" y2="302.4" stroke-width="2"/><line x1="502.4" y1="228.4" x2="509.2" y2="241.8" stroke-width="2"/><line x1="600.0" y1="205.0" x2="600.0" y2="230.0" stroke-width="4"/><line x1="697.6" y1="228.4" x2="690.8" y2="241.8" stroke-width="2"/><line x1="773.9" y1="293.6" x2="761.8" y2="302.4" stroke-width="2"/><line x1="812.4" y1="386.4" x2="797.5" y2="388.7" stroke-width="2"/><line x1="804.5" y1="486.4" x2="790.2" y2="481.8" stroke-width="2"/><line x1="752.0" y1="572.0" x2="734.4" y2="554.4" stroke-width="4"/>
+    <path d="M 750.7 243.6 A 232 232 0 0 1 814.3 331.2" stroke="#c9a227" stroke-width="10"/>
+    <line x1="600" y1="420" x2="737.5" y2="320.1" stroke="#8c4f2e" stroke-width="6"/>
+    <circle cx="600" cy="420" r="12" fill="#181513"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="34" text-anchor="middle">
+    <text x="486.9" y="545.1">0</text><text x="600.0" y="272.0">50</text><text x="713.1" y="545.1">100</text>
+    <text x="600" y="530" font-size="26" fill="#9c948a">% HR</text>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="850" y1="420" x2="960" y2="420"/><circle cx="850" cy="420" r="5" fill="#9c948a"/>
+    <line x1="814.3" y1="331.2" x2="900" y2="300"/><circle cx="814.3" cy="331.2" r="5" fill="#9c948a"/>
+    <line x1="600" y1="670" x2="600" y2="740"/><circle cx="600" cy="670" r="5" fill="#9c948a"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28">
+    <text x="975" y="410">Ø 45 mm</text>
+    <text x="975" y="446" font-size="22" fill="#9c948a">cadran laiton</text>
+    <text x="915" y="295">zone 65 à 75 %</text>
+    <text x="620" y="760">vis d'étalonnage au dos</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Hygromètre analogique — échelle 0 à 100 % HR · se recale au sel en dix minutes</text>
+</svg>

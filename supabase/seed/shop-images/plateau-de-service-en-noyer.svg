@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="t">
+  <title id="t">Plateau de service en noyer — planche de démonstration</title>
+  <rect width="1200" height="900" fill="#f3eee4"/>
+  <rect x="24" y="24" width="1152" height="852" fill="none" stroke="#9c948a" stroke-width="2"/>
+  <g transform="translate(0,-70)" fill="none" stroke="#181513" stroke-width="4" stroke-linejoin="round">
+    <path d="M 240 520 L 700 640 L 1000 520 L 540 400 Z" fill="#7a5c43"/>
+    <path d="M 240 520 L 240 560 L 700 680 L 700 640 Z" fill="#8c4f2e"/>
+    <path d="M 700 640 L 700 680 L 1000 560 L 1000 520 Z" fill="#7a5c43"/>
+    <path d="M 290 520 L 700 626 L 950 520 L 540 414 Z" fill="#ede6d8" opacity="0.35"/>
+    <path d="M 330 470 q 60 -30 110 -6 M 420 500 q 80 -40 170 -4 M 560 450 q 60 -30 120 -2" stroke="#8c4f2e" stroke-width="2"/>
+    <path d="M 250 500 L 250 470 L 300 458" stroke-width="5"/>
+    <path d="M 990 500 L 990 470 L 940 458" stroke-width="5"/>
+  </g>
+  <g fill="none" stroke="#9c948a" stroke-width="2">
+    <line x1="240" y1="640" x2="700" y2="760"/><line x1="240" y1="625" x2="240" y2="655"/><line x1="700" y1="745" x2="700" y2="775"/>
+    <line x1="730" y1="640" x2="1030" y2="520"/><line x1="1030" y1="505" x2="1030" y2="535"/><line x1="730" y1="625" x2="730" y2="655"/>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#181513" font-size="28">
+    <text x="400" y="740">420 mm</text>
+    <text x="905" y="620">280 mm</text>
+    <text x="620" y="270" text-anchor="middle" fill="#9c948a" font-size="24">noyer massif, huilé · poignées rapportées</text>
+  </g>
+  <rect x="24" y="800" width="1152" height="76" fill="#ede6d8"/>
+  <text x="48" y="847" font-family="Georgia, 'Times New Roman', serif" font-size="26" fill="#181513">Plateau de service — noyer massif · 420 × 280 mm · rebord 30 mm · finition huilée</text>
+</svg>
