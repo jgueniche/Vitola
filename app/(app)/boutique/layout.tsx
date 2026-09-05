@@ -24,12 +24,20 @@ export default async function ShopLayout({ children }: { children: ReactNode }) 
 
   return (
     <>
-      <p className="border-accent bg-surface text-ink border-b px-4 py-2 text-center text-xs">
-        <span className="border-accent text-accent mr-2 rounded-[3px] border px-1.5 py-0.5 font-mono text-[10px] uppercase">
-          {copy.demo.badge}
-        </span>
-        {copy.demo.banner}
-      </p>
+      {/* An <aside> with a name, like the health notice: a <p> outside every
+          landmark is the one axe-core `region` finding the funnel audit
+          raised on all of /boutique (5 septembre 2026). */}
+      <aside
+        aria-label={copy.demo.label}
+        className="border-accent bg-surface text-ink border-b px-4 py-2 text-center text-xs"
+      >
+        <p>
+          <span className="border-accent text-accent mr-2 rounded-[3px] border px-1.5 py-0.5 font-mono text-[10px] uppercase">
+            {copy.demo.badge}
+          </span>
+          {copy.demo.banner}
+        </p>
+      </aside>
       <nav aria-label={copy.nav.label} className="border-rule border-b">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2.5 text-sm">
           <Link href={routes.shop()} className="text-ink font-semibold">

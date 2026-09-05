@@ -2582,6 +2582,7 @@
     "backToShop": "Toute la boutique",
     "noImage": "Sans image",
     "demo": {
+      "label": "Mode démonstration",
       "badge": "Démo",
       "banner": "Boutique en mode démonstration — le paiement est fictif : rien n’est débité, rien n’est expédié."
     },
