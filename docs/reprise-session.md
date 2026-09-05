@@ -1,7 +1,19 @@
 # Vitola — prompt de reprise
 
 > À copier tel quel au démarrage de la prochaine session. Il contient l'état complet de la base :
-> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 25 août 2026 au soir,
+> **aucune requête n'est nécessaire pour la découvrir**. Mis à jour le 3 septembre 2026, après
+> **le signalement DSA de la boutique** (migration `0024` — deux surfaces de plus dans le CHECK de
+> `mod.reports`, `REPORTABLE` gagne `product` et `vendor`, « Signaler » sur la fiche produit et la
+> vitrine, le dossier lisible dans `/moderation`, 8 assertions SQL, le parcours `marketplace.ts`
+> étendu ; la décision « la route ne bouge pas, le bouton fait le détour » est dans
+> `docs/decisions-log.md`). La 0024 est rejouée en local sur la chaîne entière **et appliquée sur
+> le projet** (`signalement_boutique`) ; ce qui reste à faire est de **rejouer le parcours
+> `marketplace.ts`** depuis une session qui a les clés — ce conteneur ne les avait pas. Entre-temps,
+> le 25 août au soir (PR #17), **la boutique était
+> devenue publique** sur instruction du porteur — migration `0023`, `/boutique` second préfixe
+> public, tunnel d'achat de démonstration jusqu'à la confirmation `QA-`. Le paragraphe qui suit
+> décrit l'état du 25 août au soir, avant ces deux livraisons.
+> Mis à jour le 25 août 2026 au soir,
 > après la livraison de **la marketplace d'accessoires** sur GO du porteur (ADR 0016, migration
 > `0022`, l'espace vendeur `/vendeur`, la relecture dans `/admin/boutique`, les écrans publics
 > `/boutique` derrière `shop_enabled` **fermé** — 60 assertions de parcours, quatre rôles ; rien

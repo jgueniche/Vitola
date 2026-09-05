@@ -3,11 +3,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { ReportDialog } from '@/components/moderation/report-dialog'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
+import { reportSlaHours } from '@/lib/moderation/queries'
 import { routes } from '@/lib/routes'
 import { formatPrice } from '@/lib/shop/model'
 import { getShopVendorBySlug, listVendorShelf, signShopImages } from '@/lib/shop/queries'
+import { currentUser } from '@/lib/supabase/server'
 
 const copy = m.shop
 const CATEGORY_LABELS = m.admin.shop.categories as Record<string, string>
@@ -25,6 +28,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * boutique Elie Bleu ». A pending or suspended vendor answers 404, never
  * « accès refusé » : the tab filter and the RLS agree on that. The contact is
  * the vendor's own professional address — they typed it for this page.
+ *
+ * « Signaler cette boutique » is the same control as on the product sheet
+ * (migration 0024): a shopfront is the vendor's own presentation, in front of
+ * the age gate, and the art. 30 traceability behind it is what a notice about
+ * it questions. Member: the dialog. Visitor: the sign-in link, way back included.
  */
 export default async function ShopVendorPage({ params }: Props) {
   if (!(await isFeatureEnabled('shop_enabled'))) notFound()
@@ -33,9 +41,14 @@ export default async function ShopVendorPage({ params }: Props) {
   const vendor = await getShopVendorBySlug(slug)
   if (!vendor) notFound()
 
-  const shelf = await listVendorShelf(vendor.id)
+  const [shelf, user, slaHours] = await Promise.all([
+    listVendorShelf(vendor.id),
+    currentUser(),
+    reportSlaHours(),
+  ])
   const images = await signShopImages([vendor.logo_path, ...shelf.map((p) => p.image_path)])
   const logoUrl = vendor.logo_path ? images.get(vendor.logo_path) : undefined
+  const here = routes.shopVendor(vendor.slug)
 
   return (
     <main id="contenu" className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
@@ -66,6 +79,25 @@ export default async function ShopVendorPage({ params }: Props) {
               {vendor.contact_phone ? ` · ${vendor.contact_phone}` : ''}
             </p>
           ) : null}
+          <div className="mt-2">
+            {user ? (
+              <ReportDialog
+                kind="vendor"
+                id={vendor.id}
+                slaHours={slaHours}
+                label={m.moderation.report.triggerVendor}
+              />
+            ) : (
+              <p className="text-ink-muted text-sm">
+                <Link
+                  href={`${routes.signIn()}?suite=${encodeURIComponent(here)}`}
+                  className="text-accent hover:underline"
+                >
+                  {copy.reportVendorSignedOut}
+                </Link>
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -77,7 +109,10 @@ export default async function ShopVendorPage({ params }: Props) {
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {shelf.map((product) => (
               <li key={product.id} className="border-rule bg-surface rounded-[3px] border">
-                <Link href={routes.shopProduct(product.slug)} className="flex h-full flex-col gap-2 p-4">
+                <Link
+                  href={routes.shopProduct(product.slug)}
+                  className="flex h-full flex-col gap-2 p-4"
+                >
                   {product.image_path && images.get(product.image_path) ? (
                     // eslint-disable-next-line @next/next/no-img-element -- signed URL
                     <img
@@ -90,12 +125,14 @@ export default async function ShopVendorPage({ params }: Props) {
                       {copy.noImage}
                     </span>
                   )}
-                  <span className="font-semibold leading-snug">{product.title}</span>
+                  <span className="leading-snug font-semibold">{product.title}</span>
                   <span className="text-ink-faint text-xs">
                     {product.brand ? `${product.brand} · ` : ''}
                     {CATEGORY_LABELS[product.category] ?? product.category}
                   </span>
-                  <span className="mt-auto font-mono text-sm">{formatPrice(product.price_eur)}</span>
+                  <span className="mt-auto font-mono text-sm">
+                    {formatPrice(product.price_eur)}
+                  </span>
                 </Link>
               </li>
             ))}

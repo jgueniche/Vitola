@@ -44,12 +44,16 @@ e-commerce) doit confirmer, et ce que nous avons déjà mis en place pour y rép
 - [ ] Registre des traitements (`docs/legal/data-map.md`)
 - [ ] **Point de contact DSA (art. 11 et 12) : une adresse à un domaine que nous possédons.**
       C'est le seul élément manquant du dispositif de signalement — le mécanisme de l'art. 16 est
-      livré (bouton « Signaler » sur les fiches et les commentaires, file `mod.reports`), et le
-      délai de 72 h est publié dans les mentions légales. `DSA_CONTACT_EMAIL` est délibérément à
-      `null` dans `lib/compliance/dsa.ts` : publier une adresse à un domaine que personne ne
-      possède, c'est s'engager à relever une boîte qui n'existe pas. La page dit alors que le point
-      de contact sera publié avant l'ouverture. **Une ligne à écrire, dès que la Q7 aura tranché un
-      domaine.**
+      livré (bouton « Signaler » sur les fiches, les commentaires et, depuis la migration 0024, les
+      produits et vitrines de la boutique, file `mod.reports`), et le délai de 72 h est publié dans
+      les mentions légales. `DSA_CONTACT_EMAIL` est délibérément à `null` dans
+      `lib/compliance/dsa.ts` : publier une adresse à un domaine que personne ne possède, c'est
+      s'engager à relever une boîte qui n'existe pas. La page dit alors que le point de contact
+      sera publié avant l'ouverture. **Une ligne à écrire, dès que la Q7 aura tranché un
+      domaine.** Depuis que la boutique est publique devant le portail, ce point de contact est la
+      seule voie d'un passant sans compte — le formulaire demande une session, par décision
+      (`docs/decisions-log.md`, « La boutique se signale, et la route ne bouge pas ») — ce qui en
+      fait une condition d'ouverture et non un détail.
 - [x] Endpoints RGPD export et suppression opérationnels — livrés en P1. L'export couvre désormais
       aussi les trois liens vers `mod` (signalements déposés, décisions rendues, actes de
       modération), par la fonction `public.moderation_records_for_subject()` de la migration 0006.

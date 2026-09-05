@@ -372,6 +372,31 @@ jobs:
             exit 1
           fi
 
+      # 0023 ouvre le drapeau shop_enabled, avec sa trace audit_log dans la
+      # même transaction — un déploiement, pas un geste d'exploitation. Rejouée
+      # ici pour que la base de la CI soit celle que le code décrit : depuis le
+      # 25 août 2026, l'état de repos de la boutique est OUVERT.
+      - name: Apply 0023 — l'ouverture de la boutique
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0023_ouverture_boutique_qa.sql
+
+      # 0024 rend la boutique signalable : deux surfaces de plus dans le CHECK
+      # de mod.reports, aucune porte nouvelle, aucun verbe nouveau. Ce qui ne
+      # se voit qu'à l'exécution : un signalement de produit entre par
+      # file_report(), la modératrice le lit, masquer y est refusé, et l'acte
+      # (dépublier, suspendre) reste celui de l'admin sous sa propre policy.
+      - name: Apply 0024 — le signalement de la boutique
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0024_signalement_boutique.sql
+
+      - name: Signalement de la boutique — entree en file, lecture, acte ailleurs
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/18_shop_reports.sql 2>&1 \
+            | tee "$RUNNER_TEMP/signalement-boutique.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/signalement-boutique.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).

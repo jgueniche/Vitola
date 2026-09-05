@@ -2,6 +2,109 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La boutique se signale, et la route ne bouge pas
+
+### Ce qui est livré
+
+Session du 3 septembre 2026. La boutique est publique depuis le 25 août (PR #17) et liste du
+contenu de vendeurs tiers **devant le portail** — et aucune surface `shop.*` n'était signalable :
+`REPORTABLE` ignorait produits et vitrines, aucun écran de `/boutique` ne portait le dialogue. La
+migration `0024` ajoute `shop.products` et `shop.vendors` au CHECK de `mod.reports`, et rien
+d'autre — `file_report()` a une cible générique, c'est le CHECK qui borne ; `mod_decide()` refuse
+toujours `hide` hors des quatre surfaces à colonnes `hidden_*`. `REPORTABLE` gagne `product` et
+`vendor`, « Signaler ce produit » et « Signaler cette boutique » sont sur la fiche et la vitrine,
+`/moderation` rend un dossier de boutique avec le titre, le vendeur, le lien en situation et, pour
+un admin, le bras de l'acte (`/admin/boutique?produit=…`). **8 assertions SQL**
+(`18_shop_reports.sql`), la chaîne 0001 → 0024 rejouée en entier sur un PostgreSQL 16 + PostGIS
+local (tests 03 à 18, couverture RLS, dérive des types — 99 objets), **9 assertions unitaires** dont
+cinq sur le dialogue rendu (`report-dialog.test.tsx`, le premier test de composant du dépôt), et le
+parcours `marketplace.ts` gagne le dépôt puis la lecture d'un signalement de produit, par un membre
+connecté **depuis la boutique** — donc sans avoir jamais franchi le portail.
+
+### La décision : le mécanisme reste derrière une session, et la route derrière le portail
+
+Le problème posé : `/api/signalements` est derrière le portail (403 en JSON pour qui n'a pas le
+cookie) alors que `/boutique` ne l'est plus. Deux options. **A** — la route devient publique pour
+les surfaces de la boutique. **B** — la route ne bouge pas, et le bouton fait le détour : le
+portail d'abord, puis retour à la fiche. C'est **B**, pour quatre raisons qui tiennent ensemble.
+
+1. **Rendre la route publique n'aurait rien ouvert.** Le 401 reste : sans session, rien ne se
+   dépose, dans les deux options. `public_signup_open` est fermé, donc un passant n'a pas de
+   session à prendre — et ce que l'art. 16 lui doit, un mécanisme joignable, est le point de
+   contact des art. 11 et 12, qui est déjà l'élément de la checklist avant ouverture
+   (`DSA_CONTACT_EMAIL`). L'état public de la boutique est un état de QA (« À trancher avant
+   commercialisation », `CLAUDE.md`), pas une ouverture commerciale ; l'adresse de contact en
+   était déjà la condition, et elle le reste.
+2. **Un signalement engage quelqu'un, dans les deux sens.** La déduplication et le frein horaire
+   de `file_report()` sont clés sur `reporter_id` ; l'art. 16(5) exige que la décision soit
+   communiquée à qui a notifié, et le dialogue le promet (« La décision vous sera communiquée ») ;
+   l'export RGPD rend ses signalements à leur auteur. Une notice anonyme serait une ligne que
+   personne ne peut ni freiner ni informer. L'ADR 0013 (D3) cache le signaleur au modérateur ; elle
+   ne le supprime pas.
+3. **La frontière `/api/` est une frontière de routage, et elle s'affirme en entier.**
+   `isApiPath()` dit « rien sous `/api/` n'est public » et `routes.test.ts` l'affirme
+   exhaustivement — « this assertion is what forces that conversation ». La conversation a eu
+   lieu. Exempter la route « pour ces surfaces » demanderait de relire le portail dans un second
+   endroit — le middleware ne connaît pas le `kind` sans parser le corps, la route devrait donc
+   le refaire selon la surface —, c'est-à-dire précisément la condition « éparpillée entre les
+   pages » que le middleware existe pour ne pas être.
+4. **Ce qui manquait à la boutique, c'est le retour, pas l'exemption.** Un membre qui se connecte
+   depuis une page publique n'a jamais franchi le portail ; la route lui répondait 403 et le
+   dialogue lui disait « Connectez-vous » — à quelqu'un qui l'est. Le dialogue distingue
+   désormais 401 (connexion, `suite` = la fiche) et 403 (portail, `suite` = la fiche), et
+   `safeSuite()` accepte déjà une adresse de boutique comme destination de retour. Le détour coûte
+   un clic à un membre — majeur par construction, `tg_handle_new_user()` l'exige — et rien à la
+   frontière.
+
+**Ce qui rouvre.** L'ouverture commerciale, avec deux conditions déjà consignées : `DSA_CONTACT_EMAIL`
+renseigné (checklist), et un frein horaire hors de `mod` (Upstash, P4) le jour où une notice sans
+session devrait être offerte — sans lui, une route anonyme serait une écriture dans la file DSA
+depuis l'internet ouvert.
+
+### Quatre décisions qui ne méritaient pas d'ADR
+
+**Aucun verbe nouveau : l'acte sur un produit est celui de l'admin.** `mod_decide()` refuse `hide`
+sur `shop.*` (`VITOLA_TARGET_NOT_HIDEABLE`), parce que ni `products` ni `vendors` ne portent de
+colonnes `hidden_*` — un verbe sans bras fabriquerait un enregistrement, pas un acte (ADR 0013,
+D4). Le bras existe et il est ailleurs : dépublier (`products_update_admin`) ou suspendre le
+vendeur (`vendors_update_admin`, qui coupe vitrine et produits en un UPDATE — ADR 0016, D4). Le
+dossier tend le lien vers `/admin/boutique` **à un admin seulement** : une porte dessinée pour une
+modératrice qui ne peut pas l'ouvrir est le genre de contrôle que l'ADR 0014 refuse. Une
+modératrice non admin lit la phrase sous les verbes et enregistre sa décision motivée ; l'acte
+suit par la voie de l'administration. Assertions S6 et S7.
+
+**`product_reviews` reste hors du CHECK.** Aucune porte d'écriture (ADR 0015, D3), donc aucune
+ligne à signaler ; une surface dans la file sans rien derrière serait la règle de `REPORTABLE`
+cassée dans l'autre sens. La surface entrera avec la caisse, comme l'ADR 0016 l'annonce.
+Assertion S3, et un test unitaire qui relit le dernier CHECK.
+
+**Le passant voit une phrase, pas un bouton qui refuse.** Derrière le portail, le bouton n'existe
+que pour un membre — le motif des lieux — et un visiteur n'y est jamais la norme. Sur la boutique,
+il l'est : lui montrer le formulaire, le laisser taper, puis lui répondre 401 lui ferait perdre
+son texte. Une phrase avec le lien de connexion et le retour vers la fiche dit la même chose sans
+le piège.
+
+**Une cible retirée se lit « introuvable ou retirée », et c'est voulu.** `products_select_published`
+exige un vendeur actif, et seule `has_min_role('admin')` lit au-delà : un produit dépublié ou une
+vitrine suspendue disparaît du dossier d'une modératrice non admin — ce qui dit que l'acte a déjà
+eu lieu. Pas de policy `products_select_moderator` ajoutée : la seule modératrice d'aujourd'hui
+est admin (ADR 0013, question ouverte), et une policy de plus pour un rôle que personne ne tient
+serait le registre de consentements à l'envers. Assertions S7 et S8.
+
+### Ce qui a été vérifié, et ce qui ne l'a pas été
+
+La chaîne SQL a tourné en entier en local — PostgreSQL 16 + PostGIS, 0001 → 0024, tests 03 à 18,
+couverture RLS, dérive des types —, puis **la 0024 a été appliquée sur le projet** (nom
+`signalement_boutique` dans `supabase_migrations`, l'outil d'application a répondu `success`),
+après un essai à blanc de chacun des six prédicats de son auto-contrôle, en lecture seule sur le
+projet : tous vrais avant l'application. La relecture du CHECK **après** application n'a pas pu
+être faite depuis ce conteneur, dont les lectures suivantes ont été refusées : c'est le second
+geste de la prochaine session, avec le parcours.
+Le conteneur n'a ni `NEXT_PUBLIC_SUPABASE_URL` ni `SUPABASE_SECRET_KEY` : le parcours
+`marketplace.ts` est écrit et typé, **pas rejoué** — c'est le premier geste de la prochaine session
+qui aura les clés, et la base est prête à le recevoir. Et `db.yml` rejoue désormais la 0023 aussi,
+qui n'y était pas : la base de la CI est celle que le code décrit, boutique ouverte.
+
 ## La boutique s'ouvre au public, tunnel de démonstration compris
 
 ### Ce qui est livré
