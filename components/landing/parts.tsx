@@ -34,7 +34,7 @@ export function ModuleHead({
         {'  ·  '}
         {name}
       </p>
-      <h2 className="font-display mt-4 text-3xl leading-[1.12] text-balance sm:text-[2.75rem]">
+      <h2 className="font-display text-display-sm mt-4 leading-[1.12] text-balance sm:text-[2.75rem]">
         {title}
       </h2>
       {body ? <p className="text-ink-muted mt-5 text-[1.0625rem] leading-relaxed">{body}</p> : null}

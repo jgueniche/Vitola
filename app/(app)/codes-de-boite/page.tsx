@@ -60,7 +60,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -91,7 +91,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
         </div>
       ) : (
         <section className="flex flex-col gap-4">
-          <h2 className="font-display text-2xl">{copy.resultTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.resultTitle}</h2>
 
           <dl className="flex flex-col gap-3">
             {matched.map(({ letters, row }) => (
@@ -134,7 +134,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.tableTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.tableTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.tableLede}</p>
         </div>
 
@@ -143,7 +143,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
           <ul className="grid gap-1 sm:grid-cols-2">
             {months.map((row) => (
               <li key={row.code} className="flex items-baseline gap-3 text-sm">
-                <span className="font-mono w-12">{row.code}</span>
+                <span className="w-12 font-mono">{row.code}</span>
                 <span className="text-ink-muted">
                   {row.month === null ? copy.kindMonth : monthName(row.month)}
                 </span>
@@ -158,7 +158,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
             {factories.map((row) => (
               <li key={row.code} className="flex flex-col gap-0.5 text-sm">
                 <span className="flex items-baseline gap-3">
-                  <span className="font-mono w-12">{row.code}</span>
+                  <span className="w-12 font-mono">{row.code}</span>
                   <span className="text-ink-muted">{row.factory_code ?? '—'}</span>
                 </span>
                 {row.notes ? (
@@ -201,9 +201,7 @@ function Reading({ letters, row }: { letters: string; row: BoxCode | null }) {
         <dd className="text-ink text-lg">
           <span className="font-mono">{letters}</span> — {row.factory_code ?? '—'}
         </dd>
-        <dd className="text-ink-muted measure text-xs leading-relaxed">
-          {copy.factoryUnverified}
-        </dd>
+        <dd className="text-ink-muted measure text-xs leading-relaxed">{copy.factoryUnverified}</dd>
       </div>
     )
   }
@@ -214,9 +212,7 @@ function Reading({ letters, row }: { letters: string; row: BoxCode | null }) {
       <dd className="text-ink-muted text-lg">
         <span className="font-mono">{letters}</span>
       </dd>
-      <dd className="text-ink-muted measure text-xs leading-relaxed">
-        {copy.unknownLettersHint}
-      </dd>
+      <dd className="text-ink-muted measure text-xs leading-relaxed">{copy.unknownLettersHint}</dd>
     </div>
   )
 }

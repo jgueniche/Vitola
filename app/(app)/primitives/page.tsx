@@ -33,7 +33,7 @@ export default function PrimitivesPage() {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-12 px-4 py-16">
       <div className="flex flex-col gap-3">
         <p className="eyebrow">Design system</p>
-        <h1 className="font-display text-4xl">Primitives</h1>
+        <h1 className="font-display text-display-md">Primitives</h1>
       </div>
 
       <Section title="Bague — élément signature">
@@ -46,7 +46,7 @@ export default function PrimitivesPage() {
       </Section>
 
       <Section title="Typographie">
-        <p className="font-display text-5xl">Siglo VI</p>
+        <p className="font-display text-display-md">Siglo VI</p>
         <p className="eyebrow">Cepo × longueur</p>
         <p className="text-base">
           Corps Inter, chiffres tabulaires : 0123456789 alignés en colonne.

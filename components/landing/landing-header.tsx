@@ -36,7 +36,7 @@ export function LandingHeader() {
   return (
     <header className="border-rule bg-ground sticky top-0 z-20 border-b">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4">
-        <span className="font-display text-ink text-2xl leading-none">{BRAND.name}</span>
+        <span className="wordmark text-ink">{BRAND.name}</span>
 
         {/* Its own label: the hero's table of contents already carries
             `tocTitle`, and two landmarks with the same name are one landmark a

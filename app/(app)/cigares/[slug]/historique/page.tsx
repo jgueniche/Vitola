@@ -6,6 +6,7 @@ import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
 import { Button } from '@/components/ui/button'
 import { DiffView } from '@/components/wiki/diff-view'
+import { aromaNameMap } from '@/lib/aromas/queries'
 import { StatusBadge } from '@/components/wiki/status-badge'
 import { formatEffectiveDate } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
@@ -40,10 +41,11 @@ export default async function HistoryPage({ params }: Params) {
   const [cigar, user] = await Promise.all([getCigarBySlug(slug), currentUser()])
   if (!cigar) notFound()
 
-  const [revisions, vitolas, lineNames] = await Promise.all([
+  const [revisions, vitolas, lineNames, aromaNames] = await Promise.all([
     user ? listForCigar(cigar.id) : Promise.resolve([]),
     listVitolaOptions(),
     listLineNames(),
+    aromaNameMap(),
   ])
 
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
@@ -54,7 +56,7 @@ export default async function HistoryPage({ params }: Params) {
         <Link href={routes.cigar(slug)} className="eyebrow hover:text-accent-bright w-fit">
           {copy.backToSheet}
         </Link>
-        <h1 className="font-display text-4xl leading-tight">{copy.historyTitle}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.historyTitle}</h1>
         <p className="text-ink-muted text-sm">
           {cigar.brands?.name ? `${cigar.brands.name} · ` : ''}
           {cigar.commercial_name}
@@ -71,7 +73,7 @@ export default async function HistoryPage({ params }: Params) {
           action={
             user ? (
               <Link href={routes.cigarPropose(slug)}>
-                <Button size="sm">{copy.proposeTitle}</Button>
+                <Button>{copy.proposeTitle}</Button>
               </Link>
             ) : undefined
           }
@@ -90,7 +92,12 @@ export default async function HistoryPage({ params }: Params) {
                 </span>
               </div>
 
-              <DiffView diff={revision.diff} vitolaNames={vitolaNames} lineNames={lineNames} />
+              <DiffView
+                diff={revision.diff}
+                vitolaNames={vitolaNames}
+                lineNames={lineNames}
+                aromaNames={aromaNames}
+              />
 
               {revision.comment ? (
                 <p className="text-ink-muted measure mt-3 text-sm leading-relaxed">

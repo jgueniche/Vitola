@@ -56,10 +56,13 @@ export function wrapperShadeLabel(shade: WrapperShade): string {
 export function WrapperScale({
   shade,
   showLabel = true,
+  size = 'sm',
   className,
 }: {
   shade: WrapperShade
   showLabel?: boolean
+  /** `lg` is the spec strip of a sheet: 14px dots instead of 10. */
+  size?: 'sm' | 'lg'
   className?: string
 }) {
   const activeIndex = WRAPPER_SHADES.indexOf(shade)
@@ -69,22 +72,21 @@ export function WrapperScale({
       <span
         role="img"
         aria-label={`Cape : ${SHADE_LABELS[shade]}, position ${activeIndex + 1} sur ${WRAPPER_SHADES.length}`}
-        className="flex items-center gap-1"
+        className={cn('flex items-center', size === 'lg' ? 'gap-1.5' : 'gap-1')}
       >
         {WRAPPER_SHADES.map((step, index) => (
           <span
             key={step}
             aria-hidden="true"
             className={cn(
-              'ring-rule-strong size-2.5 rounded-full ring-1',
+              'ring-rule-strong rounded-full ring-1',
+              size === 'lg' ? 'size-3.5' : 'size-2.5',
               index <= activeIndex ? SHADE_SWATCH[step] : 'bg-transparent',
             )}
           />
         ))}
       </span>
-      {showLabel ? (
-        <span className="text-ink-muted text-sm">{SHADE_LABELS[shade]}</span>
-      ) : null}
+      {showLabel ? <span className="text-ink-muted text-sm">{SHADE_LABELS[shade]}</span> : null}
     </div>
   )
 }

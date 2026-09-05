@@ -15,6 +15,17 @@ export function shapeLabel(shape: string): string {
 export type { Shape }
 
 /**
+ * A release type, in French. The enum values are the trade's own words
+ * (edición limitada, reserva…) and stay as they are in the database; the map
+ * gives each its display form, and an unknown value renders as itself rather
+ * than as a blank — the same rule as `shapeLabel`.
+ */
+export function releaseTypeLabel(type: string): string {
+  const labels = m.referential.releaseTypes as Record<string, string>
+  return labels[type] ?? type
+}
+
+/**
  * The homologated price, formatted for display.
  *
  * Never shown without its effective date. A price whose date is hidden becomes

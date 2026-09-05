@@ -71,7 +71,7 @@ export default async function AdminShopPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.admin.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="text-sm">
           <Link href={routes.adminShopVendors()} className="text-ink underline">
@@ -92,7 +92,7 @@ export default async function AdminShopPage({ searchParams }: Props) {
       ) : null}
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.queueTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.queueTitle}</h2>
         {queue.length === 0 ? (
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.queueEmpty}</p>
         ) : (
@@ -127,15 +127,19 @@ export default async function AdminShopPage({ searchParams }: Props) {
                   <form action={setProductStatus}>
                     <input type="hidden" name="id" value={product.id} />
                     <input type="hidden" name="status" value="published" />
-                    <Button type="submit" size="sm">
-                      {copy.publish}
-                    </Button>
+                    <Button type="submit">{copy.publish}</Button>
                   </form>
                   <form action={refuseProduct} className="flex grow flex-wrap items-end gap-2">
                     <input type="hidden" name="id" value={product.id} />
                     <div className="flex min-w-56 grow flex-col gap-1.5">
                       <Label htmlFor={`note-${product.id}`}>{copy.refuseNoteLabel}</Label>
-                      <Textarea id={`note-${product.id}`} name="note" rows={1} maxLength={500} required />
+                      <Textarea
+                        id={`note-${product.id}`}
+                        name="note"
+                        rows={1}
+                        maxLength={500}
+                        required
+                      />
                     </div>
                     <Button type="submit" variant="secondary" size="sm">
                       {copy.refuse}
@@ -152,7 +156,7 @@ export default async function AdminShopPage({ searchParams }: Props) {
       {open ? (
         <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-display text-2xl">{copy.editTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.editTitle}</h2>
             <Link href={routes.adminShop()} className="text-ink-muted text-sm underline">
               {copy.closePanel}
             </Link>
@@ -193,13 +197,13 @@ export default async function AdminShopPage({ searchParams }: Props) {
         </section>
       ) : (
         <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
-          <h2 className="font-display text-2xl">{copy.createTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
           <CreateProductForm vendorOptions={vendorOptions} />
         </section>
       )}
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.listTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.listTitle}</h2>
         {products.length === 0 ? (
           <EmptyState title={copy.emptyTitle} description={copy.emptyBody} />
         ) : (

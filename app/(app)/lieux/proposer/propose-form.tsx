@@ -55,7 +55,7 @@ export function ProposeVenueForm({ offeredTypes }: { offeredTypes: readonly Venu
   return (
     <form action={formAction} className="flex flex-col gap-6">
       <fieldset className="flex flex-col gap-4">
-        <legend className="font-display text-2xl">{copy.legend}</legend>
+        <legend className="font-display text-display-sm">{copy.legend}</legend>
 
         <div className="flex flex-wrap gap-4">
           <div className="flex flex-col gap-1">
@@ -139,7 +139,7 @@ export function ProposeVenueForm({ offeredTypes }: { offeredTypes: readonly Venu
       </details>
 
       <fieldset className="flex flex-col gap-3">
-        <legend className="font-display text-xl">{copy.positionLegend}</legend>
+        <legend className="text-base font-medium">{copy.positionLegend}</legend>
         <p className="text-ink-muted measure text-xs leading-relaxed">{copy.positionHint}</p>
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1">

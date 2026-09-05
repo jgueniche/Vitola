@@ -108,7 +108,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
         <Link href={routes.humidor()} className="eyebrow text-ink-muted hover:text-ink w-fit">
           {copy.backToHumidor}
         </Link>
-        <h1 className="font-display text-4xl leading-tight">{humidor.name}</h1>
+        <h1 className="font-display text-display-md leading-tight">{humidor.name}</h1>
         <p className="text-ink-muted text-sm">
           {humidor.capacity
             ? copy.fill
@@ -130,7 +130,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       {/* ------------------------------------------------------ inventory -- */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.lotsTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.lotsTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lotsLede}</p>
         </div>
 
@@ -141,12 +141,14 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
             {lots.map((row) => (
               <li key={row.id} className="flex flex-col gap-3">
                 <Link
-                  href={openLot === row.id ? withParams({ lot: undefined }) : withParams({ lot: row.id })}
+                  href={
+                    openLot === row.id
+                      ? withParams({ lot: undefined })
+                      : withParams({ lot: row.id })
+                  }
                   className={cn(
                     'bg-surface flex flex-wrap items-center justify-between gap-3 rounded-[3px] border px-4 py-3 transition-colors duration-(--duration-quick)',
-                    openLot === row.id
-                      ? 'border-accent'
-                      : 'border-rule hover:border-rule-strong',
+                    openLot === row.id ? 'border-accent' : 'border-rule hover:border-rule-strong',
                   )}
                 >
                   <span className="flex flex-col gap-0.5">
@@ -173,7 +175,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
                         {formatPrice(row.stock_value_eur)}
                       </span>
                     ) : null}
-                    <span className="font-display text-xl">
+                    <span className="text-base font-medium">
                       {row.qty === 0 ? copy.emptyLot : formatCount(row.qty)}
                     </span>
                   </span>
@@ -197,7 +199,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       {/* ------------------------------------------------------- adding ---- */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.addTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.addTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.addLede}</p>
         </div>
 
@@ -270,7 +272,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       {/* --------------------------------------------------- hygrometry ---- */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.readingsTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.readingsTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.readingsLede}</p>
         </div>
 
@@ -313,7 +315,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       {/* --------------------------------------------------------- CSV ----- */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.csvTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.csvTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.csvLede}</p>
         </div>
         <a href={routes.humidorExport()} download className="w-fit">
@@ -324,7 +326,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
 
       {/* ---------------------------------------------------- settings ----- */}
       <section className="border-rule flex flex-col gap-4 border-t pt-8">
-        <h2 className="font-display text-2xl">{copy.editTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.editTitle}</h2>
         <HumidorForm
           mode="edit"
           defaults={{
@@ -396,12 +398,7 @@ function LotPanel({
         <section className="flex flex-col gap-2">
           <h3 className="eyebrow">{copy.smokeTitle}</h3>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.smokeLede}</p>
-          <SmokeForm
-            itemId={lot.id}
-            slug={lot.cigar?.slug ?? null}
-            today={today}
-            max={lot.qty}
-          />
+          <SmokeForm itemId={lot.id} slug={lot.cigar?.slug ?? null} today={today} max={lot.qty} />
         </section>
       ) : (
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.emptyLotHint}</p>

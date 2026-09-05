@@ -53,7 +53,7 @@ export default async function HumidorPage() {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -96,7 +96,7 @@ export default async function HumidorPage() {
           ) : null}
 
           <section className="flex flex-col gap-3">
-            <h2 className="font-display text-2xl">{copy.eyebrow}</h2>
+            <h2 className="font-display text-display-sm">{copy.eyebrow}</h2>
             <ul className="flex flex-col gap-2">
               {humidors.map((humidor) => {
                 const held = perHumidor.get(humidor.id) ?? 0
@@ -131,7 +131,7 @@ export default async function HumidorPage() {
           </section>
 
           <section className="flex flex-col gap-3">
-            <h2 className="font-display text-2xl">{copy.csvTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.csvTitle}</h2>
             <p className="text-ink-muted measure text-sm leading-relaxed">{copy.csvLede}</p>
             <div>
               {/* A plain anchor, not a fetch: the export is a route handler
@@ -147,7 +147,7 @@ export default async function HumidorPage() {
       )}
 
       <section className="border-rule flex flex-col gap-3 border-t pt-8">
-        <h2 className="font-display text-2xl">{copy.createTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.createLede}</p>
         <HumidorForm mode="create" />
       </section>
@@ -158,7 +158,7 @@ export default async function HumidorPage() {
 function Figure({ value, label, muted }: { value: string; label: string; muted?: boolean }) {
   return (
     <div className="bg-surface flex flex-col gap-1 px-4 py-4">
-      <span className={cn('font-display text-2xl', muted && 'text-ink-muted')}>{value}</span>
+      <span className={cn('font-display text-display-sm', muted && 'text-ink-muted')}>{value}</span>
       <span className="eyebrow">{label}</span>
     </div>
   )

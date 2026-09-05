@@ -30,8 +30,11 @@ export function RingGauge({
       <span className="font-mono text-sm tracking-wide">
         {formatDimensions(ringGauge, lengthMm)}
       </span>
+      {/* A fixed 120px reference, never the label's own width: drawn inside
+          `w-full` of a flex item sized by its text, the silhouette measured
+          about 100px and showed nothing (design audit, 5 septembre 2026). */}
       {withSilhouette ? (
-        <span aria-hidden="true" className="flex h-3 w-full items-center">
+        <span aria-hidden="true" className="flex h-3 w-[7.5rem] items-center">
           <span
             className="bg-ink-faint rounded-full"
             style={{

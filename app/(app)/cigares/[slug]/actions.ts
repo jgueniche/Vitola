@@ -151,3 +151,145 @@ export async function deleteComment(formData: FormData): Promise<void> {
 function refusalMessage(code: string | undefined): string {
   return code === '42501' ? m.comments.errors.notAllowed : m.comments.errors.unknown
 }
+
+/* -------------------------------------------------------------------------- */
+/* The one gesture — « J'en fume un »                                          */
+/* -------------------------------------------------------------------------- */
+
+import { saveLogEntry } from '@/app/(app)/carnet/actions'
+import { smokeFromLot } from '@/app/(app)/cave/actions'
+import { publishSession, shareEntryToFeed } from '@/app/(app)/fil/actions'
+import { REVIEW_SCOPES } from '@/lib/reviews/model'
+
+export type GestureState = {
+  error?: string
+  done?: boolean
+  /** The notebook entry written, when something was written. */
+  id?: string
+  decremented?: boolean
+  announced?: boolean
+  /** The entry landed but the announcement did not: said, not swallowed. */
+  notice?: string
+}
+
+const gestureSchema = z.object({
+  cigarId: z.uuid(),
+  slug: z.string().min(1),
+  smokedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  scoreTotal: z.string().nullable(),
+  body: z.string().nullable(),
+  visibility: z.enum(REVIEW_SCOPES),
+  itemId: z.union([z.uuid(), z.literal('')]),
+  venueId: z.union([z.uuid(), z.literal('')]),
+  decrement: z.boolean(),
+  announce: z.boolean(),
+})
+
+/**
+ * « J'en fume un », from the cigar's own page (design audit, 5 septembre 2026).
+ *
+ * The sheet used to carry three forms for one moment — the cave's "j'en fume
+ * un", the notebook's "noter ce cigare", the feed's "dire que vous le fumez" —
+ * each asking the date, the score, the word and the scope again. This action
+ * asks once and delegates to the three writes that already exist, in the
+ * order the gesture happens:
+ *
+ *   1. The entry. With a lot ticked, `smokeFromLot()` — one transaction that
+ *      decrements the lot and writes the entry (ADR 0006), and accepts an
+ *      entry with nothing to say, because the event alone says one smoked.
+ *      Without a lot, `saveLogEntry()`, whose constraint asks for a score or a
+ *      word: a notebook entry with neither is not an entry.
+ *   2. The announcement, optional. When an entry was written,
+ *      `shareEntryToFeed()` publishes the post that points at it, at the
+ *      entry's own scope (ADR 0007 — the trigger keeps them aligned for life).
+ *      When nothing was written (decrement only), `publishSession()` says
+ *      "je fume ce cigare" without an entry — and so does a venue: naming
+ *      where one smokes is a session's fact (P5), which a shared entry does
+ *      not carry, so a gesture with a venue announces as a session, with the
+ *      word as its text, and the entry stays in the notebook. Neither accepts a scope narrower
+ *      than `followers`: a publication is addressed to someone, and the form
+ *      greys the box out for `private` and `shared` — re-checked here, because
+ *      a form post is not bound by a disabled checkbox.
+ *
+ * Delegating keeps one source for each rule — the constraints' French, the
+ * stats refresh, the revalidations — and this function adds no rule of its
+ * own. A refused entry is the whole refusal; a refused announcement over an
+ * entry that landed is a `notice`, because the entry is real and saying
+ * otherwise would make someone write it twice.
+ */
+export async function smokeThisCigar(
+  _previous: GestureState,
+  formData: FormData,
+): Promise<GestureState> {
+  const parsed = gestureSchema.safeParse({
+    cigarId: formData.get('cigarId'),
+    slug: formData.get('slug'),
+    smokedOn: formData.get('smokedOn'),
+    scoreTotal: blankToNull(formData.get('scoreTotal')),
+    body: blankToNull(formData.get('body')),
+    visibility: formData.get('visibility'),
+    itemId: formData.get('itemId') ?? '',
+    venueId: formData.get('venueId') ?? '',
+    decrement: formData.get('decrement') === 'on',
+    announce: formData.get('announce') === 'on',
+  })
+  if (!parsed.success) return { error: m.notebook.errors.unknown }
+
+  const gesture = parsed.data
+  const fromLot = gesture.decrement && gesture.itemId !== ''
+
+  let reviewId: string | undefined
+  if (fromLot) {
+    const lot = new FormData()
+    lot.set('itemId', gesture.itemId)
+    lot.set('qty', '1')
+    lot.set('occurredOn', gesture.smokedOn)
+    lot.set('visibility', gesture.visibility)
+    if (gesture.scoreTotal) lot.set('score', gesture.scoreTotal)
+    if (gesture.body) lot.set('body', gesture.body)
+    lot.set('slug', gesture.slug)
+    const result = await smokeFromLot({}, lot)
+    if (result.error) return { error: result.error }
+    reviewId = result.id
+  } else {
+    const entry = new FormData()
+    entry.set('cigarId', gesture.cigarId)
+    entry.set('slug', gesture.slug)
+    entry.set('smokedOn', gesture.smokedOn)
+    entry.set('visibility', gesture.visibility)
+    if (gesture.scoreTotal) entry.set('scoreTotal', gesture.scoreTotal)
+    if (gesture.body) entry.set('body', gesture.body)
+    const result = await saveLogEntry({}, entry)
+    if (result.error) return { error: result.error }
+    reviewId = result.id
+  }
+
+  const state: GestureState = { done: true, id: reviewId, decremented: fromLot, announced: false }
+  if (!gesture.announce) return state
+
+  if (gesture.visibility !== 'followers' && gesture.visibility !== 'public') {
+    return { ...state, notice: m.feed.share.tooNarrow }
+  }
+
+  if (reviewId && gesture.venueId === '') {
+    const share = new FormData()
+    share.set('reviewId', reviewId)
+    const result = await shareEntryToFeed({}, share)
+    return result.error ? { ...state, notice: result.error } : { ...state, announced: true }
+  }
+
+  const session = new FormData()
+  session.set('cigarId', gesture.cigarId)
+  session.set('slug', gesture.slug)
+  session.set('venueId', gesture.venueId)
+  session.set('visibility', gesture.visibility)
+  session.set('body', gesture.body ?? '')
+  const result = await publishSession({}, session)
+  return result.error ? { ...state, notice: result.error } : { ...state, announced: true }
+}
+
+function blankToNull(value: FormDataEntryValue | null): string | null {
+  if (value === null) return null
+  const text = String(value).trim()
+  return text === '' ? null : text
+}

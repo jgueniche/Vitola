@@ -46,7 +46,7 @@ export function FeedSharePanel({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl">{copy.title}</h2>
+        <h2 className="text-base font-medium">{copy.title}</h2>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -73,7 +73,7 @@ export function FeedSharePanel({
           <input type="hidden" name="reviewId" value={reviewId} />
           {state.error ? <FieldError>{state.error}</FieldError> : null}
           <div>
-            <Button type="submit" size="sm" disabled={pending}>
+            <Button type="submit" disabled={pending}>
               {copy.submit}
             </Button>
           </div>

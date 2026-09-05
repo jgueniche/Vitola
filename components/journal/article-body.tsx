@@ -51,11 +51,11 @@ export function ArticleBody({ blocks }: { blocks: readonly BlockNode[] }) {
         switch (block.kind) {
           case 'heading':
             return block.level === 2 ? (
-              <h2 key={index} className="font-display mt-4 text-2xl leading-snug">
+              <h2 key={index} className="font-display text-display-sm mt-4 leading-snug">
                 <Inline nodes={block.children} />
               </h2>
             ) : (
-              <h3 key={index} className="font-display mt-2 text-xl leading-snug">
+              <h3 key={index} className="mt-2 text-base leading-snug font-medium">
                 <Inline nodes={block.children} />
               </h3>
             )
@@ -67,7 +67,10 @@ export function ArticleBody({ blocks }: { blocks: readonly BlockNode[] }) {
             )
           case 'list':
             return (
-              <ul key={index} className="flex list-disc flex-col gap-1 pl-5 text-sm leading-relaxed">
+              <ul
+                key={index}
+                className="flex list-disc flex-col gap-1 pl-5 text-sm leading-relaxed"
+              >
                 {block.items.map((item, itemIndex) => (
                   <li key={itemIndex}>
                     <Inline nodes={item} />

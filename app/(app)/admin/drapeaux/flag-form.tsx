@@ -106,7 +106,7 @@ export function FlagForm({
       {state.done ? <FieldStatus>{copy.saved}</FieldStatus> : null}
 
       <div className="flex flex-wrap items-baseline gap-3">
-        <Button type="submit" variant={enabled ? 'secondary' : 'primary'} size="sm" disabled={pending}>
+        <Button type="submit" variant={enabled ? 'secondary' : 'primary'} disabled={pending}>
           {enabled ? copy.turnOff : copy.turnOn}
         </Button>
         {field ? (

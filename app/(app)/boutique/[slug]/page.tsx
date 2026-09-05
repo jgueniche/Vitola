@@ -84,7 +84,7 @@ export default async function ShopProductPage({ params }: Props) {
         <div className="flex grow flex-col gap-4">
           <div className="flex flex-col gap-2">
             <p className="eyebrow">{CATEGORY_LABELS[product.category] ?? product.category}</p>
-            <h1 className="font-display text-4xl leading-tight">{product.title}</h1>
+            <h1 className="font-display text-display-md leading-tight">{product.title}</h1>
             <p className="text-ink-muted text-sm">
               {product.brand ? (
                 <>
@@ -167,7 +167,7 @@ export default async function ShopProductPage({ params }: Props) {
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-2xl">{copy.reviewsTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.reviewsTitle}</h2>
         {/* ADR 0015 D3, unchanged by 0016: nothing can write a review until
             the checkout decides « achat vérifié » — the empty state says so
             rather than hiding the section. */}

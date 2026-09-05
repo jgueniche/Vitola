@@ -6,6 +6,7 @@ import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
 import { Button } from '@/components/ui/button'
 import { DiffView } from '@/components/wiki/diff-view'
+import { aromaNameMap } from '@/lib/aromas/queries'
 import { StatusBadge } from '@/components/wiki/status-badge'
 import { formatEffectiveDate } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
@@ -58,11 +59,12 @@ export default async function ContributionsPage({ searchParams }: Props) {
   const account = await getAccount(user.id)
   const isEditor = hasMinRole(account?.role ?? 'member', REVIEWER_ROLE)
 
-  const [mine, pending, vitolas, lineNames] = await Promise.all([
+  const [mine, pending, vitolas, lineNames, aromaNames] = await Promise.all([
     listMine(user.id),
     isEditor ? listPending() : Promise.resolve([]),
     listVitolaOptions(),
     listLineNames(),
+    aromaNameMap(),
   ])
 
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
@@ -71,7 +73,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -86,7 +88,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.mineTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.mineTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.mineLede}</p>
         </div>
 
@@ -107,7 +109,12 @@ export default async function ContributionsPage({ searchParams }: Props) {
             {mine.map((revision) => (
               <li key={revision.id} className="border-rule bg-surface rounded-[3px] border p-4">
                 <Header revision={revision} />
-                <DiffView diff={revision.diff} vitolaNames={vitolaNames} lineNames={lineNames} />
+                <DiffView
+                  diff={revision.diff}
+                  vitolaNames={vitolaNames}
+                  lineNames={lineNames}
+                  aromaNames={aromaNames}
+                />
                 {revision.comment ? (
                   <p className="text-ink-muted measure mt-3 text-sm leading-relaxed">
                     {revision.comment}
@@ -134,7 +141,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.queueTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.queueTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.queueLede}</p>
         </div>
 
@@ -147,14 +154,17 @@ export default async function ContributionsPage({ searchParams }: Props) {
           <EmptyState title={copy.queueEmptyTitle} description={copy.queueEmptyBody} />
         ) : (
           <>
-            <p className="eyebrow">
-              {copy.queueCount.replace('{count}', String(pending.length))}
-            </p>
+            <p className="eyebrow">{copy.queueCount.replace('{count}', String(pending.length))}</p>
             <ul className="flex flex-col gap-4">
               {pending.map((revision) => (
                 <li key={revision.id} className="border-rule bg-surface rounded-[3px] border p-4">
                   <Header revision={revision} />
-                  <DiffView diff={revision.diff} vitolaNames={vitolaNames} lineNames={lineNames} />
+                  <DiffView
+                    diff={revision.diff}
+                    vitolaNames={vitolaNames}
+                    lineNames={lineNames}
+                    aromaNames={aromaNames}
+                  />
                   {revision.comment ? (
                     <p className="text-ink-muted measure mt-3 text-sm leading-relaxed">
                       {revision.comment}

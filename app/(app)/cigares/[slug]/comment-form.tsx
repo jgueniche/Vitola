@@ -15,7 +15,7 @@ import { postComment, type CommentState } from './actions'
 function Submit() {
   const { pending } = useFormStatus()
   return (
-    <Button type="submit" size="sm" disabled={pending}>
+    <Button type="submit" disabled={pending}>
       {m.comments.submit}
     </Button>
   )

@@ -26,7 +26,7 @@ export function HubPage({
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{lede}</p>
       </div>
 

@@ -55,7 +55,7 @@ export function RolePanel({
   if (currentRole === 'admin') {
     return (
       <div className="flex flex-col gap-2">
-        <h2 className="font-display text-xl">{copy.roleTitle}</h2>
+        <h2 className="text-base font-medium">{copy.roleTitle}</h2>
         <p className="text-ink-muted text-sm">
           {copy.roleCurrent} : {LABELS[currentRole]}
         </p>
@@ -90,7 +90,7 @@ export function RolePanel({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl">{copy.roleTitle}</h2>
+        <h2 className="text-base font-medium">{copy.roleTitle}</h2>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.roleLede}</p>
       </div>
 

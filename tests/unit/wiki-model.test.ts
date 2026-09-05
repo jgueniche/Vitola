@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -27,16 +27,31 @@ import {
  * The second block pins the columns kept **out**, with the reason attached.
  */
 
-const SCHEMA = readFileSync(join(process.cwd(), 'docs/phase-0/03-schema-p1.sql'), 'utf8')
+/* The grant of 0001 and every column-level grant a later migration added —
+   0025 grants `aroma_tags` on its own line. A test that read only the first
+   file would refuse the allowlist the day the schema legitimately grew. */
+const MIGRATIONS_DIR = join(process.cwd(), 'supabase/migrations')
+const SQL_SOURCES = [
+  readFileSync(join(process.cwd(), 'docs/phase-0/03-schema-p1.sql'), 'utf8'),
+  ...readdirSync(MIGRATIONS_DIR)
+    .filter((file) => file.endsWith('.sql'))
+    .map((file) => readFileSync(join(MIGRATIONS_DIR, file), 'utf8')),
+]
 
-/** The column list of `grant update (…) on ref.cigars to authenticated`. */
+/** The column lists of every `grant update (…) on ref.cigars to authenticated`. */
 function grantedColumns(): string[] {
-  const match = /grant update \(([\s\S]*?)\) on ref\.cigars to authenticated/.exec(SCHEMA)
-  if (!match) return []
-  return (match[1] ?? '')
-    .split(',')
-    .map((column) => column.trim())
-    .filter((column) => column !== '')
+  const granted: string[] = []
+  for (const source of SQL_SOURCES) {
+    for (const match of source.matchAll(
+      /grant update \(([\s\S]*?)\) on ref\.cigars to authenticated/g,
+    )) {
+      for (const column of (match[1] ?? '').split(',')) {
+        const name = column.trim()
+        if (name !== '') granted.push(name)
+      }
+    }
+  }
+  return granted
 }
 
 describe('the allowlist is a subset of what the grant allows', () => {
@@ -154,9 +169,9 @@ describe('staleness', () => {
 
   it('ignores columns the proposal does not touch', () => {
     // A busy sheet must stay reviewable.
-    expect(staleFields(diff, { strength: 'moyen', release_year: 2019, commercial_name: 'X' })).toEqual(
-      [],
-    )
+    expect(
+      staleFields(diff, { strength: 'moyen', release_year: 2019, commercial_name: 'X' }),
+    ).toEqual([])
   })
 })
 

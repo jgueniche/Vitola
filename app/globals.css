@@ -66,6 +66,20 @@
   --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 
+  /* --- Display sizes ------------------------------------------------------
+     The didone has a floor of 32px (§4.3): below it the hairlines vanish.
+     These three are the only sizes the display face is set in — a page
+     title, a section title, the name of a cigar. Anything smaller than a
+     section title is not a display role: it is an eyebrow (Marcellus) or
+     Inter at 16px medium. tooling/scripts/check-tokens.ts fails the build
+     on `font-display` paired with a text size under the floor. */
+  --text-display-sm: 2rem;
+  --text-display-sm--line-height: 2.25rem;
+  --text-display-md: 3rem;
+  --text-display-md--line-height: 3.25rem;
+  --text-display-lg: 3.5rem;
+  --text-display-lg--line-height: 3.75rem;
+
   /* --- Geometry, §4.5 ---------------------------------------------------
      3px. Never 0 (generic broadsheet), never >= 12px (generic SaaS). */
   --radius-band: 3px;
@@ -261,10 +275,23 @@
   }
 
   /* Display is a high-contrast didone: below 32px it loses its hairlines and
-     becomes unreadable. The floor is enforced here, not left to discipline. */
+     becomes unreadable. The floor here is a safety net for text that sets no
+     size at all; it does NOT win over a `text-*` utility, because the utility
+     layer comes after this one in the cascade. The floor that actually holds
+     is the build check in tooling/scripts/check-tokens.ts, which refuses
+     `font-display` next to any size under the three display sizes above. */
   .font-display {
     font-family: var(--font-display);
     font-size: max(2rem, 1em);
+    letter-spacing: -0.02em;
+  }
+
+  /* The wordmark of the header: the one admitted use of the didone under its
+     floor. A logotype is read as a shape, not as a line of text. */
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
     letter-spacing: -0.02em;
   }
 

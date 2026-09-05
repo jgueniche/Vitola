@@ -1,6 +1,12 @@
 import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
 
-import { scoreScaleFromPreferences, type ReviewKind, type ReviewVisibility, type ScoreScale, type Scores } from './model'
+import {
+  scoreScaleFromPreferences,
+  type ReviewKind,
+  type ReviewVisibility,
+  type ScoreScale,
+  type Scores,
+} from './model'
 
 /**
  * Reads of the notebook (ADR 0004).
@@ -66,8 +72,7 @@ export type ReviewWithContext = ReviewRow & {
   cigar: ReviewCigar | null
 }
 
-const COLUMNS =
-  `id, user_id, cigar_id, kind, visibility, score_total, scores, aroma_tags,
+const COLUMNS = `id, user_id, cigar_id, kind, visibility, score_total, scores, aroma_tags,
    strength_perceived, smoke_duration_min, pairing_text, pairing_tags, box_code,
    production_year, purchase_year, humidity_pct, is_blind, body, smoked_on,
    created_at, updated_at`
@@ -239,7 +244,9 @@ export async function getReview(id: string): Promise<ReviewWithContext | null> {
 }
 
 /** The three thirds of a tasting, in order. Their RLS follows the entry's. */
-export async function listThirds(reviewId: string): Promise<{ third: number; notes: string | null }[]> {
+export async function listThirds(
+  reviewId: string,
+): Promise<{ third: number; notes: string | null }[]> {
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
@@ -299,7 +306,10 @@ export async function listShares(reviewId: string): Promise<ShareRow[]> {
   const { data: profiles } = await supabase
     .from('profiles')
     .select('id, handle, display_name')
-    .in('id', shares.map((share) => share.grantee_id))
+    .in(
+      'id',
+      shares.map((share) => share.grantee_id),
+    )
 
   const byId = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
   return shares.map((share) => ({ ...share, grantee: byId.get(share.grantee_id) ?? null }))
@@ -351,14 +361,20 @@ export async function aromaLabels(ids: number[]): Promise<Map<number, string>> {
   return new Map((data ?? []).map((row) => [row.id, row.label_fr]))
 }
 
+export type CitedAroma = { id: number; n: number }
+
 export type CigarStats = {
   review_count: number
+  /** Public entries, scored or not — a word without a score is cited, not counted. */
+  entry_count: number
   mean_score: number | null
   bayesian_score: number | null
   review_count_90d: number
   mean_score_90d: number | null
   distribution: Record<string, number>
   last_review_at: string | null
+  /** At most eight descriptor ids, most cited first (migration 0025). */
+  top_aromas: CitedAroma[]
 }
 
 /**
@@ -374,13 +390,25 @@ export type CigarStats = {
  * no row at all rather than a row of zeroes. `maybeSingle()` returns null and
  * the page shows an empty state — an invitation, per §4.6.
  */
+/** The view's jsonb, read defensively: a row is trusted, its shape is checked. */
+function readCitedAromas(value: unknown): CitedAroma[] {
+  if (!Array.isArray(value)) return []
+  const cited: CitedAroma[] = []
+  for (const item of value) {
+    if (typeof item !== 'object' || item === null) continue
+    const { id, n } = item as { id?: unknown; n?: unknown }
+    if (typeof id === 'number' && typeof n === 'number') cited.push({ id, n })
+  }
+  return cited
+}
+
 export async function getCigarStats(cigarId: string): Promise<CigarStats | null> {
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from('cigar_stats')
     .select(
-      'review_count, mean_score, bayesian_score, review_count_90d, mean_score_90d, distribution, last_review_at',
+      'review_count, entry_count, mean_score, bayesian_score, review_count_90d, mean_score_90d, distribution, last_review_at, top_aromas',
     )
     .eq('cigar_id', cigarId)
     .maybeSingle()
@@ -390,12 +418,14 @@ export async function getCigarStats(cigarId: string): Promise<CigarStats | null>
 
   return {
     review_count: data.review_count ?? 0,
+    entry_count: data.entry_count ?? 0,
     mean_score: data.mean_score,
     bayesian_score: data.bayesian_score,
     review_count_90d: data.review_count_90d ?? 0,
     mean_score_90d: data.mean_score_90d,
     distribution: (data.distribution ?? {}) as Record<string, number>,
     last_review_at: data.last_review_at,
+    top_aromas: readCitedAromas(data.top_aromas),
   }
 }
 

@@ -76,7 +76,7 @@ export default async function ConversationPage({
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-3xl leading-tight">
+        <h1 className="font-display text-display-sm leading-tight">
           {copy.withPerson.replace('{name}', otherName)}
         </h1>
         <p className="text-ink-faint text-xs">

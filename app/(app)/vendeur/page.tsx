@@ -62,7 +62,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
       <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
         <div className="flex flex-col gap-2">
           <p className="eyebrow">{copy.eyebrow}</p>
-          <h1 className="font-display text-4xl leading-tight">{copy.restrictedTitle}</h1>
+          <h1 className="font-display text-display-md leading-tight">{copy.restrictedTitle}</h1>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.restrictedBody}</p>
         </div>
       </main>
@@ -85,7 +85,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">
+        <h1 className="font-display text-display-md leading-tight">
           {copy.title} — {vendor.name}
         </h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
@@ -125,7 +125,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
       {open ? (
         <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-display text-2xl">{copy.editTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.editTitle}</h2>
             <Link href={routes.vendorSpace()} className="text-ink-muted text-sm underline">
               {copy.closePanel}
             </Link>
@@ -155,7 +155,12 @@ export default async function VendorSpacePage({ searchParams }: Props) {
 
           <div className="border-rule flex flex-wrap items-center gap-2 border-t pt-4">
             {!suspended && open.status === 'draft' && open.submitted_at === null ? (
-              <GestureForm id={open.id} gesture="soumettre" label={copy.submit} hint={copy.submitHint} />
+              <GestureForm
+                id={open.id}
+                gesture="soumettre"
+                label={copy.submit}
+                hint={copy.submitHint}
+              />
             ) : null}
             {!suspended && open.status === 'draft' && open.submitted_at !== null ? (
               <GestureForm id={open.id} gesture="retirer-soumission" label={copy.withdraw} />
@@ -170,7 +175,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
       ) : suspended ? null : (
         <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
           <div className="flex flex-col gap-1">
-            <h2 className="font-display text-2xl">{copy.createTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
             <p className="text-ink-muted measure text-sm leading-relaxed">{copy.createLede}</p>
           </div>
           <VendorCreateProductForm />
@@ -178,7 +183,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
       )}
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.productsTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.productsTitle}</h2>
         {products.length === 0 ? (
           <EmptyState title={copy.emptyTitle} description={copy.emptyBody} />
         ) : (
@@ -230,7 +235,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
 
       <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.storefrontTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.storefrontTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.storefrontLede}</p>
         </div>
         {suspended ? null : <StorefrontForm vendor={vendor} />}

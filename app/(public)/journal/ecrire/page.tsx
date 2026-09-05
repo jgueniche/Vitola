@@ -71,7 +71,7 @@ export default async function ComposePage({
             {m.journal.eyebrow}
           </Link>
         </p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -88,7 +88,7 @@ export default async function ComposePage({
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="font-display text-2xl">{copy.draftsTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.draftsTitle}</h2>
             {drafts.length === 0 ? (
               <p className="text-ink-muted text-sm">{copy.draftsEmpty}</p>
             ) : (
@@ -131,9 +131,7 @@ export default async function ComposePage({
               {article.status === 'draft' ? (
                 <form action={publishArticle}>
                   <input type="hidden" name="articleId" value={article.id} />
-                  <Button type="submit" size="sm">
-                    {copy.publish}
-                  </Button>
+                  <Button type="submit">{copy.publish}</Button>
                 </form>
               ) : (
                 <form action={unpublishArticle}>
@@ -147,7 +145,10 @@ export default async function ComposePage({
             </section>
           ) : null}
 
-          <ComposeForm key={article ? `${article.id}-${article.updated_at}` : 'new'} article={article} />
+          <ComposeForm
+            key={article ? `${article.id}-${article.updated_at}` : 'new'}
+            article={article}
+          />
 
           {article ? (
             article.audience === 'gated' ? (

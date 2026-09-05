@@ -38,7 +38,7 @@ export default async function AdminPage() {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -47,7 +47,7 @@ export default async function AdminPage() {
           number links to the screen that owns the work. */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.dash.shopTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.dash.shopTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.dash.shopLede}</p>
         </div>
         <p
@@ -95,7 +95,7 @@ export default async function AdminPage() {
       <Band variant="divider" />
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.dash.queuesTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.dash.queuesTitle}</h2>
         <ul className="grid gap-3 sm:grid-cols-2">
           <Queue
             count={openReports.length}
@@ -132,7 +132,7 @@ export default async function AdminPage() {
       <Band variant="divider" />
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.dash.stateTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.dash.stateTitle}</h2>
         <ul className="grid gap-3 sm:grid-cols-2">
           <Queue
             count={counts.sheetsUnreviewed}
@@ -159,7 +159,7 @@ export default async function AdminPage() {
       <Band variant="divider" />
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-2xl">{copy.dash.flagsTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.dash.flagsTitle}</h2>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.dash.flagsLede}</p>
         <p className="text-sm">
           <Link href={routes.adminFlags()} className="text-accent underline">

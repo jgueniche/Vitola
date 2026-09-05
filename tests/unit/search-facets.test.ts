@@ -66,6 +66,7 @@ describe('facetsToSearchParams', () => {
       countries: ['CU'],
       brand: 'cohiba',
       vitola: 'laguito-no-1',
+      completeness: 'a-completer',
       page: 4,
     }
     const params = facetsToSearchParams(facets)

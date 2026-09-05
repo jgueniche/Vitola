@@ -47,7 +47,7 @@ export function ReferentialFigure() {
         <div className="flex flex-col gap-4 p-5">
           <div className="flex flex-col gap-1">
             <p className="eyebrow">{P.brand}</p>
-            <h3 className="font-display text-xl leading-tight">{P.product}</h3>
+            <h3 className="text-base leading-tight font-medium">{P.product}</h3>
             <p className="text-ink-muted text-sm">{f.vitola}</p>
           </div>
           <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
@@ -692,7 +692,7 @@ export function ShopFigure() {
             </div>
             <div className="flex flex-col gap-2 p-4.5">
               <p className="eyebrow">{category}</p>
-              <h3 className="font-display text-lg">{P.productName}</h3>
+              <h3 className="text-base font-medium">{P.productName}</h3>
               <p className="text-ink-muted text-[13px]">{description}</p>
               <p className="mt-1 font-mono text-sm">
                 {P.price} {f.currency}

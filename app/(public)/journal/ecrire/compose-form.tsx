@@ -22,7 +22,7 @@ export function ComposeForm({ article }: { article: ArticleRow | null }) {
       <input type="hidden" name="articleId" value={article?.id ?? ''} />
 
       <fieldset className="flex flex-col gap-4">
-        <legend className="font-display text-2xl">
+        <legend className="font-display text-display-sm">
           {article ? copy.legendEdit : copy.legendNew}
         </legend>
 
@@ -55,7 +55,11 @@ export function ComposeForm({ article }: { article: ArticleRow | null }) {
           </div>
           <div className="flex min-w-64 flex-1 flex-col gap-1">
             <Label htmlFor="article-audience">{copy.audienceLabel}</Label>
-            <Select id="article-audience" name="audience" defaultValue={article?.audience ?? 'gated'}>
+            <Select
+              id="article-audience"
+              name="audience"
+              defaultValue={article?.audience ?? 'gated'}
+            >
               <option value="gated">{copy.audienceGated}</option>
               <option value="public">{copy.audiencePublic}</option>
             </Select>

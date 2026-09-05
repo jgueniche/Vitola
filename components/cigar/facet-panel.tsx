@@ -6,10 +6,12 @@ import { countryLabel } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import {
+  COMPLETENESS,
   EMPTY_FACETS,
   facetsToSearchParams,
   isFacetActive,
   STRENGTHS,
+  toggleCompleteness,
   toggleFacet,
   WRAPPER_SHADES,
   type Facets,
@@ -37,13 +39,7 @@ function href(facets: Facets): string {
   return query ? `${routes.cigars()}?${query}` : routes.cigars()
 }
 
-function FacetGroup({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function FacetGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="eyebrow mb-2">{title}</legend>
@@ -52,15 +48,7 @@ function FacetGroup({
   )
 }
 
-function FacetLink({
-  label,
-  active,
-  target,
-}: {
-  label: string
-  active: boolean
-  target: string
-}) {
+function FacetLink({ label, active, target }: { label: string; active: boolean; target: string }) {
   return (
     <Link
       href={target}
@@ -88,7 +76,7 @@ export function FacetPanel({
   return (
     <aside className="flex flex-col gap-6" aria-label={m.referential.facets.title}>
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="font-display text-lg">{m.referential.facets.title}</h2>
+        <h2 className="text-base font-medium">{m.referential.facets.title}</h2>
         {isFacetActive(facets) ? (
           <Link
             href={href({ ...EMPTY_FACETS, query: facets.query })}
@@ -119,6 +107,24 @@ export function FacetPanel({
             target={href(toggleFacet(facets, 'shades', shade))}
           />
         ))}
+      </FacetGroup>
+
+      <FacetGroup title={m.referential.facets.completeness}>
+        {COMPLETENESS.map((value) => (
+          <FacetLink
+            key={value}
+            label={
+              value === 'renseignee'
+                ? m.referential.facets.complete
+                : m.referential.facets.incomplete
+            }
+            active={facets.completeness === value}
+            target={href(toggleCompleteness(facets, value))}
+          />
+        ))}
+        <p className="text-ink-faint basis-full text-xs leading-relaxed">
+          {m.referential.facets.completenessHint}
+        </p>
       </FacetGroup>
 
       {countries.length > 0 ? (

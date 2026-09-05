@@ -525,3 +525,48 @@ pnpm storybook      # galerie des primitives
 
 Sujet à l'impératif, en anglais, préfixé par le domaine : `feat(band):`, `fix(age-gate):`,
 `docs(p0):`, `chore(ci):`. Le corps explique **pourquoi**, pas quoi.
+
+## La refonte des pages cigare — livrée le 5 septembre 2026
+
+Demandée le 5 septembre (« on comprend mal les pages des cigares, les dimensions des encarts,
+refonte majeure, la charte reste »), auditée d'abord — douze constats lus dans le code et mesurés
+en base, le canevas est dans `design/fiche-cigare/` — puis construite le même jour. La charte n'a
+pas bougé ; la distribution, si.
+
+**Ce qui est à l'écran** : la fiche en trois zones (ce que le référentiel sait, avec ses lacunes
+qui sont la porte du wiki ; un rail collant « vous et ce cigare » avec la cave, un seul geste et
+votre carnet ; ce qu'en disent les membres — la note à sa mesure, les arômes les plus cités, les
+entrées en lignes, la discussion de la fiche dite pour ce qu'elle est), la recherche dans
+l'en-tête et « Cigares » en entrée directe, le carnet groupé par mois, la liste en grille de bagues
+avec une facette « à compléter », et le profil aromatique des fiches (migration 0025).
+
+**Cinq règles qui ne se contournent pas :**
+
+1. **Un seul geste sur la fiche.** « J'en fume un » s'ouvre par `?geste=fumer` (l'état dans l'URL)
+   et délègue aux trois écritures qui existaient — `smoke_from_humidor()` pour le lot et l'entrée
+   (ADR 0006), `saveLogEntry` sans lot, la publication qui pointe l'entrée ou une session avec son
+   lieu (ADR 0007). L'action n'invente aucune règle : une entrée refusée est le refus entier, une
+   annonce refusée sur une entrée qui a abouti est un `notice`. Ne pas rouvrir un second formulaire
+   sur la fiche.
+2. **Le plancher du display est un contrôle de build**, pas une règle de CSS : `.font-display`
+   posait `max(2rem, 1em)` dans la couche de base et `text-2xl` gagnait — 91 titres rendus sous
+   32 px pendant que la feuille disait 32. `tooling/scripts/check-tokens.ts` refuse désormais
+   `font-display` à côté de toute taille sous `text-display-sm/md/lg`. Sous un titre de section,
+   c'est Marcellus (`.eyebrow`) ou Inter 16 demi-gras ; le mot-marque a sa classe `.wordmark`, seule
+   exception admise.
+3. **Le profil aromatique d'une fiche est un fait du référentiel, jamais un amorçage.**
+   `ref.cigars.aroma_tags` se propose par le wiki (treizième colonne de l'allowlist), un trigger
+   tient ce qu'une clé étrangère ne sait pas viser dans un tableau, et aucun script ne le remplit
+   (PROVENANCE §6 et §9). Les « arômes les plus cités » sont l'autre fait, agrégé par `cigar_stats`
+   sur les seules entrées publiques — la même frontière que la note.
+4. **Alimenter une fiche, c'est proposer.** `08_habanos_propositions.csv` et `seed_propositions.sql`
+   versent des propositions en attente dans `/contributions` (38 vitoles de galera standard, 129
+   forces publiées par Habanos pour la marque, 131 fiches), une par fiche, que le relecteur accepte ou refuse.
+   Aucune cape, aucun arôme, aucune fiche non cubaine : ce qui n'est pas justifiable reste vide.
+5. **Trois niveaux de conteneur, et pas un de plus.** La page, la carte (surface et filet, réservée
+   au rail et aux chiffres), la ligne (un filet sous le texte). Jamais une carte dans une carte ;
+   une entrée est une ligne avec sa note dans la marge, la portée en quatre puces sur une ligne.
+
+**Ce qui reste à faire, et qui le fait** : les 131 propositions attendent le clic du relecteur ;
+les 862 fiches sans vitole restent listées par la facette « À compléter » ; le canevas de
+`design/fiche-cigare/` garde les directions B et C si A déçoit à l'usage.

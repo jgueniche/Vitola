@@ -50,9 +50,7 @@ export function ClubControls({
         <form action={joinClub}>
           <input type="hidden" name="clubId" value={clubId} />
           <input type="hidden" name="slug" value={slug} />
-          <Button type="submit" size="sm">
-            {copy.join}
-          </Button>
+          <Button type="submit">{copy.join}</Button>
         </form>
       )}
 

@@ -74,7 +74,10 @@ export default async function ComparePage({ searchParams }: Props) {
 
   const rows: { label: string; value: (cigar: CigarDetail) => string | null }[] = [
     { label: copy.rowBrand, value: (c) => c.brands?.name ?? null },
-    { label: copy.rowOrigin, value: (c) => (c.origin_country ? countryLabel(c.origin_country) : null) },
+    {
+      label: copy.rowOrigin,
+      value: (c) => (c.origin_country ? countryLabel(c.origin_country) : null),
+    },
     { label: copy.rowVitola, value: (c) => c.vitolas?.name_salida ?? null },
     {
       label: copy.rowDimensions,
@@ -82,8 +85,14 @@ export default async function ComparePage({ searchParams }: Props) {
         c.vitolas ? formatDimensions(c.vitolas.ring_gauge, c.vitolas.length_mm) : null,
     },
     { label: copy.rowShape, value: (c) => (c.vitolas ? shapeLabel(c.vitolas.shape) : null) },
-    { label: copy.rowWrapperOrigin, value: (c) => (c.wrapper_origin ? countryLabel(c.wrapper_origin) : null) },
-    { label: copy.rowBinderOrigin, value: (c) => (c.binder_origin ? countryLabel(c.binder_origin) : null) },
+    {
+      label: copy.rowWrapperOrigin,
+      value: (c) => (c.wrapper_origin ? countryLabel(c.wrapper_origin) : null),
+    },
+    {
+      label: copy.rowBinderOrigin,
+      value: (c) => (c.binder_origin ? countryLabel(c.binder_origin) : null),
+    },
     {
       label: copy.rowFillerOrigins,
       value: (c) =>
@@ -127,7 +136,7 @@ export default async function ComparePage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -165,7 +174,7 @@ export default async function ComparePage({ searchParams }: Props) {
                       <span className="flex flex-col gap-1">
                         <Link
                           href={routes.cigar(cigar.slug)}
-                          className="font-display hover:text-accent-bright text-lg leading-tight"
+                          className="hover:text-accent-bright text-base leading-tight font-medium"
                         >
                           {cigar.commercial_name}
                         </Link>
@@ -193,13 +202,8 @@ export default async function ComparePage({ searchParams }: Props) {
                       <span className="eyebrow">{row.label}</span>
                     </th>
                     {kept.map((cigar) => (
-                      <td
-                        key={cigar.slug}
-                        className="border-rule border-b px-3 py-2 align-top"
-                      >
-                        {row.value(cigar) ?? (
-                          <span className="text-ink-faint">{copy.missing}</span>
-                        )}
+                      <td key={cigar.slug} className="border-rule border-b px-3 py-2 align-top">
+                        {row.value(cigar) ?? <span className="text-ink-faint">{copy.missing}</span>}
                       </td>
                     ))}
                   </tr>
@@ -234,7 +238,7 @@ export default async function ComparePage({ searchParams }: Props) {
       )}
 
       <section className="border-rule flex flex-col gap-4 border-t pt-8">
-        <h2 className="font-display text-2xl">{copy.searchLabel}</h2>
+        <h2 className="font-display text-display-sm">{copy.searchLabel}</h2>
 
         {kept.length >= MAX ? (
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.full}</p>

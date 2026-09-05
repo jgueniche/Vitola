@@ -31,6 +31,21 @@ const buttonStyles = cva(
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonStyles>
 
+/**
+ * The button's classes, for a link that must look like one.
+ *
+ * A `<Link>` wrapping a `<Button>` nests two interactive elements, which a
+ * screen reader announces twice and a keyboard tabs through twice. A link
+ * styled as a button is one element that does one thing — navigate — and says
+ * so. Sizes follow the rule of the design system: `lg` (48px) for the one
+ * gesture of a page, `md` (40px) for submitting and for secondary actions,
+ * `sm` (32px) never for a gesture.
+ */
+export function buttonClass(props: VariantProps<typeof buttonStyles> & { className?: string }) {
+  const { className, ...variants } = props
+  return cn(buttonStyles(variants), className)
+}
+
 export function Button({ className, variant, size, type = 'button', ...props }: ButtonProps) {
   return (
     <button type={type} className={cn(buttonStyles({ variant, size }), className)} {...props} />

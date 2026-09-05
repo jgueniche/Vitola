@@ -35,7 +35,7 @@ export default async function JournalPage() {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="text-sm">
           {/* Always underlined: a link in running text told apart by colour
@@ -68,7 +68,7 @@ export default async function JournalPage() {
               </div>
               <Link
                 href={routes.journalArticle(article.slug)}
-                className="font-display text-ink hover:text-accent text-2xl leading-snug transition-colors duration-(--duration-quick)"
+                className="font-display text-ink hover:text-accent text-display-sm leading-snug transition-colors duration-(--duration-quick)"
               >
                 {article.title}
               </Link>

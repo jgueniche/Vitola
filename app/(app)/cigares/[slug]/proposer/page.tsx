@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { listAromaWheel } from '@/lib/aromas/queries'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
@@ -39,7 +40,7 @@ export default async function ProposePage({ params }: Params) {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.cigarPropose(slug))}`)
   }
 
-  const [values, vitolas, lines, open] = await Promise.all([
+  const [values, vitolas, lines, open, families] = await Promise.all([
     currentValues(cigar.id),
     listVitolaOptions(),
     /* Published lines of this brand only — ADR 0009: the dropdown is the first
@@ -49,6 +50,7 @@ export default async function ProposePage({ params }: Params) {
        Closed is the fallback: a flag that opens a door must never be opened by
        a database hiccup. */
     isFeatureEnabled('wiki_contributions_open'),
+    listAromaWheel(),
   ])
   if (!values) notFound()
 
@@ -65,6 +67,7 @@ export default async function ProposePage({ params }: Params) {
     release_type: String(values.release_type ?? 'regular'),
     release_year: (values.release_year as number | null) ?? null,
     discontinued_year: (values.discontinued_year as number | null) ?? null,
+    aroma_tags: (values.aroma_tags as number[] | null) ?? [],
   }
 
   return (
@@ -74,7 +77,7 @@ export default async function ProposePage({ params }: Params) {
           {copy.backToSheet}
         </Link>
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.proposeTitle}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.proposeTitle}</h1>
         <p className="text-ink-muted text-sm">
           {copy.proposeFor} : {cigar.brands?.name ? `${cigar.brands.name} · ` : ''}
           {cigar.commercial_name}
@@ -85,7 +88,14 @@ export default async function ProposePage({ params }: Params) {
       <Band variant="divider" />
 
       {open ? (
-        <ProposeForm cigarId={cigar.id} slug={slug} current={current} vitolas={vitolas} lines={lines} />
+        <ProposeForm
+          cigarId={cigar.id}
+          slug={slug}
+          current={current}
+          vitolas={vitolas}
+          lines={lines}
+          families={families}
+        />
       ) : (
         <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
           <p className="eyebrow">{copy.closedTitle}</p>

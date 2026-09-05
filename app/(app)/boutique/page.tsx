@@ -62,7 +62,7 @@ export default async function ShopPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -91,9 +91,13 @@ export default async function ShopPage({ searchParams }: Props) {
                   {copy.searchSubmit}
                 </button>
               </div>
-              {filters.categorie ? <input type="hidden" name="categorie" value={filters.categorie} /> : null}
+              {filters.categorie ? (
+                <input type="hidden" name="categorie" value={filters.categorie} />
+              ) : null}
               {filters.marque ? <input type="hidden" name="marque" value={filters.marque} /> : null}
-              {filters.vendeur ? <input type="hidden" name="vendeur" value={filters.vendeur} /> : null}
+              {filters.vendeur ? (
+                <input type="hidden" name="vendeur" value={filters.vendeur} />
+              ) : null}
               {filters.prix ? <input type="hidden" name="prix" value={filters.prix} /> : null}
             </form>
 
@@ -102,7 +106,9 @@ export default async function ShopPage({ searchParams }: Props) {
               options={facets.categories.map((f) => ({
                 label: CATEGORY_LABELS[f.value] ?? f.value,
                 count: f.count,
-                href: withFilters({ categorie: filters.categorie === f.value ? undefined : f.value }),
+                href: withFilters({
+                  categorie: filters.categorie === f.value ? undefined : f.value,
+                }),
                 active: filters.categorie === f.value,
               }))}
             />
@@ -153,7 +159,10 @@ export default async function ShopPage({ searchParams }: Props) {
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {products.map((product) => (
                   <li key={product.id} className="border-rule bg-surface rounded-[3px] border">
-                    <Link href={routes.shopProduct(product.slug)} className="flex h-full flex-col gap-2 p-4">
+                    <Link
+                      href={routes.shopProduct(product.slug)}
+                      className="flex h-full flex-col gap-2 p-4"
+                    >
                       {product.image_path && images.get(product.image_path) ? (
                         // eslint-disable-next-line @next/next/no-img-element -- signed URL
                         <img
@@ -166,7 +175,7 @@ export default async function ShopPage({ searchParams }: Props) {
                           {copy.noImage}
                         </span>
                       )}
-                      <span className="font-semibold leading-snug">{product.title}</span>
+                      <span className="leading-snug font-semibold">{product.title}</span>
                       <span className="text-ink-faint text-xs">
                         {product.brand ? `${product.brand} · ` : ''}
                         {CATEGORY_LABELS[product.category] ?? product.category}
@@ -174,7 +183,9 @@ export default async function ShopPage({ searchParams }: Props) {
                       <span className="text-ink-faint text-xs">
                         {copy.soldBy} {product.vendor?.name ?? '—'}
                       </span>
-                      <span className="mt-auto font-mono text-sm">{formatPrice(product.price_eur)}</span>
+                      <span className="mt-auto font-mono text-sm">
+                        {formatPrice(product.price_eur)}
+                      </span>
                     </Link>
                   </li>
                 ))}

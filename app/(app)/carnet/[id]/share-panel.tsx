@@ -52,7 +52,7 @@ export function SharePanel({
   return (
     <section aria-labelledby="partages" className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h2 id="partages" className="font-display text-xl">
+        <h2 id="partages" className="text-base font-medium">
           {copy.title}
         </h2>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>

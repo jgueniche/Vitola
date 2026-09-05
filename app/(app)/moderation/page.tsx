@@ -54,7 +54,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
       <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
         <div className="flex flex-col gap-2">
           <p className="eyebrow">{copy.eyebrow}</p>
-          <h1 className="font-display text-4xl leading-tight">{copy.restrictedTitle}</h1>
+          <h1 className="font-display text-display-md leading-tight">{copy.restrictedTitle}</h1>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.restrictedBody}</p>
         </div>
       </main>
@@ -71,7 +71,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">
           {copy.lede.replace('{hours}', String(slaHours))}
         </p>
@@ -131,7 +131,14 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                         ) : null}
                       </>
                     ) : row.decided_at ? (
-                      <> · {copy.case.decidedOn.replace('{date}', formatDateTime(new Date(row.decided_at)))}</>
+                      <>
+                        {' '}
+                        ·{' '}
+                        {copy.case.decidedOn.replace(
+                          '{date}',
+                          formatDateTime(new Date(row.decided_at)),
+                        )}
+                      </>
                     ) : null}
                   </p>
                 </div>
@@ -139,7 +146,10 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
                   <p className="text-ink-muted mt-2 text-sm leading-relaxed">{row.detail}</p>
                 ) : null}
                 <p className="mt-3">
-                  <Link href={routes.moderationReport(row.id)} className="text-ink text-sm underline">
+                  <Link
+                    href={routes.moderationReport(row.id)}
+                    className="text-ink text-sm underline"
+                  >
                     {copy.openCase}
                   </Link>
                 </p>

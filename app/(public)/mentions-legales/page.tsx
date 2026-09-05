@@ -26,7 +26,7 @@ export default async function Page() {
     <DocumentPage eyebrow="Informations légales" title={m.legal.noticeTitle}>
       <p>{m.legal.placeholder}</p>
 
-      <h2 className="font-display text-ink mt-6 text-2xl">{m.legal.dsaTitle}</h2>
+      <h2 className="font-display text-ink text-display-sm mt-6">{m.legal.dsaTitle}</h2>
       <p>{m.legal.dsaMechanism}</p>
       <p>{m.legal.dsaDeadline.replace('{hours}', String(hours))}</p>
 

@@ -42,7 +42,7 @@ export default async function VitolasPage() {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-3">
         <p className="eyebrow">{m.referential.eyebrow}</p>
-        <h1 className="font-display text-4xl">{m.referential.vitolasTitle}</h1>
+        <h1 className="font-display text-display-md">{m.referential.vitolasTitle}</h1>
       </div>
 
       <Band variant="divider" />
@@ -57,9 +57,7 @@ export default async function VitolasPage() {
                 className="border-rule bg-surface hover:border-rule-strong flex flex-wrap items-center justify-between gap-4 rounded-[3px] border px-4 py-3 transition-colors"
               >
                 <span className="flex flex-col gap-0.5">
-                  <span className="font-display text-lg leading-tight">
-                    {vitola.name_salida}
-                  </span>
+                  <span className="text-base leading-tight font-medium">{vitola.name_salida}</span>
                   <span className="text-ink-muted text-xs">
                     {vitola.name_galera ? `${vitola.name_galera} · ` : null}
                     {shapeLabel(vitola.shape)}

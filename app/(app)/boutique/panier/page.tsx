@@ -52,13 +52,15 @@ export default async function ShopCartPage({ searchParams }: Props) {
   })
   const missing = cart.length - lines.length
   const images = await signShopImages(lines.map((line) => line.product.image_path))
-  const totals = cartTotals(lines.map((line) => ({ priceEur: line.product.price_eur, qty: line.qty })))
+  const totals = cartTotals(
+    lines.map((line) => ({ priceEur: line.product.price_eur, qty: line.qty })),
+  )
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 

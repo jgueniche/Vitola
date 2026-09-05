@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: copy.title }
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <>
-      <h2 className="font-display text-ink mt-8 text-2xl">{title}</h2>
+      <h2 className="font-display text-ink text-display-sm mt-8">{title}</h2>
       {children}
     </>
   )
@@ -96,11 +96,12 @@ export default function Page() {
 
       <Section title={copy.rightsTitle}>
         <p>{copy.rightsBody}</p>
+        <p>{copy.rightsExport.replace('{count}', String(sourceCount))}</p>
         <p>
-          {copy.rightsExport.replace('{count}', String(sourceCount))}
-        </p>
-        <p>
-          <Link href={routes.settings()} className="text-accent-bright underline underline-offset-4">
+          <Link
+            href={routes.settings()}
+            className="text-accent-bright underline underline-offset-4"
+          >
             {m.settings.title}
           </Link>
           {' · '}

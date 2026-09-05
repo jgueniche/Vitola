@@ -39,7 +39,7 @@ export default async function BrandsPage() {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-3">
         <p className="eyebrow">{m.referential.eyebrow}</p>
-        <h1 className="font-display text-4xl">{m.referential.brandsTitle}</h1>
+        <h1 className="font-display text-display-md">{m.referential.brandsTitle}</h1>
       </div>
 
       <Band variant="divider" />
@@ -51,7 +51,7 @@ export default async function BrandsPage() {
               href={routes.brand(brand.slug)}
               className="border-rule bg-surface hover:border-rule-strong flex flex-col gap-1 rounded-[3px] border px-4 py-3 transition-colors"
             >
-              <span className="font-display text-lg leading-tight">{brand.name}</span>
+              <span className="text-base leading-tight font-medium">{brand.name}</span>
               <span className="text-ink-muted text-xs">
                 {brand.country ? countryLabel(brand.country) : null}
                 {brand.manufacturers ? ` · ${brand.manufacturers.name}` : null}

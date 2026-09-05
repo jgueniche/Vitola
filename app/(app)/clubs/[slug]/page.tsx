@@ -82,7 +82,7 @@ export default async function ClubPage({
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{club.name}</h1>
+        <h1 className="font-display text-display-md leading-tight">{club.name}</h1>
         {club.description ? (
           <p className="text-ink-muted measure text-sm leading-relaxed">{club.description}</p>
         ) : null}
@@ -113,7 +113,7 @@ export default async function ClubPage({
       <ClubControls clubId={club.id} slug={club.slug} isMember={isMember} isOwner={isOwner} />
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-2xl">{copy.membersTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.membersTitle}</h2>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.membersLede}</p>
         <ul className="flex flex-col gap-2">
           {members.map((member) => (
@@ -131,7 +131,7 @@ export default async function ClubPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-2xl">{copy.agendaTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.agendaTitle}</h2>
 
         {upcoming.length === 0 ? (
           <EmptyState title={m.events.emptyTitle} description={copy.agendaEmpty} />
@@ -144,7 +144,7 @@ export default async function ClubPage({
               >
                 <Link
                   href={routes.event(event.id)}
-                  className="font-display text-ink hover:text-accent text-lg transition-colors duration-(--duration-quick)"
+                  className="text-ink hover:text-accent text-base font-medium transition-colors duration-(--duration-quick)"
                 >
                   {event.title}
                 </Link>
@@ -157,7 +157,9 @@ export default async function ClubPage({
           </ul>
         )}
 
-        {isMember ? <EventForm clubId={club.id} clubName={club.name} venueOptions={await venueOptions()} /> : null}
+        {isMember ? (
+          <EventForm clubId={club.id} clubName={club.name} venueOptions={await venueOptions()} />
+        ) : null}
       </section>
     </main>
   )

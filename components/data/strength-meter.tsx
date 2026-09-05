@@ -26,30 +26,36 @@ export function strengthLabel(strength: Strength): string {
 export function StrengthMeter({
   strength,
   showLabel = true,
+  size = 'sm',
   className,
 }: {
   strength: Strength
   showLabel?: boolean
+  /** `lg` is the spec strip of a sheet: 10px notches, 8 to 20px tall. */
+  size?: 'sm' | 'lg'
   className?: string
 }) {
   const activeIndex = STRENGTHS.indexOf(strength)
+  const base = size === 'lg' ? 8 : 6
+  const step = size === 'lg' ? 3 : 2
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <span
         role="img"
         aria-label={`Force : ${STRENGTH_LABELS[strength]}, ${activeIndex + 1} sur ${STRENGTHS.length}`}
-        className="flex items-end gap-0.5"
+        className={cn('flex items-end', size === 'lg' ? 'gap-1' : 'gap-0.5')}
       >
-        {STRENGTHS.map((step, index) => (
+        {STRENGTHS.map((notch, index) => (
           <span
-            key={step}
+            key={notch}
             aria-hidden="true"
             className={cn(
-              'w-1.5 rounded-[1px]',
+              'rounded-[1px]',
+              size === 'lg' ? 'w-2.5' : 'w-1.5',
               index <= activeIndex ? 'bg-accent' : 'bg-rule-strong',
             )}
-            style={{ height: `${6 + index * 2}px` }}
+            style={{ height: `${base + index * step}px` }}
           />
         ))}
       </span>

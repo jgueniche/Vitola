@@ -69,7 +69,7 @@ export default async function ShopVendorPage({ params }: Props) {
         ) : null}
         <div className="flex min-w-0 flex-col gap-2">
           <p className="eyebrow">{copy.eyebrow}</p>
-          <h1 className="font-display text-4xl leading-tight">{vendor.name}</h1>
+          <h1 className="font-display text-display-md leading-tight">{vendor.name}</h1>
           {vendor.description ? (
             <p className="text-ink-muted measure text-sm leading-relaxed">{vendor.description}</p>
           ) : null}
@@ -102,7 +102,7 @@ export default async function ShopVendorPage({ params }: Props) {
       </div>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.vendorShelfTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.vendorShelfTitle}</h2>
         {shelf.length === 0 ? (
           <EmptyState title={copy.vendorShelfEmpty} description={copy.shelfEmptyBody} />
         ) : (

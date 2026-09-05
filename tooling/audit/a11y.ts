@@ -41,6 +41,7 @@ const MEMBER_PAGES = [
   '/autour',
   '/cigares',
   '/cigares/undercrown-10-robusto',
+  '/cigares/undercrown-10-robusto?geste=fumer',
   '/cigares/undercrown-10-robusto/degustation',
   '/marques',
   '/carnet',

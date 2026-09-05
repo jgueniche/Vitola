@@ -27,7 +27,7 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `humidor/model.ts` | Le signe d'un mouvement, les bornes de la cave, la courbe de maturité, le format CSV. |
 | `stats/queries.ts` | Ce que comptent les statistiques, et le plafond qu'elles annoncent. |
 | `settings/model.ts` | Les défauts de `profile_settings`, et la base légale de chaque consentement. |
-| `wiki/model.ts` | Les onze colonnes qu'une contribution peut proposer, et la forme d'un diff. |
+| `wiki/model.ts` | Les treize colonnes qu'une contribution peut proposer — le profil aromatique depuis la 0025 — et la forme d'un diff. |
 | `boxcode/decode.ts` | La **forme** d'un code de boîte. Le **sens** est en base, dans `ref.box_codes`. |
 | `site.ts` | L'origine sur laquelle le site répond — sitemap et `metadataBase`. |
 | `flags.ts` | La lecture d'un drapeau, et le repli fermé qui va avec. |

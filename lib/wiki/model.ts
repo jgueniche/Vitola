@@ -30,11 +30,17 @@
  * no database constraint says a line and a sheet share a brand, so the
  * allowlist's shape is the only guard. Creating a line stays out (piece 3,
  * deferred): a line is born from an editor, draft by default.
+ *
+ * `aroma_tags` joined with migration 0025: the profile of a sheet — what one
+ * finds from one box to the next — is a referential fact, distinct from what
+ * a tasting relevé says. It is proposed like the strength, and it is never
+ * seeded: a guessed profile is exactly what PROVENANCE §6 refuses.
  */
 
 import { Constants } from '@/lib/supabase/database.types'
 
-export type FieldKind = 'text' | 'enum' | 'country' | 'countryList' | 'year' | 'vitola' | 'line'
+export type FieldKind =
+  'text' | 'enum' | 'country' | 'countryList' | 'year' | 'vitola' | 'line' | 'aromas'
 
 export type EditableField = {
   /** The column, which is also the diff key. */
@@ -58,6 +64,10 @@ export const EDITABLE_FIELDS = [
   { column: 'release_type', kind: 'enum', values: Constants.ref.Enums.release_type },
   { column: 'release_year', kind: 'year' },
   { column: 'discontinued_year', kind: 'year' },
+  /* The aroma profile (migration 0025): descriptor ids of the wheel, stored as
+     strings in a diff like every other list, cast back to integers on apply.
+     Twelve at most — the CHECK says so, and `validate()` says it in French. */
+  { column: 'aroma_tags', kind: 'aromas' },
 ] as const satisfies readonly EditableField[]
 
 export type EditableColumn = (typeof EDITABLE_FIELDS)[number]['column']

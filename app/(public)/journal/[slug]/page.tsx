@@ -60,7 +60,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </Link>{' '}
           · {copy.categories[article.category]}
         </p>
-        <h1 className="font-display text-4xl leading-tight">{article.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{article.title}</h1>
         <p className="text-ink-faint text-xs tabular-nums">
           {article.status === 'draft' ? (
             <span className="eyebrow">{copy.draftBadge} · </span>
@@ -88,7 +88,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       {links.length > 0 ? (
         <section className="flex flex-col gap-3">
           <Band variant="divider" />
-          <h2 className="font-display text-2xl">{copy.linksTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.linksTitle}</h2>
           <ul className="flex flex-col gap-1 text-sm">
             {links.map((link) => (
               <li key={link.id}>
@@ -101,7 +101,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     {link.cigar.name}
                   </Link>
                 ) : link.venue ? (
-                  <Link href={routes.venue(link.venue.slug)} className="text-accent underline underline-offset-4">
+                  <Link
+                    href={routes.venue(link.venue.slug)}
+                    className="text-accent underline underline-offset-4"
+                  >
                     {link.venue.name}
                   </Link>
                 ) : null}

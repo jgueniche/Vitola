@@ -32,7 +32,7 @@ export default async function VitolaPage({ params }: Params) {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.referential.vitolasTitle}</p>
-        <h1 className="font-display text-4xl leading-tight">{vitola.name_salida}</h1>
+        <h1 className="font-display text-display-md leading-tight">{vitola.name_salida}</h1>
         {vitola.name_galera ? (
           <p className="text-ink-muted text-sm">
             {m.referential.vitola.galera} · {vitola.name_galera}

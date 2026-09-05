@@ -1249,11 +1249,13 @@ export type Database = {
           bayesian_score: number | null
           cigar_id: string | null
           distribution: Json | null
+          entry_count: number | null
           last_review_at: string | null
           mean_score: number | null
           mean_score_90d: number | null
           review_count: number | null
           review_count_90d: number | null
+          top_aromas: Json | null
         }
         Relationships: []
       }
@@ -1775,6 +1777,7 @@ export type Database = {
       }
       cigars: {
         Row: {
+          aroma_tags: number[]
           binder_origin: string | null
           brand_id: string
           commercial_name: string
@@ -1804,6 +1807,7 @@ export type Database = {
           wrapper_shade: Database["ref"]["Enums"]["wrapper_shade"] | null
         }
         Insert: {
+          aroma_tags?: number[]
           binder_origin?: string | null
           brand_id: string
           commercial_name: string
@@ -1833,6 +1837,7 @@ export type Database = {
           wrapper_shade?: Database["ref"]["Enums"]["wrapper_shade"] | null
         }
         Update: {
+          aroma_tags?: number[]
           binder_origin?: string | null
           brand_id?: string
           commercial_name?: string

@@ -50,7 +50,7 @@ export function PostCommentForm({ postId }: { postId: string }) {
       {state.done ? <FieldStatus>{copy.done}</FieldStatus> : null}
 
       <div>
-        <Button type="submit" size="sm" disabled={pending}>
+        <Button type="submit" disabled={pending}>
           {copy.submit}
         </Button>
       </div>

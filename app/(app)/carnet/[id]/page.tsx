@@ -108,7 +108,9 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
             href={routes.cigar(entry.cigar.slug)}
             className="font-display hover:text-accent-bright text-4xl leading-tight"
           >
-            {entry.cigar.brand ? <span className="text-ink-muted">{entry.cigar.brand} </span> : null}
+            {entry.cigar.brand ? (
+              <span className="text-ink-muted">{entry.cigar.brand} </span>
+            ) : null}
             {entry.cigar.commercial_name}
           </Link>
         ) : (
@@ -168,7 +170,7 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
 
       {thirds.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <h2 className="font-display text-xl">{copy.thirds}</h2>
+          <h2 className="text-base font-medium">{copy.thirds}</h2>
           <dl className="flex flex-col">
             {thirds.map((third) => (
               <Row key={third.third} label={thirdLabels[third.third - 1] ?? String(third.third)}>

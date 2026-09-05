@@ -77,7 +77,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.case.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">
+        <h1 className="font-display text-display-md leading-tight">
           {surfaces[`${report.entity_schema}.${report.entity_table}`] ?? report.entity_table}
         </h1>
         <p className="text-ink-muted text-sm">
@@ -151,7 +151,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
 
           <section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl">{copy.case.decideTitle}</h2>
+              <h2 className="font-display text-display-sm">{copy.case.decideTitle}</h2>
               <p className="text-ink-muted measure text-sm leading-relaxed">
                 {copy.case.decideLede}
               </p>

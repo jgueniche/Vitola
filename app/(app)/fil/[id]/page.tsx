@@ -80,7 +80,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       <Band variant="divider" />
 
       <section aria-labelledby="reponses" className="flex flex-col gap-4">
-        <h2 id="reponses" className="font-display text-2xl">
+        <h2 id="reponses" className="font-display text-display-sm">
           {copy.comments.title}
         </h2>
 

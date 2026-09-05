@@ -25,7 +25,13 @@ const LABELS: Record<ReviewVisibility, { label: string; hint: string }> = {
  * Four radios rather than a select, because this is the control that decides
  * who reads a note about tobacco consumption, which §2 of the brief says may be
  * art. 9 data. A collapsed listbox shows one option and hides three; here the
- * four consequences are readable at once, without a click, before choosing.
+ * four options are readable at once, without a click, before choosing — and
+ * the sentence under the row says what the chosen one does.
+ *
+ * Four pills in a row rather than four stacked cards, since the design audit
+ * of 5 septembre 2026: stacked, the control was 300px tall and was deployed
+ * twice on the same page. The pills carry the same four consequences, one
+ * hint at a time, and the "mes abonnés" warning still fires at the choice.
  *
  * `private` is pre-selected because it is the column default, and ADR 0004 ties
  * that default to art. 25: publishing is a gesture one makes, never one one
@@ -94,8 +100,10 @@ export function ScopeSelector({
     onChange?.(next)
   }
 
+  const { hint } = LABELS[selected]
+
   return (
-    <fieldset className="flex flex-col gap-3">
+    <fieldset className="flex flex-col gap-2">
       <legend className="eyebrow mb-2">{copy.legend}</legend>
 
       {/*
@@ -113,18 +121,18 @@ export function ScopeSelector({
         radio is what the *next* submit posts, so a second save — fixing a typo —
         republished an entry its author had just made private.
       */}
-      <div key={value ?? 'new'} className="flex flex-col gap-2">
+      <div key={value ?? 'new'} className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
         {REVIEW_SCOPES.map((scope) => {
-          const { label, hint } = LABELS[scope]
+          const { label } = LABELS[scope]
           const active = selected === scope
           return (
             <label
               key={scope}
               className={cn(
-                'flex cursor-pointer gap-3 rounded-[3px] border px-3 py-2.5 transition-colors duration-(--duration-quick)',
+                'flex h-9 cursor-pointer items-center justify-center gap-2 rounded-[3px] border px-2 text-sm transition-colors duration-(--duration-quick)',
                 active
-                  ? 'border-accent bg-surface-raised'
-                  : 'border-rule bg-surface hover:border-rule-strong',
+                  ? 'border-accent bg-accent text-on-accent'
+                  : 'border-rule bg-surface text-ink-muted hover:border-rule-strong hover:text-ink',
               )}
             >
               <input
@@ -133,16 +141,15 @@ export function ScopeSelector({
                 value={scope}
                 checked={active}
                 onChange={() => choose(scope)}
-                className="accent-accent mt-1 shrink-0"
+                className="accent-accent"
               />
-              <span className="flex flex-col gap-0.5">
-                <span className="text-ink text-sm">{label}</span>
-                <span className="text-ink-muted text-xs leading-relaxed">{hint}</span>
-              </span>
+              <span>{label}</span>
             </label>
           )
         })}
       </div>
+
+      <p className="text-ink-muted text-xs leading-relaxed">{hint}</p>
 
       {SCOPE_TRAITS[selected].livingAudience ? (
         <div
@@ -165,8 +172,6 @@ export function ScopeSelector({
       {selected === 'public' ? (
         <p className="text-ink-faint measure text-xs leading-relaxed">{copy.publicCounts}</p>
       ) : null}
-
-      <p className="text-ink-faint text-xs">{copy.hint}</p>
     </fieldset>
   )
 }

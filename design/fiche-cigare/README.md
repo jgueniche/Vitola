@@ -87,3 +87,10 @@ node <skill>/seed-canvas.mjs --template <skill>/payload.template.html \
 ```
 
 `pages-cigare-refonte.html` est un produit de sortie (éditeur embarqué) : il n'est pas versionné.
+
+## Livré
+
+La direction A est construite le 5 septembre 2026, le jour même de l'audit, sur instruction du
+porteur. Ce que le code fait de chaque planche est consigné dans le `CLAUDE.md` racine (« La
+refonte des pages cigare ») et dans `docs/decisions-log.md`. Les planches restent la référence
+visuelle ; les directions B et C restent sur le canevas si A déçoit à l'usage.

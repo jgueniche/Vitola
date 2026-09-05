@@ -178,7 +178,7 @@ export function ReportDialog({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" size="sm" disabled={outcome === 'sending'}>
+            <Button type="submit" disabled={outcome === 'sending'}>
               {copy.submit}
             </Button>
             <Button variant="ghost" size="sm" onClick={toggle}>

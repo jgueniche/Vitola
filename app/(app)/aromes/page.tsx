@@ -28,7 +28,7 @@ export default async function AromasPage() {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-3">
         <p className="eyebrow">{m.aromas.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{m.aromas.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{m.aromas.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{m.aromas.lede}</p>
       </div>
 

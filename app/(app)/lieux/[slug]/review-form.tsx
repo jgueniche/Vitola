@@ -44,7 +44,7 @@ export function VenueReviewForm({
       <input type="hidden" name="slug" value={slug} />
 
       <fieldset className="flex flex-col gap-3">
-        <legend className="font-display text-xl">
+        <legend className="text-base font-medium">
           {existing ? copy.formLegendEdit : copy.formLegendNew}
         </legend>
         <p className="text-ink-muted measure text-xs leading-relaxed">{copy.guard}</p>
