@@ -559,14 +559,19 @@ avec une facette « à compléter », et le profil aromatique des fiches (migrat
    tient ce qu'une clé étrangère ne sait pas viser dans un tableau, et aucun script ne le remplit
    (PROVENANCE §6 et §9). Les « arômes les plus cités » sont l'autre fait, agrégé par `cigar_stats`
    sur les seules entrées publiques — la même frontière que la note.
-4. **Alimenter une fiche, c'est proposer.** `08_habanos_propositions.csv` et `seed_propositions.sql`
-   versent des propositions en attente dans `/contributions` (38 vitoles de galera standard, 129
-   forces publiées par Habanos pour la marque, 131 fiches), une par fiche, que le relecteur accepte ou refuse.
-   Aucune cape, aucun arôme, aucune fiche non cubaine : ce qui n'est pas justifiable reste vide.
+4. **Alimenter une fiche, c'est proposer — et le porteur a choisi d'accepter d'un bloc.**
+   `08_habanos_propositions.csv` et `seed_propositions.sql` versent des propositions dans
+   `/contributions` (77 vitoles de galera standard dont 39 sur le vitolario étendu de 36 galeras,
+   129 forces publiées par Habanos pour la marque) ; `apply_propositions.sql` les accepte comme
+   « Accepter » le ferait, une par une, avec la trace qui cite l'instruction du 6 septembre 2026
+   (« publie tout ce que tu peux, on fera les corrections derrière »). La relecture est déplacée
+   après, fiche par fiche. Aucune cape, aucun arôme, aucune fiche non cubaine : ce qui n'a pas de
+   source reste vide.
 5. **Trois niveaux de conteneur, et pas un de plus.** La page, la carte (surface et filet, réservée
    au rail et aux chiffres), la ligne (un filet sous le texte). Jamais une carte dans une carte ;
    une entrée est une ligne avec sa note dans la marge, la portée en quatre puces sur une ligne.
 
-**Ce qui reste à faire, et qui le fait** : les 131 propositions attendent le clic du relecteur ;
-les 862 fiches sans vitole restent listées par la facette « À compléter » ; le canevas de
+**Ce qui reste à faire, et qui le fait** : relire fiche par fiche ce que l'amorçage a écrit —
+les 36 galeras ajoutées d'abord, une cote fausse contamine toutes les fiches qui la portent ; les
+fiches sans vitole restent listées par la facette « À compléter » ; le canevas de
 `design/fiche-cigare/` garde les directions B et C si A déçoit à l'usage.

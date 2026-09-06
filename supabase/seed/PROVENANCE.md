@@ -304,3 +304,20 @@ juste, la cote de la vitole reste au premier poste de relecture du §5.
 
 Le script est idempotent : une fiche déjà renseignée ne reçoit pas de proposition pour cette
 colonne, une fiche qui porte déjà une proposition d'amorçage en attente n'en reçoit pas une seconde.
+
+**Le 6 septembre 2026, le porteur a tranché plus loin** : « publie tout ce que tu peux, c'est pas
+grave, on fera les corrections derrière ». Deux conséquences, écrites pour être rejouables :
+
+1. **Le vitolario s'étend de 36 galeras** (`03_vitolas.csv`, de Minutos à Picadores), toutes
+   marquées « Dimensions à vérifier — ajoutée le 6 septembre 2026 (Source A) ». Ce sont les
+   noms d'usine standard de Habanos pour des formats que la base ne connaissait pas ; leurs
+   cotes viennent de mémoire et sont le premier poste de relecture du §5. Trente-neuf fiches
+   de plus y sont rattachées par une seconde vague de propositions (« vitolario étendu »).
+2. **Les propositions d'amorçage s'acceptent d'un bloc**, par `apply_propositions.sql` — le
+   même geste que « Accepter » dans `/contributions`, proposition par proposition, avec la
+   règle de fraîcheur du wiki et une trace signée qui cite l'instruction. La relecture n'est pas
+   supprimée : elle est déplacée après, fiche par fiche, depuis `/admin/fiches` et l'historique.
+
+Ce qui reste hors de tout script, même après cette instruction : la cape, le profil aromatique,
+et les fiches non cubaines — pour les raisons dites plus haut, qui ne sont pas des prudences
+mais des absences de source.
