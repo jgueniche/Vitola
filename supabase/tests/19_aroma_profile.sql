@@ -35,10 +35,15 @@ update public.profiles set handle='aromes_omar'
  where id='bb250000-0000-4000-8000-000000000002';
 
 -- Une famille de test et quatorze descripteurs, hors des identifiants du seed :
--- le test ne dépend pas de la roue chargée, et il la laisse intacte.
-insert into public.aroma_taxonomy (id, parent_id, family, slug, label_fr, label_en) values
-  (9250, null, 'boise', 'famille-test-aromes', 'Famille de test', 'Test family');
+-- le test ne dépend pas de la roue chargée, et il la laisse intacte. `id` est
+-- une identité GENERATED ALWAYS (0003) : des identifiants choisis demandent
+-- OVERRIDING SYSTEM VALUE, sans quoi PostgreSQL refuse l'insertion — et un
+-- fixture qui n'existe pas fait passer toute assertion « zéro ligne ».
 insert into public.aroma_taxonomy (id, parent_id, family, slug, label_fr, label_en)
+overriding system value
+values (9250, null, 'boise', 'famille-test-aromes', 'Famille de test', 'Test family');
+insert into public.aroma_taxonomy (id, parent_id, family, slug, label_fr, label_en)
+overriding system value
 select 9250 + g, 9250, 'boise', 'descripteur-test-' || g, 'Descripteur ' || g, 'Descriptor ' || g
   from generate_series(1, 14) as g;
 
