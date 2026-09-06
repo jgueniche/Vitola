@@ -54,8 +54,12 @@ comment on column ref.cigars.aroma_tags is
 
 -- Droits d'appelant, volontairement : la roue est en lecture publique, donc
 -- tout rôle qui peut écrire une fiche peut vérifier qu'un descripteur existe.
--- `alter default privileges in schema ref` (0005) ferme EXECUTE aux clients ;
--- un trigger n'a besoin d'aucun droit d'appel pour se déclencher.
+-- L'EXECUTE, lui, se ferme explicitement sous le trigger : un trigger n'a
+-- besoin d'aucun droit d'appel pour se déclencher, et le `alter default
+-- privileges in schema ref … revoke` de la 0005 ne retire PAS le défaut global
+-- de PostgreSQL — un revoke par schéma ne défait qu'un grant par schéma. Cette
+-- fonction est la première créée dans `ref` depuis, et la CI l'a vue appelable
+-- par un anonyme (tests/02_function_grants.sql, contrôle 2).
 create or replace function ref.guard_cigar_aroma_tags()
 returns trigger
 language plpgsql
@@ -99,6 +103,10 @@ comment on function ref.guard_cigar_aroma_tags() is
 create trigger cigars_aroma_tags_guard
   before insert or update of aroma_tags on ref.cigars
   for each row execute function ref.guard_cigar_aroma_tags();
+
+-- Fermée aux clients comme les deux fonctions de trigger de `ref` (0005) :
+-- rien ne l'appelle hors trigger.
+revoke execute on function ref.guard_cigar_aroma_tags() from public, anon, authenticated;
 
 -- Les relecteurs écrivent la colonne comme les autres colonnes proposables
 -- (0001 §grants) ; l'allowlist du wiki décide de ce qui y arrive.
@@ -213,6 +221,11 @@ begin
      where tgrelid = 'ref.cigars'::regclass and tgname = 'cigars_aroma_tags_guard'
   ) then
     raise exception 'VITOLA_MIGRATION_INCOMPLETE: le trigger cigars_aroma_tags_guard manque';
+  end if;
+
+  if has_function_privilege('anon', 'ref.guard_cigar_aroma_tags()', 'EXECUTE')
+     or has_function_privilege('authenticated', 'ref.guard_cigar_aroma_tags()', 'EXECUTE') then
+    raise exception 'VITOLA_GRANT_GAP: ref.guard_cigar_aroma_tags() est appelable par un client';
   end if;
 
   if not exists (
