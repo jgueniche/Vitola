@@ -235,39 +235,40 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
 
       {isMine ? (
         <>
-          <Band variant="divider" />
+          {/* Three panels, one container: the editor, then the feed, then the
+              named recipients — the order the two audiences widen in. They were
+              three identical bordered cards in a row; a hairline between them
+              says the same thing without drawing three boxes. */}
+          <div className="border-rule flex flex-col divide-y border-t border-b">
+            <div className="py-6">
+              <EntryEditor
+                id={entry.id}
+                kind={entry.kind}
+                smokedOn={entry.smoked_on}
+                scoreTotal={entry.score_total}
+                body={entry.body}
+                visibility={entry.visibility}
+                sharedCount={shares.length}
+              />
+            </div>
 
-          <div className="border-rule bg-surface rounded-[3px] border p-5">
-            <EntryEditor
-              id={entry.id}
-              kind={entry.kind}
-              smokedOn={entry.smoked_on}
-              scoreTotal={entry.score_total}
-              body={entry.body}
-              visibility={entry.visibility}
-              sharedCount={shares.length}
-            />
-          </div>
+            <div className="py-6">
+              <FeedSharePanel
+                reviewId={entry.id}
+                visibility={entry.visibility}
+                existingPostId={feedPostId}
+              />
+            </div>
 
-          {/* Le fil, between the editor and the named recipients, because that
-              is the order the two audiences widen in: this one is the entry's
-              own scope announced, the next one names people one by one. */}
-          <div className="border-rule bg-surface rounded-[3px] border p-5">
-            <FeedSharePanel
-              reviewId={entry.id}
-              visibility={entry.visibility}
-              existingPostId={feedPostId}
-            />
-          </div>
-
-          <div className="border-rule bg-surface rounded-[3px] border p-5">
-            <SharePanel
-              reviewId={entry.id}
-              visibility={entry.visibility}
-              shares={shares}
-              results={results}
-              query={rawQuery}
-            />
+            <div className="py-6">
+              <SharePanel
+                reviewId={entry.id}
+                visibility={entry.visibility}
+                shares={shares}
+                results={results}
+                query={rawQuery}
+              />
+            </div>
           </div>
 
           <DeleteEntryForm id={entry.id} />

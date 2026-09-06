@@ -213,7 +213,6 @@ export default async function VenuePage({
 
       {events.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <Band variant="divider" />
           <h2 className="font-display text-display-sm">{copy.sheet.eventsTitle}</h2>
           <ul className="flex flex-col gap-2">
             {events.map((event) => (
@@ -231,7 +230,6 @@ export default async function VenuePage({
       ) : null}
 
       <section id="avis" className="flex flex-col gap-4">
-        <Band variant="divider" />
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-display-sm">{copy.reviews.title}</h2>
           <p className="text-ink-muted text-sm tabular-nums">

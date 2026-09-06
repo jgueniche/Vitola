@@ -130,7 +130,7 @@ export default async function VenuesPage({
 
       {/* The distance search. The radius rides the same GET form idea: it is a
           link parameter, and « Me localiser » is the only client code here. */}
-      <div className="border-rule bg-surface flex flex-wrap items-center gap-3 rounded-[3px] border p-4">
+      <div className="border-rule flex flex-wrap items-center gap-3 border-t border-b py-3">
         <p className="text-ink-muted flex-1 text-sm leading-relaxed">
           {hasPoint ? copy.list.nearActive.replace('{km}', String(radiusKm)) : copy.list.locateHint}
         </p>
@@ -161,12 +161,9 @@ export default async function VenuesPage({
           <EmptyState title={copy.list.emptyTitle} description={copy.list.emptyBody} />
         )
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="border-rule flex flex-col border-t">
           {(hasPoint ? nearby : listed).map((venue) => (
-            <li
-              key={venue.id}
-              className="border-rule bg-surface flex flex-col gap-1 rounded-[3px] border p-4"
-            >
+            <li key={venue.id} className="border-rule flex flex-col gap-1 border-b py-3.5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
                   href={routes.venue(venue.slug)}
@@ -174,7 +171,7 @@ export default async function VenuesPage({
                 >
                   {venue.name}
                 </Link>
-                <p className="eyebrow text-xs">{copy.types[venue.type]}</p>
+                <p className="label text-xs">{copy.types[venue.type]}</p>
               </div>
               <p className="text-ink-muted text-sm">
                 {[venue.address, venue.postal_code, venue.city].filter(Boolean).join(', ')}

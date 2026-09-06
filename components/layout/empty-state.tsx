@@ -5,6 +5,11 @@ import { cn } from '@/lib/utils'
 /**
  * An empty state is an invitation, never a dead end (§4.6).
  * "Votre cave est vide. Scannez une bague ou cherchez une vitole pour commencer."
+ *
+ * A row between two hairlines, not a box. It used to be a bordered, centred
+ * panel 96px tall — on thirty-one screens, sometimes three of them on one
+ * page — and an empty list drew more attention than a full one. What is
+ * empty says so in one line and offers the next step; it does not stage it.
  */
 export function EmptyState({
   title,
@@ -18,15 +23,10 @@ export function EmptyState({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        'border-rule bg-surface flex flex-col items-center gap-3 rounded-[3px] border px-6 py-12 text-center',
-        className,
-      )}
-    >
-      <p className="eyebrow">{title}</p>
+    <div className={cn('border-rule flex flex-col gap-1.5 border-t border-b py-4', className)}>
+      <p className="text-ink text-sm font-medium">{title}</p>
       <p className="text-ink-muted measure text-sm leading-relaxed">{description}</p>
-      {action ? <div className="pt-2">{action}</div> : null}
+      {action ? <div className="pt-1.5">{action}</div> : null}
     </div>
   )
 }

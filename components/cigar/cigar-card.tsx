@@ -41,7 +41,7 @@ export function CigarCard({ cigar }: { cigar: CigarSummary }) {
     <article className="border-rule bg-surface hover:border-rule-strong flex h-full flex-col rounded-[3px] border transition-colors">
       <Band brand={cigar.brands?.name} vitola={cigar.commercial_name} />
 
-      <div className="flex flex-1 flex-col gap-3.5 px-5 pt-4 pb-5">
+      <div className="flex flex-1 flex-col gap-3 px-4 pt-3.5 pb-4">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           <h2 className="text-base leading-tight font-medium">
             <Link href={routes.cigar(cigar.slug)} className="hover:text-accent-bright">
@@ -52,19 +52,19 @@ export function CigarCard({ cigar }: { cigar: CigarSummary }) {
         </div>
 
         {sparse ? (
-          <div className="border-rule-strong flex flex-col gap-1 rounded-[3px] border border-dashed px-3 py-2.5">
-            <p className="text-ink-faint text-sm">{copy.card.sparse}</p>
+          <p className="text-ink-faint text-sm">
+            {copy.card.sparse}{' '}
             <Link
               href={routes.cigarPropose(cigar.slug)}
-              className="text-accent hover:text-accent-bright w-fit text-xs underline underline-offset-4"
+              className="text-accent hover:text-accent-bright text-xs underline underline-offset-4"
             >
               {copy.card.proposeValues}
             </Link>
-          </div>
+          </p>
         ) : (
           <dl className="grid grid-cols-3 gap-3">
             <div className="flex flex-col gap-1">
-              <dt className="eyebrow text-[0.625rem]">{copy.cigar.cepoLength}</dt>
+              <dt className="label text-xs">{copy.cigar.cepoLength}</dt>
               <dd className="font-mono text-sm tracking-wide">
                 {vitola ? (
                   formatDimensions(vitola.ring_gauge, vitola.length_mm)
@@ -74,7 +74,7 @@ export function CigarCard({ cigar }: { cigar: CigarSummary }) {
               </dd>
             </div>
             <div className="flex flex-col gap-1">
-              <dt className="eyebrow text-[0.625rem]">{copy.cigar.strength}</dt>
+              <dt className="label text-xs">{copy.cigar.strength}</dt>
               {strength ? (
                 <>
                   <dd className="text-sm">{strengthLabel(strength)}</dd>
@@ -87,7 +87,7 @@ export function CigarCard({ cigar }: { cigar: CigarSummary }) {
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <dt className="eyebrow text-[0.625rem]">{copy.cigar.wrapper}</dt>
+              <dt className="label text-xs">{copy.cigar.wrapper}</dt>
               {shade ? (
                 <>
                   <dd className="text-sm">{shadeLabel(shade)}</dd>

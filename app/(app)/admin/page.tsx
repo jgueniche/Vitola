@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { Band } from '@/components/band/band'
 import { adminCounts } from '@/lib/admin/queries'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
@@ -51,7 +50,7 @@ export default async function AdminPage() {
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.dash.shopLede}</p>
         </div>
         <p
-          className={`rounded-[3px] border px-4 py-3 text-sm ${shopOpen ? 'border-accent text-ink' : 'border-rule-strong text-ink'}`}
+          className={`border-l-2 pl-3 text-sm ${shopOpen ? 'border-accent text-ink' : 'border-rule-strong text-ink'}`}
         >
           <span className="font-semibold">
             {shopOpen ? copy.dash.shopFlagOpen : copy.dash.shopFlagClosed}
@@ -64,7 +63,7 @@ export default async function AdminPage() {
             {copy.dash.shopSeePublic}
           </Link>
         </p>
-        <ul className="grid gap-3 sm:grid-cols-3">
+        <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-3">
           <Queue
             count={counts.productsSubmitted}
             label={copy.dash.shopQueueLabel}
@@ -92,11 +91,9 @@ export default async function AdminPage() {
         </ul>
       </section>
 
-      <Band variant="divider" />
-
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-display-sm">{copy.dash.queuesTitle}</h2>
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-2">
           <Queue
             count={openReports.length}
             label={copy.dash.moderationLabel}
@@ -129,11 +126,9 @@ export default async function AdminPage() {
         </ul>
       </section>
 
-      <Band variant="divider" />
-
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-display-sm">{copy.dash.stateTitle}</h2>
-        <ul className="grid gap-3 sm:grid-cols-2">
+        <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-2">
           <Queue
             count={counts.sheetsUnreviewed}
             label={copy.dash.sheetsUnreviewed}
@@ -155,8 +150,6 @@ export default async function AdminPage() {
           />
         </ul>
       </section>
-
-      <Band variant="divider" />
 
       <section className="flex flex-col gap-2">
         <h2 className="font-display text-display-sm">{copy.dash.flagsTitle}</h2>
@@ -184,16 +177,18 @@ function Queue({
   href: string
   link: string
 }) {
+  /* The whole figure is the link: a number one cannot click next to a link
+     one can is two targets for one destination. */
   return (
-    <li className="border-rule bg-surface flex flex-col gap-1 rounded-[3px] border p-4">
-      <p className="text-3xl leading-none font-semibold tabular-nums">{count}</p>
-      <p className="text-ink-muted text-sm leading-snug">{label}</p>
-      {note ? <p className="text-ink-faint text-xs leading-snug">{note}</p> : null}
-      <p className="mt-1 text-sm">
-        <Link href={href} className="text-accent underline">
+    <li>
+      <Link href={href} className="group flex flex-col gap-0.5">
+        <span className="text-2xl leading-tight font-medium tabular-nums">{count}</span>
+        <span className="text-ink-muted text-sm leading-snug">{label}</span>
+        {note ? <span className="text-ink-faint text-xs leading-snug">{note}</span> : null}
+        <span className="text-accent group-hover:text-accent-bright mt-1 text-xs underline underline-offset-4">
           {link}
-        </Link>
-      </p>
+        </span>
+      </Link>
     </li>
   )
 }

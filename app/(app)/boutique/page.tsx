@@ -168,10 +168,10 @@ export default async function ShopPage({ searchParams }: Props) {
                         <img
                           src={images.get(product.image_path)}
                           alt=""
-                          className="border-rule h-36 w-full rounded-[3px] border object-cover"
+                          className="h-36 w-full rounded-[3px] object-cover"
                         />
                       ) : (
-                        <span className="border-rule text-ink-faint flex h-36 w-full items-center justify-center rounded-[3px] border text-xs">
+                        <span className="bg-surface-raised text-ink-faint flex h-36 w-full items-center justify-center rounded-[3px] text-xs">
                           {copy.noImage}
                         </span>
                       )}

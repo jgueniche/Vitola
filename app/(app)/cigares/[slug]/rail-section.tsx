@@ -52,7 +52,7 @@ export async function RailSection({
     return (
       <section
         aria-labelledby="vous"
-        className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-6"
+        className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-5"
       >
         <p className="eyebrow">{copy.myEntries}</p>
         <h2 id="vous" className="font-display text-display-sm">
@@ -90,7 +90,7 @@ export async function RailSection({
       <div id="geste" className="flex flex-col gap-4 lg:sticky lg:top-6">
         <section
           aria-labelledby="vous"
-          className="border-rule bg-surface flex flex-col gap-5 rounded-[3px] border p-6"
+          className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-5"
         >
           <h2 id="vous" className="eyebrow">
             {copy.eyebrow}
@@ -128,15 +128,22 @@ export async function RailSection({
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-2">
+          {/* One gesture, one button — and on a phone that button is the bar
+              under the thumb below, so the card does not show it twice. The
+              structured tasting is a link: a second button of the same width
+              made two gestures out of one. */}
+          <div className="flex flex-col gap-2.5">
             {gestureOpen ? null : (
-              <Link href={openGesture} className={buttonClass({ size: 'lg', className: 'w-full' })}>
+              <Link
+                href={openGesture}
+                className={buttonClass({ size: 'lg', className: 'hidden w-full lg:inline-flex' })}
+              >
                 {m.humidor.smoke}
               </Link>
             )}
             <Link
               href={routes.cigarTasting(cigar.slug)}
-              className={buttonClass({ variant: 'secondary', className: 'w-full' })}
+              className="text-ink-muted hover:text-ink text-sm underline underline-offset-4"
             >
               {copy.tasting}
             </Link>
@@ -144,7 +151,7 @@ export async function RailSection({
 
           <div className="border-rule flex flex-col gap-2.5 border-t pt-4">
             <div className="flex items-baseline justify-between gap-4">
-              <span className="eyebrow">{copy.myEntries}</span>
+              <span className="label">{copy.myEntries}</span>
               {mine.length > 0 ? (
                 <span className="text-ink-faint text-xs">
                   {copy.myEntriesCount.replace('{count}', formatCount(mine.length))}
@@ -182,7 +189,7 @@ export async function RailSection({
         {gestureOpen ? (
           <section
             aria-label={copy.gesture.title}
-            className="border-rule-strong bg-surface rounded-[3px] border p-6"
+            className="border-rule-strong bg-surface rounded-[3px] border p-5"
           >
             <SmokeForm
               cigarId={cigar.id}

@@ -44,8 +44,8 @@ export async function HumidorLink({
   if (lots.length === 0) return null
 
   return (
-    <section className="border-rule flex flex-col gap-3 rounded-[3px] border border-dashed px-4 py-4">
-      <p className="eyebrow">{copy.notLinkedTitle}</p>
+    <section className="border-rule flex flex-col gap-3 border-t border-b py-4">
+      <p className="text-ink text-sm font-medium">{copy.notLinkedTitle}</p>
       <p className="text-ink-muted measure text-sm leading-relaxed">{copy.notLinkedBody}</p>
       <AttachSmokeForm
         reviewId={reviewId}

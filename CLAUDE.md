@@ -170,7 +170,7 @@ OG et le contrôle de dérive des types.
    porterait son nom et non celui du proposeur. Dans un référentiel dont toute la valeur est la
    provenance, cela demande une migration et une décision.
 
-**Ce qui rouvre `ref.lines` existe désormais** — la file de contribution — mais proposer une *gamme*
+**Ce qui rouvre `ref.lines` existe désormais** — la file de contribution — mais proposer une _gamme_
 n'est pas offert : il faut d'abord que des gammes existent. La décision de v1 ci-dessous tient.
 
 ## P3 — le social, livré le 23 août 2026 au matin
@@ -489,7 +489,7 @@ pnpm storybook      # galerie des primitives
 - **Un `GRANT` de colonne refuse aussi les colonnes qu'on ne voulait pas changer.** La bascule
   /100 ↔ /20 n'a rien fait pendant toute sa première journée : l'action écrivait `updated_at`, qui
   n'est pas dans le `GRANT UPDATE` de `profile_settings` — il porte `(birth_date, locale,
-  preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, le résultat n'était
+preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, le résultat n'était
   pas lu, et le bouton était décoratif. Troisième membre de la même famille, après « une policy qui
   refuse ne lève pas » et « BYPASSRLS ne dit rien des droits de table ». **Lire le résultat d'une
   écriture, toujours** — et ne jamais écrire à la main une colonne qu'un trigger tient.
@@ -577,3 +577,55 @@ avec une facette « à compléter », et le profil aromatique des fiches (migrat
 les 36 galeras ajoutées d'abord, une cote fausse contamine toutes les fiches qui la portent ; les
 fiches sans vitole restent listées par la facette « À compléter » ; le canevas de
 `design/fiche-cigare/` garde les directions B et C si A déçoit à l'usage.
+
+## L'accueil sobre et l'allègement du site — 6 septembre 2026
+
+Demandé le 6 septembre (« le cigare est trop lisse, les bandes trop régulières, la bande fumée
+strictement horizontale ; l'accueil est surchargé pour rien ; le site n'est pas assez élégant, les
+encarts encore trop gros »), mesuré d'abord — 173 encarts `rounded-[3px] border` écrits à la main
+dans 79 fichiers, 31 états vides de 96 px, 280 surtitres en capitales, 49 filets laiton — puis
+construit le même jour. La charte n'a pas bougé ; l'accueil, la planche et la densité, si.
+L'analyse complète et le prompt de la prochaine session sont dans `docs/audit-2026-09-06.md`.
+
+**Ce qui est à l'écran** : un accueil en trois temps (une phrase, la planche, six lignes sur ce
+qu'il y a derrière la porte, la porte), une planche redessinée en SVG, et un site qui préfère la
+ligne à la carte — hubs, états vides, publications, lieux, notifications, conversations, file de
+relecture, panneau d'un lot, dossier de modération, en-tête des paramètres.
+
+**Cinq règles qui ne se contournent pas :**
+
+1. **Rien de droit sur un objet roulé à la main.** La planche
+   (`components/landing/cigar-plate.tsx`) est un SVG : une couture est une hélice vue de côté,
+   donc un cosinus, espacée à la main ; le reflet est une région aux bords qui ondulent, floutée,
+   jamais une bande ; la cendre, la ligne de feu et le bord carbonisé sont des chemins qui
+   tremblent, puis un déplacement de turbulence les émiette. Le pigment reste dans
+   `app/globals.css` (`--plate-*`, le contrôle des tokens refuse un hexa ailleurs) et le SVG le
+   lit par `var()`. Tout chemin est calculé par des constantes et `Math.sin`, identique côté
+   serveur et côté client.
+2. **L'accueil dit une chose et montre un objet.** Une phrase, la planche annotée en mesures (le
+   §2 ne bouge pas : aucune marque, aucun adjectif), six lignes sur ce qui existe — pas sur ce
+   qui attend ses clés (le scan, le Cercle, les partenaires) — et « Entrer » trois fois, en-tête,
+   héros et pied, ce que le parcours e2e compte. Les figures des neuf modules, le sommaire, le
+   nuancier et la grille tarifaire sont partis avec `components/landing/figures.tsx`.
+3. **La ligne avant la carte.** Un état vide est une ligne entre deux filets (`EmptyState`), un
+   hub est une liste de lignes, une publication est une ligne comme une entrée de carnet. Une
+   carte se mérite : le rail de la fiche, la carte de bague de la liste, la fiche produit. Jamais
+   une carte dans une carte — le panneau d'un lot ouvert est un filet à gauche, pas une boîte
+   dans la boîte.
+4. **`.eyebrow` est un surtitre, `.label` est un libellé.** Marcellus en capitales espacées se lit
+   une fois — le surtitre d'une page, la bague. Le libellé d'un champ, d'une `dt`, d'une carte
+   est `.label` : Inter, 13 px, sans capitales. `<Label>` de `components/ui/field.tsx` l'a
+   basculé pour tous les formulaires du site.
+5. **Un chiffre n'est pas un titre.** `FigureRow` et `Figure` (`components/data/figures.tsx`)
+   remplacent les deux copies de la bande de tuiles : Inter 24 demi-gras entre deux filets, pas
+   le didone à 32. Une confirmation `role="status"` est un filet à gauche (`border-l-2`), pas un
+   encart — il y en avait neuf copies.
+
+**Un piège de plus** : `next dev` (Next 16) **réécrit `CLAUDE.md`** en y ajoutant un bloc
+`nextjs-agent-rules` à chaque démarrage. `agentRules: false` dans `next.config.ts` le désactive ;
+sans quoi le fichier qui dit comment on travaille change sous les doigts.
+
+**Ce qui reste à faire** : `/vendeur` et `/admin/boutique` déplient encore leurs trois panneaux à
+la fois ; `/evenements/[id]` garde ses étiquettes-radio bordées ; les 17 en-têtes de section
+« titre + lede » attendent un composant ; les parcours de `tooling/parcours` et l'audit a11y sont
+à rejouer sur les écrans allégés.

@@ -2,8 +2,10 @@ import type { ComponentProps, LabelHTMLAttributes } from 'react'
 
 import { cn } from '@/lib/utils'
 
+/* A label is a data label (`.label`), not an eyebrow: a form of twelve fields
+   set in tracked capitals read as twelve headings. */
 export function Label({ className, ...props }: LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn('eyebrow block', className)} {...props} />
+  return <label className={cn('label block', className)} {...props} />
 }
 
 /* ComponentProps rather than InputHTMLAttributes, which is what Textarea and

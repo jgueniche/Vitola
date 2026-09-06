@@ -7,276 +7,749 @@ import { m } from '@/lib/i18n'
  * Drawn rather than photographed, for two reasons that pull the same way: a
  * stock photograph of a cigar is somebody's advertising, and a drawing can be
  * annotated. What is on screen is a plate in a reference work — the ember, the
- * band, the wrapper shade and the vitola are all labelled — not a poster.
+ * band, the wrapper shade and the vitola are labelled with measurements — not
+ * a poster.
  *
- * The geometry and the light live in app/landing.css; the pigment lives in
- * app/globals.css as --plate-*. Everything here is structure.
+ * Redrawn on 6 septembre 2026, after the owner found the first version too
+ * smooth: seams at a fixed period, a highlight ruled dead straight, an ash
+ * cut from gradients. This one is an SVG, and the rule it follows is that
+ * nothing on a hand-rolled object is straight:
  *
- * Two things are load-bearing and easy to break:
+ *   - a seam is a helix seen from the side, so it is a cosine — flat where it
+ *     meets each edge, steepest on the axis — and the seams are spaced by hand;
+ *   - the sheen is a region with undulating edges, blurred, not a stripe;
+ *   - the ash outline, the burn line and the charred edge are wobbly paths,
+ *     then a turbulence displacement crumbles them further;
+ *   - the leaf is mottled by noise before the cylinder shading is laid over it.
  *
- *   - The band is a real 3D ring: sixteen slats laid on a cylinder of radius
- *     58px. Its lighting sheet is a SIBLING of the ring, not a child, so the
- *     light stays put while the ring sways. Nest it inside and the highlight
- *     rotates with the metal, which reads as a sticker.
- *   - The two SVG filters below are referenced by CSS `filter: url(#…)`, which
- *     only resolves within the same document. They must be rendered here, not
- *     imported from a file.
+ * The pigment lives in app/globals.css as --plate-* (the token check forbids a
+ * hex outside that file); the geometry lives here; the little CSS the plate
+ * needs — the crop on a phone, the smoke's drift — is in app/landing.css.
+ * Every path is computed from constants with Math.sin, so the markup is the
+ * same on the server and on the client.
  */
 
-/** Sixteen slats at 22.5° each: one full turn around the cigar's axis. */
-const SLATS = [-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7] as const
+const AXIS = 300
+const R = 58
+const TOP = AXIS - R
+const BOT = AXIS + R
+const BURN = 306
+const HEAD = 1312
+const BAND = { left: 872, right: 1006 } as const
+const TILT = -1.8
 
-/** Puffs, pre-seeded with negative delays so the column is never empty. */
-const WISPS = [
-  { left: 47, size: 48, dx: 52, duration: 10, delay: -0.6 },
-  { left: 33, size: 76, dx: -34, duration: 13, delay: -3.4 },
-  { left: 53, size: 36, dx: 84, duration: 9, delay: -6.1 },
-  { left: 39, size: 64, dx: 30, duration: 14.5, delay: -8.8 },
-  { left: 26, size: 90, dx: -58, duration: 16, delay: -11.5 },
-  { left: 51, size: 40, dx: 70, duration: 11.5, delay: -2 },
-  { left: 43, size: 56, dx: 44, duration: 12.5, delay: -5 },
-  { left: 57, size: 30, dx: -20, duration: 8.2, delay: -7.4 },
+const f = (n: number) => n.toFixed(1)
+
+/** The cigar is drawn level and tilted as a whole; the notes are not. */
+function rot(x: number, y: number): [number, number] {
+  const a = (TILT * Math.PI) / 180
+  const dx = x - 760
+  const dy = y - AXIS
+  return [760 + dx * Math.cos(a) - dy * Math.sin(a), AXIS + dx * Math.sin(a) + dy * Math.cos(a)]
+}
+
+/** A helix seen from the side projects to a cosine: horizontal at both edges. */
+function helix(x: number, run: number, over = 6): string {
+  const c = 0.38
+  return `M${x} ${TOP - over} C${f(x + run * c)} ${TOP + 3} ${f(x + run * (1 - c))} ${BOT - 3} ${x + run} ${BOT + over}`
+}
+
+/* Where the leaf overlaps itself. Spaced by hand, with a different run each
+   time — a wrapper is rolled, not printed. The band hides the stretch
+   between 872 and 1006. */
+const SEAMS = [
+  { x: 371, run: 46, w: 1 },
+  { x: 483, run: 54, w: 0.7 },
+  { x: 569, run: 41, w: 0.9 },
+  { x: 706, run: 60, w: 1 },
+  { x: 809, run: 47, w: 0.8 },
+  { x: 1053, run: 51, w: 0.9 },
+  { x: 1141, run: 43, w: 0.7 },
+  { x: 1232, run: 49, w: 1 },
 ] as const
 
-/** A leader line and its dot, from a label to the point it names. */
-function Note({
-  left,
-  top,
-  lineTop,
-  lineHeight,
-  dotTop,
-  anchor,
-  label,
-  children,
-}: {
-  left: number
-  top: number
-  lineTop: number
-  lineHeight: number
-  dotTop: number
-  anchor: number
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="note absolute" style={{ left, top, width: 240 }}>
-      <p className="eyebrow text-ink">{label}</p>
-      <p className="text-ink-muted text-xs leading-snug">{children}</p>
-      <span
-        aria-hidden="true"
-        className="note-l"
-        style={{ left: anchor, top: lineTop, height: lineHeight }}
-      />
-      <span aria-hidden="true" className="note-d" style={{ left: anchor - 3, top: dotTop }} />
-    </div>
-  )
+/* The lateral veins of the leaf: the same curve at a shallower angle, in
+   patches rather than everywhere. */
+const VEINS = [
+  332, 356, 389, 418, 447, 519, 548, 596, 631, 663, 742, 772, 801, 834, 857, 1082, 1108, 1168, 1199,
+  1258, 1284,
+].map((x, i) => ({ x, run: 118 + (i % 3) * 22, o: 0.05 + ((i * 7) % 5) * 0.014 }))
+
+/** The oil of the wrapper: a long soft light whose edges wander. */
+function sheen(): string {
+  const top: string[] = []
+  const bot: string[] = []
+  for (let x = 322; x <= 1296; x += 34) {
+    top.push(`${x} ${f(263 + 5 * Math.sin(x / 91) + 3 * Math.sin(x / 37 + 1.3))}`)
+    bot.push(`${x} ${f(291 + 6 * Math.sin(x / 79 + 0.6) + 3 * Math.sin(x / 43))}`)
+  }
+  return `M${top.join(' L')} L${bot.reverse().join(' L')} Z`
 }
+
+/** The burn line, which is never straight either. */
+function burn(): string {
+  const pts: string[] = []
+  for (let y = TOP - 4; y <= BOT + 4; y += 11) {
+    pts.push(`${f(BURN + 3.2 * Math.sin(y / 9.5) + 1.6 * Math.sin(y / 4.1))} ${y}`)
+  }
+  return `M${pts.join(' L')}`
+}
+
+/** The charred band the burn leaves on the wrapper, with a ragged edge. */
+function char(): string {
+  const edge: string[] = []
+  for (let y = TOP - 2; y <= BOT + 2; y += 14) {
+    edge.push(`${f(352 + 7 * Math.sin(y / 13) + 3 * Math.sin(y / 5.3))} ${y}`)
+  }
+  return `M${BURN - 8} ${TOP - 2} L${edge.join(' L')} L${BURN - 8} ${BOT + 2} Z`
+}
+
+/** A thread of light on the top edge, the further from the ember the stronger. */
+function rim(): string {
+  const pts: string[] = []
+  for (let x = 362; x <= 1244; x += 46) pts.push(`${x} ${f(TOP + 1.5 + 0.9 * Math.sin(x / 53))}`)
+  return `M${pts.join(' L')}`
+}
+
+/* The silhouette of the wrapper: parallel sides, a shoulder, a cut head. */
+const BODY = `M${BURN - 6} ${TOP} L1248 ${TOP} C1284 ${TOP + 1} 1302 ${TOP + 9} ${HEAD} ${AXIS - 52} L${HEAD} ${AXIS + 52} C1302 ${BOT - 9} 1284 ${BOT - 1} 1248 ${BOT} L${BURN - 6} ${BOT} Z`
+
+/* The ash continues the cylinder and blunts toward the foot; its outline is
+   drawn crumbled, and the displacement crumbles it more. */
+const ASH = `M${BURN + 2} 243 L286 241 L270 245 L252 240 L236 246 L218 243 L204 249 L190 247 L180 256 L172 270 L169 286 L171 302 L168 318 L173 334 L182 346 L196 353 L214 356 L232 353 L250 358 L268 355 L288 359 L${BURN + 2} 357 Z`
+
+const CRACKS = [
+  'M229 243 l-2 9 l4 8 l-3 11 l2 13 l-4 10 l3 12 l-2 14 l3 11 l-1 12',
+  'M197 249 l-3 8 l3 10 l-4 9 l1 12 l-3 10 l4 11 l-2 12 l2 11',
+  'M262 241 l-1 10 l3 9 l-2 12 l3 11 l-3 10 l2 13 l-3 12 l2 10 l-1 9',
+  'M283 244 l2 12 l-3 10 l2 13 l-2 11 l3 12 l-2 13 l2 10',
+  'M176 262 l6 4 l7 -2 l8 5',
+  'M240 318 l9 -3 l8 4 l10 -2',
+  'M301 268 l-12 5 l-9 -2 l-8 4',
+] as const
+
+const BAND_SHAPE = `M${BAND.left} ${TOP} C${BAND.left - 4} ${AXIS - 28} ${BAND.left - 4} ${AXIS + 28} ${BAND.left} ${BOT} L${BAND.right} ${BOT} C${BAND.right + 4} ${AXIS + 28} ${BAND.right + 4} ${AXIS - 28} ${BAND.right} ${TOP} Z`
+
+function bandRule(x: number, bulge: number): string {
+  return `M${x} ${TOP + 2} C${x + bulge} ${AXIS - 28} ${x + bulge} ${AXIS + 28} ${x} ${BOT - 2}`
+}
+
+/* Two threads of smoke, born on the burn line. Drawn relative to the ember,
+   masked so they dissolve rather than end. */
+const SMOKE = [
+  {
+    d: 'M0 0 C-18 -36 22 -58 -4 -96 C-28 -132 12 -156 -8 -190 C-20 -212 -2 -226 -10 -246',
+    w: 13,
+    o: 0.42,
+    dur: '11s',
+  },
+  {
+    d: 'M8 -4 C4 -28 36 -44 20 -76 C6 -104 34 -122 18 -150 C8 -168 22 -184 12 -206',
+    w: 7,
+    o: 0.3,
+    dur: '8.5s',
+  },
+] as const
+
+const BAND_CENTER = (BAND.left + BAND.right) / 2
 
 export function CigarPlate() {
   const t = m.landing.plate
+  const [emberX, emberY] = rot(BURN, TOP - 4)
+  const [emberDotX, emberDotY] = rot(BURN, BOT + 9)
+  const [bandDotX, bandDotY] = rot(BAND_CENTER, TOP - 9)
+  const [wrapDotX, wrapDotY] = rot(600, BOT + 9)
+  const [vitDotX, vitDotY] = rot(1180, BOT + 9)
 
   return (
     <div className="cigar-plate" role="img" aria-label={t.alt}>
-      {/* Turbulence displacement. Referenced from app/landing.css by id, so it
-          has to live in the rendered document — hence a 0×0 inline svg. */}
-      <svg width="0" height="0" aria-hidden="true" focusable="false" className="absolute">
-        <filter
-          id="vt-ash-rough"
-          x="-14%"
-          y="-28%"
-          width="128%"
-          height="156%"
-          colorInterpolationFilters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.021 0.055"
-            numOctaves={3}
-            seed={9}
-            result="t"
-          />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="t"
-            scale={6}
-            xChannelSelector="R"
-            yChannelSelector="G"
-          />
-        </filter>
-        <filter
-          id="vt-leaf-rough"
-          x="-3%"
-          y="-16%"
-          width="106%"
-          height="132%"
-          colorInterpolationFilters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.009 0.038"
-            numOctaves={3}
-            seed={23}
-            result="t"
-          />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="t"
-            scale={3}
-            xChannelSelector="R"
-            yChannelSelector="G"
-          />
-        </filter>
-      </svg>
-
       <div className="cigar-plate__box">
-        <div className="cigar-plate__inner">
-          <span aria-hidden="true" className="glow" />
+        <svg
+          viewBox="0 0 1440 520"
+          preserveAspectRatio="xMinYMid slice"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <clipPath id="vt-body">
+              <path d={BODY} />
+            </clipPath>
+            <clipPath id="vt-ash">
+              <path d={ASH} />
+            </clipPath>
+            <clipPath id="vt-band">
+              <path d={BAND_SHAPE} />
+            </clipPath>
 
-          <div className="scene" aria-hidden="true">
-            <div className="cigar">
-              <span className="cast" />
-
-              <div className="body-wrap">
-                <span className="stick" />
-                <span className="shade" />
-                <span className="mottle" />
-                <span className="veins" />
-                <span className="grain" />
-                <span className="sheen" />
-                <span className="rimlight" />
-                <span className="bounce" />
-              </div>
-
-              <span className="head" />
-              <span className="head-rim" />
-              <span className="ring-cast" />
-
-              <div className="ash-wrap">
-                <span className="ash" />
-                <span className="ash-grain" />
-                <span className="ash-crack" />
-                <span className="ash-shade" />
-              </div>
-              <span className="ash-heat" />
-              <span className="char" />
-              <span className="rim" />
-              <span className="ember" />
-              <span className="ember-core" />
-              <span className="ember-glow" />
-
-              <div className="ring">
-                {SLATS.map((i) => {
-                  if (i === 0) {
-                    return (
-                      <div
-                        key={i}
-                        className="slat slat-face"
-                        style={{ '--i': i } as React.CSSProperties}
-                      >
-                        <span className="lk-fil" />
-                        <span className="lk-mark">{BRAND.name}</span>
-                        <span className="lk-fil" />
-                      </div>
-                    )
-                  }
-                  if (i === -1 || i === 1) {
-                    return (
-                      <div
-                        key={i}
-                        className="slat slat-sub"
-                        style={{ '--i': i } as React.CSSProperties}
-                      >
-                        {i === -1 ? BRAND.tagline : t.bandVitola}
-                      </div>
-                    )
-                  }
-                  return (
-                    <div key={i} className="slat" style={{ '--i': i } as React.CSSProperties} />
-                  )
-                })}
-              </div>
-              <span className="ring-light" />
-              <span className="ring-spec" />
-            </div>
-          </div>
-
-          <div className="smoke">
-            <span className="ember-lit" />
-            <span className="thread" />
-            <span
-              className="thread"
-              style={{
-                left: 76,
-                width: 10,
-                height: 132,
-                animationDuration: '8.5s',
-                animationDelay: '-2.5s',
-                opacity: 0.72,
-              }}
-            />
-            {WISPS.map((w) => (
-              <span
-                key={`${w.left}-${w.size}`}
-                className="wisp"
-                style={
-                  {
-                    left: w.left,
-                    width: w.size,
-                    height: w.size,
-                    '--dx': `${w.dx}px`,
-                    animationDuration: `${w.duration}s`,
-                    animationDelay: `${w.delay}s`,
-                  } as React.CSSProperties
-                }
+            {/* Texture: noise, desaturated, blended over the matter. */}
+            <filter id="vt-leaf-noise" x="0" y="0" width="100%" height="100%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.018 0.07"
+                numOctaves={3}
+                seed={11}
               />
-            ))}
-          </div>
+              <feColorMatrix type="saturate" values="0" />
+            </filter>
+            <filter id="vt-ash-noise" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.06 0.2" numOctaves={4} seed={5} />
+              <feColorMatrix type="saturate" values="0" />
+            </filter>
 
-          <Note
-            left={151}
-            top={126}
-            anchor={97}
-            lineTop={38}
-            lineHeight={92}
-            dotTop={124}
-            label={t.emberLabel}
-          >
-            {t.emberValue}
-          </Note>
-          <Note
-            left={923}
-            top={126}
-            anchor={89}
-            lineTop={38}
-            lineHeight={92}
-            dotTop={124}
-            label={t.bandLabel}
-          >
-            {t.bandValue}
-          </Note>
-          <Note
-            left={470}
-            top={424}
-            anchor={90}
-            lineTop={-44}
-            lineHeight={44}
-            dotTop={-50}
-            label={t.wrapperLabel}
-          >
-            {t.wrapperValue}
-          </Note>
-          <Note
-            left={1214}
-            top={424}
-            anchor={86}
-            lineTop={-44}
-            lineHeight={44}
-            dotTop={-50}
-            label={t.vitolaLabel}
-          >
-            <span className="font-mono">{t.vitolaDimensions}</span> — {t.vitolaName}
-          </Note>
-        </div>
+            {/* Displacement: the drawing is straight to the pixel until this. */}
+            <filter id="vt-wobble-leaf" x="-4%" y="-20%" width="108%" height="140%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.008 0.035"
+                numOctaves={2}
+                seed={23}
+                result="t"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="t"
+                scale={3.5}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+            <filter id="vt-wobble-ash" x="-20%" y="-30%" width="140%" height="160%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.02 0.06"
+                numOctaves={3}
+                seed={9}
+                result="t"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="t"
+                scale={7}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+
+            <filter id="vt-soft" x="-30%" y="-60%" width="160%" height="220%">
+              <feGaussianBlur stdDeviation={2} />
+            </filter>
+            <filter id="vt-softer" x="-30%" y="-60%" width="160%" height="220%">
+              <feGaussianBlur stdDeviation={7} />
+            </filter>
+            <filter id="vt-glow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation={18} />
+            </filter>
+            <filter id="vt-smoke-blur" x="-80%" y="-30%" width="260%" height="160%">
+              <feGaussianBlur stdDeviation={8} />
+            </filter>
+
+            {/* The leaf, warmed near the ember, deepening toward the head. */}
+            <linearGradient id="vt-leaf" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" style={{ stopColor: 'var(--plate-leaf-lit)' }} />
+              <stop offset="0.16" style={{ stopColor: 'var(--plate-leaf)' }} />
+              <stop offset="0.58" style={{ stopColor: 'var(--plate-leaf)' }} />
+              <stop offset="0.86" style={{ stopColor: 'var(--plate-leaf-deep)' }} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-leaf-deep)' }} />
+            </linearGradient>
+            {/* The drape of the cylinder: a lit crest a third of the way down. */}
+            <linearGradient id="vt-drape" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="rgb(0 0 0)" stopOpacity={0.9} />
+              <stop offset="0.05" stopColor="rgb(0 0 0)" stopOpacity={0.58} />
+              <stop offset="0.14" stopColor="rgb(0 0 0)" stopOpacity={0.26} />
+              <stop offset="0.27" stopColor="rgb(0 0 0)" stopOpacity={0.05} />
+              <stop offset="0.36" stopColor="rgb(0 0 0)" stopOpacity={0} />
+              <stop offset="0.5" stopColor="rgb(0 0 0)" stopOpacity={0.03} />
+              <stop offset="0.62" stopColor="rgb(0 0 0)" stopOpacity={0.18} />
+              <stop offset="0.78" stopColor="rgb(0 0 0)" stopOpacity={0.48} />
+              <stop offset="0.92" stopColor="rgb(0 0 0)" stopOpacity={0.76} />
+              <stop offset="1" stopColor="rgb(0 0 0)" stopOpacity={0.94} />
+            </linearGradient>
+            <linearGradient id="vt-char" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" style={{ stopColor: 'var(--plate-char)' }} stopOpacity={0.97} />
+              <stop offset="0.35" style={{ stopColor: 'var(--plate-char)' }} stopOpacity={0.62} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-char)' }} stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="vt-ashfill" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" style={{ stopColor: 'var(--plate-ash-old)' }} />
+              <stop offset="0.42" style={{ stopColor: 'var(--plate-ash)' }} />
+              <stop offset="0.86" style={{ stopColor: 'var(--plate-ash-fresh)' }} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-ash)' }} />
+            </linearGradient>
+            {/* Ash is pale: its shoulders darken without going black. */}
+            <linearGradient id="vt-ashdrape" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="rgb(0 0 0)" stopOpacity={0.7} />
+              <stop offset="0.08" stopColor="rgb(0 0 0)" stopOpacity={0.42} />
+              <stop offset="0.22" stopColor="rgb(0 0 0)" stopOpacity={0.12} />
+              <stop offset="0.34" stopColor="rgb(255 252 246)" stopOpacity={0.1} />
+              <stop offset="0.46" stopColor="rgb(255 252 246)" stopOpacity={0.02} />
+              <stop offset="0.62" stopColor="rgb(0 0 0)" stopOpacity={0.18} />
+              <stop offset="0.82" stopColor="rgb(0 0 0)" stopOpacity={0.5} />
+              <stop offset="1" stopColor="rgb(0 0 0)" stopOpacity={0.78} />
+            </linearGradient>
+            <radialGradient id="vt-cut" cx="0.42" cy="0.46" r="0.6">
+              <stop offset="0" style={{ stopColor: 'var(--plate-cut-core)' }} />
+              <stop offset="0.5" style={{ stopColor: 'var(--plate-cut)' }} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-char)' }} />
+            </radialGradient>
+            <radialGradient id="vt-ember-glow">
+              <stop offset="0" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0.5} />
+              <stop offset="0.35" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0.16} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0} />
+            </radialGradient>
+            <radialGradient id="vt-ground-glow">
+              <stop offset="0" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0.22} />
+              <stop offset="0.45" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0.06} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0} />
+            </radialGradient>
+            {/* The band: brass, lit from above like the leaf under it. */}
+            <linearGradient id="vt-brass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" style={{ stopColor: 'var(--plate-band-edge)' }} />
+              <stop offset="0.05" style={{ stopColor: 'var(--plate-band-lo)' }} />
+              <stop offset="0.17" style={{ stopColor: 'var(--plate-band)' }} />
+              <stop offset="0.31" style={{ stopColor: 'var(--plate-band-hi)' }} />
+              <stop offset="0.48" style={{ stopColor: 'var(--plate-band)' }} />
+              <stop offset="0.74" style={{ stopColor: 'var(--plate-band-lo)' }} />
+              <stop offset="0.92" style={{ stopColor: 'var(--plate-band-edge)' }} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-band-edge)' }} />
+            </linearGradient>
+            <linearGradient id="vt-brass-ends" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="rgb(0 0 0)" stopOpacity={0.4} />
+              <stop offset="0.14" stopColor="rgb(0 0 0)" stopOpacity={0} />
+              <stop offset="0.86" stopColor="rgb(0 0 0)" stopOpacity={0} />
+              <stop offset="1" stopColor="rgb(0 0 0)" stopOpacity={0.4} />
+            </linearGradient>
+            <linearGradient id="vt-smoke-fade" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0" stopColor="rgb(255 255 255)" stopOpacity={1} />
+              <stop offset="0.45" stopColor="rgb(255 255 255)" stopOpacity={0.7} />
+              <stop offset="1" stopColor="rgb(255 255 255)" stopOpacity={0} />
+            </linearGradient>
+            <mask id="vt-smoke-mask">
+              <rect
+                x={emberX - 140}
+                y={0}
+                width={300}
+                height={emberY + 20}
+                fill="url(#vt-smoke-fade)"
+              />
+            </mask>
+          </defs>
+
+          {/* The single light source of the composition, on the ground. */}
+          <ellipse
+            cx={emberX}
+            cy={AXIS + 10}
+            rx={330}
+            ry={210}
+            fill="url(#vt-ground-glow)"
+            style={{ mixBlendMode: 'screen' }}
+          />
+
+          {/* Cast shadow — outside the tilt, on the table. */}
+          <ellipse
+            cx={790}
+            cy={392}
+            rx={580}
+            ry={20}
+            fill="rgb(0 0 0)"
+            fillOpacity={0.5}
+            filter="url(#vt-glow)"
+          />
+
+          <g transform={`rotate(${TILT} 760 ${AXIS})`}>
+            {/* ------------------------------------------------- the ash */}
+            <g filter="url(#vt-wobble-ash)">
+              <path d={ASH} fill="url(#vt-ashfill)" />
+              <g clipPath="url(#vt-ash)">
+                <rect
+                  x={160}
+                  y={TOP - 10}
+                  width={160}
+                  height={R * 2 + 20}
+                  filter="url(#vt-ash-noise)"
+                  opacity={0.55}
+                  style={{ mixBlendMode: 'overlay' }}
+                />
+                <rect x={160} y={TOP} width={160} height={R * 2} fill="url(#vt-ashdrape)" />
+                {CRACKS.map((d) => (
+                  <g key={d}>
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke="rgb(255 250 240)"
+                      strokeOpacity={0.16}
+                      strokeWidth={0.9}
+                      transform="translate(1.2 0.6)"
+                    />
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke="rgb(18 14 10)"
+                      strokeOpacity={0.62}
+                      strokeWidth={1.3}
+                    />
+                  </g>
+                ))}
+              </g>
+            </g>
+
+            {/* ------------------------------------------------ the leaf */}
+            <g filter="url(#vt-wobble-leaf)">
+              <g clipPath="url(#vt-body)">
+                <path d={BODY} fill="url(#vt-leaf)" />
+
+                {/* Blotches: a wrapper is never one brown. */}
+                <ellipse
+                  cx={560}
+                  cy={318}
+                  rx={180}
+                  ry={40}
+                  style={{ fill: 'var(--plate-leaf-lit)' }}
+                  opacity={0.3}
+                  filter="url(#vt-glow)"
+                />
+                <ellipse
+                  cx={766}
+                  cy={262}
+                  rx={150}
+                  ry={34}
+                  style={{ fill: 'var(--plate-leaf-deep)' }}
+                  opacity={0.5}
+                  filter="url(#vt-glow)"
+                />
+                <ellipse
+                  cx={1126}
+                  cy={322}
+                  rx={190}
+                  ry={44}
+                  style={{ fill: 'var(--plate-leaf-lit)' }}
+                  opacity={0.22}
+                  filter="url(#vt-glow)"
+                />
+
+                <rect
+                  x={BURN - 10}
+                  y={TOP - 10}
+                  width={HEAD - BURN + 20}
+                  height={R * 2 + 20}
+                  filter="url(#vt-leaf-noise)"
+                  opacity={0.42}
+                  style={{ mixBlendMode: 'overlay' }}
+                />
+
+                {/* Veins, then seams: matter before light. */}
+                {VEINS.map((v) => (
+                  <path
+                    key={v.x}
+                    d={helix(v.x, v.run)}
+                    fill="none"
+                    style={{ stroke: 'var(--plate-leaf-vein)' }}
+                    strokeOpacity={v.o}
+                    strokeWidth={0.9}
+                  />
+                ))}
+                {SEAMS.map((s) => (
+                  <g key={s.x}>
+                    <path
+                      d={helix(s.x, s.run)}
+                      fill="none"
+                      stroke="rgb(0 0 0)"
+                      strokeOpacity={0.36 * s.w}
+                      strokeWidth={2.4}
+                      filter="url(#vt-soft)"
+                    />
+                    <path
+                      d={helix(s.x, s.run)}
+                      fill="none"
+                      stroke="rgb(0 0 0)"
+                      strokeOpacity={0.3 * s.w}
+                      strokeWidth={1}
+                    />
+                    <path
+                      d={helix(s.x + 2.2, s.run)}
+                      fill="none"
+                      stroke="rgb(255 226 180)"
+                      strokeOpacity={0.09 * s.w}
+                      strokeWidth={1.1}
+                    />
+                  </g>
+                ))}
+
+                <rect
+                  x={BURN - 10}
+                  y={TOP}
+                  width={HEAD - BURN + 20}
+                  height={R * 2}
+                  fill="url(#vt-drape)"
+                />
+
+                {/* The oil: a light whose edges wander, and which the ember does not reach. */}
+                <path
+                  d={sheen()}
+                  fill="rgb(255 238 206)"
+                  fillOpacity={0.13}
+                  filter="url(#vt-softer)"
+                />
+                <path
+                  d={rim()}
+                  fill="none"
+                  stroke="rgb(236 220 196)"
+                  strokeOpacity={0.3}
+                  strokeWidth={1.4}
+                  filter="url(#vt-soft)"
+                />
+
+                {/* Bounce from the ember on the near end. */}
+                <ellipse
+                  cx={336}
+                  cy={AXIS}
+                  rx={96}
+                  ry={72}
+                  style={{ fill: 'var(--plate-ember)' }}
+                  opacity={0.26}
+                  filter="url(#vt-glow)"
+                />
+
+                {/* The band's paper is thicker than the leaf: a hairline of shadow either side. */}
+                <path
+                  d={`M${BAND.left - 5} ${TOP} L${BAND.left - 5} ${BOT}`}
+                  stroke="rgb(0 0 0)"
+                  strokeOpacity={0.5}
+                  strokeWidth={9}
+                  filter="url(#vt-soft)"
+                />
+                <path
+                  d={`M${BAND.right + 5} ${TOP} L${BAND.right + 5} ${BOT}`}
+                  stroke="rgb(0 0 0)"
+                  strokeOpacity={0.5}
+                  strokeWidth={9}
+                  filter="url(#vt-soft)"
+                />
+
+                {/* The charred edge, laid last on the leaf. */}
+                <path d={char()} fill="url(#vt-char)" />
+              </g>
+            </g>
+
+            {/* ------------------------------------------------ the head */}
+            <ellipse cx={HEAD} cy={AXIS} rx={12} ry={52} fill="url(#vt-cut)" />
+            <path
+              d={`M1250 ${TOP + 1} C1284 ${TOP + 2} 1301 ${TOP + 10} ${HEAD - 1} ${AXIS - 50}`}
+              fill="none"
+              stroke="rgb(236 220 196)"
+              strokeOpacity={0.22}
+              strokeWidth={1.2}
+            />
+
+            {/* ------------------------------------------------ la bague */}
+            <g clipPath="url(#vt-band)">
+              <path d={BAND_SHAPE} fill="url(#vt-brass)" />
+              <rect
+                x={BAND.left - 6}
+                y={TOP}
+                width={BAND.right - BAND.left + 12}
+                height={R * 2}
+                fill="url(#vt-brass-ends)"
+              />
+              <path
+                d={bandRule(BAND.left + 13, -2)}
+                fill="none"
+                style={{ stroke: 'var(--plate-band-ink)' }}
+                strokeOpacity={0.6}
+                strokeWidth={1}
+              />
+              <path
+                d={bandRule(BAND.left + 17, -2)}
+                fill="none"
+                style={{ stroke: 'var(--plate-band-hi)' }}
+                strokeOpacity={0.75}
+                strokeWidth={0.8}
+              />
+              <path
+                d={bandRule(BAND.right - 13, 2)}
+                fill="none"
+                style={{ stroke: 'var(--plate-band-ink)' }}
+                strokeOpacity={0.6}
+                strokeWidth={1}
+              />
+              <path
+                d={bandRule(BAND.right - 17, 2)}
+                fill="none"
+                style={{ stroke: 'var(--plate-band-hi)' }}
+                strokeOpacity={0.75}
+                strokeWidth={0.8}
+              />
+              <text x={BAND_CENTER} y={AXIS + 6} textAnchor="middle" className="plate-band-mark">
+                {BRAND.name.toUpperCase()}
+              </text>
+              <path
+                d={`M${BAND_CENTER - 44} ${AXIS - 16} L${BAND_CENTER + 44} ${AXIS - 16}`}
+                style={{ stroke: 'var(--plate-band-ink)' }}
+                strokeOpacity={0.5}
+                strokeWidth={0.8}
+              />
+              <text x={BAND_CENTER} y={AXIS + 24} textAnchor="middle" className="plate-band-sub">
+                {t.bandVitola.toUpperCase()}
+              </text>
+              <rect
+                x={BAND.left - 6}
+                y={TOP}
+                width={BAND.right - BAND.left + 12}
+                height={R * 2}
+                fill="url(#vt-drape)"
+                opacity={0.7}
+              />
+            </g>
+
+            {/* --------------------------------------------- the burn line */}
+            <ellipse
+              cx={BURN - 4}
+              cy={AXIS}
+              rx={80}
+              ry={110}
+              fill="url(#vt-ember-glow)"
+              style={{ mixBlendMode: 'screen' }}
+            />
+            <path
+              d={burn()}
+              fill="none"
+              style={{ stroke: 'var(--plate-ember)' }}
+              strokeWidth={5.5}
+              strokeLinecap="round"
+              filter="url(#vt-soft)"
+              className="plate-ember-breathe"
+            />
+            <path
+              d={burn()}
+              fill="none"
+              style={{ stroke: 'var(--plate-ember-hot)' }}
+              strokeWidth={2}
+              strokeLinecap="round"
+              className="plate-ember-breathe"
+            />
+            <path
+              d={burn()}
+              fill="none"
+              style={{ stroke: 'var(--plate-ember-white)' }}
+              strokeOpacity={0.7}
+              strokeWidth={1}
+              strokeLinecap="round"
+            />
+          </g>
+
+          {/* --------------------------------------------------- la fumée */}
+          <g mask="url(#vt-smoke-mask)">
+            <g className="plate-smoke" transform={`translate(${f(emberX)} ${f(emberY)})`}>
+              {SMOKE.map((s) => (
+                <path
+                  key={s.d}
+                  d={s.d}
+                  fill="none"
+                  style={
+                    {
+                      stroke: 'var(--plate-smoke)',
+                      '--o': s.o,
+                      '--dur': s.dur,
+                    } as React.CSSProperties
+                  }
+                  strokeWidth={s.w}
+                  strokeLinecap="round"
+                  filter="url(#vt-smoke-blur)"
+                />
+              ))}
+            </g>
+          </g>
+
+          {/* --------------------------------------------- the annotations
+              A plate in a reference work: leader lines and measurements. */}
+          <g className="plate-note">
+            <circle
+              cx={f(emberDotX)}
+              cy={f(emberDotY)}
+              r={3}
+              fill="none"
+              style={{ stroke: 'var(--color-accent)' }}
+            />
+            <line
+              x1={f(emberDotX)}
+              y1={f(emberDotY + 4)}
+              x2={f(emberDotX)}
+              y2={412}
+              style={{ stroke: 'var(--color-rule-strong)' }}
+            />
+            <text x={f(emberDotX - 74)} y={440} className="plate-label">
+              {t.emberLabel}
+            </text>
+            <text x={f(emberDotX - 74)} y={462} className="plate-value">
+              {t.emberValue}
+            </text>
+          </g>
+          <g className="plate-note">
+            <circle
+              cx={f(bandDotX)}
+              cy={f(bandDotY)}
+              r={3}
+              fill="none"
+              style={{ stroke: 'var(--color-accent)' }}
+            />
+            <line
+              x1={f(bandDotX)}
+              y1={162}
+              x2={f(bandDotX)}
+              y2={f(bandDotY - 4)}
+              style={{ stroke: 'var(--color-rule-strong)' }}
+            />
+            <text x={f(bandDotX)} y={126} textAnchor="middle" className="plate-label">
+              {t.bandLabel}
+            </text>
+            <text x={f(bandDotX)} y={148} textAnchor="middle" className="plate-value">
+              {t.bandValue}
+            </text>
+          </g>
+          <g className="plate-note">
+            <circle
+              cx={f(wrapDotX)}
+              cy={f(wrapDotY)}
+              r={3}
+              fill="none"
+              style={{ stroke: 'var(--color-accent)' }}
+            />
+            <line
+              x1={f(wrapDotX)}
+              y1={f(wrapDotY + 4)}
+              x2={f(wrapDotX)}
+              y2={412}
+              style={{ stroke: 'var(--color-rule-strong)' }}
+            />
+            <text x={f(wrapDotX)} y={440} textAnchor="middle" className="plate-label">
+              {t.wrapperLabel}
+            </text>
+            <text x={f(wrapDotX)} y={462} textAnchor="middle" className="plate-value">
+              {t.wrapperValue}
+            </text>
+          </g>
+          <g className="plate-note">
+            <circle
+              cx={f(vitDotX)}
+              cy={f(vitDotY)}
+              r={3}
+              fill="none"
+              style={{ stroke: 'var(--color-accent)' }}
+            />
+            <line
+              x1={f(vitDotX)}
+              y1={f(vitDotY + 4)}
+              x2={f(vitDotX)}
+              y2={412}
+              style={{ stroke: 'var(--color-rule-strong)' }}
+            />
+            <text x={f(vitDotX)} y={440} textAnchor="middle" className="plate-label">
+              {t.vitolaLabel}
+            </text>
+            <text x={f(vitDotX)} y={462} textAnchor="middle" className="plate-value">
+              <tspan className="plate-mono">{t.vitolaDimensions}</tspan> — {t.vitolaName}
+            </text>
+          </g>
+        </svg>
       </div>
     </div>
   )

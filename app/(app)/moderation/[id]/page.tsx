@@ -92,12 +92,12 @@ export default async function ModerationCasePage({ params, searchParams }: Props
       </div>
 
       {confirmation ? (
-        <p role="status" className="border-rule text-ink rounded-[3px] border px-4 py-3 text-sm">
+        <p role="status" className="border-accent text-ink border-l-2 py-1 pl-3 text-sm">
           {confirmation}
         </p>
       ) : null}
 
-      <section className="border-rule flex flex-col gap-2 rounded-[3px] border p-4">
+      <section className="border-rule flex flex-col gap-2 border-t pt-4">
         <h2 className="text-ink text-sm font-medium">{copy.case.reasonLabel}</h2>
         <p className="text-ink text-sm">{reasons[report.reason] ?? report.reason}</p>
         <h2 className="text-ink mt-2 text-sm font-medium">{copy.case.detailLabel}</h2>
@@ -106,7 +106,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
         </p>
       </section>
 
-      <section className="border-rule flex flex-col gap-2 rounded-[3px] border p-4">
+      <section className="border-rule flex flex-col gap-2 border-t pt-4">
         <h2 className="text-ink text-sm font-medium">{copy.case.targetTitle}</h2>
         {target ? (
           <>
@@ -164,7 +164,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
           </section>
         </>
       ) : (
-        <section className="border-rule flex flex-col gap-2 rounded-[3px] border p-4">
+        <section className="border-rule flex flex-col gap-2 border-t pt-4">
           <h2 className="text-ink text-sm font-medium">{copy.case.decisionNote}</h2>
           <p className="text-ink-muted text-sm">
             {report.decided_at

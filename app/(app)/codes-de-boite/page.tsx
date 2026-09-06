@@ -80,13 +80,13 @@ export default async function BoxCodesPage({ searchParams }: Props) {
       </form>
 
       {reading === null ? (
-        <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
-          <p className="eyebrow">{copy.emptyTitle}</p>
+        <div className="flex flex-col gap-1">
+          <p className="text-ink text-sm font-medium">{copy.emptyTitle}</p>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.emptyBody}</p>
         </div>
       ) : reading.empty ? (
-        <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
-          <p className="eyebrow">{copy.nothingTitle}</p>
+        <div className="flex flex-col gap-1">
+          <p className="text-ink text-sm font-medium">{copy.nothingTitle}</p>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.nothingBody}</p>
         </div>
       ) : (
@@ -125,9 +125,9 @@ export default async function BoxCodesPage({ searchParams }: Props) {
         </section>
       )}
 
-      <div className="border-rule rounded-[3px] border border-dashed px-4 py-4">
-        <p className="eyebrow">{copy.caveatTitle}</p>
-        <p className="text-ink-muted measure mt-2 text-sm leading-relaxed">{copy.caveatBody}</p>
+      <div className="border-rule border-l-2 pl-4">
+        <p className="text-ink text-sm font-medium">{copy.caveatTitle}</p>
+        <p className="text-ink-muted measure mt-1 text-sm leading-relaxed">{copy.caveatBody}</p>
       </div>
 
       <Band variant="divider" />

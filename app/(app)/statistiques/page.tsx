@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Figure, FigureRow } from '@/components/data/figures'
 import { EmptyState } from '@/components/layout/empty-state'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/cigar'
@@ -94,7 +95,7 @@ export default async function StatisticsPage() {
         />
       ) : (
         <>
-          <section className="border-rule bg-surface grid gap-px overflow-hidden rounded-[3px] border sm:grid-cols-3">
+          <FigureRow>
             <Figure value={formatCount(stats.entries.length)} label={copy.entriesCount} />
             <Figure value={formatCount(smoked)} label={copy.smokedCount} />
             <Figure
@@ -102,7 +103,7 @@ export default async function StatisticsPage() {
               label={copy.meanScore}
               muted={mean === null}
             />
-          </section>
+          </FigureRow>
 
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.smokedHint}</p>
 
@@ -220,19 +221,10 @@ export default async function StatisticsPage() {
   )
 }
 
-function Figure({ value, label, muted }: { value: string; label: string; muted?: boolean }) {
-  return (
-    <div className="bg-surface flex flex-col gap-1 px-4 py-4">
-      <span className={cn('font-display text-display-sm', muted && 'text-ink-muted')}>{value}</span>
-      <span className="eyebrow">{label}</span>
-    </div>
-  )
-}
-
 function Pair({ label, value }: { label: string; value: string }) {
   return (
     <span className="flex items-baseline gap-2">
-      <dt className="eyebrow">{label}</dt>
+      <dt className="label">{label}</dt>
       <dd className="text-ink">{value}</dd>
     </span>
   )
