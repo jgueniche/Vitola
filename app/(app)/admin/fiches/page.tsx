@@ -67,6 +67,14 @@ export default async function AdminSheetsPage({ searchParams }: Props) {
         <p className="eyebrow">
           {copy.countUnreviewed.replace('{count}', String(counts.sheetsUnreviewed))}
         </p>
+        <p className="text-sm">
+          <Link
+            href={routes.adminSheetsReview()}
+            className="text-accent underline underline-offset-4"
+          >
+            {copy.reviewLink}
+          </Link>
+        </p>
       </div>
 
       {done ? (

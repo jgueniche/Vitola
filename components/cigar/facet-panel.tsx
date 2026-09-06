@@ -14,6 +14,7 @@ import {
   toggleCompleteness,
   toggleFacet,
   WRAPPER_SHADES,
+  type Completeness,
   type Facets,
 } from '@/lib/search/facets'
 import { cn } from '@/lib/utils'
@@ -32,6 +33,15 @@ import { cn } from '@/lib/utils'
  * an unsupported attribute is silence, not state. "Current" is also the truer
  * word for a filter the URL already holds.
  */
+
+/* One label per hole: « À compléter » said three ways since the sourced
+   proposals of 6 septembre 2026 — a contributor picks the hole they can fill. */
+const COMPLETENESS_LABELS: Record<Completeness, string> = {
+  renseignee: m.referential.facets.complete,
+  'sans-vitole': m.referential.facets.missingVitola,
+  'sans-force': m.referential.facets.missingStrength,
+  'sans-aromes': m.referential.facets.missingAromas,
+}
 
 function href(facets: Facets): string {
   const params = facetsToSearchParams(facets)
@@ -113,11 +123,7 @@ export function FacetPanel({
         {COMPLETENESS.map((value) => (
           <FacetLink
             key={value}
-            label={
-              value === 'renseignee'
-                ? m.referential.facets.complete
-                : m.referential.facets.incomplete
-            }
+            label={COMPLETENESS_LABELS[value]}
             active={facets.completeness === value}
             target={href(toggleCompleteness(facets, value))}
           />

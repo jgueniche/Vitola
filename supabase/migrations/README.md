@@ -1,8 +1,8 @@
 # supabase/migrations/
 
 État appliqué sur le projet `vitola` (ref `upbewqsmgcrogoapubyz`, `eu-west-3`), et
-enregistré dans `supabase_migrations.schema_migrations` — **vingt-quatre migrations**, relu
-le 5 septembre 2026 par `list_migrations` sur le projet :
+enregistré dans `supabase_migrations.schema_migrations` — **vingt-sept migrations**, relu
+le 6 septembre 2026 par `list_migrations` sur le projet :
 
 | Fichier                                   | Nom                           | Enregistrée sous |
 | ----------------------------------------- | ----------------------------- | ---------------- |
@@ -30,6 +30,9 @@ le 5 septembre 2026 par `list_migrations` sur le projet :
 | `0022_marketplace_vendors.sql`            | `marketplace_vendors`         | `20260825151134` |
 | `0023_ouverture_boutique_qa.sql`          | `0023_ouverture_boutique_qa`  | `20260825164958` |
 | `0024_signalement_boutique.sql`           | `signalement_boutique`        | `20260903190015` |
+| `0025_profil_aromatique.sql`              | `profil_aromatique`           | `20260905181040` |
+| `0026_source_de_proposition.sql`          | `revision_source`             | `20260906213624` |
+| `0027_provenance_des_fiches.sql`          | `sheet_sources`               | `20260906220211` |
 
 ## Pourquoi douze versions ne ressemblent pas à leur fichier
 
@@ -60,7 +63,7 @@ Elle n'a pas été déplacée, pour trois raisons qui tiennent ensemble :
 
 **Question toujours ouverte.** Le déplacement est la bonne fin de course ; il demande de mettre
 à jour les deux références et de décider ce que `docs/phase-0/` conserve — le fichier, ou un
-lien vers lui. Vingt-trois migrations plus tard, rien n'en a dépendu : la CI rejoue la chaîne
+lien vers lui. Vingt-six migrations plus tard, rien n'en a dépendu : la CI rejoue la chaîne
 depuis `docs/phase-0/`, et c'est la seule chose qui compte.
 
 ## Rejouer l'état complet sur une base nue
@@ -72,7 +75,7 @@ la migration qu'elles éprouvent.
 ```bash
 psql -f supabase/tests/00_supabase_stubs.sql      # hors Supabase uniquement
 psql -f docs/phase-0/03-schema-p1.sql             # 0001
-for f in supabase/migrations/00{02..24}_*.sql; do  # 0002 → 0024, dans l'ordre du nom
+for f in supabase/migrations/00{02..27}_*.sql; do  # 0002 → 0027, dans l'ordre du nom
   psql -v ON_ERROR_STOP=1 -f "$f"
 done
 cd supabase/seed && psql -f seed.sql && psql -f seed_venues.sql

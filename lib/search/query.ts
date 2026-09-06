@@ -73,9 +73,16 @@ export async function searchCigars(facets: Facets): Promise<SearchResult> {
   if (facets.brand) query = query.eq('brands.slug', facets.brand)
   if (facets.vitola) query = query.eq('vitolas.slug', facets.vitola)
   /* The vitola is the column that decides whether a sheet is documented: it
-     carries the format, and the strength and shade of the seed came with it. */
+     carries the format, and the strength and shade of the seed came with it.
+     The three holes are asked one at a time — a sheet lacking all three is in
+     all three lists, which is what a contributor looking for work wants. */
   if (facets.completeness === 'renseignee') query = query.not('vitola_id', 'is', null)
-  if (facets.completeness === 'a-completer') query = query.is('vitola_id', null)
+  if (facets.completeness === 'sans-vitole') query = query.is('vitola_id', null)
+  if (facets.completeness === 'sans-force') query = query.is('strength', null)
+  /* An empty integer[] is `{}` to PostgREST — the column is NOT NULL (0025).
+     `filter()` rather than `eq()`: the typed helper wants a number[], and an
+     array serialises to nothing, where the literal is what the server reads. */
+  if (facets.completeness === 'sans-aromes') query = query.filter('aroma_tags', 'eq', '{}')
 
   const from = (facets.page - 1) * PAGE_SIZE
   const { data, count, error } = await query
@@ -95,23 +102,35 @@ export async function searchCigars(facets: Facets): Promise<SearchResult> {
   }
 }
 
-export type PublishedCounts = { total: number; withVitola: number }
+export type PublishedCounts = {
+  total: number
+  withVitola: number
+  withStrength: number
+  withAromas: number
+}
 
 /**
- * How much of the referential is documented — two head counts, for the lede
+ * How much of the referential is documented — four head counts, for the lede
  * of the list. Said on the page because it is the page's truth: 940 sheets
  * and 78 formats is a different site from 940 and 940, and the visitor
- * should not have to discover which one by scrolling.
+ * should not have to discover which one by scrolling. The strength and the
+ * aroma profile joined the count with the sourced proposals of 6 septembre
+ * 2026: three holes, three numbers, and the facet below opens each one.
  */
 export async function publishedCounts(): Promise<PublishedCounts> {
   const db = await referential()
-  const [all, documented] = await Promise.all([
-    db.from('cigars').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    db
-      .from('cigars')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'published')
-      .not('vitola_id', 'is', null),
+  const published = () =>
+    db.from('cigars').select('id', { count: 'exact', head: true }).eq('status', 'published')
+  const [all, vitola, strength, aromas] = await Promise.all([
+    published(),
+    published().not('vitola_id', 'is', null),
+    published().not('strength', 'is', null),
+    published().filter('aroma_tags', 'neq', '{}'),
   ])
-  return { total: all.count ?? 0, withVitola: documented.count ?? 0 }
+  return {
+    total: all.count ?? 0,
+    withVitola: vitola.count ?? 0,
+    withStrength: strength.count ?? 0,
+    withAromas: aromas.count ?? 0,
+  }
 }

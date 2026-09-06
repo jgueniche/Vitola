@@ -13,7 +13,7 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 |---|---|---|
 | **A — Saisie de mémoire** | Manufactures, marques, vitoles, 123 fiches curées, codes de boîte | À relire (§2) |
 | **B — Arrêté d'homologation des prix (Douane)** | 900 prix de vente au détail, 817 fiches supplémentaires | Donnée publique officielle, exacte à sa date |
-| **C — Site officiel Habanos S.A.** | Confirmation de 13 vitoles, ajout d'une vitole manquante | Spécifications publiées par le fabricant |
+| **C — Sites officiels des fabricants** | Habanos S.A. : confirmation de 13 vitoles, ajout d'une vitole manquante, la force par marque (§9) ; Davidoff, Arturo Fuente, Padrón, Oliva, Plasencia, Rocky Patel : force, arômes et cotes transcrits de leurs pages, avec leur URL (§10) | Spécifications publiées par le fabricant, citées |
 | **D — Nomenclature rédigée pour ce projet** | 11 familles d'arômes, 76 descripteurs | Vocabulaire de dégustation, écrit ici |
 | **E — Registre des buralistes (DGDDI)** | 200 lieux (`07_venues.csv`) | Donnée publique officielle, exacte à sa date (2018) — voir §7 |
 | **F — Planches de démonstration de la boutique** | 10 visuels de produits, 2 logos (`shop-images/*.svg`) | Dessinés pour ce projet, sans objet réel représenté — voir §8 |
@@ -326,6 +326,116 @@ puis 170 propositions acceptées d'un bloc — 77 vitoles, 129 forces — sur 13
 publiées qui portent une vitole passent de 78 à 155, celles qui portent une force de 123 à 252 ;
 686 n'ont encore ni l'une ni l'autre, et la facette « À compléter » les liste.
 
-Ce qui reste hors de tout script, même après cette instruction : la cape, le profil aromatique,
-et les fiches non cubaines — pour les raisons dites plus haut, qui ne sont pas des prudences
-mais des absences de source.
+Ce qui reste hors de tout script, même après cette instruction : la cape — elle varie d'une boîte
+à l'autre. Le profil aromatique et les fiches non cubaines, eux, ont trouvé leur source le
+6 septembre au soir : la spécification que le fabricant publie lui-même, citée ligne par ligne —
+c'est le §10.
+
+Le CSV de cette vague a gagné deux colonnes vides (`aroma_tags`, `source_url`) pour partager la
+forme du §10 et le même script ; aucune valeur n'a changé. Il se rejoue avec
+`-v csv=08_habanos_propositions.csv -v section='§9'`.
+
+## 10. Les propositions sourcées des fabricants — le second amorçage
+
+Le 6 septembre 2026, l'audit du jour (`docs/audit-2026-09-06.md`) a nommé la voie que les règles
+ci-dessus laissaient ouverte sans que personne ne l'ait prise : **la spécification publiée par le
+fabricant lui-même**, régime C, citée. Ni base tierce, ni collecte automatisée, ni mémoire : une
+page officielle, lue, et ce qu'elle dit transcrit dans le vocabulaire du référentiel — avec son
+adresse dans la colonne `source` que la migration 0026 a donnée aux propositions.
+
+Le fichier est `09_fabricants_propositions.csv` (`cigar_slug, vitola_slug, strength, aroma_tags,
+source_url, note`), versé par `seed_propositions.sql` sous ce régime, puis accepté d'un bloc par
+`apply_propositions.sql` — qui, depuis la 0026, ne prend **que ce qui cite une source**. La `note`
+de chaque ligne cite les mots du fabricant et dit ce qui a été laissé vide, et pourquoi.
+
+### Ce qui a été consulté, et comment
+
+Six fabricants, ceux que l'audit nommait, page par page, à leur adresse publique. Les pages ont
+été lues telles que le serveur les rend ; aucun script de collecte n'existe dans le dépôt, et
+aucun site du secteur autre que ces six n'a été sollicité.
+
+| Fabricant | Ce que la page publie | Ce qui a été transcrit |
+|---|---|---|
+| **Davidoff** (`us.davidoffgeneva.com/product/…`) | La description officielle de chaque cigare, dans les métadonnées de la fiche produit | Un mot de force quand il est un cran (« mild », « medium-intense », « full-bodied ») ; les notes nommées (« oak wood, liquorice », « roasted coffee and leather »…) |
+| **Arturo Fuente** (`arturofuente.com/_download/AF_catalog_EN.pdf`, Fuente Marketing Ltd, mars 2019) | Les cotes de chaque vitole par gamme ; peu de mots de force ; aucune note d'arôme propre | Les cotes qui coïncident **exactement** avec un format conventionnel de la base ; « full-flavor, robust » pour Destino al Siglo |
+| **Padrón** (`padron.com/<série>/`) | Un paragraphe par série, les cotes par vitole ; aucune note d'arôme | La force par série (« full-bodied », « medium- to full-bodied ») |
+| **Oliva** (`olivacigar.com/cigars/<gamme>/`) | Un paragraphe par gamme, les cotes par vitole | « medium body », « medium-bodied » ; « rich coffee and dark chocolate tones », « cedar and coffee » |
+| **Plasencia** (`plasenciacigars.com/collection/<collection>/`) | Un champ **Strength** à cinq feuilles, un paragraphe de notes, les cotes | Les feuilles allumées sur cinq → l'échelle du §5.1 ; les notes nommées |
+| **Rocky Patel** (`rockypatel.com/cigar/<cigare>/`) | Un champ **STRENGTH** (« Medium », « Medium-Full »…), les cotes ; presque jamais de notes | Le champ, quand il est un cran ; les notes de Conviction |
+
+**Une réserve, dite.** `davidoff.com` redirige notre point de sortie vers `us.davidoffgeneva.com`,
+le site de Davidoff of Geneva USA — filiale d'Oettinger Davidoff AG, le fabricant. Les
+descriptions transcrites sont celles du fabricant, publiées par sa filiale ; l'échelle d'intensité
+de Davidoff (un curseur rendu côté client) n'était pas lisible dans la page et **n'a pas été
+transcrite** — les fiches Davidoff ne portent une force que là où la description l'écrit en
+toutes lettres.
+
+### Les règles de transcription, et rien d'autre
+
+1. **La force** est un cran de l'échelle du §5.1 ou rien : « mild » → léger ; « mild to medium »,
+   2 feuilles sur 5 → léger-moyen ; « medium », « medium-bodied », 3 sur 5 → moyen ;
+   « medium- to full », « Medium-Full », 4 sur 5 → moyen-corsé (le report de « medio a fuerte »
+   du §9) ; « full-bodied », « full-flavor, robust », 5 sur 5 → corsé. Un comparatif
+   (« fuller-bodied », « slightly more intensity »), un adjectif sans échelle (« intense »,
+   « robust flavor ») ou un cran hors échelle (« Medium Plus ») sont **laissés vides** et dits
+   dans la note. Quand une page donne les deux, l'échelle publiée prime sur l'adjectif
+   (Plasencia Cosecha 151 : 4 feuilles et « full-bodied » → moyen-corsé).
+2. **Les arômes** sont des **descripteurs** de la roue (`06_aroma_taxonomy.csv`), jamais une
+   famille : « spice », « wood », « earthy », « floral », « sweet » ne se transcrivent pas. Un
+   mot sans descripteur (plum, nuts, almonds, marzipan, nougat, cream, barley, pecans, « chocolate »
+   sans précision, « pepper » sans couleur) est laissé vide — **on ne crée pas de descripteur**, et
+   le script s'arrête sur un slug inconnu. Seize descripteurs ont servi : cacao, café, cannelle,
+   caramel, cèdre, chêne, chocolat noir, cuir, expresso, gingembre, mélasse, miel, muscade,
+   pruneau, réglisse, zeste d'orange.
+3. **La vitole** n'est proposée que si la cote publiée est **exactement** celle d'un format de la
+   base — et seuls les cinq formats conventionnels non cubains de `03_vitolas.csv` (Rothschild
+   50 × 114, Toro 52 × 152, Gordo 60 × 152, Double Toro, Corona Extra) peuvent l'être : une galera
+   Habanos est un nom d'usine cubain, et un « 5 × 50 » de Padrón n'est pas un Prado. Quinze
+   rattachements, tous à Rothschild, Toro ou Gordo.
+4. **Aucune cape**, pour la raison du §9. **Aucune fiche cubaine** : Habanos ne publie pas de
+   notes de dégustation par vitole, et la force par marque est déjà au §9.
+5. **Les citations de revues tierces** reproduites par un fabricant (le catalogue Fuente cite
+   Cigar Aficionado et Cigar Insider) **ne sont pas reprises** : ce sont des bases tierces, quel
+   que soit l'endroit où on les lit.
+
+### Ce que cela a donné
+
+106 lignes : Davidoff 19, Arturo Fuente 11, Padrón 19, Oliva 18, Plasencia 21, Rocky Patel 18 —
+15 avec une vitole, 75 avec une force (deux fiches en portaient déjà une, le script ne l'écrase
+pas), 48 avec un profil aromatique. Aucune ligne sans source.
+
+**Exécuté sur la base de production le 6 septembre 2026 au soir**, par l'API de gestion (le SQL de
+`seed_propositions.sql` avec les lignes du CSV inlinées, puis `apply_propositions.sql`), l'auteur et
+le relecteur étant le compte du porteur — comme au §9 :
+
+| Mesure | Avant | Après |
+|---|---|---|
+| Fiches publiées avec une vitole | 155 | **170** |
+| Fiches publiées avec une force | 252 | **325** |
+| Fiches publiées avec un profil aromatique | 0 | **48** |
+| Fiches publiées sans vitole ni force | 686 | **601** |
+| Propositions citant une source | 0 | **106** (toutes acceptées) |
+
+### Ce qui a été laissé vide, et pourquoi
+
+- **Davidoff Winston Churchill** (treize fiches) : aucune fiche produit trouvée à l'adresse de
+  la filiale ; **Signature, Grand Cru Robusto/Toro, Aniversario Entreacto/Special/Double R,
+  Royal Release** : la description ne nomme ni cran ni descripteur (« floral », « creamy »,
+  « earthy, woody » sont des familles).
+- **Arturo Fuente** : le catalogue ne donne ni force ni arôme propre pour Gran Reserva,
+  Chateau Fuente, Hemingway, Don Carlos, Añejo, OpusX (« rich, spicy, slightly sweet » sont des
+  familles) — seules les cotes exactes et Destino al Siglo ont pu servir ; 145 des 156 fiches
+  restent sans rien.
+- **Padrón 1964 Anniversary et 60th Anniversary** : « smooth and complex » n'est pas une force ;
+  **Dámaso** n'a pas de fiche dans la base.
+- **Oliva Serie O, Master Blends 3, Serie V Melanio** (hors Double Toro) : aucun mot de force ni
+  note nommée sur la page.
+- **Plasencia Cosecha 146** : la page n'existe plus sur le site du fabricant.
+- **Rocky Patel Decade, Vintage 1992, Sun Grown Maduro, Edge Habano** : pas de champ de force ;
+  **Quarter Century, Old World Reserve, Seed to Smoke, Edge Nicaragua** : pas de page ;
+  **ALR Toro** : la base ne dit pas quelle édition ; **Conviction** : « Medium Plus » est hors
+  échelle.
+
+Tout cela se relit fiche par fiche depuis `/admin/fiches/relire`, la source à un clic — c'est ce
+que « publie tout ce que tu peux » laisse derrière lui, et c'est écrit dans l'historique de chaque
+fiche.

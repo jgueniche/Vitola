@@ -389,7 +389,7 @@ buralistes cumule ce que la loi Évin interdit (désigner où acheter un produit
 `defaultChecked` du montage après le retour de l'action — le bug du sélecteur de portée, qui
 aurait ici republié un drapeau qu'on venait de couper. Un bouton ne porte aucun état qui puisse
 mentir ; la page re-rendue dit la vérité, et le second bouton (« Enregistrer » la charge utile
-sans basculer) passe par la valeur du *submitter*, pas par un second formulaire.
+sans basculer) passe par la valeur du _submitter_, pas par un second formulaire.
 
 **Les actions de fiches et de gammes naviguent, les drapeaux rendent un état.** Marquer une fiche
 relue la retire de la liste filtrée où on a cliqué — le formulaire qui tenait l'état de retour est
@@ -418,7 +418,7 @@ délégation**, avec la provenance consignée dans chacune. La 0008 n'ouvre **ri
 recommandation : après la relecture des 862 fiches). La 0009 est appliquée pièces 1 et 2 :
 
 - migration `0019` (appliquée en base, version `20260823210941`) : `ref.lines.status
-  ref.entry_status` défaut `draft`, `lines_select_all` remplacée par `lines_select_published`
+ref.entry_status` défaut `draft`, `lines_select_all` remplacée par `lines_select_published`
   (bornée) + `lines_select_editor` (les brouillons), auto-contrôle ;
 - `supabase/tests/14_ref_lines_status.sql`, **6 assertions** qui n'accordent rien, jouées en CI
   après la 0019 ;
@@ -835,7 +835,7 @@ Il fallait le noter, parce qu'un parcours qui se trompe est pire qu'un parcours
 absent : il rassure.
 
 - **Une exception n'était pas un échec.** Un `finally` sortait avec zéro échec
-  parce que rien n'avait été *coché* en échec : un parcours interrompu à l'étape
+  parce que rien n'avait été _coché_ en échec : un parcours interrompu à l'étape
   8 rendait « 29 assertions, 0 échec ».
 - **Une boucle d'écriture faisait confiance à un délai.** 700 ms entre deux
   publications en a perdu six sur vingt-et-une, et quinze publications
@@ -912,7 +912,7 @@ privilège, et confondre les deux est le raccourci qu'on regrette deux migration
 
 **Fumer sans rien noter n'écrit pas d'entrée**, et ce n'est pas une simplification : c'est le
 premier test SQL qui l'a imposé. `reviews_log_says_something` refuse une entrée sans note ni mot,
-et le commentaire de la migration 0003 disait déjà pourquoi — « *j'ai fumé ce cigare* est une ligne vide avec
+et le commentaire de la migration 0003 disait déjà pourquoi — « _j'ai fumé ce cigare_ est une ligne vide avec
 une date ». La cave est exactement ce qui rend cette ligne inutile. Exiger une note pour
 décompter un stock aurait produit des notes inventées ou des cigares que la cave ignore ; ni l'un
 ni l'autre n'est un inventaire.
@@ -930,8 +930,8 @@ vieillie, et le §5.5 demande l'âge de vieillissement.
 
 **La contrainte de vieillissement était à l'envers, et seul un navigateur pouvait le dire.**
 `aging_start_date >= purchase_date` a été écrite, appliquée, testée verte — puis retirée le jour
-même en rangeant une boîte achetée vieillie. Un module de 2019 acheté aujourd'hui *se repose
-depuis 2019* ; la contrainte obligeait à le rajeunir de six ans, c'est-à-dire à falsifier le seul
+même en rangeant une boîte achetée vieillie. Un module de 2019 acheté aujourd'hui _se repose
+depuis 2019_ ; la contrainte obligeait à le rajeunir de six ans, c'est-à-dire à falsifier le seul
 chiffre que la fonctionnalité existe pour montrer. Aucun test unitaire ne l'aurait vue : la
 contrainte était cohérente, elle était simplement fausse. Ce qui reste refusé — une date future —
 ne peut pas être un `CHECK` (`current_date` y est interdit, leçon de la 0001) et vit dans Zod.
@@ -942,7 +942,7 @@ navigateur. Ce qu'une personne fait, c'est **cliquer**, et ce qui arrive, c'est 
 `page.waitForEvent('download')`, puis lire le fichier sur le disque.
 
 **Une assertion qui lit la page une fois court après le serveur.** Une Server Action renvoie
-*avant* que le rendu de `revalidatePath` n'arrive. Deux assertions ont échoué sur un produit qui
+_avant_ que le rendu de `revalidatePath` n'arrive. Deux assertions ont échoué sur un produit qui
 marchait, et une troisième a réussi pour rien — `contains(texte, '5')` trouvait « 0 / 50 ». Les
 parcours attendent maintenant le texte au lieu de le lire.
 
@@ -1488,3 +1488,83 @@ Ce qui n'était pas justifiable est resté vide, et le CSV dit pourquoi ligne pa
 migration les recrée tous, et son auto-contrôle vérifie l'index unique sans lequel
 `refresh … concurrently` refuse de tourner — la première exécution après la migration l'aurait dit
 en production, sur la première note publiée.
+
+---
+
+## Les arômes et les cotes sourcés — 6 septembre 2026 au soir
+
+### Ce qui est livré
+
+Le n° 1 de l'audit du jour, dans l'ordre qu'il donnait : la migration 0026 (`source` sur une
+proposition, hors de tout GRANT UPDATE, test 20 à `BEGIN` explicite), la relecture en série
+`/admin/fiches/relire` et son parcours `tooling/parcours/relecture.ts`, le second amorçage
+(`09_fabricants_propositions.csv`, 106 lignes sourcées, PROVENANCE §10), la provenance sur la fiche
+par la porte `sheet_sources()` de la 0027 (test 21) et la facette « À compléter » en trois. Mesuré
+sur la base après acceptation d'un bloc : 170 fiches publiées avec une vitole (155 avant), 325 avec
+une force (252), 48 avec un profil aromatique (0), 601 ni vitole ni force (686), 106 propositions
+qui citent une source (0). Les deux migrations et les deux vagues ont été rejouées en local sur la
+chaîne complète de `db.yml` (PostgreSQL 16 + PostGIS, 27 migrations, 21 fichiers d'assertions,
+couverture RLS, dérive des types) avant d'être appliquées au projet. Le parcours
+`relecture.ts` passe 21 assertions sur 21 contre la vraie base ; l'audit a11y rejoué sur 48 écrans
+compte 0 violation tous impacts confondus, après la correction d'un indice à 2,47:1 dans le geste
+« j'en fume un » (`opacity-60` sur un bloc désactivé).
+
+### Décisions prises en construisant
+
+**La source n'est pas dans le GRANT UPDATE.** Le `diff` et le `comment` d'une proposition en
+attente peuvent se corriger ; la source, non. Un relecteur décide sur ce qu'il a lu, et si la
+source pouvait changer après coup, la trace de la décision citerait autre chose que ce qui a été
+jugé. L'auto-contrôle de la 0026 et le test 20 tiennent les deux sens : insérable, jamais
+réécrite.
+
+**Le bloc n'accepte que ce qui cite une source.** La première vague (§9) a été acceptée d'un bloc
+sans source, parce qu'il n'y avait pas de colonne pour la dire. Depuis qu'elle existe, « publie
+tout ce que tu peux » se lit : tout ce qui est transcrit d'une page citée. Une proposition muette
+reste en attente — la relecture en série est là pour ça.
+
+**`davidoff.com` redirige vers la filiale, et c'est dit.** Depuis notre point de sortie, le site du
+fabricant renvoie à `us.davidoffgeneva.com` (Davidoff of Geneva USA, filiale d'Oettinger Davidoff
+AG). Les descriptions transcrites sont celles du fabricant, publiées par sa filiale ; le curseur
+d'intensité se rend côté client et n'a pas été transcrit. Les fiches Davidoff portent une force
+seulement là où le texte l'écrit en toutes lettres. PROVENANCE §10 le consigne comme réserve.
+
+**Une échelle publiée prime sur un adjectif.** Plasencia affiche « Strength » en cinq feuilles et
+écrit « full-bodied » sur la même page (Cosecha 151, quatre feuilles) : la feuille est la mesure,
+l'adjectif la prose. Le résumé automatique d'une page avait lu « cinq feuilles allumées » là où le
+HTML en montrait trois — les pages ont été relues dans leur balisage, jamais par leur résumé.
+
+**Le CSV de la première vague gagne deux colonnes vides.** Plutôt que deux scripts pour deux
+formes, `08_habanos_propositions.csv` a pris la forme à six colonnes de la seconde vague
+(`aroma_tags`, `source_url` vides) ; aucune valeur n'a changé, et `seed_propositions.sql` prend
+le fichier et le régime en variables.
+
+**La provenance est une porte, pas une colonne dénormalisée.** Écrire `aroma_source` sur la fiche
+à l'acceptation aurait doublé un fait que `ref.cigar_revisions` tient déjà, et l'aurait laissé
+mentir à la première correction. `public.sheet_sources(uuid)` lit la dernière proposition
+acceptée par colonne et rend trois colonnes ; elle est `SECURITY DEFINER` parce que la table est
+privée par policy et que ce que la fiche a à dire — une URL, une date — n'est ni un auteur ni un
+diff. L'auto-contrôle de la 0027 et le test 21 relisent la forme du retour : une colonne de plus
+serait une fuite passée par la signature.
+
+**La relecture en série est gardée au rang de relecteur, sous `/admin`.** Le droit de décider est
+celui de `cigar_revisions_update_editor` ; un écran qui refuserait à un `editor` ce que la policy
+lui accorde serait la navigation qui décide de ce qui peut se produire (ADR 0014, à l'envers).
+La barre `/admin` reste réservée aux admins ; l'adresse, non.
+
+**`R` ne refuse pas, elle mène au mot.** Un refus sans mot est refusé par l'action ; une touche qui
+refuserait d'un coup fabriquerait des refus vides ou des refus impossibles. `R` place le curseur
+dans le champ, `Ctrl + Entrée` soumet le refus, `Échap` sort du champ. `A` accepte parce
+qu'accepter n'exige rien.
+
+**`sans-aromes` passe par `filter()`, pas par `eq()`.** Le tableau vide d'une colonne
+`integer[] not null` est `{}` pour PostgREST ; l'assistant typé veut un `number[]`, et un tableau
+vide se sérialise en rien du tout — le prédicat ne filtrait plus rien. Le littéral est ce que le
+serveur lit.
+
+### Un piège de plus
+
+**Le scratchpad n'est pas un répertoire pour un démon d'un autre utilisateur.** Un cluster
+PostgreSQL local initialisé sous le scratchpad de la session tournait, puis mourait au premier
+appel suivant : les droits des répertoires parents sont remis entre deux commandes, et
+`postgres` ne peut plus les traverser. Le cluster vit sous `/var/lib/postgresql/`, où il a sa
+place ; le journal, l'inventaire et les scripts de la chaîne restent dans le scratchpad.

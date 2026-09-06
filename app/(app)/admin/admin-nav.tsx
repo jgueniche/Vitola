@@ -22,7 +22,8 @@ const ENTRIES = [
   { label: copy.vendors, href: routes.adminShopVendors(), exact: false },
   { label: copy.flags, href: routes.adminFlags(), exact: false },
   { label: copy.accounts, href: routes.adminAccounts(), exact: false },
-  { label: copy.sheets, href: routes.adminSheets(), exact: false },
+  { label: copy.sheets, href: routes.adminSheets(), exact: true },
+  { label: copy.review, href: routes.adminSheetsReview(), exact: false },
   { label: copy.lines, href: routes.adminLines(), exact: false },
 ] as const
 

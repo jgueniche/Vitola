@@ -60,7 +60,9 @@ export default async function CigarsPage({
           <p className="text-ink-muted measure text-sm leading-relaxed">
             {m.referential.results.lede
               .replace('{total}', formatCount(counts.total))
-              .replace('{withVitola}', formatCount(counts.withVitola))}
+              .replace('{withVitola}', formatCount(counts.withVitola))
+              .replace('{withStrength}', formatCount(counts.withStrength))
+              .replace('{withAromas}', formatCount(counts.withAromas))}
           </p>
         </div>
         {/* The comparator is reached from here because here is where one has

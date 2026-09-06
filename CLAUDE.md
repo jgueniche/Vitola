@@ -554,11 +554,13 @@ avec une facette « à compléter », et le profil aromatique des fiches (migrat
    `font-display` à côté de toute taille sous `text-display-sm/md/lg`. Sous un titre de section,
    c'est Marcellus (`.eyebrow`) ou Inter 16 demi-gras ; le mot-marque a sa classe `.wordmark`, seule
    exception admise.
-3. **Le profil aromatique d'une fiche est un fait du référentiel, jamais un amorçage.**
-   `ref.cigars.aroma_tags` se propose par le wiki (treizième colonne de l'allowlist), un trigger
-   tient ce qu'une clé étrangère ne sait pas viser dans un tableau, et aucun script ne le remplit
-   (PROVENANCE §6 et §9). Les « arômes les plus cités » sont l'autre fait, agrégé par `cigar_stats`
-   sur les seules entrées publiques — la même frontière que la note.
+3. **Le profil aromatique d'une fiche est un fait du référentiel, jamais un amorçage de
+   mémoire.** `ref.cigars.aroma_tags` se propose par le wiki (treizième colonne de l'allowlist),
+   un trigger tient ce qu'une clé étrangère ne sait pas viser dans un tableau, et aucun script ne
+   le remplit de mémoire (PROVENANCE §6 et §9). La seule voie d'amorçage est la spécification que
+   le fabricant publie lui-même, transcrite en descripteurs de la roue et citée (0026, PROVENANCE
+   §10). Les « arômes les plus cités » sont l'autre fait, agrégé par `cigar_stats` sur les seules
+   entrées publiques — la même frontière que la note — et la fiche ne les mélange jamais.
 4. **Alimenter une fiche, c'est proposer — et le porteur a choisi d'accepter d'un bloc.**
    `08_habanos_propositions.csv` et `seed_propositions.sql` versent des propositions dans
    `/contributions` (77 vitoles de galera standard dont 39 sur le vitolario étendu de 36 galeras,
@@ -568,7 +570,12 @@ avec une facette « à compléter », et le profil aromatique des fiches (migrat
    après, fiche par fiche. **Exécuté sur la base le 6 septembre 2026** : 87 galeras, 170
    propositions acceptées sur 131 fiches — 155 fiches publiées portent une vitole (78 avant), 252
    une force (123 avant), 686 ni l'une ni l'autre. Aucune cape, aucun arôme, aucune fiche non
-   cubaine : ce qui n'a pas de source reste vide.
+   cubaine dans cette vague : ce qui n'a pas de source reste vide. **Le même soir, la seconde
+   vague** (`09_fabricants_propositions.csv`, PROVENANCE §10, régime C — six fabricants non
+   cubains, chaque ligne avec l'URL de la page officielle) : 106 propositions sourcées versées et
+   acceptées d'un bloc, ce qui porte le référentiel à **170 fiches publiées avec une vitole, 325
+   avec une force, 48 avec un profil aromatique, 601 ni vitole ni force**, et 106 propositions qui
+   citent une source. Toujours aucune cape.
 5. **Trois niveaux de conteneur, et pas un de plus.** La page, la carte (surface et filet, réservée
    au rail et aux chiffres), la ligne (un filet sous le texte). Jamais une carte dans une carte ;
    une entrée est une ligne avec sa note dans la marge, la portée en quatre puces sur une ligne.
@@ -629,3 +636,56 @@ sans quoi le fichier qui dit comment on travaille change sous les doigts.
 la fois ; `/evenements/[id]` garde ses étiquettes-radio bordées ; les 17 en-têtes de section
 « titre + lede » attendent un composant ; les parcours de `tooling/parcours` et l'audit a11y sont
 à rejouer sur les écrans allégés.
+
+## Les arômes et les cotes sourcés — 6 septembre 2026 au soir
+
+Demandé par l'audit du jour (`docs/audit-2026-09-06.md`, n° 1 : « c'est le contenu ») et construit
+le même soir. Trois pièces de schéma, deux écrans, un fichier de données, et une mesure.
+
+**Ce qui est à l'écran** : une proposition porte sa **source** (migration 0026 — un champ
+facultatif sur `/cigares/[slug]/proposer`, lue dans `/contributions`, l'historique et la relecture) ;
+la **relecture en série** `/admin/fiches/relire` (une fiche à la fois, ses propositions, la source
+à un clic, `A` et `R` annoncés, un compteur « 12 / 214 », le filtre « avec source » et la fiche
+courante dans l'URL) ; la **provenance sur la fiche** (« selon le fabricant » avec le lien, ou
+« selon le référentiel », lue par la porte `sheet_sources()` de la 0027 — jamais mélangée aux
+« arômes les plus cités par les membres ») ; la facette « À compléter » en trois — **sans vitole,
+sans force, sans arômes** — et la liste qui compte les trois.
+
+**Cinq règles qui ne se contournent pas :**
+
+1. **Une source se dit au dépôt et ne se réécrit pas.** `ref.cigar_revisions.source` est dans le
+   GRANT INSERT et hors de tout GRANT UPDATE : un relecteur décide sur ce qu'il a lu, et la trace
+   cite ce qui a été jugé. Corriger une source, c'est retirer la proposition et la refaire.
+2. **Le bloc n'accepte que ce qui cite une source.** `apply_propositions.sql` filtre
+   `source is not null` ; une proposition d'amorçage muette reste en attente et se relit à la
+   main. « Publie tout ce que tu peux » veut dire cela dès qu'on sait distinguer une transcription
+   d'une supposition.
+3. **Transcrire, jamais compléter.** Un cran de l'échelle du §5.1 ou rien (« fuller-bodied »,
+   « intense », « Medium Plus » restent vides) ; un descripteur de la roue ou rien (« spice »,
+   « wood », « earthy » sont des familles ; plum, nuts, marzipan n'ont pas de descripteur et on
+   n'en crée pas — le script s'arrête sur un slug inconnu) ; une cote exacte d'un format
+   conventionnel non cubain ou rien (un « 5 × 50 » de Padrón n'est pas un Prado). Les citations de
+   revues qu'un fabricant reproduit sont des bases tierces, où qu'on les lise. PROVENANCE §10 tient
+   la liste de ce qui a été laissé vide, et pourquoi.
+4. **La provenance passe par une porte de la taille du geste.** `ref.cigar_revisions` reste
+   privée ; `public.sheet_sources(uuid)` (SECURITY DEFINER, 0027) projette par colonne l'URL et la
+   date de la **dernière** proposition acceptée — jamais l'auteur, le diff ni le commentaire, et
+   l'auto-contrôle relit ses trois colonnes. Un profil transcrit du fabricant puis corrigé de
+   mémoire n'est plus « selon le fabricant ».
+5. **La relecture en série ne décide pas autrement que `/contributions`.** Mêmes
+   `approveRevision` / `rejectRevision`, même fraîcheur, même trace, mêmes policies ; la seule
+   chose ajoutée à l'action est `retour`, passé par `safeSuite()`. La touche `R` ne refuse pas —
+   un refus demande un mot — elle mène au champ ; `Ctrl + Entrée` refuse. L'écran est gardé au
+   rang de relecteur (`editor`), pas d'admin : le droit de décider est celui de la policy.
+
+**Mesuré, pas supposé** : `tooling/parcours/relecture.ts` — 21 assertions, 0 échec, la fiche
+rendue telle qu'elle était ; `tooling/audit/a11y.ts` rejoué sur les 48 écrans, les deux nouveaux
+compris — **0 violation, tous impacts confondus**, après une correction : l'indice de lieu du
+geste « j'en fume un » passait sous 2,5:1 derrière un `opacity-60`, et un bloc désactivé se dit
+désormais par son contrôle et une encre atténuée, jamais par une opacité.
+
+**Ce qui reste à faire, et qui le fait** : relire fiche par fiche les 106 propositions acceptées
+d'un bloc, la source à un clic ; les treize Winston Churchill de Davidoff, 145 fiches Arturo
+Fuente, les Padrón 1964 et les Rocky Patel sans champ de force attendent une page qui dise un
+cran ou une note (PROVENANCE §10 les liste) ; l'échelle d'intensité de Davidoff se rend côté
+client et n'a pas été transcrite. La cape reste hors de tout script.

@@ -262,6 +262,22 @@ export function ProposeForm({
         </div>
       </div>
 
+      {/* The source (0026): where the fact comes from. One line, optional, and
+          stated now or never — the column is outside every UPDATE grant. */}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="source">{copy.fieldSource}</Label>
+        <Input
+          id="source"
+          name="source"
+          type="text"
+          inputMode="url"
+          maxLength={500}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <p className="text-ink-muted text-xs leading-relaxed">{copy.fieldSourceHint}</p>
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="comment">{copy.proposeComment}</Label>
         <Textarea id="comment" name="comment" maxLength={1000} />

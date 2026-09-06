@@ -1329,6 +1329,14 @@ export type Database = {
       }
     }
     Functions: {
+      sheet_sources: {
+        Args: { p_cigar_id: string }
+        Returns: {
+          column_name: string
+          source: string | null
+          decided_at: string | null
+        }[]
+      }
       admin_set_flag: {
         Args: { p_enabled: boolean; p_key: string; p_payload?: Json }
         Returns: Json
@@ -1739,6 +1747,7 @@ export type Database = {
           review_comment: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          source: string | null
           status: Database["ref"]["Enums"]["revision_status"]
         }
         Insert: {
@@ -1751,6 +1760,7 @@ export type Database = {
           review_comment?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source?: string | null
           status?: Database["ref"]["Enums"]["revision_status"]
         }
         Update: {
@@ -1763,6 +1773,7 @@ export type Database = {
           review_comment?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          source?: string | null
           status?: Database["ref"]["Enums"]["revision_status"]
         }
         Relationships: [

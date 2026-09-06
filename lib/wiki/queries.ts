@@ -1,4 +1,4 @@
-import { referential } from '@/lib/supabase/server'
+import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
 
 import { EDITABLE_COLUMNS, readDiff, type Diff } from './model'
 
@@ -28,6 +28,8 @@ export type RevisionRow = {
   reviewed_at: string | null
   review_comment: string | null
   created_at: string
+  /** Where the fact comes from (0026): an official manufacturer page or a published document. */
+  source: string | null
 }
 
 export type RevisionCigar = { id: string; slug: string; commercial_name: string }
@@ -36,14 +38,16 @@ export type RevisionWithCigar = RevisionRow & { cigar: RevisionCigar | null }
 
 const COLUMNS =
   'id, cigar_id, author_id, diff, comment, status, reviewed_by, reviewed_at, ' +
-  'review_comment, created_at'
+  'review_comment, created_at, source'
 
 function hydrate(rows: unknown[]): RevisionRow[] {
   return (rows as RevisionRow[]).map((row) => ({ ...row, diff: readDiff(row.diff) }))
 }
 
 async function attachCigars(rows: RevisionRow[]): Promise<Map<string, RevisionCigar>> {
-  const ids = [...new Set(rows.map((row) => row.cigar_id).filter((id): id is string => id !== null))]
+  const ids = [
+    ...new Set(rows.map((row) => row.cigar_id).filter((id): id is string => id !== null)),
+  ]
   if (ids.length === 0) return new Map()
 
   const db = await referential()
@@ -78,6 +82,37 @@ export async function listPending(): Promise<RevisionWithCigar[]> {
 
   if (error) throw new Error(`Could not read the queue: ${error.message}`)
   return withCigars(hydrate(data ?? []))
+}
+
+export type PendingSheet = {
+  cigar: RevisionCigar
+  /** Pending proposals on this sheet, oldest first — the queue order, kept. */
+  revisions: RevisionWithCigar[]
+}
+
+/**
+ * The queue, folded by sheet, for the serial review (/admin/fiches/relire).
+ *
+ * The same rows as `listPending()` — the editor policy decides what comes
+ * back, nothing here restates it — grouped by the sheet they correct and
+ * ordered by their oldest proposal, so the first sheet on screen is the one
+ * whose contributor has waited longest. `withSource` keeps only the proposals
+ * that cite a page or a document (0026): a filter on what the screen is about,
+ * in the `feed_page()` sense, never on who may read.
+ *
+ * A proposal on a sheet the caller cannot read (a draft, for a non-editor)
+ * is dropped rather than shown headless: the review needs the sheet's name.
+ */
+export async function listPendingSheets(withSource: boolean): Promise<PendingSheet[]> {
+  const rows = (await listPending()).filter((row) => !withSource || row.source !== null)
+  const sheets = new Map<string, PendingSheet>()
+  for (const row of rows) {
+    if (!row.cigar) continue
+    const entry = sheets.get(row.cigar.id) ?? { cigar: row.cigar, revisions: [] }
+    entry.revisions.push(row)
+    sheets.set(row.cigar.id, entry)
+  }
+  return [...sheets.values()]
 }
 
 /**
@@ -121,7 +156,12 @@ export async function getRevision(id: string): Promise<RevisionRow | null> {
   return data ? (hydrate([data])[0] ?? null) : null
 }
 
-export type VitolaOption = { id: string; name_salida: string; length_mm: number; ring_gauge: number }
+export type VitolaOption = {
+  id: string
+  name_salida: string
+  length_mm: number
+  ring_gauge: number
+}
 
 /** The vitolas a proposal may point at. 51 rows, so all of them. */
 export async function listVitolaOptions(): Promise<VitolaOption[]> {
@@ -211,4 +251,27 @@ export async function currentValues(cigarId: string): Promise<Record<string, unk
     .maybeSingle()
 
   return (data as Record<string, unknown> | null) ?? null
+}
+
+export type SheetSource = { source: string | null; decidedAt: string | null }
+
+/**
+ * Where a sheet takes each of its columns from (0027): the source cited by the
+ * last approved proposal that wrote it, keyed by column, and when it was
+ * decided. Read through `sheet_sources()`, a SECURITY DEFINER door that
+ * projects a URL and a date over the private queue — never an author, a diff
+ * or a comment — so a reader without a session gets the same answer as an
+ * editor. A column absent from the map was never written by the wiki: its
+ * value is the seed's, and the sheet says « selon le référentiel ».
+ */
+export async function sheetSources(cigarId: string): Promise<Map<string, SheetSource>> {
+  const db = await createSupabaseServerClient()
+  const { data, error } = await db.rpc('sheet_sources', { p_cigar_id: cigarId })
+  if (error) throw new Error(`Could not read the sheet sources: ${error.message}`)
+  return new Map(
+    (data ?? []).map((row) => [
+      row.column_name,
+      { source: row.source, decidedAt: row.decided_at } satisfies SheetSource,
+    ]),
+  )
 }

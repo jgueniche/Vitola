@@ -58,6 +58,7 @@ export const SEGMENTS = {
   adminSheets: 'fiches',
   adminLines: 'gammes',
   adminShop: 'boutique',
+  review: 'relire',
   compare: 'comparer',
   history: 'historique',
   legalNotice: 'mentions-legales',
@@ -179,6 +180,10 @@ export const routes = {
   adminFlags: () => `/${SEGMENTS.admin}/${SEGMENTS.adminFlags}`,
   adminAccounts: () => `/${SEGMENTS.admin}/${SEGMENTS.adminAccounts}`,
   adminSheets: () => `/${SEGMENTS.admin}/${SEGMENTS.adminSheets}`,
+  /* La relecture en série pend sous les fiches de l'admin : une fiche à la
+     fois, ses propositions, A et R. L'état — la fiche courante, le filtre
+     « avec source » — vit dans l'URL, comme partout (app/CLAUDE.md). */
+  adminSheetsReview: () => `/${SEGMENTS.admin}/${SEGMENTS.adminSheets}/${SEGMENTS.review}`,
   adminLines: () => `/${SEGMENTS.admin}/${SEGMENTS.adminLines}`,
   adminShop: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}`,
   adminShopVendors: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}/${SEGMENTS.shopVendors}`,
@@ -224,15 +229,11 @@ export const PUBLIC_PATHS: readonly string[] = [
  * of 25 août 2026: product sheets, shopfronts and the whole checkout funnel
  * are rows and static segments under `/boutique/`, all accessory-only.
  */
-export const PUBLIC_PREFIXES: readonly string[] = [
-  `/${SEGMENTS.journal}/`,
-  `/${SEGMENTS.shop}/`,
-]
+export const PUBLIC_PREFIXES: readonly string[] = [`/${SEGMENTS.journal}/`, `/${SEGMENTS.shop}/`]
 
 export function isPublicPath(pathname: string): boolean {
   return (
-    PUBLIC_PATHS.includes(pathname) ||
-    PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+    PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))
   )
 }
 
