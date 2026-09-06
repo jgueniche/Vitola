@@ -63,7 +63,7 @@ export default async function AdminVendorsPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.admin.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="text-sm">
           <Link href={routes.adminShop()} className="text-ink underline">
@@ -79,12 +79,12 @@ export default async function AdminVendorsPage({ searchParams }: Props) {
       ) : null}
 
       <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
-        <h2 className="font-display text-2xl">{copy.createTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
         <CreateVendorForm />
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.listTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.listTitle}</h2>
         {vendors.length === 0 ? (
           <EmptyState title={copy.emptyTitle} description={copy.emptyBody} />
         ) : (
@@ -127,7 +127,7 @@ export default async function AdminVendorsPage({ searchParams }: Props) {
                       <form action={setVendorStatus}>
                         <input type="hidden" name="id" value={vendor.id} />
                         <input type="hidden" name="status" value="active" />
-                        <Button type="submit" size="sm">
+                        <Button type="submit">
                           {vendor.status === 'suspended' ? copy.reinstate : copy.activate}
                         </Button>
                       </form>

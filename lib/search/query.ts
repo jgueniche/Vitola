@@ -59,10 +59,7 @@ export async function searchCigars(facets: Facets): Promise<SearchResult> {
     ${vitolaJoin}(name_salida, name_galera, length_mm, ring_gauge, shape, slug)`
 
   const db = await referential()
-  let query = db
-    .from('cigars')
-    .select(select, { count: 'exact' })
-    .eq('status', 'published')
+  let query = db.from('cigars').select(select, { count: 'exact' }).eq('status', 'published')
 
   if (facets.query) {
     query = query.textSearch('search_vector', toSearchQuery(facets.query), {
@@ -75,6 +72,10 @@ export async function searchCigars(facets: Facets): Promise<SearchResult> {
   if (facets.countries.length > 0) query = query.in('origin_country', facets.countries)
   if (facets.brand) query = query.eq('brands.slug', facets.brand)
   if (facets.vitola) query = query.eq('vitolas.slug', facets.vitola)
+  /* The vitola is the column that decides whether a sheet is documented: it
+     carries the format, and the strength and shade of the seed came with it. */
+  if (facets.completeness === 'renseignee') query = query.not('vitola_id', 'is', null)
+  if (facets.completeness === 'a-completer') query = query.is('vitola_id', null)
 
   const from = (facets.page - 1) * PAGE_SIZE
   const { data, count, error } = await query
@@ -92,4 +93,25 @@ export async function searchCigars(facets: Facets): Promise<SearchResult> {
     page: facets.page,
     pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)),
   }
+}
+
+export type PublishedCounts = { total: number; withVitola: number }
+
+/**
+ * How much of the referential is documented — two head counts, for the lede
+ * of the list. Said on the page because it is the page's truth: 940 sheets
+ * and 78 formats is a different site from 940 and 940, and the visitor
+ * should not have to discover which one by scrolling.
+ */
+export async function publishedCounts(): Promise<PublishedCounts> {
+  const db = await referential()
+  const [all, documented] = await Promise.all([
+    db.from('cigars').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    db
+      .from('cigars')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .not('vitola_id', 'is', null),
+  ])
+  return { total: all.count ?? 0, withVitola: documented.count ?? 0 }
 }

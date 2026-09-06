@@ -38,6 +38,8 @@ export type CigarDetail = {
   msrp_source: string | null
   verified_at: string | null
   brands: { name: string; slug: string; is_cuban: boolean; country: string | null } | null
+  /** The aroma profile of the referential (migration 0025), descriptor ids. */
+  aroma_tags: number[]
   lines: { name: string; slug: string } | null
   vitolas: {
     name_salida: string
@@ -57,7 +59,7 @@ export async function getCigarBySlug(slug: string): Promise<CigarDetail | null> 
     .select(
       `id, slug, brand_id, commercial_name, origin_country, wrapper_origin, binder_origin,
        filler_origins, strength, wrapper_shade, release_year, release_type,
-       discontinued_year, msrp_eur, msrp_effective_on, msrp_source, verified_at,
+       discontinued_year, msrp_eur, msrp_effective_on, msrp_source, verified_at, aroma_tags,
        brands(name, slug, is_cuban, country),
        lines(name, slug),
        vitolas(name_salida, name_galera, length_mm, ring_gauge, shape, slug, notes)`,
@@ -85,7 +87,9 @@ export async function listBrands(): Promise<BrandSummary[]> {
   const db = await referential()
   const { data, error } = await db
     .from('brands')
-    .select('id, name, slug, country, is_cuban, founded_year, description, manufacturers(name, slug)')
+    .select(
+      'id, name, slug, country, is_cuban, founded_year, description, manufacturers(name, slug)',
+    )
     .order('name', { ascending: true })
 
   if (error) throw new Error(`Could not list brands: ${error.message}`)
@@ -96,7 +100,9 @@ export async function getBrandBySlug(slug: string): Promise<BrandSummary | null>
   const db = await referential()
   const { data, error } = await db
     .from('brands')
-    .select('id, name, slug, country, is_cuban, founded_year, description, manufacturers(name, slug)')
+    .select(
+      'id, name, slug, country, is_cuban, founded_year, description, manufacturers(name, slug)',
+    )
     .eq('slug', slug)
     .maybeSingle()
 
@@ -162,7 +168,6 @@ export async function publishedOriginCountries(): Promise<string[]> {
   }
   return [...codes].sort()
 }
-
 
 /* -------------------------------------------------------------------------- */
 /* Box codes                                                                   */

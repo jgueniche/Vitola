@@ -89,7 +89,7 @@ export default async function SettingsPage({
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="text-ink-faint text-xs">
           {copy.memberSince.replace('{date}', formatEffectiveDate(account.created_at.slice(0, 10)))}
@@ -133,7 +133,7 @@ export default async function SettingsPage({
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.profileTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.profileTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.profileLede}</p>
         </div>
         <ProfileForm
@@ -151,7 +151,7 @@ export default async function SettingsPage({
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.preferencesTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.preferencesTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.preferencesLede}</p>
         </div>
         <PreferencesForm preferences={account.preferences} />
@@ -159,7 +159,7 @@ export default async function SettingsPage({
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.privacyTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.privacyTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.privacyLede}</p>
         </div>
         <PrivacyForm privacy={account.privacy} />
@@ -174,7 +174,7 @@ export default async function SettingsPage({
           mot pour mot ici. */}
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.blockedTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.blockedTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.blockedLede}</p>
         </div>
 
@@ -212,7 +212,7 @@ export default async function SettingsPage({
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.consentsTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.consentsTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.consentsLede}</p>
         </div>
 
@@ -282,7 +282,7 @@ export default async function SettingsPage({
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-2xl">{copy.gdprTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.gdprTitle}</h2>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.gdprLede}</p>
         </div>
 

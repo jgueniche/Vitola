@@ -9,12 +9,7 @@ import { Input, Label, Select } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { venueConfirmation } from '@/lib/venues/confirmations'
-import {
-  formatDistance,
-  isVenueType,
-  VENUE_SEARCH,
-  type VenueType,
-} from '@/lib/venues/model'
+import { formatDistance, isVenueType, VENUE_SEARCH, type VenueType } from '@/lib/venues/model'
 import {
   listPendingVenues,
   listVenues,
@@ -81,9 +76,7 @@ export default async function VenuesPage({
     hasPoint
       ? venuesNearby({ lat, lng, radiusKm, offeredTypes: flag.types, type })
       : Promise.resolve<NearbyVenue[]>([]),
-    hasPoint
-      ? Promise.resolve<VenueRow[]>([])
-      : listVenues({ offeredTypes: flag.types, type, q }),
+    hasPoint ? Promise.resolve<VenueRow[]>([]) : listVenues({ offeredTypes: flag.types, type, q }),
     user ? listPendingVenues() : Promise.resolve<VenueRow[]>([]),
   ])
 
@@ -93,7 +86,7 @@ export default async function VenuesPage({
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="text-ink-muted measure text-xs leading-relaxed">{copy.sourceNote}</p>
       </div>
@@ -139,9 +132,7 @@ export default async function VenuesPage({
           link parameter, and « Me localiser » is the only client code here. */}
       <div className="border-rule bg-surface flex flex-wrap items-center gap-3 rounded-[3px] border p-4">
         <p className="text-ink-muted flex-1 text-sm leading-relaxed">
-          {hasPoint
-            ? copy.list.nearActive.replace('{km}', String(radiusKm))
-            : copy.list.locateHint}
+          {hasPoint ? copy.list.nearActive.replace('{km}', String(radiusKm)) : copy.list.locateHint}
         </p>
         {hasPoint ? (
           <Link href={routes.venues()} className="text-accent text-sm hover:underline">
@@ -179,7 +170,7 @@ export default async function VenuesPage({
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
                   href={routes.venue(venue.slug)}
-                  className="font-display text-ink hover:text-accent text-xl transition-colors duration-(--duration-quick)"
+                  className="text-ink hover:text-accent text-base font-medium transition-colors duration-(--duration-quick)"
                 >
                   {venue.name}
                 </Link>
@@ -208,7 +199,7 @@ export default async function VenuesPage({
       {pending.length > 0 ? (
         <section className="flex flex-col gap-3">
           <Band variant="divider" />
-          <h2 className="font-display text-2xl">
+          <h2 className="font-display text-display-sm">
             {pending.some((venue) => venue.created_by !== user?.id)
               ? copy.pending.titleEditor
               : copy.pending.titleMine}

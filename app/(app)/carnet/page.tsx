@@ -4,21 +4,29 @@ import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
-import { EntryCard } from '@/components/reviews/entry-card'
-import { Button } from '@/components/ui/button'
+import { EntryRow } from '@/components/reviews/entry-row'
+import { buttonClass } from '@/components/ui/button'
+import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { REVIEW_SCOPES, type ReviewKind, type ReviewVisibility } from '@/lib/reviews/model'
-import { listMyNotebook, listSharedWithMe, myScoreScale } from '@/lib/reviews/queries'
+import {
+  listMyNotebook,
+  listSharedWithMe,
+  myScoreScale,
+  type ReviewWithContext,
+} from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
-
 
 export const metadata: Metadata = { title: m.notebook.title }
 
 const copy = m.notebook
 
-type Search = { params?: never; searchParams: Promise<Record<string, string | string[] | undefined>> }
+type Search = {
+  params?: never
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 function one(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value
@@ -44,10 +52,11 @@ function FilterLink({
   return (
     <Link
       href={href}
+      aria-current={active ? 'true' : undefined}
       className={cn(
-        'rounded-[3px] border px-3 py-1 text-sm transition-colors duration-(--duration-quick)',
+        'rounded-[3px] border px-2.5 py-1 text-sm whitespace-nowrap transition-colors duration-(--duration-quick)',
         active
-          ? 'border-accent text-accent'
+          ? 'border-accent bg-accent text-on-accent'
           : 'border-rule text-ink-muted hover:border-rule-strong hover:text-ink',
       )}
     >
@@ -57,7 +66,45 @@ function FilterLink({
 }
 
 /**
+ * The month an entry belongs to, as a heading: "Septembre 2026".
+ *
+ * Parsed field by field from `smoked_on` (YYYY-MM-DD) rather than through
+ * `new Date(string)`, which reads a bare date as UTC midnight and renders it
+ * locally — the trap `formatEffectiveDate` documents. A month heading that
+ * puts the 1st of the month in the previous one would be a quiet lie.
+ */
+function monthOf(smokedOn: string): { key: string; label: string } {
+  const match = /^(\d{4})-(\d{2})/.exec(smokedOn)
+  if (!match) return { key: smokedOn, label: smokedOn }
+  const [, year, month] = match
+  const label = new Intl.DateTimeFormat('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(Date.UTC(Number(year), Number(month) - 1, 1))
+  return { key: `${year}-${month}`, label: label.charAt(0).toUpperCase() + label.slice(1) }
+}
+
+function groupByMonth(
+  entries: ReviewWithContext[],
+): { key: string; label: string; entries: ReviewWithContext[] }[] {
+  const groups: { key: string; label: string; entries: ReviewWithContext[] }[] = []
+  for (const entry of entries) {
+    const month = monthOf(entry.smoked_on)
+    const last = groups[groups.length - 1]
+    if (last && last.key === month.key) last.entries.push(entry)
+    else groups.push({ ...month, entries: [entry] })
+  }
+  return groups
+}
+
+/**
  * Mon carnet — everything one has written, and everything one has been named on.
+ *
+ * Rebuilt on 5 septembre 2026 from the design audit: one toolbar instead of
+ * two rows of chips and a sentence, the entries as rows grouped by month so a
+ * notebook reads as a notebook, and the page's one title said once — the old
+ * page repeated "Mon carnet" as its section heading.
  *
  * Two sections rather than one list, because they are two different things: the
  * first is authored, editable and re-scopable; the second is read-only and
@@ -110,37 +157,57 @@ export default async function NotebookPage({ searchParams }: Search) {
   const count =
     entries.length === 1
       ? copy.countOne
-      : copy.countMany.replace('{count}', String(entries.length))
+      : copy.countMany.replace('{count}', formatCount(entries.length))
+
+  const groups = groupByMonth(entries)
 
   return (
-    <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+    <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <p className="eyebrow">
+          {m.nav.mine.label} · {copy.eyebrow}
+        </p>
+        <h1 id="mon-carnet" className="font-display text-display-md leading-tight">
+          {copy.title}
+        </h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
-      <Band variant="divider" />
-
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <span className="eyebrow">{copy.filters.kind}</span>
-          <div className="flex flex-wrap gap-2">
-            <FilterLink href={withFilter({ kind: undefined })} active={kind === undefined}>
-              {copy.filters.kindAll}
-            </FilterLink>
-            <FilterLink href={withFilter({ kind: 'log' })} active={kind === 'log'}>
-              {copy.filters.kindLog}
-            </FilterLink>
-            <FilterLink href={withFilter({ kind: 'tasting' })} active={kind === 'tasting'}>
-              {copy.filters.kindTasting}
-            </FilterLink>
+      {/* One toolbar on two hairlined rows: what kind, who reads, which scale.
+          The scale control moved to /parametres with the other display
+          preferences; what stays is the fact and the way to change it. */}
+      <div className="border-rule flex flex-col border-t border-b">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="eyebrow">{copy.filters.kind}</span>
+            <div className="flex flex-wrap gap-1.5">
+              <FilterLink href={withFilter({ kind: undefined })} active={kind === undefined}>
+                {copy.filters.kindAll}
+              </FilterLink>
+              <FilterLink href={withFilter({ kind: 'log' })} active={kind === 'log'}>
+                {copy.filters.kindLog}
+              </FilterLink>
+              <FilterLink href={withFilter({ kind: 'tasting' })} active={kind === 'tasting'}>
+                {copy.filters.kindTasting}
+              </FilterLink>
+            </div>
           </div>
+          <p className="text-ink-muted flex flex-wrap items-center gap-x-2 text-xs">
+            {entries.length > 0 ? (
+              <>
+                <span>{count}</span>
+                <span className="text-ink-faint">·</span>
+              </>
+            ) : null}
+            <span>{scale === 100 ? copy.scale.hundred : copy.scale.twenty}</span>
+            <Link href={routes.settings()} className="hover:text-ink underline underline-offset-4">
+              {m.settings.scaleChange}
+            </Link>
+          </p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3">
           <span className="eyebrow">{copy.filters.scope}</span>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             <FilterLink href={withFilter({ scope: undefined })} active={scope === undefined}>
               {copy.filters.scopeAll}
             </FilterLink>
@@ -151,37 +218,17 @@ export default async function NotebookPage({ searchParams }: Search) {
             ))}
           </div>
         </div>
-
-        {/* The control moved to /parametres, with the other display
-            preferences. What stays is the fact — which scale is in force — and
-            the way to change it, so the move costs no discoverability. */}
-        <p className="text-ink-muted flex flex-wrap items-center gap-x-2 text-sm">
-          <span className="eyebrow">{m.notebook.scale.legend}</span>
-          <span>{scale === 100 ? m.notebook.scale.hundred : m.notebook.scale.twenty}</span>
-          <Link href={routes.settings()} className="text-accent underline">
-            {m.settings.scaleChange}
-          </Link>
-        </p>
       </div>
 
-      <section aria-labelledby="mes-entrees" className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <h2 id="mes-entrees" className="font-display text-2xl">
-            {copy.title}
-          </h2>
-          {entries.length > 0 ? <p className="text-ink-faint text-sm">{count}</p> : null}
-        </div>
-
+      <section aria-labelledby="mon-carnet" className="flex flex-col gap-8">
         {entries.length === 0 ? (
           filtered ? (
             <EmptyState
               title={copy.emptyFilteredTitle}
               description={copy.emptyFilteredBody}
               action={
-                <Link href={routes.notebook()}>
-                  <Button variant="secondary" size="sm">
-                    {copy.filtersReset}
-                  </Button>
+                <Link href={routes.notebook()} className={buttonClass({ variant: 'secondary' })}>
+                  {copy.filtersReset}
                 </Link>
               }
             />
@@ -190,42 +237,42 @@ export default async function NotebookPage({ searchParams }: Search) {
               title={copy.emptyTitle}
               description={copy.emptyBody}
               action={
-                <Link href={routes.cigars()}>
-                  <Button size="sm">{copy.emptyAction}</Button>
+                <Link href={routes.cigars()} className={buttonClass({})}>
+                  {copy.emptyAction}
                 </Link>
               }
             />
           )
         ) : (
-          <ul className="flex flex-col gap-3">
-            {entries.map((entry) => (
-              <li key={entry.id}>
-                <EntryCard entry={entry} scale={scale} showCigar showScope isMine />
-              </li>
-            ))}
-          </ul>
+          groups.map((group) => (
+            <div key={group.key} className="flex flex-col gap-1">
+              <h2 className="eyebrow text-accent">{group.label}</h2>
+              <div className="border-rule border-t">
+                {group.entries.map((entry) => (
+                  <EntryRow key={entry.id} entry={entry} scale={scale} showCigar showScope isMine />
+                ))}
+              </div>
+            </div>
+          ))
         )}
       </section>
 
       <section aria-labelledby="partage" className="flex flex-col gap-4">
-        <Band variant="divider" />
-        <div className="flex flex-col gap-1">
-          <h2 id="partage" className="font-display text-2xl">
+        <Band variant="divider">
+          <span id="partage" className="eyebrow">
             {copy.sharedWithMeTitle}
-          </h2>
-          <p className="text-ink-muted text-sm">{copy.sharedWithMeLede}</p>
-        </div>
+          </span>
+        </Band>
+        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.sharedWithMeLede}</p>
 
         {shared.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.sharedWithMeEmpty}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <div className="border-rule border-t">
             {shared.map((entry) => (
-              <li key={entry.id}>
-                <EntryCard entry={entry} scale={scale} showCigar showAuthor />
-              </li>
+              <EntryRow key={entry.id} entry={entry} scale={scale} showCigar showAuthor />
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </main>

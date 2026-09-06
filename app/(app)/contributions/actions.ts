@@ -81,6 +81,18 @@ function readField(formData: FormData, column: string): DiffValue | undefined {
     return list.length === 0 ? null : list
   }
 
+  /* A `<select multiple>` sends one value per choice and nothing at all when
+     none is chosen — which is why the form also carries a hidden empty field
+     under the same name: "sent, and empty" is a profile cleared, "not sent"
+     would be a field never rendered. */
+  if (field.kind === 'aromas') {
+    const list = formData
+      .getAll(column)
+      .map((item) => String(item).trim())
+      .filter((item) => item !== '')
+    return list.length === 0 ? null : list
+  }
+
   const raw = String(formData.get(column) ?? '').trim()
   if (raw === '') return null
 
@@ -114,6 +126,11 @@ function validate(submitted: Record<string, DiffValue>): string | null {
     if (field.kind === 'year') {
       const year = Number(value)
       if (!Number.isInteger(year) || year < YEAR_MIN || year > YEAR_MAX) return copy.yearRange
+    }
+    if (field.kind === 'aromas') {
+      const list = Array.isArray(value) ? value : [String(value)]
+      if (list.length > 12) return copy.tooManyAromas
+      if (list.some((item) => !/^[0-9]{1,9}$/.test(item))) return copy.unknownAroma
     }
     if (field.kind === 'enum' && !field.values?.includes(String(value))) {
       return copy.unknown
@@ -245,7 +262,10 @@ export async function approveRevision(
   _previous: WikiState,
   formData: FormData,
 ): Promise<WikiState> {
-  const parsed = decideSchema.safeParse({ id: formData.get('id'), comment: formData.get('comment') })
+  const parsed = decideSchema.safeParse({
+    id: formData.get('id'),
+    comment: formData.get('comment'),
+  })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
 
   const revision = await getRevision(parsed.data.id)
@@ -279,7 +299,17 @@ export async function approveRevision(
    * cannot reach here, whatever a stored diff contains — `readDiff()` drops it
    * on the way out of the database as well as on the way in.
    */
-  const patch = applyDiff(revision.diff) as Database['ref']['Tables']['cigars']['Update']
+  const values: Record<string, unknown> = applyDiff(revision.diff)
+  /* The one column whose stored shape is not its column type: a diff keeps
+     descriptor ids as strings like every list, the column is integer[] and
+     NOT NULL — so "cleared" is an empty array, never a null. The trigger of
+     0025 still decides whether each id is a descriptor; this only restores
+     the type the JSON lost. */
+  if ('aroma_tags' in values) {
+    const list = values.aroma_tags
+    values.aroma_tags = Array.isArray(list) ? list.map(Number) : []
+  }
+  const patch = values as Database['ref']['Tables']['cigars']['Update']
 
   const { data: updated, error: updateError } = await supabase
     .schema('ref')
@@ -330,11 +360,11 @@ export async function approveRevision(
   redirect(`${routes.contributions()}?decidee=approuvee`)
 }
 
-export async function rejectRevision(
-  _previous: WikiState,
-  formData: FormData,
-): Promise<WikiState> {
-  const parsed = decideSchema.safeParse({ id: formData.get('id'), comment: formData.get('comment') })
+export async function rejectRevision(_previous: WikiState, formData: FormData): Promise<WikiState> {
+  const parsed = decideSchema.safeParse({
+    id: formData.get('id'),
+    comment: formData.get('comment'),
+  })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
 
   /* A rejection without a reason is a door closed in somebody's face. The
@@ -379,6 +409,8 @@ async function refuseForeignLine(
 function refusalMessage(code: string | undefined): string {
   if (code === '42501') return copy.notEditor
   if (code === '23514') return copy.constraint
+  /* The aroma guard of 0025 raises a foreign-key code for an id the wheel does not know. */
+  if (code === '23503') return copy.unknownAroma
   if (code === '23505') return copy.duplicate
   return copy.unknown
 }

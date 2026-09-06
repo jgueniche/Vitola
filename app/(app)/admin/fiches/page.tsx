@@ -62,7 +62,7 @@ export default async function AdminSheetsPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.admin.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
         <p className="eyebrow">
           {copy.countUnreviewed.replace('{count}', String(counts.sheetsUnreviewed))}
@@ -137,12 +137,30 @@ export default async function AdminSheetsPage({ searchParams }: Props) {
               </span>
               <span className="flex flex-wrap gap-2">
                 {sheet.verified_by === null ? (
-                  <SheetAction id={sheet.id} verb="relire" filtre={filter} q={q} label={copy.markReviewed} />
+                  <SheetAction
+                    id={sheet.id}
+                    verb="relire"
+                    filtre={filter}
+                    q={q}
+                    label={copy.markReviewed}
+                  />
                 ) : null}
                 {sheet.status === 'published' ? (
-                  <SheetAction id={sheet.id} verb="depublier" filtre={filter} q={q} label={copy.unpublish} />
+                  <SheetAction
+                    id={sheet.id}
+                    verb="depublier"
+                    filtre={filter}
+                    q={q}
+                    label={copy.unpublish}
+                  />
                 ) : (
-                  <SheetAction id={sheet.id} verb="republier" filtre={filter} q={q} label={copy.republish} />
+                  <SheetAction
+                    id={sheet.id}
+                    verb="republier"
+                    filtre={filter}
+                    q={q}
+                    label={copy.republish}
+                  />
                 )}
               </span>
             </li>

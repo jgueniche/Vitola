@@ -10,6 +10,7 @@ import { STRENGTHS, strengthLabel, type Strength } from '@/components/data/stren
 import { WRAPPER_SHADES, shadeLabel, type WrapperShade } from '@/components/data/wrapper-scale'
 import { Button } from '@/components/ui/button'
 import { FieldError, FieldStatus, Input, Label, Select, Textarea } from '@/components/ui/field'
+import type { AromaFamily } from '@/lib/aromas/queries'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { Constants } from '@/lib/supabase/database.types'
@@ -31,6 +32,7 @@ export type Current = {
   release_type: string
   release_year: number | null
   discontinued_year: number | null
+  aroma_tags: number[]
 }
 
 /**
@@ -53,12 +55,14 @@ export function ProposeForm({
   current,
   vitolas,
   lines,
+  families,
 }: {
   cigarId: string
   slug: string
   current: Current
   vitolas: { id: string; name_salida: string; length_mm: number; ring_gauge: number }[]
   lines: { id: string; name: string }[]
+  families: AromaFamily[]
 }) {
   const [state, action, pending] = useActionState<WikiState, FormData>(proposeRevision, {})
 
@@ -130,8 +134,16 @@ export function ProposeForm({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Country id="origin_country" label={copy.fieldOriginCountry} value={current.origin_country} />
-        <Country id="wrapper_origin" label={copy.fieldWrapperOrigin} value={current.wrapper_origin} />
+        <Country
+          id="origin_country"
+          label={copy.fieldOriginCountry}
+          value={current.origin_country}
+        />
+        <Country
+          id="wrapper_origin"
+          label={copy.fieldWrapperOrigin}
+          value={current.wrapper_origin}
+        />
         <Country id="binder_origin" label={copy.fieldBinderOrigin} value={current.binder_origin} />
       </div>
 
@@ -144,6 +156,35 @@ export function ProposeForm({
           className="uppercase"
         />
         <p className="text-ink-muted text-xs">{copy.fieldFillerOriginsHint}</p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="aroma_tags">{copy.fieldAromaTags}</Label>
+        {/* A native multi-select over the wheel, grouped by family: the same
+            rule as the vitola picker — the platform control is the one that
+            is keyboard-correct. The hidden empty field is what makes "nothing
+            selected" a submitted value, so a profile can be cleared. */}
+        <input type="hidden" name="aroma_tags" value="" />
+        <select
+          id="aroma_tags"
+          name="aroma_tags"
+          multiple
+          size={10}
+          defaultValue={current.aroma_tags.map(String)}
+          key={`aromas-${current.aroma_tags.join('-')}`}
+          className="border-rule-strong bg-surface text-ink focus:border-accent w-full rounded-[3px] border px-3 py-2 text-sm focus:outline-none"
+        >
+          {families.map((family) => (
+            <optgroup key={family.id} label={family.label}>
+              {family.descriptors.map((descriptor) => (
+                <option key={descriptor.id} value={descriptor.id}>
+                  {descriptor.label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        <p className="text-ink-muted text-xs">{copy.fieldAromaTagsHint}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

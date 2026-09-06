@@ -30,7 +30,7 @@ export default async function ShopConfirmationPage() {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
       </div>
 
       <p
@@ -46,7 +46,7 @@ export default async function ShopConfirmationPage() {
       </p>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-2xl">{copy.linesTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.linesTitle}</h2>
         <ul className="border-rule bg-surface flex flex-col gap-1.5 rounded-[3px] border p-4 text-sm">
           {order.lines.map((line) => (
             <li key={line.slug} className="flex justify-between gap-3">
@@ -63,7 +63,7 @@ export default async function ShopConfirmationPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-2xl">{copy.totalsTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.totalsTitle}</h2>
         <dl className="border-rule bg-surface flex flex-col gap-1.5 rounded-[3px] border p-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-ink-muted">{m.shop.cart.itemsTotal}</dt>
@@ -85,7 +85,7 @@ export default async function ShopConfirmationPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-2xl">{copy.shippingTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.shippingTitle}</h2>
         <div className="border-rule bg-surface flex flex-col gap-0.5 rounded-[3px] border p-4 text-sm">
           <p>{order.shipping.fullName}</p>
           <p className="text-ink-muted">{order.shipping.address}</p>

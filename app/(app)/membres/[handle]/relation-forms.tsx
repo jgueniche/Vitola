@@ -62,7 +62,13 @@ export function RelationForms({
             secondary
           />
         ) : (
-          <Relation action={follow} userId={userId} handle={handle} retour={retour} label={copy.follow} />
+          <Relation
+            action={follow}
+            userId={userId}
+            handle={handle}
+            retour={retour}
+            label={copy.follow}
+          />
         )}
       </div>
 
@@ -179,7 +185,7 @@ function Relation({
       <input type="hidden" name="handle" value={handle} />
       <input type="hidden" name="retour" value={retour} />
       <div>
-        <Button type="submit" size="sm" variant={secondary ? 'secondary' : 'primary'} disabled={pending}>
+        <Button type="submit" variant={secondary ? 'secondary' : 'primary'} disabled={pending}>
           {label}
         </Button>
       </div>

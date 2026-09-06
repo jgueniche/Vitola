@@ -397,6 +397,23 @@ jobs:
             exit 1
           fi
 
+      # 0025 donne à la fiche son profil aromatique (une colonne, un trigger qui
+      # tient ce qu'une clé étrangère ne sait pas viser dans un tableau) et à
+      # cigar_stats les arômes les plus cités — la même frontière que la note :
+      # visibility = 'public' dans la vue, et rien qui recompte ailleurs.
+      - name: Apply 0025 — le profil aromatique
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0025_profil_aromatique.sql
+
+      - name: Profil aromatique — descripteurs seuls, relecteur seul, vue publique seule
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/19_aroma_profile.sql 2>&1 \
+            | tee "$RUNNER_TEMP/aromes.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/aromes.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).

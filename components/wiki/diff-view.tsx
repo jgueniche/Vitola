@@ -19,6 +19,7 @@ const FIELD_LABELS: Record<string, string> = {
   release_type: copy.fieldReleaseType,
   release_year: copy.fieldReleaseYear,
   discontinued_year: copy.fieldDiscontinuedYear,
+  aroma_tags: copy.fieldAromaTags,
 }
 
 export function fieldLabel(column: string): string {
@@ -44,11 +45,13 @@ export function DiffValueText({
   value,
   vitolaNames,
   lineNames,
+  aromaNames,
 }: {
   column: string
   value: DiffValue
   vitolaNames?: Map<string, string>
   lineNames?: Map<string, string>
+  aromaNames?: Map<string, string>
 }) {
   if (value === null) return <span className="text-ink-faint italic">{copy.emptyValue}</span>
 
@@ -63,6 +66,13 @@ export function DiffValueText({
   if (field?.kind === 'line') {
     const name = lineNames?.get(String(value))
     return <span>{name ?? String(value)}</span>
+  }
+  /* Descriptor ids, rendered by the wheel's own labels. An id the wheel no
+     longer knows renders as itself: a number shown as a number says "stale",
+     where a blank would say "nothing". */
+  if (field?.kind === 'aromas') {
+    const list = Array.isArray(value) ? value : [String(value)]
+    return <span>{list.map((id) => aromaNames?.get(id) ?? id).join(', ')}</span>
   }
   if (field?.kind === 'country') return <span>{countryLabel(String(value))}</span>
   if (field?.kind === 'countryList') {
@@ -87,10 +97,12 @@ export function DiffView({
   diff,
   vitolaNames,
   lineNames,
+  aromaNames,
 }: {
   diff: Diff
   vitolaNames?: Map<string, string>
   lineNames?: Map<string, string>
+  aromaNames?: Map<string, string>
 }) {
   const entries = Object.entries(diff)
   if (entries.length === 0) return null
@@ -106,6 +118,7 @@ export function DiffView({
               value={entry.from}
               vitolaNames={vitolaNames}
               lineNames={lineNames}
+              aromaNames={aromaNames}
             />
           </dd>
           <dd aria-hidden="true" className="text-ink-faint">
@@ -117,6 +130,7 @@ export function DiffView({
               value={entry.to}
               vitolaNames={vitolaNames}
               lineNames={lineNames}
+              aromaNames={aromaNames}
             />
           </dd>
         </div>

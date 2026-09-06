@@ -78,7 +78,7 @@ export default async function StatisticsPage() {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -88,7 +88,7 @@ export default async function StatisticsPage() {
           description={copy.emptyBody}
           action={
             <Link href={routes.cigars()}>
-              <Button size="sm">{copy.emptyAction}</Button>
+              <Button>{copy.emptyAction}</Button>
             </Link>
           }
         />
@@ -106,12 +106,10 @@ export default async function StatisticsPage() {
 
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.smokedHint}</p>
 
-          {stats.truncated ? (
-            <p className="text-ink-faint text-xs">{copy.truncated}</p>
-          ) : null}
+          {stats.truncated ? <p className="text-ink-faint text-xs">{copy.truncated}</p> : null}
 
           <section className="flex flex-col gap-3">
-            <h2 className="font-display text-2xl">{copy.entriesTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.entriesTitle}</h2>
             <dl className="text-ink-muted flex flex-wrap gap-x-8 gap-y-1 text-sm">
               <Pair label={copy.tastingsCount} value={formatCount(tastings)} />
               <Pair label={copy.logsCount} value={formatCount(logs)} />
@@ -126,7 +124,7 @@ export default async function StatisticsPage() {
 
           <section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl">{copy.rhythmTitle}</h2>
+              <h2 className="font-display text-display-sm">{copy.rhythmTitle}</h2>
               <p className="text-ink-muted text-sm">{copy.rhythmLede}</p>
             </div>
 
@@ -172,7 +170,7 @@ export default async function StatisticsPage() {
 
           <section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl">{copy.topTitle}</h2>
+              <h2 className="font-display text-display-sm">{copy.topTitle}</h2>
               <p className="text-ink-muted text-sm">{copy.topLede}</p>
             </div>
 
@@ -198,7 +196,7 @@ export default async function StatisticsPage() {
           </section>
 
           <section className="flex flex-col gap-3">
-            <h2 className="font-display text-2xl">{copy.stockTitle}</h2>
+            <h2 className="font-display text-display-sm">{copy.stockTitle}</h2>
             <p className="text-ink-muted text-sm">
               {formatCount(stats.stockQty)} {copy.stockCount}
               {stats.stockValue !== null
@@ -225,7 +223,7 @@ export default async function StatisticsPage() {
 function Figure({ value, label, muted }: { value: string; label: string; muted?: boolean }) {
   return (
     <div className="bg-surface flex flex-col gap-1 px-4 py-4">
-      <span className={cn('font-display text-2xl', muted && 'text-ink-muted')}>{value}</span>
+      <span className={cn('font-display text-display-sm', muted && 'text-ink-muted')}>{value}</span>
       <span className="eyebrow">{label}</span>
     </div>
   )

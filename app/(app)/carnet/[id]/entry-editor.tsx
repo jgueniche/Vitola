@@ -19,7 +19,7 @@ const copy = m.notebook
 function Submit() {
   const { pending } = useFormStatus()
   return (
-    <Button type="submit" size="sm" disabled={pending}>
+    <Button type="submit" disabled={pending}>
       {copy.entry.save}
     </Button>
   )
@@ -64,18 +64,12 @@ export function EntryEditor({
     <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="id" value={id} />
 
-      <h2 className="font-display text-xl">{copy.entry.edit}</h2>
+      <h2 className="text-base font-medium">{copy.entry.edit}</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-smoked-on">{copy.form.smokedOn}</Label>
-          <Input
-            id="edit-smoked-on"
-            name="smokedOn"
-            type="date"
-            defaultValue={smokedOn}
-            required
-          />
+          <Input id="edit-smoked-on" name="smokedOn" type="date" defaultValue={smokedOn} required />
         </div>
 
         <div className="flex flex-col gap-2">

@@ -41,7 +41,7 @@ export default async function BrandPage({ params }: Params) {
         <p className="eyebrow">
           {brand.is_cuban ? m.referential.brand.cuban : m.referential.brandsTitle}
         </p>
-        <h1 className="font-display text-4xl leading-tight">{brand.name}</h1>
+        <h1 className="font-display text-display-md leading-tight">{brand.name}</h1>
         <p className="text-ink-muted text-sm">
           {brand.country ? countryLabel(brand.country) : null}
           {brand.founded_year
@@ -58,7 +58,7 @@ export default async function BrandPage({ params }: Params) {
       <Band variant="divider" />
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl">{m.referential.brand.cigarCount}</h2>
+        <h2 className="text-base font-medium">{m.referential.brand.cigarCount}</h2>
         {result.total === 0 ? (
           <EmptyState
             title={m.referential.brand.noCigars}

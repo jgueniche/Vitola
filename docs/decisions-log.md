@@ -1442,3 +1442,49 @@ une chose est absente déclenche l'alerte que cette chose est présente. Constat
 **Captures d'écran : attendre `load`, pas `domcontentloaded`.** `domcontentloaded` n'attend pas les
 feuilles de style : les captures sortaient non stylées de façon intermittente. Vaut pour tout
 futur test de régression visuelle.
+
+---
+
+## La refonte des pages cigare — 5 septembre 2026
+
+### Ce qui est livré
+
+L'audit d'abord (`design/fiche-cigare/`, douze constats lus dans le code et mesurés en base), la
+construction ensuite, le même jour, sur instruction du porteur (« corrige tout et implémente-le »).
+La fiche en trois zones et son geste unique, l'en-tête avec sa recherche et « Cigares » en entrée
+directe, le carnet groupé par mois, la liste en grille de bagues avec la facette « À compléter »,
+la migration 0025 (profil aromatique, arômes les plus cités), l'allowlist du wiki à treize
+colonnes, et 131 propositions d'amorçage versées dans la file de relecture.
+
+### Trois décisions prises en construisant
+
+**Le plancher du display est un contrôle de build.** `.font-display` encodait `max(2rem, 1em)` dans
+`@layer base` ; `text-2xl` vit dans la couche utilitaire et gagne la cascade. Mesuré : 91 titres en
+Bodoni à 18, 20 ou 24 px pendant que la feuille de style disait 32. On n'a pas cherché à faire
+gagner le CSS — un `!important` aurait écrasé les grandes tailles aussi — on a donné au display
+ses trois tailles (`text-display-sm/md/lg`) et confié le plancher à `check-tokens.ts`, qui refuse
+la classe à côté de toute taille inférieure. Le mot-marque de l'en-tête a sa classe, seule exception.
+
+**Un geste, trois écritures, aucune règle nouvelle.** « J'en fume un » délègue à `smokeFromLot`,
+`saveLogEntry`, `shareEntryToFeed` et `publishSession`, dans cet ordre, avec un `FormData`
+synthétisé. Réécrire les validations et les revalidations dans une action de plus aurait fabriqué
+une seconde source pour chaque règle. Une annonce refusée sur une entrée qui a abouti est un
+`notice`, jamais une erreur : l'entrée est réelle, et dire le contraire ferait réécrire ce qui est
+écrit. Le lieu (P5) ne voyage que par la session — une entrée partagée ne porte pas de lieu — donc
+un geste avec un lieu s'annonce en session, le mot en texte, et l'entrée reste au carnet.
+
+**Alimenter, c'est proposer.** La demande du porteur (« alimente les fiches avec des sources ») a
+trouvé sa réponse dans le chemin que PROVENANCE §6 impose : 38 vitoles de galera standard et 129
+forces publiées par Habanos pour la marque, versées en propositions `pending` signées de son
+compte, à accepter une par une depuis `/contributions`. Aucune cape (elle varie d'une boîte à
+l'autre), aucun arôme (un profil deviné est exactement ce qu'un modèle de langage restitue en
+confondant lu et su), aucune fiche non cubaine (les cotes varient d'une manufacture à l'autre).
+Ce qui n'était pas justifiable est resté vide, et le CSV dit pourquoi ligne par ligne.
+
+### Un piège de plus
+
+**Une vue matérialisée ne s'altère pas.** Ajouter `top_aromas` à `cigar_stats` est un
+`drop` puis un `create`, et les index, les grants et le commentaire partent avec l'ancienne. La
+migration les recrée tous, et son auto-contrôle vérifie l'index unique sans lequel
+`refresh … concurrently` refuse de tourner — la première exécution après la migration l'aurait dit
+en production, sur la première note publiée.

@@ -37,7 +37,7 @@ export function EventCard({ event }: { event: EventCardRow }) {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <Link
           href={routes.event(event.id)}
-          className="font-display text-ink hover:text-accent text-xl transition-colors duration-(--duration-quick)"
+          className="text-ink hover:text-accent text-base font-medium transition-colors duration-(--duration-quick)"
         >
           {event.title}
         </Link>

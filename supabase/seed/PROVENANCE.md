@@ -271,3 +271,61 @@ produits versés à l'écran par le porteur gardent leurs propres photographies.
 
 *Dernière mise à jour : aux planches de démonstration de la boutique (5 septembre 2026). Toute
 modification manuelle des CSV ou des planches doit être consignée ici.*
+
+## 9. Les propositions d'amorçage des fiches cubaines
+
+Le 5 septembre 2026, le porteur a demandé d'alimenter les fiches « avec des sources x ou y ». Les
+règles ci-dessus ne bougent pas : aucune base tierce, aucun script de collecte, aucune écriture
+directe sur une fiche publiée. Ce qui existe désormais, c'est un **versement de propositions**
+dans la file de relecture — `08_habanos_propositions.csv`, chargé par `seed_propositions.sql` —
+qu'un relecteur accepte ou refuse depuis `/contributions`, une par une, comme n'importe quelle
+proposition (§6). Rien n'entre sur une fiche sans ce clic, et l'historique de la fiche garde qui
+a proposé, qui a décidé, et pourquoi.
+
+Deux faits par ligne, chacun sous un régime déjà décrit :
+
+| Fait | Régime | Ce que la ligne dit |
+|---|---|---|
+| **La vitole de galera** | A (saisie de mémoire, à relire) — le rattachement marque → galera est un fait de métier standard du vitolario Habanos ; §5 le range en deuxième poste de relecture | 38 fiches, uniquement quand la galera existe déjà dans `03_vitolas.csv` — **aucune vitole n'est créée**. Les rattachements incertains (Wide Edmundo, Río Seco, Secretos, les éditions limitées…) sont laissés vides plutôt que devinés. |
+| **La force** | C (spécification publiée par le fabricant) — Habanos S.A. publie une *fortaleza* par marque : ligero, ligero a medio, medio, medio a fuerte, fuerte | 129 fiches, la classification de la marque reportée sur l'échelle du §5.1. Deux marques sont laissées vides faute de certitude sur la classification (La Flor de Cano, Quintero). |
+
+**Ce que le CSV ne contient pas, et pourquoi.** Aucune **cape** : elle varie d'une boîte à
+l'autre, et une teinte proposée serait une appréciation, pas une spécification. Aucun **arôme** :
+le profil aromatique d'une fiche (migration 0025) est exactement ce qu'un modèle de langage
+restituerait de mémoire en le confondant avec ce qu'il a lu — il se remplit par le wiki et par les
+dégustations des membres, jamais par un script. Aucune fiche **non cubaine** : les cotes varient
+d'une manufacture à l'autre (§2), et le vitolario générique de la base (Toro, Gordo…) ne dit pas
+lesquelles.
+
+**Deux réserves, dites.** Le compte auteur des propositions est celui du porteur : c'est lui qui
+verse et lui qui relit, et l'historique le montre tel quel. Et deux galeras visées portent la mention
+« Dimensions à vérifier » dans `03_vitolas.csv` (Hermosos No. 4, Conservas) : le rattachement est
+juste, la cote de la vitole reste au premier poste de relecture du §5.
+
+Le script est idempotent, colonne par colonne : une fiche déjà renseignée ne reçoit pas de
+proposition pour cette colonne, et une colonne qu'une proposition d'amorçage en attente propose
+déjà n'est pas proposée une seconde fois. Une fiche peut donc porter deux propositions d'amorçage
+— la force d'une vague, la vitole de l'autre — que `apply_propositions.sql` replie par fiche.
+
+**Le 6 septembre 2026, le porteur a tranché plus loin** : « publie tout ce que tu peux, c'est pas
+grave, on fera les corrections derrière ». Deux conséquences, écrites pour être rejouables :
+
+1. **Le vitolario s'étend de 36 galeras** (`03_vitolas.csv`, de Minutos à Picadores), toutes
+   marquées « Dimensions à vérifier — ajoutée le 6 septembre 2026 (Source A) ». Ce sont les
+   noms d'usine standard de Habanos pour des formats que la base ne connaissait pas ; leurs
+   cotes viennent de mémoire et sont le premier poste de relecture du §5. Trente-neuf fiches
+   de plus y sont rattachées par une seconde vague de propositions (« vitolario étendu »).
+2. **Les propositions d'amorçage s'acceptent d'un bloc**, par `apply_propositions.sql` — le
+   même geste que « Accepter » dans `/contributions`, proposition par proposition, avec la
+   règle de fraîcheur du wiki et une trace signée qui cite l'instruction. La relecture n'est pas
+   supprimée : elle est déplacée après, fiche par fiche, depuis `/admin/fiches` et l'historique.
+
+**Exécuté sur la base de production le 6 septembre 2026**, dans l'ordre que `seed_vitolas_only.sql`
+décrit : 36 galeras ajoutées (87 au total), 39 propositions de vitole versées en seconde vague,
+puis 170 propositions acceptées d'un bloc — 77 vitoles, 129 forces — sur 131 fiches. Les fiches
+publiées qui portent une vitole passent de 78 à 155, celles qui portent une force de 123 à 252 ;
+686 n'ont encore ni l'une ni l'autre, et la facette « À compléter » les liste.
+
+Ce qui reste hors de tout script, même après cette instruction : la cape, le profil aromatique,
+et les fiches non cubaines — pour les raisons dites plus haut, qui ne sont pas des prudences
+mais des absences de source.

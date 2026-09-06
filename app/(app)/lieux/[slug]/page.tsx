@@ -95,7 +95,7 @@ export default async function VenuePage({
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.types[venue.type]}</p>
-        <h1 className="font-display text-4xl leading-tight">{venue.name}</h1>
+        <h1 className="font-display text-display-md leading-tight">{venue.name}</h1>
         <p className="text-ink-muted text-sm">{address}</p>
       </div>
 
@@ -116,9 +116,7 @@ export default async function VenuePage({
               <form action={publishVenue}>
                 <input type="hidden" name="venueId" value={venue.id} />
                 <input type="hidden" name="slug" value={venue.slug} />
-                <Button type="submit" size="sm">
-                  {copy.sheet.publish}
-                </Button>
+                <Button type="submit">{copy.sheet.publish}</Button>
               </form>
             </div>
           ) : null}
@@ -134,7 +132,7 @@ export default async function VenuePage({
 
       <section className="grid gap-6 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-2xl">{copy.sheet.contactTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.sheet.contactTitle}</h2>
           {venue.phone ? (
             <p className="text-sm">
               <span className="text-ink-muted">{copy.sheet.phoneLabel} : </span>
@@ -170,7 +168,7 @@ export default async function VenuePage({
         </div>
 
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-2xl">{copy.sheet.hoursTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.sheet.hoursTitle}</h2>
           {hasHours(venue.hours) ? (
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
               {HOURS_DAYS.map((day) =>
@@ -196,7 +194,7 @@ export default async function VenuePage({
       ) : null}
       {venue.status === 'published' && !isClaimant ? (
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-xl">{copy.sheet.claimTitle}</h2>
+          <h2 className="text-base font-medium">{copy.sheet.claimTitle}</h2>
           <p className="text-ink-muted measure text-xs leading-relaxed">
             {venue.claimed_by ? copy.sheet.claimed : copy.sheet.claimHow}
           </p>
@@ -216,7 +214,7 @@ export default async function VenuePage({
       {events.length > 0 ? (
         <section className="flex flex-col gap-3">
           <Band variant="divider" />
-          <h2 className="font-display text-2xl">{copy.sheet.eventsTitle}</h2>
+          <h2 className="font-display text-display-sm">{copy.sheet.eventsTitle}</h2>
           <ul className="flex flex-col gap-2">
             {events.map((event) => (
               <li key={event.id} className="flex flex-wrap items-baseline gap-2 text-sm">
@@ -235,7 +233,7 @@ export default async function VenuePage({
       <section id="avis" className="flex flex-col gap-4">
         <Band variant="divider" />
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-2xl">{copy.reviews.title}</h2>
+          <h2 className="font-display text-display-sm">{copy.reviews.title}</h2>
           <p className="text-ink-muted text-sm tabular-nums">
             {mean !== null ? (
               <>

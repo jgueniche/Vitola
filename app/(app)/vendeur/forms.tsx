@@ -83,14 +83,19 @@ export function StorefrontForm({ vendor }: { vendor: ShopVendorRow }) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <h3 className="font-display text-xl">{copy.legalTitle}</h3>
+        <h3 className="text-base font-medium">{copy.legalTitle}</h3>
         <p className="text-ink-muted measure text-xs leading-relaxed">{copy.legalLede}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="sf-legal">{copy.legalNameLabel}</Label>
-          <Input id="sf-legal" name="legalName" maxLength={200} defaultValue={vendor.legal_name ?? ''} />
+          <Input
+            id="sf-legal"
+            name="legalName"
+            maxLength={200}
+            defaultValue={vendor.legal_name ?? ''}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="sf-registration">{copy.registrationLabel}</Label>

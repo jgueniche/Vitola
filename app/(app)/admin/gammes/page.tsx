@@ -44,7 +44,7 @@ export default async function AdminLinesPage({ searchParams }: Props) {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.admin.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -55,12 +55,12 @@ export default async function AdminLinesPage({ searchParams }: Props) {
       ) : null}
 
       <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
-        <h2 className="font-display text-2xl">{copy.createTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
         <CreateLineForm brands={brands} />
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl">{copy.listTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.listTitle}</h2>
         {lines.length === 0 ? (
           <EmptyState title={copy.emptyTitle} description={copy.emptyBody} />
         ) : (

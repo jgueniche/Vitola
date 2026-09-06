@@ -7,7 +7,14 @@
  * plain uncontrolled input, and the form still posts through a Server Action.
  */
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, useTransition } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from 'react'
 
 import { saveTasting } from '@/app/(app)/carnet/actions'
 import { STRENGTHS, strengthLabel } from '@/components/data/strength-meter'
@@ -57,7 +64,7 @@ function Section({
   return (
     <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-5">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl">{title}</h2>
+        <h2 className="text-base font-medium">{title}</h2>
         {hint ? <p className="text-ink-muted measure text-sm leading-relaxed">{hint}</p> : null}
       </div>
       {children}
@@ -504,11 +511,7 @@ export function TastingForm({
       ) : null}
 
       <Section title={m.notebook.scope.legend}>
-        <ScopeSelector
-          pendingShares
-          value={draft?.visibility}
-          onChange={scheduleSave}
-        />
+        <ScopeSelector pendingShares value={draft?.visibility} onChange={scheduleSave} />
       </Section>
 
       {error ? <FieldError id="tasting-error">{error}</FieldError> : null}

@@ -39,13 +39,15 @@ export default async function ShopPaymentPage() {
   })
   if (lines.length === 0) redirect(routes.shopCart())
 
-  const totals = cartTotals(lines.map((line) => ({ priceEur: line.product.price_eur, qty: line.qty })))
+  const totals = cartTotals(
+    lines.map((line) => ({ priceEur: line.product.price_eur, qty: line.qty })),
+  )
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="border-accent text-ink measure border-l-2 pl-3 text-sm leading-relaxed">
           {copy.lede}
         </p>
@@ -77,7 +79,9 @@ export default async function ShopPaymentPage() {
             <div className="flex justify-between">
               <dt className="text-ink-muted">{m.shop.cart.shipping}</dt>
               <dd className="font-mono">
-                {totals.shippingEur === 0 ? m.shop.cart.shippingFree : formatPrice(totals.shippingEur)}
+                {totals.shippingEur === 0
+                  ? m.shop.cart.shippingFree
+                  : formatPrice(totals.shippingEur)}
               </dd>
             </div>
             <div className="flex justify-between font-semibold">

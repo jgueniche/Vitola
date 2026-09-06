@@ -9,7 +9,7 @@ raison — ni celle des lieux, dont le seul code client est le bouton de géoloc
 liste du journal, qui n'en charge aucun — ni la file de modération, dont le seul code client est
 le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les actions naviguent
 (`?fait=…`) plutôt que de rendre un état — ni le panier de la boutique, dont chaque ligne est
-deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-trois existent :
+deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-deux existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -18,7 +18,7 @@ deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-troi
 | `cigares/[slug]/comment-form.tsx` | idem, plus vider le champ **uniquement** en cas de succès |
 | `cigares/[slug]/comment-item.tsx` | un commentaire bascule entre lecture et édition |
 | `components/moderation/report-dialog.tsx` | un `POST` vers une route API, avec son état d'envoi |
-| `cigares/[slug]/log-form.tsx` | `useActionState` — vider le champ **uniquement** en cas de succès |
+| `cigares/[slug]/smoke-form.tsx` | `useActionState` — le geste unique de la fiche : trois écritures possibles, chacune avec son refus à lire en place, et la confirmation nomme ce qui a eu lieu |
 | `cigares/[slug]/degustation/tasting-form.tsx` | total calculé, minuteur, roue, brouillon local |
 | `carnet/[id]/entry-editor.tsx` | `useActionState` — le refus se relit sur place |
 | `carnet/[id]/share-add-button.tsx` | nommer quelqu'un peut être refusé, et doit le dire |
@@ -36,7 +36,6 @@ deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-troi
 | `fil/ember-button.tsx` | `useTransition` — une braise n'a rien à rendre, la page revalidée dit tout |
 | `fil/[id]/comment-form.tsx` | idem `comment-form.tsx` : vider le champ **seulement** en cas de succès |
 | `fil/[id]/delete-forms.tsx` | `window.confirm` avant une suppression en cascade |
-| `cigares/[slug]/session-form.tsx` | publier au fil depuis la fiche, avec sa portée |
 | `carnet/[id]/feed-share-panel.tsx` | annoncer une entrée au fil, ou dire pourquoi c'est impossible |
 | `membres/[handle]/relation-forms.tsx` | s'abonner, se désabonner, retirer un abonné, bloquer |
 | `membres/[handle]/unblock-button.tsx` | débloquer depuis la liste des paramètres |

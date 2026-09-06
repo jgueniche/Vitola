@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
 import { ReportDialog } from '@/components/moderation/report-dialog'
-import { EntryCard } from '@/components/reviews/entry-card'
+import { EntryRow } from '@/components/reviews/entry-row'
 import { PostCard } from '@/components/social/post-card'
 import { Button } from '@/components/ui/button'
 import { countryLabel } from '@/lib/cigar'
@@ -42,23 +42,23 @@ export async function generateMetadata({
   return { title: copy.profileTitle.replace('{handle}', `@${handle}`) }
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
       <Band variant="divider" />
-      <h2 className="font-display text-2xl">{title}</h2>
+      <h2 className="font-display text-display-sm">{title}</h2>
       {children}
     </section>
   )
 }
 
-function PersonList({ people, empty }: { people: { id: string; handle: string; display_name: string | null }[]; empty: string }) {
+function PersonList({
+  people,
+  empty,
+}: {
+  people: { id: string; handle: string; display_name: string | null }[]
+  empty: string
+}) {
   if (people.length === 0) return <p className="text-ink-faint text-sm">{empty}</p>
 
   return (
@@ -121,17 +121,19 @@ export default async function MemberPage({
 
   const isMe = profile.id === user.id
 
-  const [privacy, counts, followers, following, relation, slaHours, viewerRole] = await Promise.all([
-    readProfilePrivacy(profile.id),
-    countFollows(profile.id),
-    listFollowGraph(profile.id, 'followers', 30),
-    listFollowGraph(profile.id, 'following', 30),
-    isMe
-      ? Promise.resolve({ iFollow: false, followsMe: false, blocked: false })
-      : readFollowState(user.id, profile.id),
-    reportSlaHours(),
-    currentAppRole(),
-  ])
+  const [privacy, counts, followers, following, relation, slaHours, viewerRole] = await Promise.all(
+    [
+      readProfilePrivacy(profile.id),
+      countFollows(profile.id),
+      listFollowGraph(profile.id, 'followers', 30),
+      listFollowGraph(profile.id, 'following', 30),
+      isMe
+        ? Promise.resolve({ iFollow: false, followsMe: false, blocked: false })
+        : readFollowState(user.id, profile.id),
+      reportSlaHours(),
+      currentAppRole(),
+    ],
+  )
 
   const viewerIsAdmin = hasMinRole(viewerRole, 'admin')
 
@@ -157,7 +159,9 @@ export default async function MemberPage({
     .limit(10)
 
   const [entries, scale, shelf] = await Promise.all([
-    privacy.show_reviews ? listMyNotebook(profile.id, { visibility: 'public' }) : Promise.resolve([]),
+    privacy.show_reviews
+      ? listMyNotebook(profile.id, { visibility: 'public' })
+      : Promise.resolve([]),
     myScoreScale(user.id),
     privacy.show_humidor ? readSharedShelf(profile.id) : Promise.resolve([]),
   ])
@@ -183,19 +187,25 @@ export default async function MemberPage({
       ? supabase.from('post_reactions').select('post_id').in('post_id', ids).eq('user_id', user.id)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     cigarIds.length
-      ? supabase.schema('ref').from('cigars').select('id, slug, commercial_name, brands(name)').in('id', cigarIds)
+      ? supabase
+          .schema('ref')
+          .from('cigars')
+          .select('id, slug, commercial_name, brands(name)')
+          .in('id', cigarIds)
       : Promise.resolve({ data: [] }),
     venuesByIds(venueIds),
   ])
 
   const embered = new Set((mine.data ?? []).map((row) => row.post_id))
   const cigarById = new Map(
-    ((cigars.data ?? []) as unknown as {
-      id: string
-      slug: string
-      commercial_name: string
-      brands: { name: string } | null
-    }[]).map((cigar) => [cigar.id, cigar]),
+    (
+      (cigars.data ?? []) as unknown as {
+        id: string
+        slug: string
+        commercial_name: string
+        brands: { name: string } | null
+      }[]
+    ).map((cigar) => [cigar.id, cigar]),
   )
 
   const posts = (postRows ?? []).map((row) => {
@@ -223,7 +233,7 @@ export default async function MemberPage({
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">
+        <h1 className="font-display text-display-md leading-tight">
           {profile.display_name ?? `@${profile.handle}`}
         </h1>
         <p className="text-ink-faint font-mono text-sm">@{profile.handle}</p>
@@ -321,13 +331,11 @@ export default async function MemberPage({
         ) : entries.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.reviewsEmpty}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <div className="border-rule border-t">
             {entries.map((entry) => (
-              <li key={entry.id}>
-                <EntryCard entry={entry} scale={scale} showCigar />
-              </li>
+              <EntryRow key={entry.id} entry={entry} scale={scale} showCigar />
             ))}
-          </ul>
+          </div>
         )}
       </Section>
 

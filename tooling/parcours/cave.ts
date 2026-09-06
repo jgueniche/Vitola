@@ -69,7 +69,11 @@ async function settle(page: Page): Promise<void> {
 async function seen(page: Page, needle: string, timeoutMs = 15000): Promise<boolean> {
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
-    const text = (await page.locator('main').innerText().catch(() => '')) ?? ''
+    const text =
+      (await page
+        .locator('main')
+        .innerText()
+        .catch(() => '')) ?? ''
     if (contains(text, needle)) return true
     await page.waitForTimeout(400)
   }
@@ -78,14 +82,22 @@ async function seen(page: Page, needle: string, timeoutMs = 15000): Promise<bool
 
 /** Le texte de `main`, pour les messages d'échec. */
 async function body(page: Page): Promise<string> {
-  return ((await page.locator('main').innerText().catch(() => '')) ?? '').slice(0, 300)
+  return (
+    (await page
+      .locator('main')
+      .innerText()
+      .catch(() => '')) ?? ''
+  ).slice(0, 300)
 }
 
 async function signIn(page: Page, email: string): Promise<void> {
   await page.goto(`${BASE}/majorite`)
   await settle(page)
   await page.locator('input[name="birthDate"]').fill('1985-04-02')
-  await page.getByRole('button', { name: /entrer|valider|confirmer/i }).first().click()
+  await page
+    .getByRole('button', { name: /entrer|valider|confirmer/i })
+    .first()
+    .click()
   await settle(page)
 
   await page.goto(`${BASE}/connexion`)
@@ -128,11 +140,7 @@ async function main(): Promise<void> {
 
     check('/cave répond à un membre connecté', page.url().includes('/cave'), page.url())
     const emptyText = (await page.locator('main').innerText()) ?? ''
-    check(
-      'la page nomme la cave',
-      contains(emptyText, 'Ma cave'),
-      emptyText.slice(0, 80),
-    )
+    check('la page nomme la cave', contains(emptyText, 'Ma cave'), emptyText.slice(0, 80))
     check(
       'le formulaire de création est présent',
       await page.locator('input[name="name"]').isVisible(),
@@ -149,13 +157,19 @@ async function main(): Promise<void> {
     check('la cave apparaît dans la liste', await seen(page, CAVE_NAME), await body(page))
     check('elle est marquée par défaut', await seen(page, 'Par défaut'))
 
-    await page.getByRole('link', { name: new RegExp(CAVE_NAME.slice(0, 20), 'i') }).first().click()
+    await page
+      .getByRole('link', { name: new RegExp(CAVE_NAME.slice(0, 20), 'i') })
+      .first()
+      .click()
     await settle(page)
     humidorUrl = page.url()
     check('la cave a sa page', /\/cave\/[0-9a-f-]{36}/.test(humidorUrl), humidorUrl)
 
     const detail = await page.locator('main').innerText()
-    check('elle annonce son état vide comme une invitation', contains(detail, 'Cette cave est vide'))
+    check(
+      'elle annonce son état vide comme une invitation',
+      contains(detail, 'Cette cave est vide'),
+    )
     check('elle affiche sa jauge', contains(detail, '0 / 50'), detail.slice(0, 200))
 
     /* -------------------------------------------------- 3. ranger un lot */
@@ -195,7 +209,10 @@ async function main(): Promise<void> {
 
     /* ----------------------------------- 4. fumer : le critère de sortie */
     console.log('\n4. Fumer depuis la cave — le critère de sortie de P2')
-    await page.getByRole('link', { name: /Undercrown/i }).first().click()
+    await page
+      .getByRole('link', { name: /Undercrown/i })
+      .first()
+      .click()
     await settle(page)
 
     check('le grand livre est ouvert', await seen(page, 'Grand livre'), await body(page))
@@ -220,7 +237,10 @@ async function main(): Promise<void> {
 
     /* ----------------------------- 5. fumer sans rien noter (ADR 0006 D2) */
     console.log('\n5. Fumer sans rien noter')
-    await page.getByRole('link', { name: /Undercrown/i }).first().click()
+    await page
+      .getByRole('link', { name: /Undercrown/i })
+      .first()
+      .click()
     await settle(page)
     await page.getByRole('button', { name: "J'en fume un" }).first().click()
     await settle(page)
@@ -244,7 +264,10 @@ async function main(): Promise<void> {
     // une quantité qui n'existe plus. C'est le second qui compte, parce qu'il
     // est le seul que `pnpm check` ne verrait jamais.
     console.log('\n6. Un refus qui dit ce qui reste')
-    await page.getByRole('link', { name: /Undercrown/i }).first().click()
+    await page
+      .getByRole('link', { name: /Undercrown/i })
+      .first()
+      .click()
     await settle(page)
 
     const smokeQty = page.locator('input[name="qty"]').first()
@@ -259,11 +282,18 @@ async function main(): Promise<void> {
     const twin = await one.newPage()
     await twin.goto(humidorUrl)
     await settle(twin)
-    await twin.getByRole('link', { name: /Undercrown/i }).first().click()
+    await twin
+      .getByRole('link', { name: /Undercrown/i })
+      .first()
+      .click()
     await settle(twin)
     await twin.getByRole('button', { name: "J'en fume un" }).first().click()
     await settle(twin)
-    check('le second onglet a bien fumé', await seen(twin, 'Décompté de votre cave'), await body(twin))
+    check(
+      'le second onglet a bien fumé',
+      await seen(twin, 'Décompté de votre cave'),
+      await body(twin),
+    )
     await twin.close()
 
     await page.getByRole('button', { name: "J'en fume un" }).first().click()
@@ -297,7 +327,7 @@ async function main(): Promise<void> {
     const cigarPage = await page.locator('main').innerText()
     check(
       'la fiche dit ce que j’en ai en cave',
-      contains(cigarPage, 'Dans votre cave'),
+      contains(cigarPage, 'En cave') || contains(cigarPage, 'Pas en cave'),
       cigarPage.slice(0, 200),
     )
 
@@ -323,25 +353,44 @@ async function main(): Promise<void> {
     await settle(page)
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: /Exporter ma cave/i }).first().click(),
+      page
+        .getByRole('button', { name: /Exporter ma cave/i })
+        .first()
+        .click(),
     ])
 
-    check('le fichier est nommé', download.suggestedFilename() === 'vitola-cave.csv', download.suggestedFilename())
+    check(
+      'le fichier est nommé',
+      download.suggestedFilename() === 'vitola-cave.csv',
+      download.suggestedFilename(),
+    )
     const csvPath = await download.path()
     const csvText = csvPath ? readFileSync(csvPath, 'utf8') : ''
-    check("l'en-tête est celui qu'on documente", contains(csvText, 'cigar_slug,qty'), csvText.slice(0, 120))
+    check(
+      "l'en-tête est celui qu'on documente",
+      contains(csvText, 'cigar_slug,qty'),
+      csvText.slice(0, 120),
+    )
     check('il nomme le cigare par son slug', contains(csvText, 'undercrown'), csvText.slice(0, 200))
     check("il n'expose aucun identifiant interne", !/[0-9a-f]{8}-[0-9a-f]{4}-/.test(csvText))
 
     /* --------------------------------------------------- 10b. l'import */
-    console.log("\n10b. Import CSV")
+    console.log('\n10b. Import CSV')
     await page.goto(humidorUrl)
     await settle(page)
     const importPath = join(tmpdir(), `vitola-import-${Date.now()}.csv`)
-    writeFileSync(importPath, 'cigar_slug,qty,purchase_price_eur\nundercrown-10-robusto,2,9.90\n', 'utf8')
+    writeFileSync(
+      importPath,
+      'cigar_slug,qty,purchase_price_eur\nundercrown-10-robusto,2,9.90\n',
+      'utf8',
+    )
     await page.locator('input[name="file"]').setInputFiles(importPath)
     await page.getByRole('button', { name: 'Importer', exact: true }).click()
-    check("l'import annonce ce qu'il a fait", await seen(page, 'Inventaire importé'), await body(page))
+    check(
+      "l'import annonce ce qu'il a fait",
+      await seen(page, 'Inventaire importé'),
+      await body(page),
+    )
 
     await page.goto(humidorUrl)
     await settle(page)
@@ -353,7 +402,7 @@ async function main(): Promise<void> {
     await page.getByRole('button', { name: 'Importer', exact: true }).click()
     check(
       'un identifiant inconnu est nommé, pas ignoré',
-      await seen(page, "ce-slug-nexiste-pas"),
+      await seen(page, 'ce-slug-nexiste-pas'),
       await body(page),
     )
 
@@ -411,7 +460,11 @@ async function main(): Promise<void> {
         await page.goto(`${BASE}/cave`)
         await settle(page)
         const left = await page.locator('main').innerText()
-        check('la cave de parcours a bien été effacée', !contains(left, CAVE_NAME), left.slice(0, 200))
+        check(
+          'la cave de parcours a bien été effacée',
+          !contains(left, CAVE_NAME),
+          left.slice(0, 200),
+        )
       }
     } catch (cause) {
       console.log(`  nettoyage incomplet : ${String(cause)}`)

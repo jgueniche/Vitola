@@ -79,7 +79,7 @@ export default async function EventPage({
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{KIND_LABELS[event.kind]}</p>
-        <h1 className="font-display text-4xl leading-tight">{event.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{event.title}</h1>
         <p className="text-ink-muted text-sm tabular-nums">
           {formatDateTime(starts)}
           {ends ? (sameDay ? ` – ${formatTime(ends)}` : ` → ${formatDateTime(ends)}`) : ''}
@@ -176,9 +176,7 @@ export default async function EventPage({
           </div>
         </fieldset>
         <div>
-          <Button type="submit" size="sm">
-            {copy.answer}
-          </Button>
+          <Button type="submit">{copy.answer}</Button>
         </div>
       </form>
 
@@ -192,7 +190,7 @@ export default async function EventPage({
       ) : null}
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-2xl">{copy.attendeesTitle}</h2>
+        <h2 className="font-display text-display-sm">{copy.attendeesTitle}</h2>
         {attendees.length === 0 ? (
           <p className="text-ink-muted text-sm">{copy.attendeesEmpty}</p>
         ) : (

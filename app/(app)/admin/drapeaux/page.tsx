@@ -34,7 +34,7 @@ export default async function AdminFlagsPage() {
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.flagsScreen.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.flagsScreen.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.flagsScreen.lede}</p>
       </div>
 
@@ -50,7 +50,9 @@ export default async function AdminFlagsPage() {
                 payload={flag.payload}
                 updatedAt={flag.updated_at}
                 label={info?.label ?? flag.key}
-                description={info?.description ?? `${copy.flagsScreen.unknownFlag} ${flag.description}`}
+                description={
+                  info?.description ?? `${copy.flagsScreen.unknownFlag} ${flag.description}`
+                }
                 warning={info?.warning}
               />
             </li>

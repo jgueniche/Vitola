@@ -24,11 +24,18 @@ export const FACET_PARAMS = {
   country: 'pays',
   brand: 'marque',
   vitola: 'vitole',
+  /* Whether the sheet has a vitola — 862 of 940 have none, and finding what
+     is missing is a search of its own (design audit, 5 septembre 2026). */
+  completeness: 'fiche',
   page: 'page',
 } as const
 
 export const STRENGTHS = Constants.ref.Enums.strength
 export const WRAPPER_SHADES = Constants.ref.Enums.wrapper_shade
+
+/** French in the URL, like every other facet value the visitor can read. */
+export const COMPLETENESS = ['renseignee', 'a-completer'] as const
+export type Completeness = (typeof COMPLETENESS)[number]
 
 export type Strength = (typeof STRENGTHS)[number]
 export type WrapperShade = (typeof WRAPPER_SHADES)[number]
@@ -53,6 +60,7 @@ export type Facets = {
   countries: string[]
   brand: string | null
   vitola: string | null
+  completeness: Completeness | null
   page: number
 }
 
@@ -63,6 +71,7 @@ export const EMPTY_FACETS: Facets = {
   countries: [],
   brand: null,
   vitola: null,
+  completeness: null,
   page: 1,
 }
 
@@ -100,6 +109,8 @@ export function parseFacets(params: RawSearchParams): Facets {
     ),
     brand: keepValid(toArray(params[FACET_PARAMS.brand]), SLUG)[0] ?? null,
     vitola: keepValid(toArray(params[FACET_PARAMS.vitola]), SLUG)[0] ?? null,
+    completeness:
+      keepValid(toArray(params[FACET_PARAMS.completeness]), z.enum(COMPLETENESS))[0] ?? null,
     page: Number.isFinite(page) && page > 0 ? Math.min(page, 500) : 1,
   }
 }
@@ -113,6 +124,7 @@ export function facetsToSearchParams(facets: Facets): URLSearchParams {
   for (const c of facets.countries) params.append(FACET_PARAMS.country, c)
   if (facets.brand) params.set(FACET_PARAMS.brand, facets.brand)
   if (facets.vitola) params.set(FACET_PARAMS.vitola, facets.vitola)
+  if (facets.completeness) params.set(FACET_PARAMS.completeness, facets.completeness)
   if (facets.page > 1) params.set(FACET_PARAMS.page, String(facets.page))
   return params
 }
@@ -127,9 +139,7 @@ export function toggleFacet<K extends 'strengths' | 'shades' | 'countries'>(
   value: Facets[K][number],
 ): Facets {
   const current = facets[key] as string[]
-  const next = current.includes(value)
-    ? current.filter((v) => v !== value)
-    : [...current, value]
+  const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value]
   return { ...facets, [key]: next, page: 1 } as Facets
 }
 
@@ -140,6 +150,12 @@ export function isFacetActive(facets: Facets): boolean {
     facets.shades.length > 0 ||
     facets.countries.length > 0 ||
     facets.brand !== null ||
-    facets.vitola !== null
+    facets.vitola !== null ||
+    facets.completeness !== null
   )
+}
+
+/** One value at a time: a sheet is either documented or not. Back to page 1. */
+export function toggleCompleteness(facets: Facets, value: Completeness): Facets {
+  return { ...facets, completeness: facets.completeness === value ? null : value, page: 1 }
 }

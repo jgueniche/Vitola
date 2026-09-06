@@ -201,7 +201,7 @@ export default function HomePage() {
           <div className="grid items-end gap-10 lg:grid-cols-2 lg:gap-18">
             <div>
               <p className="eyebrow">{m.landing.scale.eyebrow}</p>
-              <h2 className="font-display mt-4 text-2xl leading-tight text-balance sm:text-[1.75rem]">
+              <h2 className="font-display text-display-sm mt-4 leading-tight text-balance">
                 {m.landing.scale.title}
               </h2>
             </div>
@@ -352,7 +352,7 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
             <span aria-hidden="true" className="brass-rule h-px w-full max-w-[420px]" />
             <p className="eyebrow">{m.landing.final.eyebrow}</p>
-            <h2 className="font-display text-3xl leading-tight text-balance sm:text-[2.75rem]">
+            <h2 className="font-display text-display-sm leading-tight text-balance sm:text-[2.75rem]">
               {m.landing.final.title}
             </h2>
             <p className="text-ink-muted max-w-[38em] text-[1.0625rem] leading-relaxed">

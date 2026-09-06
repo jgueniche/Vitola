@@ -104,7 +104,11 @@
     },
     "vendor": {
       "label": "Espace vendeur"
-    }
+    },
+    "cigars": {
+      "label": "Cigares"
+    },
+    "searchLabel": "Rechercher une fiche cigare"
   },
   "home": {
     "eyebrow": "Comprendre ce que l'on fume",
@@ -163,7 +167,11 @@
       "shade": "Cape",
       "country": "Origine",
       "clearAll": "Tout effacer",
-      "active": "Filtres actifs"
+      "active": "Filtres actifs",
+      "completeness": "Fiche",
+      "complete": "Vitole renseignée",
+      "incomplete": "À compléter",
+      "completenessHint": "Pour trouver ce qui manque plutôt que le subir : 862 fiches sur 940 attendent leur format."
     },
     "results": {
       "one": "1 fiche",
@@ -171,7 +179,8 @@
       "none": "Aucune fiche ne correspond",
       "noneHint": "Élargissez les critères, ou effacez les filtres.",
       "emptyTitle": "Le référentiel n'est pas encore ouvert au public",
-      "emptyBody": "Les fiches sont en base mais aucune n'a encore été relue. Une fiche n'est visible qu'une fois vérifiée par un relecteur : c'est la règle du référentiel, pas une limitation temporaire de l'affichage."
+      "emptyBody": "Les fiches sont en base mais aucune n'a encore été relue. Une fiche n'est visible qu'une fois vérifiée par un relecteur : c'est la règle du référentiel, pas une limitation temporaire de l'affichage.",
+      "lede": "{total} fiches publiées · {withVitola} avec une vitole renseignée — le reste attend vos corrections."
     },
     "pagination": {
       "previous": "Précédent",
@@ -190,7 +199,36 @@
       "priceNote": "Prix de vente au détail homologué, applicable au {date}. Source : arrêté publié au Journal officiel. À titre informatif.",
       "unknown": "Non renseigné",
       "noVitola": "Vitole non renseignée",
-      "notFound": "Cette fiche n'existe pas, ou n'est pas encore publiée."
+      "notFound": "Cette fiche n'existe pas, ou n'est pas encore publiée.",
+      "cepoLength": "Cepo × longueur",
+      "silhouetteNote": "Silhouette à l’échelle, sur 235 mm",
+      "strengthStep": "{n}ᵉ cran sur 5",
+      "shadeStep": "{n}ᵉ nuance sur 6, de claro à oscuro",
+      "notProvided": "Non renseigné",
+      "notProvidedF": "Non renseignée",
+      "notProvidedPl": "Non renseignés",
+      "proposeFormat": "Proposer le format",
+      "proposeStrength": "Proposer la force",
+      "proposeShade": "Proposer la cape",
+      "proposeAromas": "Proposer les arômes",
+      "aromas": "Arômes",
+      "aromasLede": "Ce qu’on retrouve d’une boîte à l’autre, selon le référentiel.",
+      "salida": "Vitole de salida",
+      "galera": "Vitole de galera",
+      "shape": "Forme",
+      "line": "Gamme",
+      "wrapperOrigin": "Cape",
+      "binderOrigin": "Sous-cape",
+      "fillerOrigins": "Tripe",
+      "release": "Sortie",
+      "releaseRegular": "Régulière",
+      "publishedOn": "Fiche publiée le {date}",
+      "membersBand": "Ce qu’en disent les membres",
+      "priceAt": "au {date}",
+      "priceSource": "Arrêté publié au Journal officiel. À titre informatif.",
+      "since": "depuis",
+      "breadcrumb": "Fil d’Ariane",
+      "discontinued": "— arrêtée en {year}"
     },
     "brand": {
       "cuban": "Marque cubaine",
@@ -218,6 +256,19 @@
       "diadema": "Diadema",
       "petit_corona": "Petit corona",
       "figurado_autre": "Figurado"
+    },
+    "releaseTypes": {
+      "regular": "Régulière",
+      "edicion_limitada": "Edición Limitada",
+      "regional": "Édition régionale",
+      "reserva": "Reserva",
+      "gran_reserva": "Gran Reserva",
+      "aniversario": "Aniversario",
+      "custom_roll": "Roulage à façon"
+    },
+    "card": {
+      "sparse": "Format, force et cape non renseignés.",
+      "proposeValues": "Proposer ces valeurs"
     }
   },
   "auth": {
@@ -722,7 +773,10 @@
       "unknown": "Le commentaire n'a pas pu être enregistré."
     },
     "hiddenByModeration": "Masqué par la modération — {reason}",
-    "hiddenNoReason": "motif au dossier"
+    "hiddenNoReason": "motif au dossier",
+    "discussionTitle": "Discussion de la fiche",
+    "discussionLede": "Ce qui se dit de la fiche elle-même — une construction, une fumée, une donnée qui ne correspond pas. Pour noter le cigare, c’est le carnet.",
+    "signInLine": "La lecture est ouverte à tous ; écrire demande un compte."
   },
   "notebook": {
     "eyebrow": "Carnet",
@@ -931,7 +985,16 @@
     "entriesTitle": "Entrées de carnet",
     "entriesLede": "Les entrées publiques, et les vôtres.",
     "entriesEmpty": "Aucune entrée à afficher sur cette fiche.",
-    "mine": "Votre entrée"
+    "mine": "Votre entrée",
+    "emptyLine": "Aucune note publique. La vôtre serait la première — elle ne compte que si vous la rendez publique.",
+    "publicOne": "1 note publique",
+    "publicMany": "{count} notes publiques",
+    "citedAromas": "Arômes les plus cités",
+    "citedAromasHint": "Dans les entrées publiques des membres ; le référentiel a son propre profil, plus haut.",
+    "entriesCount": "{count} · les publiques, et les vôtres",
+    "entriesCountOne": "1 · la vôtre, ou une publique",
+    "hint": "Moyenne bayésienne : un cigare noté une seule fois ne domine pas un cigare noté trente fois. Ne comptent ici que les entrées publiques.",
+    "lastReviewLabel": "Dernière note"
   },
   "moderation": {
     "report": {
@@ -1811,12 +1874,16 @@
       "notAllowed": "Cette action vous a été refusée.",
       "constraint": "Le référentiel a refusé cette valeur.",
       "duplicate": "Une fiche porte déjà cette valeur.",
-      "unknown": "Cette action n'a pas abouti."
+      "unknown": "Cette action n'a pas abouti.",
+      "tooManyAromas": "Douze arômes au maximum.",
+      "unknownAroma": "Un de ces arômes n’est pas un descripteur de la roue."
     },
     "closedTitle": "Les contributions sont fermées",
     "closedBody": "La file de révisions est momentanément close. Rien de ce que vous auriez proposé n'est perdu : il n'y a simplement rien à envoyer pour l'instant.",
     "proposeLink": "Proposer une correction",
-    "historyLink": "Historique"
+    "historyLink": "Historique",
+    "fieldAromaTags": "Arômes",
+    "fieldAromaTagsHint": "Les descripteurs de la roue que cette fiche porte, douze au plus — Ctrl ou Cmd pour en choisir plusieurs. Ce sont les arômes du référentiel, pas ceux d’une dégustation : ce qu’on retrouve d’une boîte à l’autre."
   },
   "feed": {
     "eyebrow": "Le fil",
@@ -2667,6 +2734,48 @@
       "shippingTitle": "Livraison — fictive",
       "totalsTitle": "Le total",
       "backToShop": "Revenir à la boutique"
+    }
+  },
+  "sheet": {
+    "eyebrow": "Vous et ce cigare",
+    "inCave": "En cave · {count}",
+    "notInCave": "Pas en cave",
+    "lot": "Lot du {date} · {days} j de repos",
+    "lotNoDate": "Lot sans date d’achat",
+    "openCave": "Ouvrir la cave",
+    "tasting": "Dégustation complète",
+    "myEntries": "Votre carnet",
+    "myEntriesCount": "{count} entrée(s)",
+    "myEntriesNone": "Rien encore sur ce cigare.",
+    "privacyNote": "Tout ce que vous écrivez ici naît privé. La portée se choisit entrée par entrée.",
+    "signInTitle": "Tenir un carnet demande un compte",
+    "signInBody": "Ce que vous avez fumé, quand, la note et le mot. Tout y naît privé ; rien ne s’y partage sans votre geste. La cave et la dégustation complète viennent avec.",
+    "signInNote": "La lecture, elle, est ouverte.",
+    "thumbBar": "{count} en cave",
+    "gesture": {
+      "title": "J’en fume un",
+      "lede": "Une date, une note ou un mot. Le reste est facultatif.",
+      "score": "Note /100",
+      "scorePlaceholder": "0 à 100",
+      "word": "Un mot",
+      "wordPlaceholder": "Ce que vous en retenez.",
+      "decrement": "Décompter de ma cave",
+      "decrementHint": "Lot du {date} — {count} restant(s). Sans note ni mot, seul le décompte s’écrit.",
+      "decrementHintNoDate": "{count} restant(s). Sans note ni mot, seul le décompte s’écrit.",
+      "announce": "Le dire au fil",
+      "announceHintOff": "Une publication s’adresse à quelqu’un : choisissez « Mes abonnés » ou « Tout le monde ».",
+      "announceHintOn": "Vos abonnés — ou tout le monde — verront que vous le fumez, avec votre mot s’il y en a un.",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "saved": "Enregistré.",
+      "savedDecremented": "Décompté de votre cave.",
+      "savedNoted": "Noté au carnet.",
+      "savedAnnounced": "Dit au fil.",
+      "seeEntry": "Voir dans mon carnet",
+      "needsSomething": "Sans lot à décompter, une entrée demande au moins une note ou un mot.",
+      "venue": "Où ça",
+      "venueNone": "— sans lieu —",
+      "venueHint": "Facultatif, et seulement si vous le dites au fil : nommer où l’on fume est une confidence, jamais une obligation."
     }
   }
 }

@@ -1,6 +1,11 @@
 import { formatScore } from '@/lib/format'
 import { m } from '@/lib/i18n'
-import { SCOPE_TRAITS, type ReviewKind, type ReviewVisibility, type ScoreScale } from '@/lib/reviews/model'
+import {
+  SCOPE_TRAITS,
+  type ReviewKind,
+  type ReviewVisibility,
+  type ScoreScale,
+} from '@/lib/reviews/model'
 import { cn } from '@/lib/utils'
 
 const scopeCopy = m.notebook.scope
@@ -38,18 +43,39 @@ export function ScoreMark({
     return <span className="text-ink-faint text-sm">{m.notebook.entry.noScore}</span>
   }
 
+  /*
+   * Three sizes, one per use (design system of 5 septembre 2026): 48px for the
+   * one number a page is about — the weighted mean, an entry's own page — set
+   * in Inter because a score is *read* (§4.3's arbitration rule); 24px for an
+   * entry in a list, in the mono that lines a column up; 16px for a rail, a
+   * card, a table. The `/100` stays small and faint in every size: it is the
+   * unit, not the number.
+   */
+  if (size === 'lg') {
+    return (
+      <span className="inline-flex items-baseline gap-1.5">
+        <span className="text-[3rem] leading-[3.25rem] font-medium tabular-nums">
+          {formatScore(score, scale)}
+        </span>
+        <span className="text-ink-faint font-mono text-sm">/{scale}</span>
+      </span>
+    )
+  }
+
+  if (size === 'md') {
+    return (
+      <span className="inline-flex flex-col">
+        <span className="font-mono text-2xl leading-7 tabular-nums">
+          {formatScore(score, scale)}
+        </span>
+        <span className="text-ink-faint font-mono text-xs">/{scale}</span>
+      </span>
+    )
+  }
+
   return (
     <span className="inline-flex items-baseline gap-1">
-      <span
-        className={cn(
-          'font-mono tabular-nums',
-          size === 'lg' && 'text-3xl',
-          size === 'md' && 'text-xl',
-          size === 'sm' && 'text-base',
-        )}
-      >
-        {formatScore(score, scale)}
-      </span>
+      <span className={cn('font-mono text-base tabular-nums')}>{formatScore(score, scale)}</span>
       <span className="text-ink-faint font-mono text-xs">/{scale}</span>
     </span>
   )

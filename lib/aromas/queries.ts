@@ -61,3 +61,17 @@ export async function listAromaWheel(): Promise<AromaFamily[]> {
 
   return [...families.values()]
 }
+
+/**
+ * Every descriptor label, keyed by its id as a string — the shape a stored diff
+ * holds ids in. One read of the wheel, for pages that render proposals or a
+ * sheet's profile and would otherwise ask for each id separately.
+ */
+export async function aromaNameMap(): Promise<Map<string, string>> {
+  const families = await listAromaWheel()
+  const names = new Map<string, string>()
+  for (const family of families) {
+    for (const descriptor of family.descriptors) names.set(String(descriptor.id), descriptor.label)
+  }
+  return names
+}

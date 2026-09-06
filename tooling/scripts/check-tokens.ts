@@ -49,9 +49,25 @@ const RAW_PALETTE = [
 
 const UTILITY_PREFIXES = ['bg', 'text', 'border', 'ring', 'fill', 'stroke', 'from', 'to', 'via']
 
+/**
+ * Rule 5: the display face never goes under its 32px floor (§4.3).
+ *
+ * `.font-display` sets `max(2rem, 1em)` in the base layer, and a `text-2xl`
+ * utility wins over it — measured: 91 headings rendered Bodoni at 18, 20 or
+ * 24px while the stylesheet said 32. A floor that the cascade defeats is a
+ * comment, so the floor lives here. The three display sizes are the only
+ * sizes the face may take; a title smaller than a section title is an
+ * eyebrow or Inter at 16px medium, and the header's wordmark has its own
+ * class. Either order of the two classes is caught.
+ */
+const UNDER_FLOOR = String.raw`text-(?:xs|sm|base|lg|xl|2xl|3xl)(?![\w-])`
+const DISPLAY_UNDER_FLOOR = new RegExp(
+  String.raw`font-display[^"'\x60]*${UNDER_FLOOR}|${UNDER_FLOOR}[^"'\x60]*font-display`,
+  'g',
+)
+
 const HEX_COLOUR = /#[0-9a-fA-F]{3,8}\b/g
-const EMOJI =
-  /[\u{1F300}-\u{1FAFF}\u{1F000}-\u{1F2FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu
+const EMOJI = /[\u{1F300}-\u{1FAFF}\u{1F000}-\u{1F2FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu
 const BRAND_LITERAL = /\bVitola\b/g
 
 /**
@@ -169,6 +185,15 @@ function check(): Violation[] {
         })
       }
 
+      for (const match of line.matchAll(DISPLAY_UNDER_FLOOR)) {
+        violations.push({
+          file: rel,
+          line: at,
+          rule: 'display-under-floor',
+          detail: `${match[0]} — Bodoni is set at text-display-sm/md/lg only (§4.3); below a section title use .eyebrow or text-base font-medium`,
+        })
+      }
+
       if (rel !== BRAND_SOURCE) {
         for (const match of line.matchAll(BRAND_LITERAL)) {
           violations.push({
@@ -188,7 +213,9 @@ function check(): Violation[] {
 const violations = check()
 
 if (violations.length === 0) {
-  console.log('check-tokens: OK — no raw hex, no raw palette utility, no emoji, no hard-coded brand.')
+  console.log(
+    'check-tokens: OK — no raw hex, no raw palette utility, no emoji, no hard-coded brand, no display under its floor.',
+  )
   process.exit(0)
 }
 

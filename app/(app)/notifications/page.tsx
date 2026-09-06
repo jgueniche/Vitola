@@ -48,8 +48,7 @@ export default async function NotificationsPage({
 
   const query = await searchParams
   const doneRaw = Array.isArray(query.fait) ? query.fait[0] : query.fait
-  const done =
-    doneRaw === 'lu' ? copy.markedRead : doneRaw === 'efface' ? copy.cleared : null
+  const done = doneRaw === 'lu' ? copy.markedRead : doneRaw === 'efface' ? copy.cleared : null
 
   const rows = await listNotifications()
   const unread = rows.filter((row) => row.read_at === null).length
@@ -62,7 +61,7 @@ export default async function NotificationsPage({
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-4xl leading-tight">{copy.title}</h1>
+        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
@@ -99,8 +98,7 @@ export default async function NotificationsPage({
           <ul className="flex flex-col gap-2">
             {rows.map((row) => {
               const actor =
-                row.actor?.display_name ??
-                (row.actor ? `@${row.actor.handle}` : copy.someone)
+                row.actor?.display_name ?? (row.actor ? `@${row.actor.handle}` : copy.someone)
               const sentence = copy.kind[row.kind].replace('{actor}', actor)
 
               return (

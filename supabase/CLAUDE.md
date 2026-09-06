@@ -52,6 +52,13 @@ partagées → tables → recherche → index → grants → RLS → storage →
   fonctions de trigger de `ref` sont restées appelables par un visiteur anonyme depuis le premier
   jour, et le test censé le voir filtrait lui aussi sur `public`. Corrigé par 0005. Leçon générale :
   **un contrôle qui ne regarde qu'un schéma ne protège qu'un schéma.**
+- **Un `alter default privileges … in schema` ne sait pas RETIRER le défaut global.** Le
+  `revoke execute on functions from public` par schéma de la 0005 ne défait qu'un grant posé
+  par schéma ; le défaut de PostgreSQL — EXECUTE à PUBLIC sur toute fonction nouvelle — est
+  global, donc il reste. La première fonction créée dans `ref` après la 0005
+  (`guard_cigar_aroma_tags()`, 0025) est née appelable par un anonyme, et seul
+  `tests/02_function_grants.sql` l'a vu. Chaque fonction nouvelle porte son propre `revoke`
+  dans sa migration, et son auto-contrôle le relit.
 - **BYPASSRLS ne dit rien des droits de table.** `service_role` contourne la RLS, donc on le
   suppose capable de tout ; il n'avait **aucun droit** sur `ref` jusqu'à la 0007, et l'export RGPD
   répondait 500 à tout membre connecté. Même cause que le piège précédent, à l'envers :

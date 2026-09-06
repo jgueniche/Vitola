@@ -164,11 +164,7 @@ async function main(): Promise<void> {
     check('« Me localiser » met la position dans l’adresse', un.url().includes('lat=48.85'))
     check('la page annonce le rayon', await seen(un, 'rayon de 25 km'))
     check('les distances se lisent sur les lignes', await seen(un, ' km'), await body(un))
-    check(
-      'les 25 civettes parisiennes du seed sont là',
-      await seen(un, '25 lieux'),
-      await body(un),
-    )
+    check('les 25 civettes parisiennes du seed sont là', await seen(un, '25 lieux'), await body(un))
 
     /* ---------------- 3 · La fiche seedée ---------------------------------- */
     console.log('\n— La fiche d’un lieu du registre')
@@ -176,7 +172,10 @@ async function main(): Promise<void> {
     await settle(un)
     check('la fiche dit sa source et son millésime', await seen(un, 'millésime 2018'))
     check('ce qu’on ne sait pas est dit non renseigné', await seen(un, 'non renseigné'))
-    check('les horaires absents sont absents, pas devinés', await seen(un, 'Horaires non renseignés'))
+    check(
+      'les horaires absents sont absents, pas devinés',
+      await seen(un, 'Horaires non renseignés'),
+    )
     check(
       'la revendication explique pourquoi elle n’ouvre pas encore',
       await seen(un, 'revendication'),
@@ -214,7 +213,10 @@ async function main(): Promise<void> {
     await settle(deux)
     await deux.locator('select[name="reason"]').selectOption('tobacco_promotion')
     await deux.getByRole('button', { name: 'Envoyer le signalement' }).click()
-    check('le signalement d’un avis répond transmis — jamais 404', await seen(deux, 'Signalement transmis'))
+    check(
+      'le signalement d’un avis répond transmis — jamais 404',
+      await seen(deux, 'Signalement transmis'),
+    )
 
     /* ---------------- 6 · Proposer, être seul à voir, publier --------------- */
     console.log('\n— La proposition, et qui la voit')
@@ -288,12 +290,16 @@ async function main(): Promise<void> {
 
     /* ---------------- 8 · « Je fume ce cigare », avec le où ----------------- */
     console.log('\n— Une session au lieu, sur le fil')
-    await un.goto(`${BASE}/cigares/undercrown-10-robusto`)
+    // Since the redesign of 5 septembre 2026 the sheet has ONE gesture, opened
+    // by ?geste=fumer: the word, the scope, "le dire au fil", and the venue
+    // under it — a venue announces as a session, which is what the feed shows.
+    await un.goto(`${BASE}/cigares/undercrown-10-robusto?geste=fumer`)
     await settle(un)
-    await un.locator('#session-body').fill(SESSION_BODY)
-    await un.locator('#session-venue').selectOption({ label: `${VENUE_NAME} — Parcoursville` })
-    await un.locator('form:has(#session-venue) input[name="visibility"][value="public"]').check()
-    await un.getByRole('button', { name: 'Publier au fil' }).click()
+    await un.locator('#geste-body').fill(SESSION_BODY)
+    await un.locator('form:has(#geste-body) input[name="visibility"][value="public"]').check()
+    await un.locator('input[name="announce"]').check()
+    await un.locator('#geste-venue').selectOption({ label: `${VENUE_NAME} — Parcoursville` })
+    await un.getByRole('button', { name: 'Enregistrer' }).click()
     await settle(un)
 
     await un.goto(`${BASE}/fil?onglet=decouverte`)
@@ -369,9 +375,7 @@ async function main(): Promise<void> {
              diagnostics, et la publication vit plus bas dans la page. La
              première version cassait ici, en silence — compté en base. */
           if (!(await seen(un, SESSION_BODY, 4000))) break
-          const link = un
-            .locator(`article:has-text("${SESSION_BODY}") a[href^="/fil/"]`)
-            .first()
+          const link = un.locator(`article:has-text("${SESSION_BODY}") a[href^="/fil/"]`).first()
           const href = (await link.getAttribute('href').catch(() => null)) ?? ''
           if (!href.startsWith('/fil/')) break
           await un.goto(`${BASE}${href}`).catch(() => undefined)

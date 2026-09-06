@@ -18,7 +18,9 @@ type Params = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
   const cigar = await getCigarBySlug(slug)
-  return { title: cigar ? `${m.notebook.tasting.eyebrow} — ${cigar.commercial_name}` : m.notebook.title }
+  return {
+    title: cigar ? `${m.notebook.tasting.eyebrow} — ${cigar.commercial_name}` : m.notebook.title,
+  }
 }
 
 /**
@@ -56,12 +58,10 @@ export default async function TastingPage({ params }: Params) {
           {cigar.brands ? `${cigar.brands.name} · ` : ''}
           {cigar.commercial_name}
         </Link>
-        <h1 className="font-display text-4xl leading-tight">
+        <h1 className="font-display text-display-md leading-tight">
           {m.notebook.tasting.title.replace('{cigar}', cigar.commercial_name)}
         </h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">
-          {m.notebook.tasting.lede}
-        </p>
+        <p className="text-ink-muted measure text-sm leading-relaxed">{m.notebook.tasting.lede}</p>
       </div>
 
       <Band variant="divider" />

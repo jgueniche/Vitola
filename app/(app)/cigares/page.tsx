@@ -5,9 +5,11 @@ import { CigarCard } from '@/components/cigar/cigar-card'
 import { FacetPanel } from '@/components/cigar/facet-panel'
 import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
-import { Button } from '@/components/ui/button'
+import { buttonClass } from '@/components/ui/button'
+import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { publishedOriginCountries } from '@/lib/referential/queries'
+import { publishedCounts } from '@/lib/search/query'
 import { routes } from '@/lib/routes'
 import {
   facetsToSearchParams,
@@ -38,9 +40,10 @@ export default async function CigarsPage({
   searchParams: Promise<RawSearchParams>
 }) {
   const facets = parseFacets(await searchParams)
-  const [result, countries] = await Promise.all([
+  const [result, countries, counts] = await Promise.all([
     searchCigars(facets),
     publishedOriginCountries(),
+    publishedCounts(),
   ])
 
   const hasFilters = isFacetActive(facets)
@@ -51,14 +54,19 @@ export default async function CigarsPage({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-3">
           <p className="eyebrow">{m.referential.eyebrow}</p>
-          <h1 className="font-display text-4xl">{m.referential.cigarsTitle}</h1>
+          <h1 className="font-display text-display-md">{m.referential.cigarsTitle}</h1>
+          {/* Said up front: how much of the referential is documented is the
+              page's own truth, not something to discover by scrolling. */}
+          <p className="text-ink-muted measure text-sm leading-relaxed">
+            {m.referential.results.lede
+              .replace('{total}', formatCount(counts.total))
+              .replace('{withVitola}', formatCount(counts.withVitola))}
+          </p>
         </div>
         {/* The comparator is reached from here because here is where one has
             just seen two sheets worth putting side by side. */}
-        <Link href={routes.cigarCompare()}>
-          <Button variant="secondary" size="sm">
-            {m.compare.title}
-          </Button>
+        <Link href={routes.cigarCompare()} className={buttonClass({ variant: 'secondary' })}>
+          {m.compare.title}
         </Link>
       </div>
 
@@ -111,7 +119,9 @@ export default async function CigarsPage({
             />
           ) : (
             <>
-              <ul className="flex flex-col gap-4">
+              {/* A grid of bands, two across on a desk: a list scanned by the
+                  eye, not a column of full-width rows read one by one. */}
+              <ul className="grid gap-4 xl:grid-cols-2">
                 {result.cigars.map((cigar) => (
                   <li key={cigar.id}>
                     <CigarCard cigar={cigar} />

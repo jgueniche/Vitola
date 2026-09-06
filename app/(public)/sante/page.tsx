@@ -9,7 +9,7 @@ export default function HealthPage() {
   return (
     <DocumentPage eyebrow="Information" title={m.health.title}>
       <p>{m.health.lede}</p>
-      <h2 className="text-ink font-display mt-4 text-2xl">{m.health.helpTitle}</h2>
+      <h2 className="text-ink font-display text-display-sm mt-4">{m.health.helpTitle}</h2>
       <p>{m.health.helpBody}</p>
     </DocumentPage>
   )

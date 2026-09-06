@@ -74,9 +74,7 @@ export function CommentItem(props: CommentItemProps) {
         <time dateTime={props.createdAt} className="text-ink-faint text-xs">
           {formatDate(new Date(props.createdAt))}
         </time>
-        {edited ? (
-          <span className="text-ink-faint text-xs">{m.comments.editedSuffix}</span>
-        ) : null}
+        {edited ? <span className="text-ink-faint text-xs">{m.comments.editedSuffix}</span> : null}
       </div>
 
       {editing ? (
@@ -94,7 +92,7 @@ export function CommentItem(props: CommentItemProps) {
           />
           {error ? <FieldError id={errorId}>{error}</FieldError> : null}
           <div className="flex items-center gap-3">
-            <Button type="submit" size="sm" disabled={saving}>
+            <Button type="submit" disabled={saving}>
               {m.comments.save}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>

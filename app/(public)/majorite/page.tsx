@@ -21,7 +21,7 @@ export default async function AgeGatePage({
     <main id="contenu" className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-20">
       <div className="flex flex-col gap-4">
         <p className="eyebrow">{m.ageGate.eyebrow}</p>
-        <h1 className="font-display text-4xl">{m.ageGate.title}</h1>
+        <h1 className="font-display text-display-md">{m.ageGate.title}</h1>
         <p className="text-ink-muted measure leading-relaxed">{m.ageGate.lede}</p>
       </div>
 
