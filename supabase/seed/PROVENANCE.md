@@ -302,8 +302,10 @@ verse et lui qui relit, et l'historique le montre tel quel. Et deux galeras vis�
 « Dimensions à vérifier » dans `03_vitolas.csv` (Hermosos No. 4, Conservas) : le rattachement est
 juste, la cote de la vitole reste au premier poste de relecture du §5.
 
-Le script est idempotent : une fiche déjà renseignée ne reçoit pas de proposition pour cette
-colonne, une fiche qui porte déjà une proposition d'amorçage en attente n'en reçoit pas une seconde.
+Le script est idempotent, colonne par colonne : une fiche déjà renseignée ne reçoit pas de
+proposition pour cette colonne, et une colonne qu'une proposition d'amorçage en attente propose
+déjà n'est pas proposée une seconde fois. Une fiche peut donc porter deux propositions d'amorçage
+— la force d'une vague, la vitole de l'autre — que `apply_propositions.sql` replie par fiche.
 
 **Le 6 septembre 2026, le porteur a tranché plus loin** : « publie tout ce que tu peux, c'est pas
 grave, on fera les corrections derrière ». Deux conséquences, écrites pour être rejouables :
@@ -317,6 +319,12 @@ grave, on fera les corrections derrière ». Deux conséquences, écrites pour �
    même geste que « Accepter » dans `/contributions`, proposition par proposition, avec la
    règle de fraîcheur du wiki et une trace signée qui cite l'instruction. La relecture n'est pas
    supprimée : elle est déplacée après, fiche par fiche, depuis `/admin/fiches` et l'historique.
+
+**Exécuté sur la base de production le 6 septembre 2026**, dans l'ordre que `seed_vitolas_only.sql`
+décrit : 36 galeras ajoutées (87 au total), 39 propositions de vitole versées en seconde vague,
+puis 170 propositions acceptées d'un bloc — 77 vitoles, 129 forces — sur 131 fiches. Les fiches
+publiées qui portent une vitole passent de 78 à 155, celles qui portent une force de 123 à 252 ;
+686 n'ont encore ni l'une ni l'autre, et la facette « À compléter » les liste.
 
 Ce qui reste hors de tout script, même après cette instruction : la cape, le profil aromatique,
 et les fiches non cubaines — pour les raisons dites plus haut, qui ne sont pas des prudences

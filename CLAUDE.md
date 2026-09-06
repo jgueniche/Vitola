@@ -565,8 +565,10 @@ avec une facette « à compléter », et le profil aromatique des fiches (migrat
    129 forces publiées par Habanos pour la marque) ; `apply_propositions.sql` les accepte comme
    « Accepter » le ferait, une par une, avec la trace qui cite l'instruction du 6 septembre 2026
    (« publie tout ce que tu peux, on fera les corrections derrière »). La relecture est déplacée
-   après, fiche par fiche. Aucune cape, aucun arôme, aucune fiche non cubaine : ce qui n'a pas de
-   source reste vide.
+   après, fiche par fiche. **Exécuté sur la base le 6 septembre 2026** : 87 galeras, 170
+   propositions acceptées sur 131 fiches — 155 fiches publiées portent une vitole (78 avant), 252
+   une force (123 avant), 686 ni l'une ni l'autre. Aucune cape, aucun arôme, aucune fiche non
+   cubaine : ce qui n'a pas de source reste vide.
 5. **Trois niveaux de conteneur, et pas un de plus.** La page, la carte (surface et filet, réservée
    au rail et aux chiffres), la ligne (un filet sous le texte). Jamais une carte dans une carte ;
    une entrée est une ligne avec sa note dans la marge, la portée en quatre puces sur une ligne.

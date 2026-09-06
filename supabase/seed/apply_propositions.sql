@@ -31,16 +31,27 @@ with pending as (
    where status = 'pending'
      and comment like 'Amorçage (PROVENANCE §9%'
 ),
+-- One sheet may carry several seed proposals, one per fact (the strength of a
+-- first pass, the vitola of a second). `update … from` would pick one of them
+-- at random for the sheet, so they are folded per sheet first.
+wanted as (
+  select cigar_id,
+         (array_agg(diff -> 'vitola_id' ->> 'to') filter (where diff ? 'vitola_id'))[1]::uuid         as vitola_to,
+         (array_agg(diff -> 'strength'  ->> 'to') filter (where diff ? 'strength'))[1]::ref.strength as strength_to
+    from pending
+   group by cigar_id
+),
 applied as (
   update ref.cigars c
-     set vitola_id = coalesce((p.diff -> 'vitola_id' ->> 'to')::uuid, c.vitola_id),
-         strength  = coalesce((p.diff -> 'strength'  ->> 'to')::ref.strength, c.strength)
-    from pending p
-   where p.cigar_id = c.id
-     -- the wiki's staleness rule: a proposed column is still what it was proposed from
-     and (not (p.diff ? 'vitola_id') or c.vitola_id is null)
-     and (not (p.diff ? 'strength')  or c.strength  is null)
-  returning p.id as revision_id
+     set vitola_id = coalesce(c.vitola_id, w.vitola_to),
+         strength  = coalesce(c.strength,  w.strength_to)
+    from wanted w
+   where w.cigar_id = c.id
+     -- the wiki's staleness rule: a column is written only from the value it
+     -- was proposed from, here NULL — a sheet that moved keeps its value
+     and ((c.vitola_id is null and w.vitola_to  is not null)
+       or (c.strength  is null and w.strength_to is not null))
+  returning c.id as cigar_id, c.vitola_id, c.strength
 )
 update ref.cigar_revisions r
    set status         = 'approved',
@@ -49,8 +60,13 @@ update ref.cigar_revisions r
        review_comment = 'Accepté d''un bloc sur instruction du porteur du 6 septembre 2026 '
                      || '(« publie tout ce que tu peux, on fera les corrections derrière »). '
                      || 'Relecture à faire fiche par fiche — apply_propositions.sql.'
-  from applied a
- where r.id = a.revision_id;
+  from pending p
+  join applied a on a.cigar_id = p.cigar_id
+ where r.id = p.id
+   -- approved only when every value it proposed is now the sheet's value;
+   -- a proposal the sheet contradicts stays pending, to be read by a person
+   and (not (p.diff ? 'vitola_id') or a.vitola_id = (p.diff -> 'vitola_id' ->> 'to')::uuid)
+   and (not (p.diff ? 'strength')  or a.strength  = (p.diff -> 'strength'  ->> 'to')::ref.strength);
 
 select 'propositions d''amorçage acceptées' as what,
        count(*) filter (where status = 'approved') as approved,

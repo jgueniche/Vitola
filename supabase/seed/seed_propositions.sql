@@ -16,10 +16,14 @@
 --     fuerte et leurs deux intermédiaires), reportée sur l'échelle du §5.1.
 -- Une cape n'est jamais proposée : elle varie d'une boîte à l'autre.
 --
--- Idempotent : une fiche qui porte déjà une proposition d'amorçage en attente
--- n'en reçoit pas une seconde ; une fiche dont la colonne est déjà renseignée
--- ne reçoit pas de proposition pour cette colonne ; une ligne sans rien à
--- proposer est ignorée. Le CSV se relit et se corrige, le script se rejoue.
+-- Idempotent, colonne par colonne : une colonne qu'une proposition d'amorçage
+-- en attente propose déjà pour la fiche n'est pas proposée une seconde fois ;
+-- une fiche dont la colonne est déjà renseignée ne reçoit pas de proposition
+-- pour cette colonne ; une ligne sans rien à proposer est ignorée. Une fiche
+-- peut donc porter deux propositions d'amorçage — la force d'un premier
+-- passage, la vitole d'un second (le vitolario étendu du 6 septembre 2026) —
+-- et apply_propositions.sql les replie par fiche. Le CSV se relit et se
+-- corrige, le script se rejoue.
 -- =============================================================================
 
 \set ON_ERROR_STOP on
@@ -52,17 +56,26 @@ with candidates as (
   left join ref.vitolas v on v.slug = nullif(p.vitola_slug, '')
   where nullif(p.strength, '') is null
      or p.strength in ('leger', 'leger_moyen', 'moyen', 'moyen_corse', 'corse')
+),
+-- What a pending seed proposal already asks for this sheet is not asked twice:
+-- the candidate keeps only the columns nobody proposed yet.
+trimmed as (
+  select k.cigar_id,
+         k.diff - array(
+           select jsonb_object_keys(r.diff)
+             from ref.cigar_revisions r
+            where r.cigar_id = k.cigar_id
+              and r.status = 'pending'
+              and r.comment like 'Amorçage (PROVENANCE §9) — %'
+         )::text[] as diff,
+         k.comment
+    from candidates k
+   where k.diff <> '{}'::jsonb
 )
 insert into ref.cigar_revisions (cigar_id, author_id, diff, comment)
 select cigar_id, :'author'::uuid, diff, comment
-  from candidates k
- where diff <> '{}'::jsonb
-   and not exists (
-     select 1 from ref.cigar_revisions r
-      where r.cigar_id = k.cigar_id
-        and r.status = 'pending'
-        and r.comment like 'Amorçage (PROVENANCE §9) — %'
-   );
+  from trimmed
+ where diff <> '{}'::jsonb;
 
 select 'propositions en attente (amorçage)' as what, count(*) as n
   from ref.cigar_revisions
