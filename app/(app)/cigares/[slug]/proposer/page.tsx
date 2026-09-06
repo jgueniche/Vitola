@@ -103,8 +103,8 @@ export default async function ProposePage({ params }: Params) {
         </div>
       )}
 
-      <div className="border-rule rounded-[3px] border border-dashed px-4 py-4">
-        <p className="eyebrow">{copy.newSheetTitle}</p>
+      <div className="border-rule border-l-2 pl-4">
+        <p className="text-ink text-sm font-medium">{copy.newSheetTitle}</p>
         <p className="text-ink-muted measure mt-2 text-sm leading-relaxed">{copy.newSheetBody}</p>
       </div>
     </main>

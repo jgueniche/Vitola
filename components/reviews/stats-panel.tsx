@@ -56,9 +56,7 @@ export async function StatsPanel({
       </h2>
 
       {empty ? (
-        <div className="border-rule bg-surface flex flex-wrap items-center gap-x-4 gap-y-1 rounded-[3px] border px-5 py-4">
-          <p className="text-ink-muted text-sm">{copy.emptyLine}</p>
-        </div>
+        <p className="text-ink-muted text-sm">{copy.emptyLine}</p>
       ) : (
         <div className="border-rule bg-surface grid rounded-[3px] border sm:grid-cols-[12.5rem_minmax(0,1fr)]">
           <div className="border-rule flex flex-col justify-center gap-1 border-b p-5 sm:border-r sm:border-b-0">

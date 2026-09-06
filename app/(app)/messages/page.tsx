@@ -59,9 +59,7 @@ export default async function MessagesPage({
 
       <Band variant="divider" />
 
-      <p className="border-rule text-ink-muted measure rounded-[3px] border border-dashed px-4 py-3 text-xs leading-relaxed">
-        {copy.notEncrypted}
-      </p>
+      <p className="text-ink-muted measure text-xs leading-relaxed">{copy.notEncrypted}</p>
 
       {done ? (
         <p role="status" className="text-ink-muted text-sm">
@@ -84,10 +82,10 @@ export default async function MessagesPage({
            a GET is a write any link prefetcher performs. */
         <form
           action={openConversation}
-          className="border-rule bg-surface flex flex-wrap items-end gap-3 rounded-[3px] border p-4"
+          className="border-rule flex flex-wrap items-end gap-3 border-t border-b py-4"
         >
           <div className="flex min-w-56 flex-1 flex-col gap-2">
-            <label htmlFor="other" className="eyebrow block">
+            <label htmlFor="other" className="label block">
               {copy.newPerson}
             </label>
             <Select id="other" name="otherId" defaultValue={reachable[0]?.id}>
@@ -105,11 +103,11 @@ export default async function MessagesPage({
       {inbox.length === 0 ? (
         <EmptyState title={copy.emptyTitle} description={copy.emptyBody} />
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="border-rule flex flex-col border-t">
           {inbox.map((row) => (
             <li
               key={row.conversation_id}
-              className="border-rule bg-surface flex flex-col gap-1 rounded-[3px] border p-4"
+              className="border-rule flex flex-col gap-1 border-b py-3.5"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link

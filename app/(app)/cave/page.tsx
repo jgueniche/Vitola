@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { Figure, FigureRow } from '@/components/data/figures'
 import { EmptyState } from '@/components/layout/empty-state'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/cigar'
@@ -71,7 +72,7 @@ export default async function HumidorPage() {
         />
       ) : (
         <>
-          <section className="border-rule bg-surface grid gap-px overflow-hidden rounded-[3px] border sm:grid-cols-3">
+          <FigureRow>
             <Figure value={formatCount(totalCigars)} label={copy.totalCigars} />
             <Figure
               value={priced ? formatPrice(totalValue) : '—'}
@@ -86,10 +87,10 @@ export default async function HumidorPage() {
               }
               label={copy.eyebrow}
             />
-          </section>
+          </FigureRow>
 
           {rotating.length > 0 ? (
-            <p className="border-rule text-ink-muted rounded-[3px] border border-dashed px-4 py-3 text-sm">
+            <p className="text-ink-muted text-sm">
               <span className="text-ink">{copy.rotationFlag}</span> — {copy.rotationHint}{' '}
               {formatCount(rotating.length)}
             </p>
@@ -152,15 +153,6 @@ export default async function HumidorPage() {
         <HumidorForm mode="create" />
       </section>
     </main>
-  )
-}
-
-function Figure({ value, label, muted }: { value: string; label: string; muted?: boolean }) {
-  return (
-    <div className="bg-surface flex flex-col gap-1 px-4 py-4">
-      <span className={cn('font-display text-display-sm', muted && 'text-ink-muted')}>{value}</span>
-      <span className="eyebrow">{label}</span>
-    </div>
   )
 }
 

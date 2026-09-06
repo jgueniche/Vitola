@@ -365,9 +365,11 @@ function LotPanel({
   today: string
 }) {
   return (
-    <div className="border-rule bg-surface-raised flex flex-col gap-6 rounded-[3px] border p-4">
+    /* Not a card inside the card of the lot: a rule down the left, under the
+       row that opened it. Three boxes deep was the deepest nesting on the site. */
+    <div className="border-rule-strong flex flex-col gap-6 border-l-2 py-1 pl-4">
       <section className="flex flex-col gap-2">
-        <h3 className="eyebrow">{copy.ledgerTitle}</h3>
+        <h3 className="text-ink text-sm font-medium">{copy.ledgerTitle}</h3>
         {ledger.length === 0 ? (
           <p className="text-ink-muted text-sm">{copy.ledgerEmpty}</p>
         ) : (
@@ -396,7 +398,7 @@ function LotPanel({
 
       {lot.qty > 0 ? (
         <section className="flex flex-col gap-2">
-          <h3 className="eyebrow">{copy.smokeTitle}</h3>
+          <h3 className="text-ink text-sm font-medium">{copy.smokeTitle}</h3>
           <p className="text-ink-muted measure text-sm leading-relaxed">{copy.smokeLede}</p>
           <SmokeForm itemId={lot.id} slug={lot.cigar?.slug ?? null} today={today} max={lot.qty} />
         </section>
@@ -405,7 +407,7 @@ function LotPanel({
       )}
 
       <section className="flex flex-col gap-2">
-        <h3 className="eyebrow">{copy.eventTitle}</h3>
+        <h3 className="text-ink text-sm font-medium">{copy.eventTitle}</h3>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.eventLede}</p>
         <EventForm itemId={lot.id} humidorId={humidorId} today={today} />
       </section>

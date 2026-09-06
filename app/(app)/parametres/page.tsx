@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { UnblockButton } from '@/app/(app)/membres/[handle]/unblock-button'
-import { Band } from '@/components/band/band'
 import { Button } from '@/components/ui/button'
 import { formatEffectiveDate } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
@@ -98,35 +97,28 @@ export default async function SettingsPage({
           {' · '}
           {copy.reputation} : {account.reputation}
         </p>
-        {/* The desk has no global nav entry; it lives here, where the role is
-            already loaded. The header DOES now carry « Administration » and
-            « Espace vendeur » (QA of 25 août 2026: nobody found them) — these
-            lines stay as the annotated versions of the same doors. */}
-        {hasMinRole(account.role, 'moderator') ? (
-          <p className="text-sm">
-            <Link href={routes.moderation()} className="text-ink underline">
-              {m.moderation.desk.settingsLink}
-            </Link>{' '}
-            <span className="text-ink-faint text-xs">{m.moderation.desk.settingsLede}</span>
-          </p>
-        ) : null}
-        {hasMinRole(account.role, 'admin') ? (
-          <p className="text-sm">
-            <Link href={routes.admin()} className="text-ink underline">
-              {m.admin.settingsLink}
-            </Link>{' '}
-            <span className="text-ink-faint text-xs">{m.admin.settingsLede}</span>
-          </p>
-        ) : null}
-        {/* Not a role: a vendor is attached, never promoted (ADR 0016, D2).
-            Same placement rule as the desk — the link lives where the account
-            is already loaded, never in the header. */}
-        {vendor ? (
-          <p className="text-sm">
-            <Link href={routes.vendorSpace()} className="text-ink underline">
-              {m.vendor.settingsLink}
-            </Link>{' '}
-            <span className="text-ink-faint text-xs">{m.vendor.settingsLede}</span>
+        {/* The doors the account opens — the desk, the administration, the
+            vendor space — on one line. They were three annotated paragraphs
+            under a header that already carried an eyebrow, a title, a lede and
+            a line of metadata; the header does not need to explain them, the
+            screens behind them do. */}
+        {hasMinRole(account.role, 'moderator') || vendor ? (
+          <p className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-sm">
+            {hasMinRole(account.role, 'moderator') ? (
+              <Link href={routes.moderation()} className="text-ink underline underline-offset-4">
+                {m.moderation.desk.settingsLink}
+              </Link>
+            ) : null}
+            {hasMinRole(account.role, 'admin') ? (
+              <Link href={routes.admin()} className="text-ink underline underline-offset-4">
+                {m.admin.settingsLink}
+              </Link>
+            ) : null}
+            {vendor ? (
+              <Link href={routes.vendorSpace()} className="text-ink underline underline-offset-4">
+                {m.vendor.settingsLink}
+              </Link>
+            ) : null}
           </p>
         ) : null}
       </div>
@@ -146,8 +138,6 @@ export default async function SettingsPage({
         />
         <p className="text-ink-faint measure text-xs leading-relaxed">{copy.roleHint}</p>
       </section>
-
-      <Band variant="divider" />
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
@@ -207,8 +197,6 @@ export default async function SettingsPage({
           </ul>
         )}
       </section>
-
-      <Band variant="divider" />
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
@@ -278,8 +266,6 @@ export default async function SettingsPage({
         </div>
       </section>
 
-      <Band variant="divider" />
-
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.gdprTitle}</h2>
@@ -296,7 +282,7 @@ export default async function SettingsPage({
           <p className="text-ink-muted measure text-xs leading-relaxed">{copy.exportHint}</p>
         </div>
 
-        <div className="border-rule flex flex-col gap-2 rounded-[3px] border border-dashed px-4 py-4">
+        <div className="border-rule flex flex-col gap-2 border-t pt-5">
           <DeleteAccountButton />
           <p className="text-ink-muted measure text-xs leading-relaxed">{copy.deleteHint}</p>
         </div>

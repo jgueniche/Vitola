@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
-import { Band } from '@/components/band/band'
 import { ReportDialog } from '@/components/moderation/report-dialog'
 import { EntryRow } from '@/components/reviews/entry-row'
 import { PostCard } from '@/components/social/post-card'
@@ -44,8 +43,7 @@ export async function generateMetadata({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-4">
-      <Band variant="divider" />
+    <section className="border-rule flex flex-col gap-4 border-t pt-6">
       <h2 className="font-display text-display-sm">{title}</h2>
       {children}
     </section>
@@ -244,12 +242,12 @@ export default async function MemberPage({
 
       <dl className="text-ink-muted flex flex-wrap gap-x-8 gap-y-2 text-sm">
         <div className="flex gap-2">
-          <dt className="eyebrow text-ink-faint">{copy.joined}</dt>
+          <dt className="label">{copy.joined}</dt>
           <dd>{formatDate(new Date(profile.created_at))}</dd>
         </div>
         {privacy.show_country && profile.country ? (
           <div className="flex gap-2">
-            <dt className="eyebrow text-ink-faint">{copy.country}</dt>
+            <dt className="label">{copy.country}</dt>
             <dd>
               {countryLabel(profile.country)}
               {profile.city ? ` · ${profile.city}` : ''}
@@ -257,15 +255,15 @@ export default async function MemberPage({
           </div>
         ) : null}
         <div className="flex gap-2">
-          <dt className="eyebrow text-ink-faint">{copy.reputation}</dt>
+          <dt className="label">{copy.reputation}</dt>
           <dd>{profile.reputation}</dd>
         </div>
         <div className="flex gap-2">
-          <dt className="eyebrow text-ink-faint">{copy.followersTitle}</dt>
+          <dt className="label">{copy.followersTitle}</dt>
           <dd>{followersLabel}</dd>
         </div>
         <div className="flex gap-2">
-          <dt className="eyebrow text-ink-faint">{copy.followingTitle}</dt>
+          <dt className="label">{copy.followingTitle}</dt>
           <dd>{copy.followingCount.replace('{count}', String(counts.following))}</dd>
         </div>
       </dl>
@@ -275,7 +273,7 @@ export default async function MemberPage({
           `has_min_role('admin')` sous la session de l'appelant avant de toucher
           à la clé de service. Cacher un contrôle n'a jamais protégé une écriture. */}
       {viewerIsAdmin && !isMe ? (
-        <div className="border-rule bg-surface rounded-[3px] border p-5">
+        <div className="border-rule border-t border-b py-4">
           <RolePanel
             userId={profile.id}
             currentRole={profile.role}
@@ -291,7 +289,7 @@ export default async function MemberPage({
         </p>
       ) : null}
 
-      <div className="border-rule bg-surface rounded-[3px] border p-5">
+      <div className="border-rule border-t border-b py-4">
         {isMe ? (
           <div className="flex flex-wrap items-center gap-4">
             <p className="text-ink-muted text-sm">{copy.you}</p>
@@ -315,13 +313,11 @@ export default async function MemberPage({
         {posts.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.postsEmpty}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <div className="flex flex-col">
             {posts.map((post) => (
-              <li key={post.id}>
-                <PostCard post={post} isMine={isMe} />
-              </li>
+              <PostCard key={post.id} post={post} isMine={isMe} />
             ))}
-          </ul>
+          </div>
         )}
       </Section>
 

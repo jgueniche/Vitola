@@ -95,7 +95,7 @@ export default async function NotificationsPage({
             ) : null}
           </div>
 
-          <ul className="flex flex-col gap-2">
+          <ul className="border-rule flex flex-col border-t">
             {rows.map((row) => {
               const actor =
                 row.actor?.display_name ?? (row.actor ? `@${row.actor.handle}` : copy.someone)
@@ -106,14 +106,16 @@ export default async function NotificationsPage({
                   key={row.id}
                   className={
                     row.read_at === null
-                      ? 'border-accent bg-surface-raised flex flex-col gap-1 rounded-[3px] border-l-2 px-4 py-3'
-                      : 'border-rule bg-surface flex flex-col gap-1 rounded-[3px] border px-4 py-3'
+                      ? 'border-rule border-l-accent flex flex-col gap-1 border-b border-l-2 py-3 pl-3'
+                      : 'border-rule flex flex-col gap-1 border-b py-3'
                   }
                 >
                   <p className="text-ink text-sm">{sentence}</p>
                   <p className="text-ink-faint flex flex-wrap items-center gap-x-3 text-xs">
                     <span>{formatDate(new Date(row.created_at))}</span>
-                    {row.read_at === null ? <span className="eyebrow">{copy.unread}</span> : null}
+                    {row.read_at === null ? (
+                      <span className="text-accent">{copy.unread}</span>
+                    ) : null}
                     {row.post_id ? (
                       <Link href={routes.post(row.post_id)} className="text-accent hover:underline">
                         {copy.openPost}

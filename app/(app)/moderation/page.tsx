@@ -78,7 +78,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
       </div>
 
       {confirmation ? (
-        <p role="status" className="border-rule text-ink rounded-[3px] border px-4 py-3 text-sm">
+        <p role="status" className="border-accent text-ink border-l-2 py-1 pl-3 text-sm">
           {confirmation}
         </p>
       ) : null}

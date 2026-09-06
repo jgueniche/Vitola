@@ -92,6 +92,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  // `next dev` rewrites CLAUDE.md at every start, appending a block of
+  // framework guidance for agents. That file says how THIS project works and
+  // is versioned; a tool editing it under our hands is a bug, not a feature.
+  agentRules: false,
+
   // A type error must break the build. Never relax this.
   // Linting is not a build step in Next 16 (`next lint` was removed): it runs
   // as its own `pnpm lint` job in CI, which is bloquant just the same.

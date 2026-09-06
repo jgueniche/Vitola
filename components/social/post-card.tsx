@@ -12,6 +12,12 @@ const copy = m.feed
 /**
  * One publication, as it appears in the feed and on its own page.
  *
+ * A row under a hairline, like an entry of the notebook — not a card. The
+ * card it replaces carried two bordered badges, three tracked-capitals
+ * labels and a bordered foot for a text that is often two lines long; the
+ * chrome outweighed the words. What a reader needs is who, when, what, and
+ * the two counts — one line above the text, one line below it.
+ *
  * Every number it renders arrives with the row. `ember_count` and
  * `comment_count` are denormalised columns a trigger recomputes, and
  * `viewer_embered` is answered inside `feed_page()` — so a page of twenty costs
@@ -19,7 +25,7 @@ const copy = m.feed
  * the shape of the data rather than by a rule this component has to remember.
  *
  * An author that comes back null is not an error and not a deleted account: it
- * is `is_discoverable` turned off, or a block. The card says "Membre" rather
+ * is `is_discoverable` turned off, or a block. The row says "Membre" rather
  * than filling the hole with an identifier — the rule `lib/reviews/queries.ts`
  * set when the notebook shipped, and honouring a choice rather than working
  * around it.
@@ -37,7 +43,8 @@ export function PostCard({
   /** Delete, report — rendered by the page that knows which ones apply. */
   action?: React.ReactNode
 }) {
-  const authorName = post.author_display_name ?? (post.author_handle ? `@${post.author_handle}` : null)
+  const authorName =
+    post.author_display_name ?? (post.author_handle ? `@${post.author_handle}` : null)
   const embers =
     post.ember_count === 0
       ? copy.ember.countNone
@@ -52,86 +59,95 @@ export function PostCard({
         : copy.comments.countMany.replace('{count}', String(post.comment_count))
 
   return (
-    <article className="border-rule bg-surface flex flex-col gap-3 rounded-[3px] border p-4">
-      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm">
-            {post.author_handle ? (
-              <Link
-                href={routes.member(post.author_handle)}
-                className="text-ink hover:text-accent-bright"
-              >
-                {authorName}
-              </Link>
-            ) : (
-              <span className="text-ink-muted">{copy.post.authorHidden}</span>
-            )}
-          </p>
-          <p className="text-ink-faint text-xs">
-            {copy.post.publishedOn} {formatDate(new Date(post.created_at))}
-            {post.updated_at !== post.created_at ? ` · ${copy.post.edited}` : null}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="eyebrow border-rule text-ink-muted rounded-[3px] border px-2 py-0.5 text-xs">
-            {copy.kind[post.kind]}
-          </span>
+    <article
+      className={cn(
+        'border-rule flex flex-col gap-2.5 border-b py-4 first:border-t',
+        standalone && 'border-t',
+      )}
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="text-sm">
+          {post.author_handle ? (
+            <Link
+              href={routes.member(post.author_handle)}
+              className="text-ink hover:text-accent-bright font-medium"
+            >
+              {authorName}
+            </Link>
+          ) : (
+            <span className="text-ink-muted">{copy.post.authorHidden}</span>
+          )}
+        </p>
+        <p className="text-ink-faint text-xs">
+          {copy.kind[post.kind]}
+          {' · '}
+          {formatDate(new Date(post.created_at))}
+          {post.updated_at !== post.created_at ? ` · ${copy.post.edited}` : null}
           {/* The scope is shown on one's own publications only. On someone
               else's it would be noise — everything one can read is by
               definition within its audience — and on a stranger's it would
               describe a decision that is not the reader's to see. */}
           {isMine ? (
-            <span
-              className={cn(
-                'eyebrow inline-flex items-center rounded-[3px] border px-2 py-0.5 text-xs',
-                post.visibility === 'public'
-                  ? 'border-accent text-accent'
-                  : 'border-caution text-caution',
-              )}
-            >
-              {post.visibility === 'public'
-                ? copy.compose.scopePublic
-                : copy.compose.scopeFollowers}
-            </span>
+            <>
+              {' · '}
+              <span className={post.visibility === 'public' ? 'text-accent' : 'text-caution'}>
+                {post.visibility === 'public'
+                  ? copy.compose.scopePublic
+                  : copy.compose.scopeFollowers}
+              </span>
+            </>
           ) : null}
-        </div>
+        </p>
       </div>
 
       {post.body ? (
         <p className="text-ink measure text-sm leading-relaxed whitespace-pre-line">{post.body}</p>
       ) : null}
 
-      {post.cigar_slug ? (
-        <p className="text-sm">
-          <span className="eyebrow text-ink-faint">{copy.post.aboutCigar}</span>{' '}
-          <Link href={routes.cigar(post.cigar_slug)} className="text-accent hover:underline">
-            {post.brand_name ? `${post.brand_name} ` : ''}
-            {post.cigar_name}
-          </Link>
+      {/* What the publication is about, on one line: the cigar, then the
+          venue a session names (P5). Both hydrated after the RLS — a place
+          the reader may not see renders nothing, and the row does not say so. */}
+      {post.cigar_slug || (post.venue_slug && post.venue_name) || post.review_id ? (
+        <p className="text-ink-muted text-xs">
+          {post.cigar_slug ? (
+            <>
+              {copy.post.aboutCigar}{' '}
+              <Link
+                href={routes.cigar(post.cigar_slug)}
+                className="text-ink hover:text-accent-bright"
+              >
+                {post.brand_name ? `${post.brand_name} ` : ''}
+                {post.cigar_name}
+              </Link>
+            </>
+          ) : null}
+          {post.cigar_slug && post.venue_slug && post.venue_name ? ' · ' : null}
+          {post.venue_slug && post.venue_name ? (
+            <>
+              {copy.atVenue}{' '}
+              <Link
+                href={routes.venue(post.venue_slug)}
+                className="text-ink hover:text-accent-bright"
+              >
+                {post.venue_name}
+              </Link>
+            </>
+          ) : null}
+          {post.review_id ? (
+            <>
+              {post.cigar_slug || post.venue_slug ? ' · ' : null}
+              <Link
+                href={routes.notebookEntry(post.review_id)}
+                className="text-ink hover:text-accent-bright underline underline-offset-4"
+              >
+                {copy.post.openEntry}
+              </Link>
+            </>
+          ) : null}
         </p>
       ) : null}
 
-      {/* The venue a session names (P5). Hydrated after the RLS: a place the
-          reader may not see renders nothing, and the card does not say so. */}
-      {post.venue_slug && post.venue_name ? (
-        <p className="text-sm">
-          <span className="eyebrow text-ink-faint">{copy.atVenue}</span>{' '}
-          <Link href={routes.venue(post.venue_slug)} className="text-accent hover:underline">
-            {post.venue_name}
-          </Link>
-        </p>
-      ) : null}
-
-      {post.review_id ? (
-        <p className="text-sm">
-          <Link href={routes.notebookEntry(post.review_id)} className="text-accent hover:underline">
-            {copy.post.openEntry}
-          </Link>
-        </p>
-      ) : null}
-
-      <div className="border-rule flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-0.5">
         <EmberButton postId={post.id} embered={post.viewer_embered} />
         <span className="text-ink-faint text-xs">{embers}</span>
 

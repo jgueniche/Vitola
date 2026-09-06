@@ -81,7 +81,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
           no longer on the page. `role="status"` so it is announced, like every
           other confirmation in the app. */}
       {decided === 'approuvee' || decided === 'refusee' ? (
-        <p role="status" className="border-rule text-ink rounded-[3px] border px-4 py-3 text-sm">
+        <p role="status" className="border-accent text-ink border-l-2 py-1 pl-3 text-sm">
           {decided === 'approuvee' ? copy.approved : copy.rejected}
         </p>
       ) : null}
@@ -105,9 +105,9 @@ export default async function ContributionsPage({ searchParams }: Props) {
             }
           />
         ) : (
-          <ul className="flex flex-col gap-4">
+          <ul className="border-rule flex flex-col border-b">
             {mine.map((revision) => (
-              <li key={revision.id} className="border-rule bg-surface rounded-[3px] border p-4">
+              <li key={revision.id} className="border-rule border-t py-4">
                 <Header revision={revision} />
                 <DiffView
                   diff={revision.diff}
@@ -122,7 +122,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
                 ) : null}
                 {revision.review_comment ? (
                   <p className="border-rule text-ink-muted measure mt-3 border-l-2 pl-3 text-sm leading-relaxed">
-                    <span className="eyebrow block">{copy.reviewComment}</span>
+                    <span className="label block">{copy.reviewComment}</span>
                     {revision.review_comment}
                   </p>
                 ) : null}
@@ -146,18 +146,20 @@ export default async function ContributionsPage({ searchParams }: Props) {
         </div>
 
         {!isEditor ? (
-          <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
-            <p className="eyebrow">{copy.notEditorTitle}</p>
+          <div className="flex flex-col gap-1">
+            <p className="text-ink text-sm font-medium">{copy.notEditorTitle}</p>
             <p className="text-ink-muted measure text-sm leading-relaxed">{copy.notEditorBody}</p>
           </div>
         ) : pending.length === 0 ? (
           <EmptyState title={copy.queueEmptyTitle} description={copy.queueEmptyBody} />
         ) : (
           <>
-            <p className="eyebrow">{copy.queueCount.replace('{count}', String(pending.length))}</p>
-            <ul className="flex flex-col gap-4">
+            <p className="text-ink-muted text-sm">
+              {copy.queueCount.replace('{count}', String(pending.length))}
+            </p>
+            <ul className="border-rule flex flex-col border-b">
               {pending.map((revision) => (
-                <li key={revision.id} className="border-rule bg-surface rounded-[3px] border p-4">
+                <li key={revision.id} className="border-rule border-t py-4">
                   <Header revision={revision} />
                   <DiffView
                     diff={revision.diff}
