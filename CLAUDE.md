@@ -511,6 +511,14 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   assertion « vide » vieillit avec le catalogue : « la catégorie `coupe` est vide » était vraie
   le 25 août et fausse dès que le catalogue de QA a eu des coupe-cigares. Une vacuité se
   construit (un texte introuvable), elle ne se suppose pas.
+- **Un masque ou un filtre SVG a une région, et sa région par défaut est la boîte de ce qu'il
+  habille.** `maskUnits` et `filterUnits` valent `objectBoundingBox` : la région est la boîte
+  englobante de la géométrie, plus un dixième, et tout ce qu'un flou ou un déplacement étale
+  au-delà est tranché net. La fumée de la planche a été deux bandes verticales pendant une
+  journée pour cette raison — deux traits de 13 et 7 unités, floutés à 8, sous un masque qui ne
+  mesurait que leur boîte. Trouvé sur une capture du porteur, jamais dans le code : la géométrie
+  était juste, la région ne l'était pas. Un masque ou un filtre qui étale quelque chose se déclare
+  en `userSpaceOnUse`, avec une région plus large que ce qu'il étale.
 
 ## Style
 
@@ -605,7 +613,9 @@ relecture, panneau d'un lot, dossier de modération, en-tête des paramètres.
    (`components/landing/cigar-plate.tsx`) est un SVG : une couture est une hélice vue de côté,
    donc un cosinus, espacée à la main ; le reflet est une région aux bords qui ondulent, floutée,
    jamais une bande ; la cendre, la ligne de feu et le bord carbonisé sont des chemins qui
-   tremblent, puis un déplacement de turbulence les émiette. Le pigment reste dans
+   tremblent, puis un déplacement de turbulence les émiette ; la fumée est un ruban qui s'élargit
+   en montant, déchiré par une turbulence, né sur la ligne de feu et chauffé par la braise à son
+   pied, en deux copies qui montent à contretemps. Le pigment reste dans
    `app/globals.css` (`--plate-*`, le contrôle des tokens refuse un hexa ailleurs) et le SVG le
    lit par `var()`. Tout chemin est calculé par des constantes et `Math.sin`, identique côté
    serveur et côté client.

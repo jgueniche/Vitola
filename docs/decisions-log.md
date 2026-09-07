@@ -1568,3 +1568,41 @@ PostgreSQL local initialisé sous le scratchpad de la session tournait, puis mou
 appel suivant : les droits des répertoires parents sont remis entre deux commandes, et
 `postgres` ne peut plus les traverser. Le cluster vit sous `/var/lib/postgresql/`, où il a sa
 place ; le journal, l'inventaire et les scripts de la chaîne restent dans le scratchpad.
+
+## La fumée de la planche, et la planche un peu plus petite — 7 septembre 2026
+
+### Ce qui est livré
+
+Trois constats du porteur sur une capture de l'accueil : la fumée « limitée en avant et en arrière
+par deux bandes verticales », une fumée qui n'est « pas allumée », et un cigare trop grand à
+l'écran. Reproduits d'abord hors de Next — la planche rendue en statique par React et capturée par
+Chromium, un banc qui tourne en deux secondes — puis corrigés dans `components/landing/cigar-plate.tsx`,
+`app/landing.css` et la page d'accueil. `pnpm check` vert (404 tests).
+
+### Décisions prises en construisant
+
+**Les bandes verticales étaient la région du masque, pas le dessin.** Le masque de la fumée était
+laissé dans ses unités par défaut : sa région est la boîte des deux traits plus un dixième, et le
+flou de 8 unités qui les étalait au-delà était tranché net des deux côtés. La géométrie était
+juste ; la région, non. Le masque et les trois filtres de la fumée sont désormais en
+`userSpaceOnUse`, sur une région de 480 × 390 unités autour de la braise. Consigné dans
+`CLAUDE.md`, « Pièges connus ».
+
+**La fumée naît sur la ligne de feu et le montre.** Deux traits flous ne disaient ni d'où elle
+venait ni qu'elle brûlait. Elle est maintenant trois couches : un ruban qui s'élargit en montant
+(`plume()`, calculé par `Math.sin` comme le reste de la planche), rempli d'un fondu et déchiré par
+une turbulence puis un déplacement ; deux fils plus fins qui quittent le pied de la cendre, en
+dégradé de la braise à la fumée sur leurs premiers centimètres ; et une respiration de lumière de
+braise à la base, en `screen`, qui respire au rythme de `vt-breathe`.
+
+**Le mouvement est une montée continue, pas un aller-retour.** Deux copies du ruban, avec deux
+graines de turbulence, montent en s'ouvrant (`transform-box: fill-box`, origine au pied) et se
+dissolvent, décalées d'un demi-cycle par un `animation-delay` négatif : l'une naît quand l'autre
+meurt, la fumée ne redémarre jamais et elle est visible dès le premier rendu. Sous
+`prefers-reduced-motion`, la montée commence et finit invisible — figer l'animation aurait figé
+une absence ; la règle retire l'animation et laisse un panache immobile.
+
+**La planche prend la largeur d'un texte, pas celle de l'écran.** Elle était le seul élément de
+l'accueil sans `max-width` : sur un écran de 1440 px le cigare faisait 1440 px. Elle est bornée à
+`max-w-5xl` (64 rem), un cran sous les colonnes de texte, centrée, avec la marge des sections. Le
+recadrage sur téléphone ne change pas.
