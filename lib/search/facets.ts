@@ -24,8 +24,10 @@ export const FACET_PARAMS = {
   country: 'pays',
   brand: 'marque',
   vitola: 'vitole',
-  /* Whether the sheet has a vitola — 862 of 940 have none, and finding what
-     is missing is a search of its own (design audit, 5 septembre 2026). */
+  /* What the sheet still lacks — a vitola, a strength, an aroma profile.
+     Finding what is missing is a search of its own (design audit, 5 septembre
+     2026), and since the sourced proposals of 6 septembre it has three
+     answers rather than one. */
   completeness: 'fiche',
   page: 'page',
 } as const
@@ -33,8 +35,13 @@ export const FACET_PARAMS = {
 export const STRENGTHS = Constants.ref.Enums.strength
 export const WRAPPER_SHADES = Constants.ref.Enums.wrapper_shade
 
-/** French in the URL, like every other facet value the visitor can read. */
-export const COMPLETENESS = ['renseignee', 'a-completer'] as const
+/**
+ * French in the URL, like every other facet value the visitor can read.
+ * `renseignee` keeps its 5 septembre meaning — a vitola is filled in — and the
+ * three `sans-*` values each name one hole, so a contributor can go straight
+ * to the sheets whose aromas nobody has proposed yet.
+ */
+export const COMPLETENESS = ['renseignee', 'sans-vitole', 'sans-force', 'sans-aromes'] as const
 export type Completeness = (typeof COMPLETENESS)[number]
 
 export type Strength = (typeof STRENGTHS)[number]
@@ -155,7 +162,7 @@ export function isFacetActive(facets: Facets): boolean {
   )
 }
 
-/** One value at a time: a sheet is either documented or not. Back to page 1. */
+/** One value at a time: the list answers one question about a sheet. Back to page 1. */
 export function toggleCompleteness(facets: Facets, value: Completeness): Facets {
   return { ...facets, completeness: facets.completeness === value ? null : value, page: 1 }
 }

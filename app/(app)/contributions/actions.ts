@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 import { m } from '@/lib/i18n'
 import type { Database } from '@/lib/supabase/database.types'
-import { routes } from '@/lib/routes'
+import { routes, safeSuite } from '@/lib/routes'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import {
   applyDiff,
@@ -148,6 +148,31 @@ function validate(submitted: Record<string, DiffValue>): string | null {
   return null
 }
 
+/**
+ * The source of a proposal (0026): the URL of an official manufacturer page or
+ * the reference of a published document, on one line. Optional — a correction
+ * made band-in-hand has none, and requiring one would manufacture sources.
+ * A value that starts like a URL must parse as an https one: a half-typed
+ * address stored as text would read as a citation and cite nothing.
+ */
+const sourceSchema = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+  z
+    .string()
+    .transform((value) => value.trim())
+    .pipe(z.string().max(500, copy.sourceTooLong))
+    .refine((value) => !/[\r\n\t]/.test(value), copy.sourceFormat)
+    .refine((value) => {
+      if (!/^https?:/i.test(value)) return true
+      try {
+        return new URL(value).protocol === 'https:'
+      } catch {
+        return false
+      }
+    }, copy.sourceFormat)
+    .nullable(),
+)
+
 const proposeSchema = z.object({
   cigarId: z.uuid(),
   slug: z.string().min(1),
@@ -159,6 +184,7 @@ const proposeSchema = z.object({
       .pipe(z.string().max(1000, copy.commentTooLong))
       .nullable(),
   ),
+  source: sourceSchema,
 })
 
 export async function proposeRevision(
@@ -169,6 +195,7 @@ export async function proposeRevision(
     cigarId: formData.get('cigarId'),
     slug: formData.get('slug'),
     comment: formData.get('comment'),
+    source: formData.get('source'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
 
@@ -208,6 +235,7 @@ export async function proposeRevision(
       author_id: session.user.id,
       diff,
       comment: parsed.data.comment,
+      source: parsed.data.source,
     })
     .select('id')
     .single()
@@ -233,6 +261,19 @@ export async function withdrawRevision(formData: FormData): Promise<void> {
 /* -------------------------------------------------------------------------- */
 /* Deciding                                                                    */
 /* -------------------------------------------------------------------------- */
+
+/**
+ * Where a decision lands. The queue by default; the serial review passes its
+ * own address as `retour`, and it goes through `safeSuite()` like every return
+ * path that arrives in a form field — a hidden input is attacker-typed, and an
+ * unchecked one would make both buttons open redirects.
+ */
+function decisionDestination(formData: FormData, outcome: 'approuvee' | 'refusee'): string {
+  const retour = safeSuite(String(formData.get('retour') ?? '')) ?? routes.contributions()
+  const url = new URL(retour, 'http://local')
+  url.searchParams.set('decidee', outcome)
+  return `${url.pathname}${url.search}`
+}
 
 const decideSchema = z.object({
   id: z.uuid(),
@@ -340,6 +381,7 @@ export async function approveRevision(
   if (decideError) return { error: refusalMessage(decideError.code) }
 
   revalidatePath(routes.contributions())
+  revalidatePath(routes.adminSheetsReview())
   const slug = updated[0]?.slug
   if (slug) {
     revalidatePath(routes.cigar(slug))
@@ -357,7 +399,7 @@ export async function approveRevision(
    * state anyway: it survives the revalidation, it is back-button correct, and
    * the banner can name what happened.
    */
-  redirect(`${routes.contributions()}?decidee=approuvee`)
+  redirect(decisionDestination(formData, 'approuvee'))
 }
 
 export async function rejectRevision(_previous: WikiState, formData: FormData): Promise<WikiState> {
@@ -393,7 +435,8 @@ export async function rejectRevision(_previous: WikiState, formData: FormData): 
   if (!data || data.length === 0) return { error: copy.notEditor }
 
   revalidatePath(routes.contributions())
-  redirect(`${routes.contributions()}?decidee=refusee`)
+  revalidatePath(routes.adminSheetsReview())
+  redirect(decisionDestination(formData, 'refusee'))
 }
 
 /** Null when the proposed line may land; the refusal sentence otherwise. */

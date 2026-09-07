@@ -414,6 +414,44 @@ jobs:
             exit 1
           fi
 
+      # 0026 donne à une proposition sa source — l'URL d'une page officielle du
+      # fabricant ou la référence d'un document publié (PROVENANCE §6 et §10).
+      # Ce qui ne se voit qu'à l'exécution : un membre l'insère, tout le monde
+      # la lit sous les policies de 0001, et PERSONNE ne la réécrit — le grant
+      # de colonne ne la nomme pas, parce qu'un relecteur décide sur ce qu'il
+      # a lu.
+      - name: Apply 0026 — la source d'une proposition
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0026_source_de_proposition.sql
+
+      - name: Source d une proposition — deposee, lue, jamais reecrite
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/20_revision_source.sql 2>&1 \
+            | tee "$RUNNER_TEMP/source.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/source.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0027 ouvre la porte des sources : une fonction SECURITY DEFINER qui
+      # projette, par colonne d'une fiche, l'URL et la date de la dernière
+      # proposition acceptée — jamais l'auteur, le diff ni le commentaire. Ce
+      # qui ne se voit qu'à l'exécution : un anonyme la lit, ne lit toujours
+      # rien dans ref.cigar_revisions, et une proposition non décidée ne fait
+      # pas provenance.
+      - name: Apply 0027 — la porte des sources
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0027_provenance_des_fiches.sql
+
+      - name: Provenance — trois colonnes par la porte, la table fermee derriere
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/21_sheet_sources.sql 2>&1 \
+            | tee "$RUNNER_TEMP/provenance.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/provenance.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).

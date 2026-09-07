@@ -64,6 +64,8 @@ const MODERATOR_PAGES = [
   '/admin',
   '/admin/drapeaux',
   '/admin/fiches',
+  '/admin/fiches/relire',
+  '/admin/fiches/relire?source=avec',
   '/admin/gammes',
   '/admin/boutique',
   '/admin/boutique/vendeurs',

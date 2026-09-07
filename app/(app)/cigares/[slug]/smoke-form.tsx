@@ -149,8 +149,11 @@ export function SmokeForm({
           <p className="text-ink-faint text-xs leading-relaxed">{copy.needsSomething}</p>
         )}
 
+        {/* Disabled reads as disabled through the control and a muted ink, never
+            through an opacity on the block: a faded hint under 60 % opacity fell
+            to 2.5:1 and axe counted it serious (audit of 6 septembre 2026). */}
         <label
-          className={`flex items-start gap-3 text-sm ${canAnnounce ? 'cursor-pointer' : 'opacity-60'}`}
+          className={`flex items-start gap-3 text-sm ${canAnnounce ? 'cursor-pointer' : 'text-ink-muted'}`}
         >
           <input
             type="checkbox"
@@ -167,10 +170,10 @@ export function SmokeForm({
         </label>
 
         {/* Where — a referential venue, optional (P5). Only meaningful when the
-            gesture is told on the feed, so it sits under that box and greys
-            with it; a session without a place stays the common case. */}
+            gesture is told on the feed, so it sits under that box and is
+            disabled with it; a session without a place stays the common case. */}
         {venues.length > 0 ? (
-          <div className={`flex flex-col gap-1.5 ${canAnnounce ? '' : 'opacity-60'}`}>
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="geste-venue">{copy.venue}</Label>
             <Select id="geste-venue" name="venueId" defaultValue="" disabled={!canAnnounce}>
               <option value="">{copy.venueNone}</option>
@@ -180,7 +183,7 @@ export function SmokeForm({
                 </option>
               ))}
             </Select>
-            <p className="text-ink-faint text-xs leading-relaxed">{copy.venueHint}</p>
+            <p className="text-ink-muted text-xs leading-relaxed">{copy.venueHint}</p>
           </div>
         ) : null}
       </div>

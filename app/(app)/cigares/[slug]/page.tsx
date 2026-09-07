@@ -26,6 +26,7 @@ import {
 } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
+import { sheetSources } from '@/lib/wiki/queries'
 
 import { CommentThread } from './comment-thread'
 import { RailSection } from './rail-section'
@@ -95,14 +96,29 @@ export default async function CigarPage({ params, searchParams }: Props) {
   const cigar = await getCigarBySlug(slug)
   if (!cigar) notFound()
 
-  const [user, stats, entries, profile] = await Promise.all([
+  const [user, stats, entries, profile, sources] = await Promise.all([
     currentUser(),
     getCigarStats(cigar.id),
     /* Every entry this reader may see — four SELECT policies decide, nothing
        here restates them. The rail picks "mine" out of the same list. */
     listReviewsForCigar(cigar.id),
     aromaLabels(cigar.aroma_tags),
+    /* Where each column comes from (0027): the source cited by the last
+       approved proposal that wrote it, through a door that shows a URL and a
+       date and nothing of the queue. The seed's values have no row. */
+    sheetSources(cigar.id),
   ])
+  const aromaSource = sources.get('aroma_tags')?.source ?? null
+  /* The two measures of the strip that a manufacturer publishes, when the
+     sheet holds them from a sourced proposal — one line each, never a card. */
+  const sourcedSpecs = (
+    [
+      ['vitola_id', m.contributions.fieldVitolaId],
+      ['strength', m.contributions.fieldStrength],
+    ] as const
+  )
+    .map(([column, label]) => ({ label, source: sources.get(column)?.source ?? null }))
+    .filter((spec): spec is { label: string; source: string } => spec.source !== null)
   const scale = user ? await myScoreScale(user.id) : 100
 
   const vitola = cigar.vitolas
@@ -170,13 +186,53 @@ export default async function CigarPage({ params, searchParams }: Props) {
             shade={(cigar.wrapper_shade as WrapperShade | null) ?? null}
           />
 
+          {sourcedSpecs.length > 0 ? (
+            <ul className="text-ink-faint flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              {sourcedSpecs.map((spec) => (
+                <li key={spec.label}>
+                  {copy.specsFromMaker.replace('{fields}', spec.label)}
+                  {' · '}
+                  <a
+                    href={spec.source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-ink underline underline-offset-4"
+                  >
+                    {copy.sourceLink}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
           {/* The aroma profile of the referential (migration 0025): what one
-              finds from one box to the next. The members' most-cited aromas
-              are a different fact and live with the notes, below. */}
+              finds from one box to the next — « selon le fabricant » when the
+              last accepted proposal cited a source (0026, 0027), « selon le
+              référentiel » otherwise. The members' most-cited aromas are a
+              different fact and live with the notes, below; the two are never
+              merged. */}
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="eyebrow">{copy.aromas}</span>
-              <span className="text-ink-faint text-xs">{copy.aromasLede}</span>
+              {aromaSource ? (
+                <>
+                  <span className="label">{copy.aromasFromMaker}</span>
+                  <span className="text-ink-faint text-xs">
+                    {copy.aromasFromMakerLede}
+                    {' · '}
+                    <a
+                      href={aromaSource}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-ink underline underline-offset-4"
+                    >
+                      {copy.sourceLink}
+                    </a>
+                  </span>
+                </>
+              ) : (
+                <span className="text-ink-faint text-xs">{copy.aromasLede}</span>
+              )}
             </div>
             {cigar.aroma_tags.length > 0 ? (
               <ul className="flex flex-wrap gap-2">

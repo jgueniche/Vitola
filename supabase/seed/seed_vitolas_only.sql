@@ -10,10 +10,13 @@
 -- est sans danger : idempotent sur le slug, il ajoute les galeras nouvelles et
 -- met à jour les cotes des existantes.
 --
--- Ordre d'un amorçage complet des fiches cubaines, à rejouer sans risque :
+-- Ordre d'un amorçage complet, à rejouer sans risque :
 --   1. seed_vitolas_only.sql                      — les galeras que les propositions visent
 --   2. seed_propositions.sql   -v author=<uuid>   — les propositions, en attente
---   3. apply_propositions.sql  -v reviewer=<uuid> — leur acceptation d'un bloc (6 sept. 2026)
+--        -v csv=08_habanos_propositions.csv -v section='§9'   (Habanos, PROVENANCE §9)
+--        -v csv=09_fabricants_propositions.csv                (fabricants, PROVENANCE §10)
+--   3. apply_propositions.sql  -v reviewer=<uuid> — l'acceptation d'un bloc de ce qui cite
+--        une source (6 sept. 2026) ; le reste se relit dans /admin/fiches/relire
 -- =============================================================================
 
 \set ON_ERROR_STOP on

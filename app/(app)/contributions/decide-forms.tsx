@@ -26,7 +26,17 @@ const copy = m.contributions
  * and then decides. Two forms would mean two textareas and a coin flip about
  * which one holds the text.
  */
-export function DecideForm({ id }: { id: string }) {
+export function DecideForm({
+  id,
+  retour,
+  shortcuts = false,
+}: {
+  id: string
+  /** Where the decision lands (through `safeSuite()`); the queue when absent. */
+  retour?: string
+  /** The serial review's A / R keys act on the form that says so. */
+  shortcuts?: boolean
+}) {
   const [approveState, approve, approving] = useActionState<WikiState, FormData>(
     approveRevision,
     {},
@@ -38,8 +48,9 @@ export function DecideForm({ id }: { id: string }) {
   const state = approveState.error ? approveState : rejectState
 
   return (
-    <form className="mt-4 flex flex-col gap-3">
+    <form className="mt-4 flex flex-col gap-3" data-decide-form={shortcuts ? 'true' : undefined}>
       <input type="hidden" name="id" value={id} />
+      {retour ? <input type="hidden" name="retour" value={retour} /> : null}
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={`decide-${id}`}>{copy.decideComment}</Label>
@@ -55,7 +66,13 @@ export function DecideForm({ id }: { id: string }) {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" formAction={approve} disabled={approving || rejecting}>
+        <Button
+          type="submit"
+          formAction={approve}
+          disabled={approving || rejecting}
+          data-decide="approve"
+          aria-keyshortcuts={shortcuts ? 'a' : undefined}
+        >
           {copy.approve}
         </Button>
         <Button
@@ -63,6 +80,8 @@ export function DecideForm({ id }: { id: string }) {
           variant="secondary"
           formAction={reject}
           disabled={approving || rejecting}
+          data-decide="reject"
+          aria-keyshortcuts={shortcuts ? 'r Control+Enter' : undefined}
         >
           {copy.reject}
         </Button>

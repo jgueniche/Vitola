@@ -9,7 +9,7 @@ raison — ni celle des lieux, dont le seul code client est le bouton de géoloc
 liste du journal, qui n'en charge aucun — ni la file de modération, dont le seul code client est
 le formulaire de décision, ni les comptes et les fiches de `/admin`, dont les actions naviguent
 (`?fait=…`) plutôt que de rendre un état — ni le panier de la boutique, dont chaque ligne est
-deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-deux existent :
+deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-trois existent :
 
 | Fichier | Pourquoi |
 |---|---|
@@ -58,6 +58,7 @@ deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-deux
 | `boutique/commande/checkout-form.tsx` | `useActionState` — un champ d'adresse refusé se relit en place, sans perdre le reste |
 | `boutique/commande/paiement/payment-form.tsx` | `useActionState` — une carte malformée se refuse en place ; la QA vit de ces refus |
 | `admin/admin-nav.tsx` | `usePathname` — un layout serveur ne sait pas lequel de ses écrans se rend, et l'écran courant doit se lire courant |
+| `admin/fiches/relire/review-shortcuts.tsx` | un écouteur clavier global — A clique « Accepter » de la première proposition, R mène au mot pour l'auteur, Ctrl + Entrée refuse, les flèches suivent les deux liens ; rien n'y décide, tout est annoncé (légende, `aria-keyshortcuts`) |
 
 Les règles apprises en les écrivant :
 

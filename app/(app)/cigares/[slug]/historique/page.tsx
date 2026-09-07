@@ -6,6 +6,7 @@ import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
 import { Button } from '@/components/ui/button'
 import { DiffView } from '@/components/wiki/diff-view'
+import { SourceLine } from '@/components/wiki/source-line'
 import { aromaNameMap } from '@/lib/aromas/queries'
 import { StatusBadge } from '@/components/wiki/status-badge'
 import { formatEffectiveDate } from '@/lib/cigar'
@@ -104,6 +105,8 @@ export default async function HistoryPage({ params }: Params) {
                   {revision.comment}
                 </p>
               ) : null}
+
+              <SourceLine source={revision.source} />
 
               {revision.review_comment ? (
                 <p className="border-rule text-ink-muted measure mt-3 border-l-2 pl-3 text-sm leading-relaxed">

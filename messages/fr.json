@@ -170,8 +170,10 @@
       "active": "Filtres actifs",
       "completeness": "Fiche",
       "complete": "Vitole renseignée",
-      "incomplete": "À compléter",
-      "completenessHint": "Pour trouver ce qui manque plutôt que le subir : 862 fiches sur 940 attendent leur format."
+      "completenessHint": "Pour trouver ce qui manque plutôt que le subir : chaque entrée liste les fiches auxquelles il manque ce fait — c’est là qu’une proposition sourcée compte.",
+      "missingVitola": "Sans vitole",
+      "missingStrength": "Sans force",
+      "missingAromas": "Sans arômes"
     },
     "results": {
       "one": "1 fiche",
@@ -180,7 +182,7 @@
       "noneHint": "Élargissez les critères, ou effacez les filtres.",
       "emptyTitle": "Le référentiel n'est pas encore ouvert au public",
       "emptyBody": "Les fiches sont en base mais aucune n'a encore été relue. Une fiche n'est visible qu'une fois vérifiée par un relecteur : c'est la règle du référentiel, pas une limitation temporaire de l'affichage.",
-      "lede": "{total} fiches publiées · {withVitola} avec une vitole renseignée — le reste attend vos corrections."
+      "lede": "{total} fiches publiées · {withVitola} avec une vitole · {withStrength} avec une force · {withAromas} avec un profil aromatique — le reste attend vos corrections."
     },
     "pagination": {
       "previous": "Précédent",
@@ -228,7 +230,12 @@
       "priceSource": "Arrêté publié au Journal officiel. À titre informatif.",
       "since": "depuis",
       "breadcrumb": "Fil d’Ariane",
-      "discontinued": "— arrêtée en {year}"
+      "discontinued": "— arrêtée en {year}",
+      "aromasFromMaker": "Selon le fabricant",
+      "aromasFromMakerLede": "Transcrits de la page que le fabricant publie — la source est à un clic.",
+      "sourceLink": "source",
+      "specsFromMaker": "{fields} : selon le fabricant",
+      "specsFromMakerSep": ", "
     },
     "brand": {
       "cuban": "Marque cubaine",
@@ -604,8 +611,8 @@
     "emptyLine": "Aucune note publique. La vôtre serait la première — elle ne compte que si vous la rendez publique.",
     "publicOne": "1 note publique",
     "publicMany": "{count} notes publiques",
-    "citedAromas": "Arômes les plus cités",
-    "citedAromasHint": "Dans les entrées publiques des membres ; le référentiel a son propre profil, plus haut.",
+    "citedAromas": "Arômes les plus cités par les membres",
+    "citedAromasHint": "Dans les entrées publiques des membres — un autre fait que le profil du référentiel, plus haut, et jamais mélangé avec lui.",
     "entriesCount": "{count} · les publiques, et les vôtres",
     "entriesCountOne": "1 · la vôtre, ou une publique",
     "hint": "Moyenne bayésienne : un cigare noté une seule fois ne domine pas un cigare noté trente fois. Ne comptent ici que les entrées publiques.",
@@ -860,7 +867,8 @@
       "republish": "Republier",
       "openSheet": "Voir la fiche",
       "emptyTitle": "Rien sous ce filtre",
-      "emptyBody": "C'est le bon état pour « non relues » : il voudra dire que le stock est résorbé — et que proposer une fiche nouvelle (ADR 0008) peut s'ouvrir."
+      "emptyBody": "C'est le bon état pour « non relues » : il voudra dire que le stock est résorbé — et que proposer une fiche nouvelle (ADR 0008) peut s'ouvrir.",
+      "reviewLink": "Relire les propositions en série"
     },
     "lines": {
       "title": "Les gammes",
@@ -1029,7 +1037,37 @@
       "flags": "Drapeaux",
       "accounts": "Comptes",
       "sheets": "Fiches",
-      "lines": "Gammes"
+      "lines": "Gammes",
+      "review": "Relire"
+    },
+    "review": {
+      "title": "La relecture en série",
+      "lede": "Une fiche à la fois, ses propositions en attente, et deux touches. Accepter applique à la fiche ; refuser demande un mot, que seul l’auteur lira. La fraîcheur, la trace et les droits sont ceux de la file : rien ici ne décide autrement que /contributions.",
+      "restrictedTitle": "Réservé aux relecteurs",
+      "restrictedBody": "Relire demande le rôle de relecteur (editor). Il s’accorde à la main, par un administrateur, depuis un profil.",
+      "counter": "{position} / {total}",
+      "counterLede": "{sheets} fiches à relire · {proposals} propositions en attente",
+      "filterAll": "Toutes",
+      "filterSourced": "Avec source",
+      "filterHint": "« Avec source » ne garde que les propositions qui citent une page ou un document : ce sont celles qui se vérifient en un clic.",
+      "emptyTitle": "Rien à relire",
+      "emptyBody": "La file est vide sous ce filtre. C’est le bon état, tant que quelqu’un vient l’y remettre.",
+      "sheetGone": "Cette fiche n’a plus de proposition en attente : voici la suivante.",
+      "openSheet": "Voir la fiche",
+      "openHistory": "Historique",
+      "previous": "Fiche précédente",
+      "next": "Fiche suivante",
+      "shortcutsTitle": "Au clavier",
+      "shortcutAccept": "accepter la première proposition",
+      "shortcutReject": "refuser — le mot pour l’auteur se tape d’abord, puis Ctrl + Entrée",
+      "shortcutNext": "fiche suivante",
+      "shortcutPrevious": "fiche précédente",
+      "shortcutEscape": "quitter le champ",
+      "proposalsOnSheet": "{count} proposition(s) sur cette fiche",
+      "proposalPosition": "Proposition {index}",
+      "sourceNone": "Sans source citée — à vérifier autrement.",
+      "approved": "Appliquée à la fiche.",
+      "rejected": "Refusée, avec votre mot."
     }
   },
   "aromas": {
@@ -1491,14 +1529,20 @@
       "duplicate": "Une fiche porte déjà cette valeur.",
       "unknown": "Cette action n'a pas abouti.",
       "tooManyAromas": "Douze arômes au maximum.",
-      "unknownAroma": "Un de ces arômes n’est pas un descripteur de la roue."
+      "unknownAroma": "Un de ces arômes n’est pas un descripteur de la roue.",
+      "sourceTooLong": "La source est trop longue (500 caractères au plus).",
+      "sourceFormat": "Une source tient sur une ligne : une adresse https, ou la référence d’un document publié."
     },
     "closedTitle": "Les contributions sont fermées",
     "closedBody": "La file de révisions est momentanément close. Rien de ce que vous auriez proposé n'est perdu : il n'y a simplement rien à envoyer pour l'instant.",
     "proposeLink": "Proposer une correction",
     "historyLink": "Historique",
     "fieldAromaTags": "Arômes",
-    "fieldAromaTagsHint": "Les descripteurs de la roue que cette fiche porte, douze au plus — Ctrl ou Cmd pour en choisir plusieurs. Ce sont les arômes du référentiel, pas ceux d’une dégustation : ce qu’on retrouve d’une boîte à l’autre."
+    "fieldAromaTagsHint": "Les descripteurs de la roue que cette fiche porte, douze au plus — Ctrl ou Cmd pour en choisir plusieurs. Ce sont les arômes du référentiel, pas ceux d’une dégustation : ce qu’on retrouve d’une boîte à l’autre.",
+    "fieldSource": "Source",
+    "fieldSourceHint": "Facultatif. L’adresse de la page officielle du fabricant, ou la référence d’un document publié. Une source se dit au dépôt : elle ne se modifie plus ensuite, parce qu’un relecteur décide sur ce qu’il a lu.",
+    "sourceLabel": "Source",
+    "sourceNone": "Sans source citée"
   },
   "feed": {
     "eyebrow": "Le fil",
