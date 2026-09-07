@@ -69,7 +69,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="mt-6 sm:mt-2">
+        {/* Narrower than the text columns: a full-bleed cigar was too big. */}
+        <div className="mx-auto mt-6 w-full max-w-5xl sm:mt-2 sm:px-4">
           <CigarPlate />
         </div>
 

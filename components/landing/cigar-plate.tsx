@@ -134,20 +134,56 @@ function bandRule(x: number, bulge: number): string {
   return `M${x} ${TOP + 2} C${x + bulge} ${AXIS - 28} ${x + bulge} ${AXIS + 28} ${x} ${BOT - 2}`
 }
 
-/* Two threads of smoke, born on the burn line. Drawn relative to the ember,
-   masked so they dissolve rather than end. */
-const SMOKE = [
+/* La fumée. Born on the burn line, lit by the ember at its foot, and drawn in
+   three layers so that it thins as it rises rather than ends:
+
+     - the body is a ribbon that widens with height, filled with a fade and
+       torn into wisps by a turbulence displacement — two copies with
+       different seeds rise out of phase, so the smoke never restarts and
+       never shows an edge;
+     - two threads leave the foot of the ash, thin and sharper, warmed by the
+       ember for their first inches;
+     - a breath of ember light sits where the smoke leaves the fire.
+
+   Everything is relative to the ember (0, 0), y negative upward. The first
+   version was two blurred strokes under a mask left in its default units:
+   a mask's region is the box of what it masks plus a tenth, so the blur was
+   cut by two straight vertical edges — the one thing this plate forbids. */
+function plume(seed: number): string {
+  const N = 16
+  const H = 236
+  const left: string[] = []
+  const right: string[] = []
+  for (let i = 0; i <= N; i += 1) {
+    const t = i / N
+    const y = -H * t
+    const cx = 9 * Math.sin(t * 5.1 + seed) + 22 * t * Math.sin(t * 2.3 + 0.4 * seed)
+    const w = 5 + 52 * Math.pow(t, 1.35)
+    left.push(`${f(cx - w + 4 * Math.sin(t * 9.3 + seed))} ${f(y)}`)
+    right.push(`${f(cx + w + 4 * Math.sin(t * 7.7 + 1.2 + seed))} ${f(y)}`)
+  }
+  return `M${left.join(' L')} L${right.reverse().join(' L')} Z`
+}
+
+const PLUMES = [
+  { d: plume(0), filter: 'vt-smoke-wisps-a', dur: '13s', delay: '0s' },
+  { d: plume(1.7), filter: 'vt-smoke-wisps-b', dur: '13s', delay: '-6.5s' },
+] as const
+
+const THREADS = [
   {
-    d: 'M0 0 C-18 -36 22 -58 -4 -96 C-28 -132 12 -156 -8 -190 C-20 -212 -2 -226 -10 -246',
-    w: 13,
-    o: 0.42,
-    dur: '11s',
+    d: 'M0 0 C-5 -20 9 -36 -1 -60 C-9 -80 7 -96 -3 -122 C-8 -136 2 -148 -4 -164',
+    w: 3.4,
+    o: 0.55,
+    dur: '9s',
+    delay: '0s',
   },
   {
-    d: 'M8 -4 C4 -28 36 -44 20 -76 C6 -104 34 -122 18 -150 C8 -168 22 -184 12 -206',
-    w: 7,
-    o: 0.3,
-    dur: '8.5s',
+    d: 'M6 2 C3 -18 17 -30 10 -52 C4 -70 19 -84 12 -106 C8 -118 15 -130 11 -142',
+    w: 2.2,
+    o: 0.42,
+    dur: '11s',
+    delay: '-4s',
   },
 ] as const
 
@@ -239,8 +275,67 @@ export function CigarPlate() {
             <filter id="vt-glow" x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur stdDeviation={18} />
             </filter>
-            <filter id="vt-smoke-blur" x="-80%" y="-30%" width="260%" height="160%">
-              <feGaussianBlur stdDeviation={8} />
+            {/* The smoke. A turbulence tears the ribbon into wisps, then a blur
+                softens what is left. The regions are in user space and wide:
+                a region measured on the ribbon's own box would cut the wisps
+                with straight edges. */}
+            <filter
+              id="vt-smoke-wisps-a"
+              filterUnits="userSpaceOnUse"
+              x={-240}
+              y={-330}
+              width={480}
+              height={390}
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.013 0.03"
+                numOctaves={3}
+                seed={11}
+                result="n"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="n"
+                scale={44}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feGaussianBlur stdDeviation={5} />
+            </filter>
+            <filter
+              id="vt-smoke-wisps-b"
+              filterUnits="userSpaceOnUse"
+              x={-240}
+              y={-330}
+              width={480}
+              height={390}
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.011 0.034"
+                numOctaves={3}
+                seed={23}
+                result="n"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="n"
+                scale={40}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feGaussianBlur stdDeviation={5} />
+            </filter>
+            <filter
+              id="vt-smoke-thread"
+              filterUnits="userSpaceOnUse"
+              x={-240}
+              y={-330}
+              width={480}
+              height={390}
+            >
+              <feGaussianBlur stdDeviation={1.6} />
             </filter>
 
             {/* The leaf, warmed near the ember, deepening toward the head. */}
@@ -320,15 +415,47 @@ export function CigarPlate() {
             </linearGradient>
             <linearGradient id="vt-smoke-fade" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0" stopColor="rgb(255 255 255)" stopOpacity={1} />
-              <stop offset="0.45" stopColor="rgb(255 255 255)" stopOpacity={0.7} />
+              <stop offset="0.5" stopColor="rgb(255 255 255)" stopOpacity={0.9} />
               <stop offset="1" stopColor="rgb(255 255 255)" stopOpacity={0} />
             </linearGradient>
-            <mask id="vt-smoke-mask">
+            {/* The plume's own fade, from the foot to nothing. */}
+            <linearGradient id="vt-smoke-body" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0" style={{ stopColor: 'var(--plate-smoke)' }} stopOpacity={0.5} />
+              <stop offset="0.35" style={{ stopColor: 'var(--plate-smoke)' }} stopOpacity={0.34} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-smoke)' }} stopOpacity={0} />
+            </linearGradient>
+            {/* A thread is warmed by the ember for its first inches. */}
+            <linearGradient
+              id="vt-smoke-heat"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="-130"
+            >
+              <stop offset="0" style={{ stopColor: 'var(--plate-ember-hot)' }} />
+              <stop offset="0.3" style={{ stopColor: 'var(--plate-smoke)' }} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-smoke)' }} stopOpacity={0} />
+            </linearGradient>
+            <radialGradient id="vt-smoke-breath">
+              <stop offset="0" style={{ stopColor: 'var(--plate-ember-hot)' }} stopOpacity={0.4} />
+              <stop offset="1" style={{ stopColor: 'var(--plate-ember)' }} stopOpacity={0} />
+            </radialGradient>
+            {/* In user space, and wide: a mask's default region is the box of
+                what it masks plus a tenth — the ribbon's box, not the wisps'. */}
+            <mask
+              id="vt-smoke-mask"
+              maskUnits="userSpaceOnUse"
+              x={f(emberX - 240)}
+              y={0}
+              width={480}
+              height={f(emberY + 30)}
+            >
               <rect
-                x={emberX - 140}
+                x={f(emberX - 240)}
                 y={0}
-                width={300}
-                height={emberY + 20}
+                width={480}
+                height={f(emberY + 30)}
                 fill="url(#vt-smoke-fade)"
               />
             </mask>
@@ -639,21 +766,37 @@ export function CigarPlate() {
           {/* --------------------------------------------------- la fumée */}
           <g mask="url(#vt-smoke-mask)">
             <g className="plate-smoke" transform={`translate(${f(emberX)} ${f(emberY)})`}>
-              {SMOKE.map((s) => (
+              {/* The breath of light where the smoke leaves the fire. */}
+              <ellipse
+                className="plate-smoke-breath"
+                cx={4}
+                cy={-14}
+                rx={26}
+                ry={40}
+                fill="url(#vt-smoke-breath)"
+                style={{ mixBlendMode: 'screen' }}
+              />
+              {PLUMES.map((p) => (
+                <path
+                  key={p.filter}
+                  className="plate-smoke-body"
+                  d={p.d}
+                  fill="url(#vt-smoke-body)"
+                  filter={`url(#${p.filter})`}
+                  style={{ '--dur': p.dur, '--delay': p.delay } as React.CSSProperties}
+                />
+              ))}
+              {THREADS.map((s) => (
                 <path
                   key={s.d}
+                  className="plate-smoke-thread"
                   d={s.d}
                   fill="none"
-                  style={
-                    {
-                      stroke: 'var(--plate-smoke)',
-                      '--o': s.o,
-                      '--dur': s.dur,
-                    } as React.CSSProperties
-                  }
+                  stroke="url(#vt-smoke-heat)"
                   strokeWidth={s.w}
                   strokeLinecap="round"
-                  filter="url(#vt-smoke-blur)"
+                  filter="url(#vt-smoke-thread)"
+                  style={{ '--o': s.o, '--dur': s.dur, '--delay': s.delay } as React.CSSProperties}
                 />
               ))}
             </g>

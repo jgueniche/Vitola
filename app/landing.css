@@ -101,20 +101,56 @@
   }
 }
 
-.cigar-plate .plate-smoke path {
-  opacity: var(--o, 0.4);
-  animation: vt-smoke var(--dur, 10s) ease-in-out infinite alternate;
+/* The body of the plume: two torn copies rise, thin and dissolve, half a
+   cycle apart — one is born while the other dies, so the smoke never
+   restarts. The rise scales from the foot, so the plume opens as it climbs. */
+.cigar-plate .plate-smoke-body {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: vt-plume var(--dur, 13s) linear infinite;
+  animation-delay: var(--delay, 0s);
 }
 
-@keyframes vt-smoke {
-  from {
-    transform: translate(0, 0);
-    opacity: var(--o, 0.4);
+@keyframes vt-plume {
+  0% {
+    opacity: 0;
+    transform: translate(0, 6px) scale(0.94, 0.9);
   }
-  to {
-    transform: translate(10px, -18px);
-    opacity: calc(var(--o, 0.4) * 0.55);
+  22% {
+    opacity: 1;
   }
+  78% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(9px, -34px) scale(1.12, 1.06);
+  }
+}
+
+/* The threads: the same rise, quicker and sharper. */
+.cigar-plate .plate-smoke-thread {
+  animation: vt-thread var(--dur, 9s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes vt-thread {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px);
+  }
+  18% {
+    opacity: var(--o, 0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(6px, -26px);
+  }
+}
+
+/* The ember's light on the foot of the smoke breathes with the ember. */
+.cigar-plate .plate-smoke-breath {
+  animation: vt-breathe 3.6s ease-in-out infinite;
 }
 
 /* Freeze rather than remove: the base layer already collapses every
@@ -123,5 +159,13 @@
 @media (prefers-reduced-motion: reduce) {
   .cigar-plate * {
     animation-play-state: paused !important;
+  }
+
+  /* A still plume, not an empty one: the rise starts and ends invisible. */
+  .cigar-plate .plate-smoke-body,
+  .cigar-plate .plate-smoke-thread {
+    animation: none;
+    opacity: var(--o, 0.6);
+    transform: none;
   }
 }
