@@ -29,6 +29,13 @@ export const FACET_PARAMS = {
      2026), and since the sourced proposals of 6 septembre it has three
      answers rather than one. */
   completeness: 'fiche',
+  /* « Affiner avec les bagues et avec les arômes » (QA du 12 septembre 2026).
+     `arome` takes a taxonomy slug — a family OR a descriptor, because the two
+     entries to this filter ask it at two grains: the facet panel offers the
+     eleven families, and the wheel of `/aromes` points at one descriptor.
+     `bague` is a floor, not an equality: nobody looks for « exactly three ». */
+  aroma: 'arome',
+  rating: 'bague',
   page: 'page',
 } as const
 
@@ -68,6 +75,10 @@ export type Facets = {
   brand: string | null
   vitola: string | null
   completeness: Completeness | null
+  /** Taxonomy slugs, family or descriptor. Resolved to ids by the query. */
+  aromas: string[]
+  /** A floor in bands, 1 to 5, on the members' weighted note. */
+  minBands: number | null
   page: number
 }
 
@@ -79,8 +90,13 @@ export const EMPTY_FACETS: Facets = {
   brand: null,
   vitola: null,
   completeness: null,
+  aromas: [],
+  minBands: null,
   page: 1,
 }
+
+/** The floors the panel offers. Five means five — there is nothing above it. */
+export const BAND_FLOORS = [2, 3, 4, 5] as const
 
 /** Next gives a value, an array, or nothing. Normalise before validating. */
 function toArray(value: string | string[] | undefined): string[] {
@@ -118,8 +134,25 @@ export function parseFacets(params: RawSearchParams): Facets {
     vitola: keepValid(toArray(params[FACET_PARAMS.vitola]), SLUG)[0] ?? null,
     completeness:
       keepValid(toArray(params[FACET_PARAMS.completeness]), z.enum(COMPLETENESS))[0] ?? null,
+    aromas: keepValid(toArray(params[FACET_PARAMS.aroma]), SLUG),
+    minBands: readBandFloor(toArray(params[FACET_PARAMS.rating])[0]),
     page: Number.isFinite(page) && page > 0 ? Math.min(page, 500) : 1,
   }
+}
+
+/**
+ * A band floor, or nothing.
+ *
+ * Clamped rather than refused, like every other facet value here: a stale
+ * bookmark asking for eight bands should narrow the result, never error. Zero
+ * and below are dropped instead of clamped to one — « at least one band » is
+ * every rated cigar, which is a filter that says nothing.
+ */
+function readBandFloor(raw: string | undefined): number | null {
+  if (raw === undefined) return null
+  const value = Number.parseInt(raw, 10)
+  if (!Number.isFinite(value) || value < 2) return null
+  return Math.min(value, 5)
 }
 
 /** Rebuilds the query string. Used to render every facet as a plain link. */
@@ -132,6 +165,8 @@ export function facetsToSearchParams(facets: Facets): URLSearchParams {
   if (facets.brand) params.set(FACET_PARAMS.brand, facets.brand)
   if (facets.vitola) params.set(FACET_PARAMS.vitola, facets.vitola)
   if (facets.completeness) params.set(FACET_PARAMS.completeness, facets.completeness)
+  for (const a of facets.aromas) params.append(FACET_PARAMS.aroma, a)
+  if (facets.minBands) params.set(FACET_PARAMS.rating, String(facets.minBands))
   if (facets.page > 1) params.set(FACET_PARAMS.page, String(facets.page))
   return params
 }
@@ -140,7 +175,7 @@ export function facetsToSearchParams(facets: Facets): URLSearchParams {
  * Toggling a facet always returns to page 1. Staying on page 7 of a result set
  * that just shrank to two pages is how a filter appears to return nothing.
  */
-export function toggleFacet<K extends 'strengths' | 'shades' | 'countries'>(
+export function toggleFacet<K extends 'strengths' | 'shades' | 'countries' | 'aromas'>(
   facets: Facets,
   key: K,
   value: Facets[K][number],
@@ -158,8 +193,15 @@ export function isFacetActive(facets: Facets): boolean {
     facets.countries.length > 0 ||
     facets.brand !== null ||
     facets.vitola !== null ||
-    facets.completeness !== null
+    facets.completeness !== null ||
+    facets.aromas.length > 0 ||
+    facets.minBands !== null
   )
+}
+
+/** One floor at a time: two floors would be one floor. Back to page 1. */
+export function toggleBandFloor(facets: Facets, value: number): Facets {
+  return { ...facets, minBands: facets.minBands === value ? null : value, page: 1 }
 }
 
 /** One value at a time: the list answers one question about a sheet. Back to page 1. */

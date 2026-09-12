@@ -452,6 +452,74 @@ jobs:
             exit 1
           fi
 
+      # --- La QA du 12 septembre 2026 (0028 à 0034) ---------------------------
+      #
+      # Sept migrations, et la leçon qui va avec : elles ont vécu une
+      # demi-journée SANS ÊTRE APPLIQUÉES ICI, parce que ce fichier nomme chaque
+      # migration à la main et que personne n'y avait ajouté les nouvelles. La
+      # CI ne l'a pas dit en échouant sur une migration — elle n'en voyait
+      # aucune — mais sur le contrôle de dérive des types, tout en bas, qui a
+      # trouvé `admin_invitations` et `suggest_cigars` décrits dans les types et
+      # absents de la base. Un garde-fou posé pour une autre raison a attrapé
+      # celle-là ; c'est heureux et ce n'est pas une méthode.
+
+      # 0028 recalcule cigar_stats en cinq bagues. La colonne reste sur 100 —
+      # les six sous-notes d'une dégustation font 78,3 et pas 4, et la moyenne
+      # bayésienne de l'ADR 0004 est calibrée sur cent. Ce qui change est
+      # l'histogramme : les tranches de dix points mettaient une bague et deux
+      # dans la même barre.
+      - name: Apply 0028 — la note en bagues
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0028_notation_en_bagues.sql
+
+      # 0029 retire l'échelle /100 ↔ /20 : la contrainte, le défaut de colonne
+      # et la clé dans les lignes. Une contrainte qui EXIGE une clé que plus
+      # rien n'écrit est un piège sur le seul écran où l'on répare ses réglages.
+      - name: Apply 0029 — l'échelle de note retirée
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0029_echelle_de_note_retiree.sql
+
+      # 0030 ajoute `fumoir` à l'enum et n'offre que deux types dans la charge
+      # utile de venues_enabled. Les cinq autres valeurs restent : PostgreSQL
+      # n'en retire pas, et ce que le drapeau n'offre pas, aucun écran ne
+      # propose (ADR 0011, D5).
+      - name: Apply 0030 — civette et fumoir
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0030_lieux_civette_et_fumoir.sql
+
+      # 0031 : deux index GIN trigrammes. `%x%` ne peut pas utiliser un B-tree,
+      # et à 13 482 lieux la recherche était un balayage séquentiel à 45,8 ms
+      # par frappe — 4,9 ms avec eux, sur un BitmapOr.
+      - name: Apply 0031 — la recherche des lieux
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0031_recherche_des_lieux.sql
+
+      # 0032 : suggest_cigars, SECURITY INVOKER — et le privilège EST le
+      # dessin. Le profil se construit depuis le carnet, que quatre policies
+      # SELECT protègent ; en DEFINER la fonction classerait contre le carnet de
+      # tout le monde, ce qui est le canal d'inférence que l'ADR 0004 D3 ferme.
+      - name: Apply 0032 — les suggestions
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0032_suggestions.sql
+
+      # 0033 : la liste d'invitations, lue par tg_handle_new_user() à l'INSERT
+      # plutôt que par un UPDATE ensuite — le trigger de garde de 0009 refuse
+      # une écriture sur profiles.role hors contexte privilégié, et il a raison.
+      - name: Apply 0033 — les invitations admin
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0033_invitations_admin.sql
+
+      # 0034 : la boutique revend (ADR 0017). Ce qui ne se voit qu'à
+      # l'exécution est que la lecture publique d'un produit ne dépend plus de
+      # personne : la D4 de la 0016 retirerait de la vente un stock déjà payé le
+      # jour où un fournisseur ferme, en silence.
+      - name: Apply 0034 — la boutique en revente
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0034_boutique_en_revente.sql
+
+      - name: QA du 12 septembre — bagues, invitations, revente
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/22_qa_septembre.sql 2>&1 \
+            | tee "$RUNNER_TEMP/qa-septembre.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/qa-septembre.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).

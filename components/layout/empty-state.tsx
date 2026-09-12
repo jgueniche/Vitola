@@ -25,7 +25,7 @@ export function EmptyState({
   return (
     <div className={cn('border-rule flex flex-col gap-1.5 border-t border-b py-4', className)}>
       <p className="text-ink text-sm font-medium">{title}</p>
-      <p className="text-ink-muted measure text-sm leading-relaxed">{description}</p>
+      <p className="lede">{description}</p>
       {action ? <div className="pt-1.5">{action}</div> : null}
     </div>
   )

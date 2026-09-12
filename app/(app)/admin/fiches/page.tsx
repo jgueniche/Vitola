@@ -63,7 +63,7 @@ export default async function AdminSheetsPage({ searchParams }: Props) {
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.admin.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         <p className="eyebrow">
           {copy.countUnreviewed.replace('{count}', String(counts.sheetsUnreviewed))}
         </p>

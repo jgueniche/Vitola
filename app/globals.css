@@ -32,6 +32,27 @@
   --color-papier: #f3eee4;
   --color-encre: #181513;
 
+  /* --- The pale-brown light ground, QA of 12 septembre 2026 -------------
+     « Un thème clair en marron très très pâle, et marron foncé pour les
+     titres. » The original light mode was papier/encre — a warm white and a
+     near-black — which read as a generic light theme with a beige tint. These
+     eight values are a brown scale: the ground is tobacco lightened until it
+     is almost paper, the titles are brou de noix, and every step between was
+     measured against the ground and against both surfaces before it was
+     written here (4.95:1 at the faintest, on the raised surface). */
+  --color-tabac-pale: #f4ece0;
+  --color-tabac-pale-raised: #efe4d4;
+  --color-creme: #fcf8f1;
+  --color-brou: #2a1b0f;
+  --color-brou-ink: #3a2c20;
+  --color-brou-muted: #685949;
+  --color-brou-faint: #6f5e4a;
+  /* Brass, darkened until it carries text on a pale ground: the accent of the
+     dark theme (#c9a227) reaches 1.9:1 there. `-deep` is the hover, and in a
+     light theme "bright" means MORE contrast, so it is darker, not lighter. */
+  --color-laiton-sombre: #755c0d;
+  --color-laiton-sombre-deep: #5d4907;
+
   /* Semantic pigments, §4.2. The `-readable` variants are an addition —
      see Q11: the brief's error colour reaches only 2.51:1 on maduro, below
      the 3:1 floor required even for a non-text UI element. Same hue, same
@@ -102,6 +123,11 @@
   --color-surface-raised: var(--vt-surface-raised);
 
   --color-ink: var(--vt-ink);
+  /* The ink of a title, and the one token the two themes disagree about most:
+     in the dark theme a heading is the same parchment as the text it tops, and
+     in the light theme it is brou de noix over a pale brown. Set in @layer base
+     on h1/h2/h3 and on .font-display, so no heading has to ask. */
+  --color-ink-strong: var(--vt-ink-strong);
   --color-ink-muted: var(--vt-ink-muted);
   --color-ink-faint: var(--vt-ink-faint);
 
@@ -131,6 +157,7 @@
   --vt-surface-raised: var(--color-maduro-raised);
 
   --vt-ink: var(--color-parchemin);
+  --vt-ink-strong: var(--color-parchemin);
   --vt-ink-muted: var(--color-fumee);
   --vt-ink-faint: var(--color-cedre-readable);
 
@@ -195,27 +222,46 @@
   );
 }
 
+/* The light theme, asked for on 12 septembre 2026 and opted into explicitly —
+   never by `prefers-color-scheme`, for the reason above. A brown room with the
+   shutters open, not a white page: the ground is tobacco lightened almost to
+   paper, the rules are brou at 10%, and a title is the darkest thing on it. */
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --vt-ground: var(--color-papier);
-  --vt-surface: #ffffff;
-  --vt-surface-raised: #fbf8f2;
+  --vt-ground: var(--color-tabac-pale);
+  --vt-surface: var(--color-creme);
+  --vt-surface-raised: var(--color-tabac-pale-raised);
 
-  --vt-ink: var(--color-encre);
-  --vt-ink-muted: #5a5149;
-  --vt-ink-faint: var(--color-cedre);
+  --vt-ink: var(--color-brou-ink);
+  --vt-ink-strong: var(--color-brou);
+  --vt-ink-muted: var(--color-brou-muted);
+  --vt-ink-faint: var(--color-brou-faint);
 
-  --vt-accent: #8a6f14;
-  --vt-accent-bright: var(--color-claro);
+  --vt-accent: var(--color-laiton-sombre);
+  --vt-accent-bright: var(--color-laiton-sombre-deep);
   --vt-on-accent: var(--color-papier);
 
-  --vt-rule: rgb(24 21 19 / 0.1);
-  --vt-rule-strong: rgb(24 21 19 / 0.22);
+  --vt-rule: rgb(42 27 15 / 0.1);
+  --vt-rule-strong: rgb(42 27 15 / 0.2);
 
   --vt-positive: #46603c;
-  --vt-caution: #8a6228;
+  --vt-caution: #7a5620;
   --vt-negative: var(--color-erreur);
+
+  /* The signature hairline, restated: polished brass on a dark ground is the
+     bright end of the scale, and on a pale one it is the dark end. Reusing the
+     dark theme's gradient here drew a band nobody could see. */
+  --vt-brass: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(122 92 67 / 0.25) 8%,
+    var(--color-laiton-sombre) 34%,
+    var(--color-laiton-sombre-deep) 50%,
+    var(--color-laiton-sombre) 66%,
+    rgb(122 92 67 / 0.25) 92%,
+    transparent 100%
+  );
 }
 
 @layer base {
@@ -249,6 +295,35 @@
     font-family: var(--font-display);
     font-size: max(2rem, 1em);
     letter-spacing: -0.02em;
+    color: var(--color-ink-strong);
+  }
+
+  /* A title is the darkest thing on the page and it does not have to say so at
+     every call site. Utilities still win — a heading deliberately set in
+     `text-ink-muted`, and `.eyebrow`, which is a class and outranks a bare
+     element selector in this same layer. */
+  h1,
+  h2,
+  h3 {
+    color: var(--color-ink-strong);
+  }
+
+  /*
+   * A lede — the sentence under a title, when a title genuinely needs one.
+   *
+   * Asked for on 12 septembre 2026: « il me faut beaucoup moins de texte,
+   * mettre en avant les titres, moins les descriptions en terme de police et
+   * de taille ». It was `text-sm leading-relaxed text-ink-muted measure`
+   * written out on a hundred and some pages, one notch under the title it
+   * followed; here it is two notches under, at 13px, and it is a class so the
+   * decision can be revised in one place. The fastest way to honour that
+   * sentence is still to delete the lede, and most screens did.
+   */
+  .lede {
+    font-size: 0.8125rem;
+    line-height: 1.5rem;
+    color: var(--color-ink-muted);
+    max-width: var(--container-reading);
   }
 
   /* The wordmark of the header: the one admitted use of the didone under its

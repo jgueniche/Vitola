@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { DiffView } from '@/components/wiki/diff-view'
 import { SourceLine } from '@/components/wiki/source-line'
 import { aromaNameMap } from '@/lib/aromas/queries'
@@ -60,11 +61,11 @@ export default async function SerialReviewPage({ searchParams }: Props) {
   if (!hasMinRole(account?.role ?? 'member', REVIEWER_ROLE)) {
     return (
       <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
-        <div className="flex flex-col gap-2">
-          <p className="eyebrow">{m.admin.eyebrow}</p>
-          <h1 className="font-display text-display-md leading-tight">{copy.restrictedTitle}</h1>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.restrictedBody}</p>
-        </div>
+        <SectionHead
+          eyebrow={m.admin.eyebrow}
+          title={copy.restrictedTitle}
+          lede={copy.restrictedBody}
+        />
       </main>
     )
   }
@@ -117,11 +118,7 @@ export default async function SerialReviewPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{m.admin.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={m.admin.eyebrow} title={copy.title} lede={copy.lede} />
 
       {decided === 'approuvee' || decided === 'refusee' ? (
         <p role="status" className="border-accent text-ink border-l-2 py-1 pl-3 text-sm">
@@ -273,7 +270,9 @@ export default async function SerialReviewPage({ searchParams }: Props) {
             </dt>
             <dd>{copy.shortcutPrevious}</dd>
             <dt>
-              <kbd className="border-rule rounded-[3px] border px-1.5 py-0.5 font-mono">Échap</kbd>
+              <kbd className="border-rule rounded-[3px] border px-1.5 py-0.5 font-mono">
+                {m.common.escapeKey}
+              </kbd>
             </dt>
             <dd>{copy.shortcutEscape}</dd>
           </dl>

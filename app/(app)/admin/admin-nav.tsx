@@ -19,7 +19,7 @@ const copy = m.admin.nav
 const ENTRIES = [
   { label: copy.dashboard, href: routes.admin(), exact: true },
   { label: copy.shop, href: routes.adminShop(), exact: true },
-  { label: copy.vendors, href: routes.adminShopVendors(), exact: false },
+  { label: copy.vendors, href: routes.adminShopPartners(), exact: false },
   { label: copy.flags, href: routes.adminFlags(), exact: false },
   { label: copy.accounts, href: routes.adminAccounts(), exact: false },
   { label: copy.sheets, href: routes.adminSheets(), exact: true },

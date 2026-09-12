@@ -1,24 +1,15 @@
-import type { Metadata } from 'next'
+import { permanentRedirect } from 'next/navigation'
 
-import { HubPage } from '@/components/layout/hub'
-import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 
-export const metadata: Metadata = { title: m.nav.mine.title }
-
-const copy = m.nav
-
+/**
+ * « Au lieu de chez moi tu split : ma cave, mon carnet » (QA du 12 septembre
+ * 2026).
+ *
+ * The hub is gone and its two sections are two nav entries. They keep a shared
+ * tab bar — `components/layout/mine-tabs.tsx` — so the split does not cost the
+ * one thing the hub gave: knowing that the other one exists.
+ */
 export default function MineHubPage() {
-  return (
-    <HubPage
-      eyebrow={copy.mine.label}
-      title={copy.mine.title}
-      lede={copy.mine.lede}
-      cards={[
-        { ...copy.cards.notebook, href: routes.notebook() },
-        { ...copy.cards.humidor, href: routes.humidor() },
-        { ...copy.cards.statistics, href: routes.statistics() },
-      ]}
-    />
-  )
+  permanentRedirect(routes.notebook())
 }

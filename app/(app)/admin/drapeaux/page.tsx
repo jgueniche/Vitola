@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { SectionHead } from '@/components/layout/section-head'
 import { isKnownFlag } from '@/lib/admin/flags'
 import { listFlags } from '@/lib/admin/queries'
 import { m } from '@/lib/i18n'
@@ -32,11 +33,11 @@ export default async function AdminFlagsPage() {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.flagsScreen.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.flagsScreen.lede}</p>
-      </div>
+      <SectionHead
+        eyebrow={copy.eyebrow}
+        title={copy.flagsScreen.title}
+        lede={copy.flagsScreen.lede}
+      />
 
       <ul className="flex flex-col gap-4">
         {flags.map((flag) => {

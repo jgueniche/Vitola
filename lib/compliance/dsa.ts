@@ -87,16 +87,22 @@ export const REPORTABLE = {
      guardrail — a review inciting consumption is `tobacco_promotion`. */
   venue: { schema: 'public', table: 'venues' },
   venueReview: { schema: 'public', table: 'venue_reviews' },
-  /* The shop (ADR 0016), public since 25 août 2026 — the one section that
-     lists third-party content IN FRONT of the age gate. A product sheet is a
-     vendor's text about an accessory, readable by anyone; the case §2 watches
-     for is the accessory whose sheet praises the consumption it serves, which
-     is why `tobacco_promotion` is offered here like everywhere else, and
-     first. A shopfront is the vendor's own presentation, and the DSA art. 30
-     traceability behind it is what a notice about it questions. Neither
-     surface carries `hidden_*` columns: the act on an upheld notice is the
-     admin's — unpublish the product, suspend the vendor — under the policies
-     of 0021 and 0022, never a moderation verb (migration 0024). */
+  /* The shop (ADR 0016), public since 25 août 2026 — the one section in front
+     of the age gate. A product sheet is text about an accessory, readable by
+     anyone; the case §2 watches for is the accessory whose sheet praises the
+     consumption it serves, which is why `tobacco_promotion` is offered here
+     like everywhere else, and first. Neither surface carries `hidden_*`
+     columns: the act on an upheld notice is the admin's — unpublish the
+     product — under the policies of 0021, never a moderation verb (0024).
+
+     `vendor` STAYS, and it is no longer reportable from anywhere. The
+     marketplace was dropped on 12 septembre 2026 (migration 0034): there is
+     no shopfront to report, so the button is gone and the CHECK of
+     `mod.reports` keeps the value. Removing it would make the notices already
+     filed against a shopfront unreadable, and a moderation queue that cannot
+     open its own history is worse than a surface nobody can reach. The folder
+     still renders — `lib/moderation/queries.ts` names the partner and offers
+     no public link. */
   product: { schema: 'shop', table: 'products' },
   vendor: { schema: 'shop', table: 'vendors' },
 } as const

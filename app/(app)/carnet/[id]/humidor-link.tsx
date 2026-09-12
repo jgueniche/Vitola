@@ -46,7 +46,7 @@ export async function HumidorLink({
   return (
     <section className="border-rule flex flex-col gap-3 border-t border-b py-4">
       <p className="text-ink text-sm font-medium">{copy.notLinkedTitle}</p>
-      <p className="text-ink-muted measure text-sm leading-relaxed">{copy.notLinkedBody}</p>
+      <p className="lede">{copy.notLinkedBody}</p>
       <AttachSmokeForm
         reviewId={reviewId}
         lots={lots.map((lot) => ({

@@ -49,8 +49,19 @@ export const VENUE_SEARCH = {
   maxRows: 100,
 } as const
 
+/**
+ * Every value the enum holds, in the order migration 0030 left them.
+ *
+ * Only two are OFFERED — `venues_enabled.payload.types` is `["civette",
+ * "fumoir"]` since the QA session of 12 septembre 2026 (« la liste est trop
+ * longue, civette et fumoir uniquement ») — and the five others stay here
+ * because they stay in the enum: PostgreSQL does not remove an enum value, and
+ * nothing needs it to. What the flag does not offer, no screen proposes and
+ * `venues_nearby()` does not return. Reopening one is an UPDATE of one row.
+ */
 export const VENUE_TYPES = [
   'civette',
+  'fumoir',
   'cave',
   'lounge',
   'hotel',

@@ -20,9 +20,7 @@
  * reference stops being one.
  */
 
-export type Segment =
-  | { kind: 'letters'; value: string }
-  | { kind: 'digits'; value: string }
+export type Segment = { kind: 'letters'; value: string } | { kind: 'digits'; value: string }
 
 /**
  * Splits a raw code into letter and digit groups, ignoring what separates them.

@@ -2,98 +2,31 @@
   "common": {
     "skipToContent": "Aller au contenu",
     "back": "Retour",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "notFoundEyebrow": "Page introuvable",
+    "notFoundTitle": "Cette page n'existe pas.",
+    "notFoundBody": "Le lien est peut-être ancien, ou la fiche a été fusionnée avec une autre.",
+    "backHome": "Revenir à l'accueil",
+    "errorEyebrow": "Erreur",
+    "errorTitle": "Quelque chose n'a pas abouti.",
+    "errorBody": "L'incident a été enregistré. Vous pouvez réessayer immédiatement.",
+    "errorRetry": "Réessayer",
+    "escapeKey": "Échap"
+  },
+  "brand": {
+    "tagline": "Le référentiel du cigare",
+    "disclaimer": "{brand} est un site d'information. Aucun produit du tabac n'y est vendu."
   },
   "nav": {
     "mainLabel": "Navigation principale",
-    "discover": {
-      "label": "Découvrir",
-      "title": "Découvrir",
-      "lede": "Le référentiel : ce que le site sait des cigares — vérifié, sourcé, et corrigeable par vous."
-    },
-    "mine": {
-      "label": "Chez moi",
-      "title": "Chez moi",
-      "lede": "Votre carnet, votre cave, vos chiffres. Tout y naît privé ; rien ne s'y partage sans votre geste."
-    },
     "circle": {
-      "label": "Le cercle",
-      "title": "Le cercle",
-      "lede": "Le fil, les membres, les clubs, l'agenda, les messages. On s'y abonne librement, et on s'en retire pareil."
-    },
-    "around": {
-      "label": "Autour",
-      "title": "Autour",
-      "lede": "Ce qui existe hors de l'écran : les lieux où fumer, et le journal — lisible sans compte."
+      "label": "Le Cercle",
+      "title": "Le Cercle"
     },
     "cards": {
-      "cigars": {
-        "title": "Les cigares",
-        "body": "940 fiches, la recherche par force, cape et origine, le comparateur."
-      },
-      "brands": {
-        "title": "Les marques",
-        "body": "Les maisons et leurs manufactures."
-      },
-      "vitolas": {
-        "title": "Les vitoles",
-        "body": "Les formats — cepo, module, et leurs noms d'usine."
-      },
-      "aromas": {
-        "title": "La roue des arômes",
-        "body": "Onze familles, 76 descripteurs, le vocabulaire de la dégustation."
-      },
-      "boxCodes": {
-        "title": "Les codes de boîte",
-        "body": "Le décodeur — qui dit « inconnu » plutôt que de deviner."
-      },
-      "contributions": {
-        "title": "Contribuer",
-        "body": "Proposer une correction ; un relecteur l'applique. L'historique reste."
-      },
-      "notebook": {
-        "title": "Le carnet",
-        "body": "Ce que vous avez fumé, quand, la note et le mot. Privé par défaut."
-      },
-      "humidor": {
-        "title": "La cave",
-        "body": "Vos lots, leur âge, l'hygrométrie, ce qui est à faire tourner."
-      },
       "statistics": {
         "title": "Les statistiques",
         "body": "Votre rythme sur douze mois, les cigares qui reviennent."
-      },
-      "feed": {
-        "title": "Le fil",
-        "body": "Les publications des gens que vous suivez, et la découverte."
-      },
-      "members": {
-        "title": "Les membres",
-        "body": "L'annuaire, les profils, les abonnements — libres et révocables."
-      },
-      "clubs": {
-        "title": "Les clubs",
-        "body": "Des groupes et leurs calendriers. Jamais un second fil."
-      },
-      "events": {
-        "title": "L'agenda",
-        "body": "Dégustations et rencontres, annoncées à une heure qui tient."
-      },
-      "messages": {
-        "title": "Les messages",
-        "body": "Écrire à quelqu'un que vous suivez. Pas chiffré de bout en bout, et dit."
-      },
-      "venues": {
-        "title": "Les lieux",
-        "body": "Civettes, caves et fumoirs autour de vous — sans prix, jamais."
-      },
-      "journal": {
-        "title": "Le journal",
-        "body": "Articles, lexique, guides. La partie du site qui se lit sans compte."
-      },
-      "shop": {
-        "title": "La boutique",
-        "body": "Les bons accessoires, choisis par des vendeurs que nous relisons — coupes, caves, hygromètres. Jamais de tabac."
       }
     },
     "shop": {
@@ -102,24 +35,45 @@
     "admin": {
       "label": "Administration"
     },
-    "vendor": {
-      "label": "Espace vendeur"
-    },
     "cigars": {
       "label": "Cigares"
     },
-    "searchLabel": "Rechercher une fiche cigare"
+    "searchLabel": "Rechercher une fiche cigare",
+    "menu": {
+      "open": "Menu",
+      "close": "Fermer",
+      "label": "Sections du site"
+    },
+    "trail": {
+      "label": "Fil d'ariane",
+      "home": "Accueil"
+    },
+    "partners": {
+      "label": "Partenaires"
+    },
+    "notebook": {
+      "label": "Mon carnet"
+    },
+    "humidor": {
+      "label": "Ma cave"
+    },
+    "suggestions": {
+      "label": "Suggestions"
+    },
+    "account": {
+      "label": "Mon compte"
+    },
+    "searchAction": "Rechercher"
   },
   "home": {
     "eyebrow": "Comprendre ce que l'on fume",
     "title": "Le référentiel du cigare, écrit par ceux qui le fument.",
-    "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré, une cave numérique et une boutique d’accessoires. Le tabac ne s’y vend pas — les accessoires, si.",
     "enter": "Entrer",
     "enterHint": "L'accès est réservé aux personnes majeures."
   },
   "ageGate": {
     "eyebrow": "Accès réservé aux majeurs",
-    "title": "Quel est votre date de naissance ?",
+    "title": "Quelle est votre date de naissance ?",
     "lede": "Ce site traite de produits du tabac. La loi en réserve l'accès aux personnes majeures. Votre date de naissance sert uniquement à vérifier cette condition.",
     "label": "Date de naissance",
     "submit": "Confirmer",
@@ -130,14 +84,17 @@
       "underage": "L'accès à ce site est réservé aux personnes majeures.",
       "implausible": "Cette date de naissance n'est pas plausible."
     },
-    "privacy": "Cette date n'est pas conservée tant que vous n'avez pas de compte. Un cookie signé mémorise seulement que la vérification a eu lieu."
+    "privacy": "Cette date n'est pas conservée tant que vous n'avez pas de compte. Un cookie signé mémorise seulement que la vérification a eu lieu.",
+    "metaTitle": "Accès réservé aux majeurs"
   },
   "health": {
     "notice": "Fumer nuit gravement à votre santé et à celle de votre entourage.",
     "title": "Tabac et santé",
     "lede": "Le tabac est la première cause de mortalité évitable en France. Ce site est un site d'information et de documentation : il ne promeut aucune consommation.",
     "helpTitle": "Se faire aider",
-    "helpBody": "Tabac info service — 39 89, du lundi au samedi. Un accompagnement gratuit et confidentiel."
+    "helpBody": "Tabac info service — 39 89, du lundi au samedi. Un accompagnement gratuit et confidentiel.",
+    "noticeLabel": "Avertissement sanitaire",
+    "eyebrow": "Information"
   },
   "legal": {
     "noticeTitle": "Mentions légales",
@@ -146,10 +103,17 @@
     "cookiesTitle": "Cookies et traceurs",
     "placeholder": "Ce document est en cours de rédaction et sera validé par un conseil juridique avant l'ouverture publique du site.",
     "dsaTitle": "Signalement et modération",
-    "dsaMechanism": "Chaque fiche, chaque commentaire, chaque produit et chaque vitrine de la boutique porte un bouton « Signaler ». Il ouvre un dossier dans notre file de traitement, avec le motif que vous choisissez et les précisions que vous ajoutez. Il demande d'être connecté, parce que la décision est communiquée à la personne qui signale.",
+    "dsaMechanism": "Chaque fiche, chaque commentaire, et chaque produit de la boutique porte un bouton « Signaler ». Il ouvre un dossier dans notre file de traitement, avec le motif que vous choisissez et les précisions que vous ajoutez. Il demande d'être connecté, parce que la décision est communiquée à la personne qui signale.",
     "dsaDeadline": "Nous examinons chaque signalement sous {hours} heures et communiquons la décision à son auteur. Une décision de retrait est motivée et peut être contestée.",
     "dsaContactPending": "Le point de contact unique prévu par les articles 11 et 12 du règlement sur les services numériques sera publié ici avant l'ouverture du site au public. En attendant, le formulaire de signalement ci-dessus est le mécanisme prévu par l'article 16.",
-    "dsaContactLabel": "Point de contact"
+    "dsaContactLabel": "Point de contact",
+    "eyebrow": "Informations légales",
+    "footerLabel": "Informations légales",
+    "footerNotice": "Mentions légales",
+    "footerPrivacy": "Confidentialité",
+    "footerTerms": "Conditions",
+    "footerCookies": "Cookies",
+    "footerHealth": "Santé"
   },
   "referential": {
     "eyebrow": "Référentiel",
@@ -173,7 +137,12 @@
       "completenessHint": "Pour trouver ce qui manque plutôt que le subir : chaque entrée liste les fiches auxquelles il manque ce fait — c’est là qu’une proposition sourcée compte.",
       "missingVitola": "Sans vitole",
       "missingStrength": "Sans force",
-      "missingAromas": "Sans arômes"
+      "missingAromas": "Sans arômes",
+      "aroma": "Arômes",
+      "aromaHint": "Les onze familles de la roue. Le descripteur exact se choisit sur la roue elle-même.",
+      "rating": "Note des membres",
+      "ratingFloor": "{count} bagues et plus",
+      "ratingAll": "5 bagues"
     },
     "results": {
       "one": "1 fiche",
@@ -274,9 +243,31 @@
       "custom_roll": "Roulage à façon"
     },
     "card": {
-      "sparse": "Format, force et cape non renseignés.",
-      "proposeValues": "Proposer ces valeurs"
-    }
+      "sparse": "Format, force et cape non renseignés."
+    },
+    "sections": {
+      "label": "Le référentiel",
+      "brands": "Les marques",
+      "vitolas": "Le vitolario",
+      "aromas": "La roue des arômes",
+      "boxCodes": "Les codes de boîte",
+      "compare": "Comparer",
+      "contribute": "Contribuer"
+    },
+    "teaser": {
+      "title": "Le référentiel complet est réservé aux membres",
+      "body": "Voici {shown} fiches sur {total}. La recherche, les facettes, le comparateur et les notes des membres s’ouvrent avec un compte — gratuit.",
+      "cta": "Créer un compte ou se connecter"
+    },
+    "strengths": {
+      "leger": "Léger",
+      "leger_moyen": "Léger à moyen",
+      "moyen": "Moyen",
+      "moyen_corse": "Moyen-corsé",
+      "corse": "Corsé"
+    },
+    "strengthAria": "Force : {label}, {index} sur {total}",
+    "shadeAria": "Cape : {label}, position {index} sur {total}"
   },
   "auth": {
     "eyebrow": "Compte",
@@ -308,64 +299,12 @@
       "shop": "Boutique"
     },
     "hero": {
-      "lede": "Un référentiel encyclopédique, un carnet de dégustation et une cave numérique, tenus par ceux qui fument. Le tabac ne s’y vend pas.",
+      "lede": "Un référentiel, un carnet, une cave. Tenus par ceux qui fument.",
       "shopCta": "Parcourir la boutique d’accessoires"
     },
     "plate": {
-      "emberLabel": "La braise",
-      "emberValue": "Combustion — env. 90 min",
-      "bandLabel": "La bague",
-      "bandValue": "Papier imprimé — env. 34 mm",
-      "wrapperLabel": "La cape",
-      "wrapperValue": "Colorado maduro — 4ᵉ nuance sur 6",
-      "vitolaLabel": "La vitole",
-      "vitolaDimensions": "52 × 164 mm",
-      "vitolaName": "corona gorda",
       "bandVitola": "Corona gorda · 52 × 164",
-      "alt": "Planche : un cigare allumé vu de côté, la cendre et la braise à gauche, la bague au tiers droit. Quatre légendes — la braise, combustion d’environ 90 minutes ; la bague, papier imprimé d’environ 34 mm ; la cape, colorado maduro, quatrième nuance sur six ; la vitole, 52 × 164 mm, corona gorda."
-    },
-    "inside": {
-      "eyebrow": "Derrière la porte",
-      "title": "Ce que le site contient.",
-      "body": "Six espaces et un seul compte. L’accès est réservé aux personnes majeures ; votre date de naissance ne sert qu’à le vérifier."
-    },
-    "modules": {
-      "referentiel": {
-        "number": "01",
-        "name": "Le référentiel",
-        "line": "Manufactures, marques, vitoles et fiches — sourcées, relues, versionnées, corrigées par ceux qui les lisent."
-      },
-      "carnet": {
-        "number": "02",
-        "name": "Le carnet",
-        "line": "Ce que vous avez fumé, quand, la note et les arômes. Pour vous seul, pour quelques personnes ou pour tous."
-      },
-      "cave": {
-        "number": "03",
-        "name": "La cave",
-        "line": "L’inventaire réel, le grand livre des entrées et des sorties, l’hygrométrie relevée."
-      },
-      "reseau": {
-        "number": "04",
-        "name": "Le fil",
-        "line": "Un fil d’abonnements et un fil de découverte, des sessions partagées, des clubs, des événements."
-      },
-      "lieux": {
-        "number": "05",
-        "name": "Les lieux",
-        "line": "Civettes, caves et lounges autour de vous. Les avis portent sur l’accueil et le conseil, jamais sur un produit."
-      },
-      "boutique": {
-        "number": "06",
-        "name": "La boutique",
-        "line": "Des accessoires, et rien d’autre. En accès libre, sans compte."
-      }
-    },
-    "final": {
-      "eyebrow": "Accès réservé aux majeurs",
-      "title": "Ce site traite de produits du tabac. La loi en réserve l'accès aux personnes majeures.",
-      "body": "Votre date de naissance sert uniquement à vérifier cette condition. Elle n'est pas conservée tant que vous n'avez pas de compte : un cookie signé mémorise seulement que la vérification a eu lieu.",
-      "help": "Se faire aider : Tabac info service — 39 89, du lundi au samedi. Gratuit et confidentiel."
+      "alt": "Planche : un cigare allumé vu de côté, la cendre et la braise à gauche, la bague au tiers droit, un filet de fumée qui monte."
     }
   },
   "comments": {
@@ -413,7 +352,6 @@
     "emptyFilteredBody": "Ce filtre ne renvoie rien pour le moment. Retirez-le pour retrouver le carnet entier.",
     "filtersReset": "Tout le carnet",
     "openEntry": "Ouvrir l'entrée",
-    "backToNotebook": "Retour au carnet",
     "sharedWithMeTitle": "Partagé avec moi",
     "sharedWithMeLede": "Les entrées que d'autres membres vous ont nommément ouvertes.",
     "sharedWithMeEmpty": "Personne ne vous a encore nommé sur une entrée.",
@@ -424,14 +362,7 @@
       "kindLog": "Notes de carnet",
       "kindTasting": "Dégustations",
       "scope": "Portée",
-      "scopeAll": "Toutes",
-      "apply": "Filtrer"
-    },
-    "scale": {
-      "legend": "Afficher les notes",
-      "hundred": "Sur 100",
-      "twenty": "Sur 20",
-      "hint": "Préférence d'affichage. Les notes restent enregistrées sur 100."
+      "scopeAll": "Toutes"
     },
     "kind": {
       "log": "Note de carnet",
@@ -439,7 +370,6 @@
     },
     "entry": {
       "smokedOn": "Fumé le",
-      "writtenOn": "Écrit le",
       "edited": "modifié",
       "noScore": "Sans note",
       "blind": "Dégusté à l'aveugle",
@@ -479,7 +409,7 @@
       "legend": "Qui peut lire cette entrée",
       "hint": "Le choix se fait entrée par entrée, et se change à tout moment.",
       "private": "Moi seul",
-      "privateHint": "Personne d'autre ne la voit. C'est le réglage par défaut.",
+      "privateHint": "Personne d'autre ne la voit. C'est le défaut du carnet.",
       "shared": "Des personnes que je nomme",
       "sharedHint": "Vous choisissez les membres, un par un. Eux ne peuvent pas la repartager.",
       "sharedPending": "Enregistrez d'abord l'entrée : les destinataires se nomment ensuite, depuis l'entrée elle-même.",
@@ -490,25 +420,14 @@
       "public": "Tout le monde",
       "publicHint": "Visible sur la fiche du cigare, y compris d'un visiteur non connecté.",
       "publicCounts": "Seules les entrées publiques entrent dans la moyenne d'un cigare.",
-      "currentPrivate": "Lisible de vous seul",
-      "currentShared": "Lisible de {count} personne(s) que vous avez nommée(s)",
-      "currentFollowers": "Ouverte à vos abonnés",
-      "currentPublic": "Publique"
+      "currentShared": "Lisible de {count} personne(s) que vous avez nommée(s)"
     },
     "form": {
-      "logTitle": "Noter ce cigare",
-      "logLede": "Une note, un mot, ou les deux. C'est le geste quotidien du carnet ; la dégustation en trois tiers est ailleurs.",
       "smokedOn": "Fumé le",
-      "smokedOnHint": "Le jour où vous l'avez fumé, qui n'est pas forcément aujourd'hui.",
-      "score": "Note sur 100",
-      "scoreHint": "Facultative si vous écrivez quelque chose.",
-      "scorePlaceholder": "0 à 100",
       "body": "Ce que vous en retenez",
       "bodyHint": "4 000 caractères au plus. Facultatif si vous mettez une note.",
       "submit": "Enregistrer dans mon carnet",
       "saved": "Entrée enregistrée.",
-      "savedSeeIt": "Voir dans mon carnet",
-      "tastingLink": "Faire une dégustation complète",
       "signInTitle": "Connectez-vous pour tenir un carnet",
       "signInBody": "Le carnet est personnel : il demande un compte. Ce que vous y écrivez reste privé par défaut.",
       "signInAction": "Se connecter"
@@ -571,7 +490,7 @@
       "notAllowed": "Votre compte ne permet pas cette action.",
       "notFound": "Cette entrée n'existe pas, ou ne vous est pas ouverte.",
       "emptyLog": "Une entrée de carnet demande au moins une note ou un commentaire.",
-      "scoreRange": "La note va de 0 à 100.",
+      "scoreRange": "La note va de 1 à 5 bagues.",
       "bodyTooLong": "4 000 caractères au plus.",
       "pairingTooLong": "500 caractères au plus.",
       "boxCodeTooLong": "40 caractères au plus.",
@@ -586,8 +505,15 @@
       "dateFuture": "On ne note pas un cigare qu'on n'a pas encore fumé.",
       "shareSelf": "Vous ne pouvez pas vous nommer vous-même.",
       "shareUnknown": "Ce membre n'a pas pu être nommé.",
-      "shareDuplicate": "Cette personne est déjà nommée.",
-      "draftCigar": "Ce cigare n'accepte pas d'entrée."
+      "shareDuplicate": "Cette personne est déjà nommée."
+    },
+    "rings": {
+      "of": "{value} bagues sur {max}",
+      "pickOne": "1 bague",
+      "pickMany": "{value} bagues sur {max}",
+      "none": "Pas de note",
+      "label": "Votre note",
+      "unit": "bagues"
     }
   },
   "cigarStats": {
@@ -601,7 +527,7 @@
     "recent": "Sur 90 jours",
     "recentCount": "{count} note(s)",
     "recentNone": "Aucune note sur les 90 derniers jours.",
-    "distribution": "Répartition",
+    "distribution": "Répartition en bagues",
     "lastReview": "Dernière note le {date}",
     "onlyPublic": "Ne comptent ici que les entrées publiques.",
     "entriesTitle": "Entrées de carnet",
@@ -616,7 +542,9 @@
     "entriesCount": "{count} · les publiques, et les vôtres",
     "entriesCountOne": "1 · la vôtre, ou une publique",
     "hint": "Moyenne bayésienne : un cigare noté une seule fois ne domine pas un cigare noté trente fois. Ne comptent ici que les entrées publiques.",
-    "lastReviewLabel": "Dernière note"
+    "lastReviewLabel": "Dernière note",
+    "bandOne": "1 bague",
+    "bandMany": "{count} bagues"
   },
   "moderation": {
     "report": {
@@ -627,7 +555,6 @@
       "triggerProfile": "Signaler ce profil",
       "triggerMessage": "Signaler ce message",
       "triggerProduct": "Signaler ce produit",
-      "triggerVendor": "Signaler cette boutique",
       "title": "Signaler ce contenu",
       "lede": "Dites ce qui pose problème. Un modérateur examine chaque signalement sous {hours} heures.",
       "reasonLabel": "Motif",
@@ -686,7 +613,7 @@
         "public.venues": "Lieu",
         "public.venue_reviews": "Avis de lieu",
         "shop.products": "Produit de la boutique",
-        "shop.vendors": "Vitrine de vendeur"
+        "shop.vendors": "Partenaire de la boutique"
       },
       "case": {
         "eyebrow": "Dossier",
@@ -773,14 +700,14 @@
       "flagsLink": "Régler les drapeaux",
       "shopLink": "Alimenter le catalogue",
       "shopTitle": "La boutique",
-      "shopLede": "L’état de la marketplace d’un coup d’œil : le drapeau, la file de relecture, les vendeurs. Tout se gère depuis les deux écrans ci-dessous.",
+      "shopLede": "L’état de la boutique d’un coup d’œil : le drapeau, la file de relecture, les partenaires. Tout se gère depuis les deux écrans ci-dessous.",
       "shopFlagOpen": "Boutique ouverte au public",
       "shopFlagClosed": "Boutique fermée — tout /boutique répond 404",
       "shopFlagLink": "Basculer depuis les drapeaux",
       "shopQueueLabel": "produits soumis, en attente de relecture",
       "shopQueueLink": "Relire le catalogue",
-      "shopVendorsLabel": "vendeurs — {active} actifs · {pending} en attente · {suspended} suspendus",
-      "shopVendorsLink": "Gérer les vendeurs",
+      "shopVendorsLabel": "partenaires — {active} en cours · {pending} à confirmer · {suspended} arrêtés",
+      "shopVendorsLink": "Gérer les partenaires",
       "shopSeePublic": "Voir la boutique publique",
       "shopCatalogueLabel": "produits au catalogue, dont {published} publiés"
     },
@@ -827,8 +754,8 @@
       },
       "shop_enabled": {
         "label": "La boutique publique",
-        "description": "Toute la section /boutique : recherche, fiches produit et vitrines de vendeurs. Fermé jusqu'à l'ouverture commerciale (ADR 0016).",
-        "warning": "L'ouvrir est le geste d'ouverture commerciale : les vitrines deviennent visibles de tout visiteur majeur, sans caisse tant que les clés de paiement n'existent pas."
+        "description": "Toute la section /boutique : recherche, fiches produit et tunnel d’achat de démonstration. La marketplace a été retirée le 12 septembre 2026 (migration 0034) : il n’y a plus de vitrine de vendeur, nous revendons ce que nous achetons.",
+        "warning": "L'ouvrir est le geste d'ouverture commerciale : le catalogue devient visible de tout visiteur, sans caisse tant que les clés Stripe manquent."
       }
     },
     "accounts": {
@@ -847,7 +774,12 @@
       "openProfile": "Voir le profil",
       "emptyTitle": "Aucun compte ne correspond",
       "emptyBody": "La recherche porte sur le pseudo et le nom affiché.",
-      "countNote": "Les {count} comptes les plus récents. Affinez par la recherche au-delà."
+      "countNote": "Les {count} comptes les plus récents. Affinez par la recherche au-delà.",
+      "invitationsTitle": "Invitations",
+      "invitationsLede": "Ces adresses recevront leur rôle à leur première connexion — un lien magique à leur e-mail suffit. Promouvoir un compte qui existe déjà se fait depuis son profil.",
+      "invitationsPending": "En attente",
+      "invitationsClaimed": "Utilisée le {date}",
+      "invitationsEmpty": "Aucune invitation en attente."
     },
     "sheets": {
       "title": "La relecture des fiches",
@@ -897,15 +829,13 @@
       "gammeDepubliee": "Gamme dépubliée. Les fiches déjà rattachées ne l'affichent plus.",
       "gammeSupprimee": "Gamme supprimée. Les fiches rattachées ont été détachées.",
       "refus": "La base a refusé ce geste : il demande un rôle que ce compte n'a pas.",
-      "produitPublie": "Produit publié. Il sera au rayon le jour où la boutique ouvre.",
+      "produitPublie": "Produit publié. Il est au rayon public.",
       "produitDepublie": "Produit dépublié, revenu en brouillon.",
       "produitArchive": "Produit archivé.",
       "produitSupprime": "Produit supprimé, image comprise.",
-      "produitRefuse": "Produit refusé, motif transmis au vendeur.",
-      "vendeurCree": "Boutique créée, en attente d’activation.",
-      "vendeurActive": "Boutique activée : sa vitrine vivra dès l’ouverture de la boutique publique.",
-      "vendeurSuspendu": "Boutique suspendue : vitrine et produits retirés.",
-      "compteRattache": "Compte rattaché à la boutique.",
+      "produitRefuse": "Produit refusé, motif consigné sur le brouillon.",
+      "vendeurActive": "Partenaire confirmé.",
+      "vendeurSuspendu": "Partenaire arrêté. Les produits déjà achetés restent en vente : le stock est à nous.",
       "vendeurSupprime": "Boutique supprimée."
     },
     "errors": {
@@ -927,15 +857,13 @@
       "brandLen": "La marque fait entre 2 et 80 caractères.",
       "vendorNameNeeded": "Une boutique demande un nom avec au moins une lettre ou un chiffre.",
       "vendorExists": "Une boutique porte déjà ce nom — son adresse serait la même.",
-      "handleUnknown": "Ce pseudo n'existe pas, ou son profil n'est pas visible.",
-      "handleTaken": "Ce compte gère déjà une autre boutique : une seule vitrine par compte (ADR 0016).",
-      "refuseNoteNeeded": "Un refus se motive : le vendeur doit savoir quoi corriger.",
-      "vendorNeeded": "Choisissez le vendeur qui porte ce produit.",
+      "refuseNoteNeeded": "Un refus se motive : le motif reste sur le brouillon.",
+      "vendorNeeded": "Choisissez le partenaire à qui cet article a été acheté.",
       "vendorHasProducts": "Cette boutique a encore des produits : suspendre est le verbe normal, supprimer est le geste d'une boutique vide."
     },
     "shop": {
       "title": "Le catalogue de la boutique",
-      "lede": "Des accessoires, rien d'autre : la catégorie fermée est la première barrière du §2, le contrôle lexical la seconde — un produit qui nomme le tabac est refusé à l'écran et par la base. Un produit naît en brouillon ; « publié » veut dire prêt pour l'ouverture, la boutique publique arrivant avec le paiement.",
+      "lede": "Des accessoires, rien d'autre : la catégorie fermée est la première barrière du §2, le contrôle lexical la seconde — un produit qui nomme le tabac est refusé à l'écran et par la base. Un produit naît en brouillon ; « publié » le met au rayon public immédiatement — la boutique est ouverte, seul le paiement est de démonstration.",
       "createTitle": "Nouveau produit",
       "editTitle": "Modifier le produit",
       "closePanel": "Fermer",
@@ -962,7 +890,7 @@
       "statusArchived": "Archivé",
       "listTitle": "Les produits",
       "emptyTitle": "Le catalogue est vide",
-      "emptyBody": "Le premier produit se crée ci-dessus : un titre, une catégorie, un prix. La boutique publique n'ouvre qu'avec le paiement — rien de ce que vous préparez ici n'est encore visible.",
+      "emptyBody": "Le premier produit se crée ci-dessus : un titre, une catégorie, un prix. Un produit publié est au rayon aussitôt : la boutique est ouverte au public, et seul le paiement est de démonstration.",
       "noImage": "Sans image",
       "categories": {
         "coupe": "Coupe-cigares",
@@ -976,64 +904,28 @@
         "entretien": "Entretien",
         "autre": "Autres accessoires"
       },
-      "vendorLabel": "Vendeur",
-      "vendorHint": "La boutique qui vend. La maison est le premier vendeur ; les partenaires se créent dans « Les vendeurs ».",
+      "vendorLabel": "Partenaire",
+      "vendorHint": "À qui cet article a été acheté. Facultatif — c’est une information de compta, jamais montrée à un visiteur.",
       "brandLabel": "Marque (fabricant)",
-      "brandHint": "Qui fabrique — facultatif. Le vendeur, lui, est la boutique qui vend : deux questions, deux colonnes.",
+      "brandHint": "Qui fabrique — facultatif. Le partenaire, lui, est celui à qui nous achetons : deux questions, deux colonnes.",
       "queueTitle": "Soumissions à relire",
-      "queueEmpty": "Rien à relire : aucun vendeur n'a soumis de produit. Une soumission arrive ici du plus ancien au plus récent.",
+      "queueEmpty": "Rien à relire : aucun brouillon n'attend. Un brouillon soumis arrive ici du plus ancien au plus récent.",
       "queueSubmittedOn": "Soumis le {date}",
       "refuse": "Refuser",
       "refuseNoteLabel": "Motif du refus",
-      "refuseNoteHint": "Le vendeur le lit sur son brouillon. Un refus sans motif est une porte qui claque.",
+      "refuseNoteHint": "Le motif reste sur le brouillon, pour savoir quoi corriger.",
       "statusSubmitted": "Soumis à relecture",
-      "vendorsLink": "Les vendeurs",
-      "vendorsLede": "Créer une boutique partenaire, rattacher un compte, activer, suspendre.",
+      "vendorsLink": "Les partenaires",
+      "vendorsLede": "Ceux à qui nous achetons. Ni compte, ni vitrine : la boutique revend.",
       "reviewNotePrefix": "Motif du refus",
-      "seePublic": "Voir la boutique publique"
-    },
-    "vendors": {
-      "title": "Les vendeurs",
-      "lede": "L'entrée est humaine (ADR 0016) : pas d'inscription libre — une boutique se crée ici, se rattache à un compte, et s'active après vérification. Suspendre une boutique retire sa vitrine et ses produits de la boutique publique, en un geste.",
-      "createTitle": "Nouvelle boutique",
-      "nameLabel": "Nom de la boutique",
-      "ownerLabel": "Pseudo du gestionnaire (facultatif)",
-      "ownerHint": "Le compte qui gérera cette vitrine depuis son espace vendeur. Il se rattache aussi plus tard.",
-      "create": "Créer (en attente)",
-      "created": "Boutique créée, en attente d’activation.",
-      "listTitle": "Les boutiques",
-      "emptyTitle": "Aucune boutique partenaire",
-      "emptyBody": "La maison est le premier vendeur ; les partenaires se créent ci-dessus, un par un.",
-      "statusPending": "En attente",
-      "statusActive": "Active",
-      "statusSuspended": "Suspendue",
-      "activate": "Activer",
-      "suspend": "Suspendre",
-      "reinstate": "Réactiver",
-      "suspendConfirm": "Suspendre cette boutique ? Sa vitrine et tous ses produits publiés disparaissent de la boutique publique immédiatement. Réversible.",
-      "attachLabel": "Rattacher un compte (pseudo)",
-      "attach": "Rattacher",
-      "ownerNone": "Aucun compte rattaché",
-      "ownerNoneHouse": "La maison — se gère depuis ce back-office, jamais depuis un espace vendeur.",
-      "ownerPrefix": "Gérée par",
-      "traceTitle": "Traçabilité (DSA art. 30)",
-      "traceComplete": "Complète.",
-      "traceMissing": "Manquent : {fields}",
-      "traceHint": "Nom légal, numéro au registre, adresse, contact : exigés avant que le premier contrat se conclue sur la plateforme. La contrainte dure arrive avec la caisse (ADR 0016) ; d'ici là, l'écran dit ce qui manque.",
-      "traceLegalName": "raison sociale",
-      "traceRegistration": "numéro au registre",
-      "traceAddress": "adresse",
-      "traceContactEmail": "courriel de contact",
-      "productsCount": "{n} produit(s)",
-      "shopfrontLink": "Voir la vitrine",
-      "delete": "Supprimer",
-      "deleteConfirm": "Supprimer cette boutique vide ? Une boutique qui a des produits se suspend, elle ne se supprime pas."
+      "seePublic": "Voir la boutique publique",
+      "vendorNone": "Non renseigné"
     },
     "nav": {
       "label": "Navigation de l’administration",
       "dashboard": "Tableau de bord",
       "shop": "Boutique",
-      "vendors": "Vendeurs",
+      "vendors": "Partenaires",
       "flags": "Drapeaux",
       "accounts": "Comptes",
       "sheets": "Fiches",
@@ -1068,15 +960,45 @@
       "sourceNone": "Sans source citée — à vérifier autrement.",
       "approved": "Appliquée à la fiche.",
       "rejected": "Refusée, avec votre mot."
+    },
+    "partners": {
+      "title": "Les partenaires",
+      "lede": "Ceux à qui nous achetons. Un partenaire n’a ni compte ni vitrine : depuis le 12 septembre 2026 la boutique revend, et personne ne vend ici que nous.",
+      "createTitle": "Ajouter un partenaire",
+      "nameLabel": "Nom",
+      "create": "Ajouter",
+      "created": "Partenaire ajouté.",
+      "listTitle": "Les partenaires",
+      "emptyTitle": "Aucun partenaire",
+      "emptyBody": "Ajoutez celui à qui vous achetez : les fiches produit s’y rattachent.",
+      "statusPending": "À confirmer",
+      "statusActive": "En cours",
+      "statusSuspended": "Arrêté",
+      "activate": "Confirmer",
+      "suspend": "Arrêter",
+      "reinstate": "Reprendre",
+      "suspendConfirm": "Arrêter d’acheter chez ce partenaire ? Les produits déjà achetés restent en vente : le stock est à nous.",
+      "traceTitle": "Identité",
+      "traceComplete": "Complète",
+      "traceMissing": "À compléter : {fields}",
+      "traceLegalName": "raison sociale",
+      "traceRegistration": "numéro au registre",
+      "traceAddress": "adresse",
+      "traceContactEmail": "courriel de contact",
+      "productsCount": "{n} produit(s)",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette boutique vide ? Une boutique qui a des produits se suspend, elle ne se supprime pas."
     }
   },
   "aromas": {
     "eyebrow": "Nomenclature",
     "title": "Roue des arômes",
-    "lede": "Le vocabulaire commun de la dégustation : onze familles, et sous chacune les descripteurs qu'un carnet peut employer. Cette liste ne juge pas — elle sert autant à nommer un défaut qu'un plaisir.",
+    "lede": "Onze familles, soixante-seize descripteurs. C’est le vocabulaire d’une dégustation — et la porte d’entrée du référentiel par le goût.",
     "count": "{families} familles, {descriptors} descripteurs",
     "emptyTitle": "La roue n'est pas encore chargée",
-    "emptyBody": "La nomenclature des arômes arrive avec l'amorçage du référentiel."
+    "emptyBody": "La nomenclature des arômes arrive avec l'amorçage du référentiel.",
+    "wheelHint": "Choisissez une famille sur l’anneau extérieur, puis un descripteur : la liste vous mène aux fiches qui le portent.",
+    "listTitle": "Les onze familles"
   },
   "humidor": {
     "eyebrow": "Cave",
@@ -1106,7 +1028,6 @@
     "delete": "Supprimer cette cave",
     "deleteConfirm": "Supprimer cette cave ? Ses lots, son grand livre et ses relevés partent avec elle. Vos entrées de carnet, elles, restent.",
     "open": "Ouvrir",
-    "backToHumidor": "Retour à la cave",
     "countOne": "1 cave",
     "countMany": "{count} caves",
     "totalCigars": "cigares en cave",
@@ -1115,11 +1036,6 @@
     "fillNoCapacity": "{count} cigares",
     "lotsTitle": "Inventaire",
     "lotsLede": "Un lot par achat : deux boîtes du même cigare n'ont ni le même âge ni le même prix.",
-    "colCigar": "Cigare",
-    "colQty": "Reste",
-    "colAge": "En cave depuis",
-    "colValue": "Valeur",
-    "colPosition": "Emplacement",
     "ageUnknown": "Date inconnue",
     "ageDays": "{count} j",
     "ageMonths": "{count} mois",
@@ -1128,7 +1044,6 @@
     "maturitySettling": "Se repose",
     "maturityReady": "Prête",
     "maturityMature": "Mature",
-    "maturityHint": "Repère unique pour tous les cigares, faute d'une courbe par famille : le référentiel n'en porte pas, et l'inventer serait la déguiser en mesure.",
     "rotationFlag": "À faire tourner",
     "rotationHint": "En cave depuis plus de dix-huit mois et jamais entamée.",
     "emptyLot": "Épuisé",
@@ -1154,22 +1069,19 @@
     "add": "Ranger dans la cave",
     "added": "Rangé dans votre cave.",
     "inHumidor": "Dans votre cave",
-    "inHumidorCount": "Vous en avez {count} en cave.",
-    "inHumidorNone": "Vous n'en avez pas en cave.",
     "putAway": "Mettre en cave",
     "smokeTitle": "J'en fume un",
     "smokeLede": "Le stock baisse et l'entrée de carnet s'écrit dans le même mouvement. Vous pouvez ne rien noter : l'événement suffit à dire que vous l'avez fumé.",
     "smokeLot": "Depuis quel lot",
     "smokeLotOption": "{cigar} — {count} restant(s)",
     "smokeDate": "Fumé le",
-    "smokeScore": "Note sur 100",
+    "smokeScore": "Votre note",
     "smokeBody": "Un mot ?",
     "smokeBodyPlaceholder": "Facultatif. Sans note ni mot, rien n'entre au carnet.",
     "smoke": "J'en fume un",
     "smokeDone": "Décompté de votre cave.",
     "smokeDoneWithEntry": "Décompté, et noté au carnet.",
     "openEntry": "Ouvrir l'entrée",
-    "moveTitle": "Déplacer",
     "moveTo": "Vers",
     "move": "Déplacer",
     "moved": "Lot déplacé.",
@@ -1184,7 +1096,6 @@
     "eventRecord": "Enregistrer le mouvement",
     "eventRecorded": "Mouvement enregistré.",
     "ledgerTitle": "Grand livre",
-    "ledgerLede": "Tout ce qui est entré et sorti de ce lot, dans l'ordre.",
     "ledgerEmpty": "Rien n'est encore sorti de ce lot.",
     "ledgerAdd": "Entrée en cave",
     "ledgerSmoke": "Fumé",
@@ -1200,7 +1111,6 @@
     "tempC": "Température (°C)",
     "addReading": "Relever",
     "readingAdded": "Relevé enregistré.",
-    "deleteReading": "Retirer",
     "readingDrift": "Écart de {value} point(s) avec la cible.",
     "csvTitle": "Import et export",
     "csvLede": "Le fichier nomme chaque cigare par son identifiant d'URL, pas par un numéro interne : on doit pouvoir le relire ailleurs qu'ici.",
@@ -1225,7 +1135,7 @@
       "boxCodeTooLong": "Le code de boîte est trop long (40 caractères au plus).",
       "positionTooLong": "L'emplacement est trop long (60 caractères au plus).",
       "notesTooLong": "Ces notes sont trop longues (2 000 caractères au plus).",
-      "scoreRange": "La note se donne entre 0 et 100.",
+      "scoreRange": "La note se donne de 1 à 5 bagues.",
       "bodyTooLong": "Ce commentaire est trop long (4 000 caractères au plus).",
       "dateInvalid": "Cette date n'est pas lisible.",
       "dateFuture": "Cette date est dans le futur.",
@@ -1258,9 +1168,8 @@
     "tastingsCount": "dégustations",
     "logsCount": "notes",
     "meanScore": "Note moyenne",
-    "meanScoreHint": "Sur vos entrées notées, toutes portées confondues.",
+    "meanScoreHint": "Sur vos entrées notées, en bagues, toutes portées confondues.",
     "noScore": "Aucune note pour l'instant",
-    "smokedTitle": "Ce qui est sorti de la cave",
     "smokedCount": "cigares fumés",
     "smokedHint": "Comptés depuis le grand livre, donc y compris ceux que vous n'avez pas notés.",
     "rhythmTitle": "Le rythme",
@@ -1302,10 +1211,6 @@
     "roleHint": "Le rôle et la réputation ne se modifient pas d'ici, ni d'ailleurs : ils sont hors de tout droit d'écriture client.",
     "preferencesTitle": "Préférences d'affichage",
     "preferencesLede": "Comment les chiffres vous sont montrés. Rien de ce qui suit ne change ce qui est enregistré.",
-    "scoreScale": "Échelle des notes",
-    "scoreScaleHint": "Les notes sont enregistrées sur 100 ; l'échelle est une préférence d'affichage, jamais une conversion au stockage.",
-    "hundred": "Sur 100",
-    "twenty": "Sur 20",
     "lengthUnit": "Unité de longueur",
     "mm": "Millimètres",
     "inch": "Pouces",
@@ -1314,7 +1219,7 @@
     "privacyTitle": "Confidentialité",
     "privacyLede": "Ce que les autres membres voient de vous, sur votre profil public. Les trois sont honorés depuis P3 ; ce qu'ils font n'est pas la même chose, et c'est dit sous chacun.",
     "showHumidor": "Montrer ma cave",
-    "showHumidorHint": "Décoché par défaut, et le seul des trois à l'être : ce qu'on possède n'est pas du même ordre que ce qu'on a pensé. C'est aussi le seul qui soit un **droit** : sans lui, votre cave est illisible d'un tiers, par n'importe quel chemin. Ce qui est montré, c'est ce que la cave contient et depuis quand — jamais ce qu'elle a coûté.",
+    "showHumidorHint": "Décoché par défaut, et le seul des trois à l'être : ce qu'on possède n'est pas du même ordre que ce qu'on a pensé. C'est aussi le seul qui soit un droit : sans lui, votre cave est illisible d'un tiers, par n'importe quel chemin. Ce qui est montré, c'est ce que la cave contient et depuis quand — jamais ce qu'elle a coûté.",
     "showReviews": "Montrer mes entrées publiques",
     "showReviewsHint": "Si vous le décochez, votre profil cesse de lister vos entrées publiques. Elles restent publiques : une entrée « Tout le monde » reste sur la fiche du cigare et dans sa moyenne. C'est l'affichage du profil que ce réglage décide, pas la portée de l'entrée.",
     "showCountry": "Montrer mon pays",
@@ -1363,8 +1268,7 @@
       "notAllowed": "Cette modification vous a été refusée.",
       "notStored": "Le réglage n'a pas été enregistré.",
       "unknown": "Cette action n'a pas abouti."
-    },
-    "scaleChange": "Changer"
+    }
   },
   "boxCodes": {
     "eyebrow": "Codes de boîte",
@@ -1389,11 +1293,8 @@
     "emptyBody": "Tapez-le ci-dessus. En attendant, la table complète est en dessous : douze mois et six sigles d'usine, avec ce que nous savons de chacun.",
     "tableTitle": "La table, en entier",
     "tableLede": "Dix-huit lignes, dont la provenance est écrite dans le dépôt. Les douze mois sont sûrs ; les six sigles, non.",
-    "colCode": "Code",
-    "colMeaning": "Signification",
     "kindMonth": "Mois",
     "kindFactory": "Usine",
-    "kindYear": "Année",
     "caveatTitle": "Ce que ce décodeur ne fait pas",
     "caveatBody": "Il ne dit pas si une boîte est authentique. Un code lisible et cohérent se contrefait ; un code illisible ne prouve rien non plus. Ce qu'il donne, c'est une date de production probable — ce qui est utile pour savoir depuis quand un module se repose, et rien d'autre.",
     "monthNames": {
@@ -1431,12 +1332,10 @@
     "rowDimensions": "Dimensions",
     "rowShape": "Forme",
     "rowStrength": "Force",
-    "rowWrapper": "Cape",
     "rowWrapperOrigin": "Origine de cape",
     "rowBinderOrigin": "Sous-cape",
     "rowFillerOrigins": "Tripe",
     "rowRelease": "Sortie",
-    "rowReleaseType": "Type",
     "rowPrice": "Prix indicatif",
     "missing": "—",
     "openSheet": "Ouvrir la fiche",
@@ -1508,7 +1407,7 @@
     "staleTitle": "La fiche a bougé depuis",
     "staleBody": "Un ou plusieurs champs ont été modifiés depuis cette proposition : l'accepter écraserait silencieusement ce changement-là. Champs concernés : {fields}.",
     "newSheetTitle": "Proposer une fiche entièrement nouvelle",
-    "newSheetBody": "Pas encore possible, et pour une raison précise : `ref.cigars.created_by` s'écrit à l'insertion et ne se modifie plus, donc une fiche créée par un relecteur porterait son nom et non le vôtre. Dans un référentiel dont toute la valeur est la provenance, c'est un mensonge qu'on n'écrit pas à la légère. Le chemin demande une migration et une décision ; il est signalé, pas oublié.",
+    "newSheetBody": "Pas encore possible, et pour une raison précise : la colonne « créée par » s'écrit à l'insertion et ne se modifie plus, donc une fiche créée par un relecteur porterait son nom et non le vôtre. Dans un référentiel dont toute la valeur est la provenance, c'est un mensonge qu'on n'écrit pas à la légère. Le chemin demande une migration et une décision ; il est signalé, pas oublié.",
     "errors": {
       "nothingChanged": "Vous n'avez rien changé. Modifiez au moins un champ pour proposer quelque chose.",
       "countryFormat": "Un pays s'écrit en deux lettres majuscules — CU, NI, DO.",
@@ -1602,8 +1501,7 @@
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer cette publication ? Les braises et les commentaires disparaissent avec elle.",
       "deleted": "Publication supprimée.",
-      "notFound": "Cette publication n'existe pas, ou ne vous est pas ouverte.",
-      "backToFeed": "Retour au fil"
+      "notFound": "Cette publication n'existe pas, ou ne vous est pas ouverte."
     },
     "ember": {
       "add": "Braise",
@@ -1760,7 +1658,7 @@
     "sensitiveTitle": "Un avertissement qui vient en premier, parce qu'il change tout le reste",
     "sensitiveBody": "Ce que vous fumez, quand, et à quelle fréquence est une habitude de consommation de tabac. Une telle donnée peut être requalifiée en donnée de santé au sens de l'article 9 du RGPD. Nous partons de l'hypothèse qu'elle l'est, et nous construisons en conséquence : chaque entrée de carnet est privée par défaut, la portée se choisit entrée par entrée, et c'est la base de données elle-même qui l'applique — pas l'affichage. Concrètement, une entrée que vous n'avez pas ouverte n'est lisible par personne d'autre que vous, y compris en s'adressant directement à l'interface de programmation.",
     "notebookTitle": "Le carnet — ce que vous fumez",
-    "notebookBody": "Une entrée de carnet enregistre le cigare, la date à laquelle vous l'avez fumé, une note facultative sur 100, un texte libre, et — pour une dégustation structurée — six sous-notes, trois commentaires de tiers, les arômes relevés, la force perçue, la durée, l'accord, le code de boîte, l'année de production, l'année d'achat, l'hygrométrie, et si la dégustation était à l'aveugle.",
+    "notebookBody": "Une entrée de carnet enregistre le cigare, la date à laquelle vous l'avez fumé, une note facultative de une à cinq bagues, un texte libre, et — pour une dégustation structurée — six sous-notes, trois commentaires de tiers, les arômes relevés, la force perçue, la durée, l'accord, le code de boîte, l'année de production, l'année d'achat, l'hygrométrie, et si la dégustation était à l'aveugle.",
     "notebookScope": "Chaque entrée porte l'une de quatre portées : vous seul (le défaut), des personnes que vous nommez une par une, vos abonnés, ou tout le monde. Seules les entrées « tout le monde » entrent dans la moyenne publique d'un cigare — une entrée privée ne déplace aucun chiffre visible, ce qui serait une façon de la déduire.",
     "notebookRevoke": "Retirer un destinataire ferme sa lecture à venir ; cela ne défait pas une lecture passée, et nous ne prétendrons pas le contraire. Le même principe vaut pour la portée « mes abonnés » : l'abonnement est libre sur ce site, donc l'audience d'une entrée déjà écrite peut grandir sans qu'on vous le redemande. Vous pouvez retirer un abonné à tout moment depuis son profil ; sa lecture à venir se referme.",
     "humidorTitle": "La cave — ce que vous possédez",
@@ -1866,12 +1764,13 @@
     }
   },
   "venues": {
-    "eyebrow": "Les lieux",
-    "title": "Les lieux",
-    "lede": "Où fumer, où se faire conseiller. Un annuaire informatif : les avis portent sur l'accueil, le confort et le conseil — jamais sur les produits. Rien ne s'y vend, rien ne s'y recommande.",
-    "sourceNote": "Les civettes viennent du registre officiel des débits de tabac (DGDDI, millésime 2018), sous Licence Ouverte. Le reste vient des membres. Un établissement fermé se signale depuis sa fiche.",
+    "eyebrow": "Partenaires",
+    "title": "Les partenaires",
+    "lede": "Civettes et fumoirs, autour de vous. Ni prix, ni produit du tabac — l’accueil et le conseil, jamais l’étal.",
+    "sourceNote": "Ces adresses viennent du registre officiel des buralistes (douanes, 2018, Licence Ouverte) : {count} lieux dans toute la France métropolitaine. Certains ont fermé depuis — signalez-le et la fiche passera en « fermé ».",
     "types": {
       "civette": "Civette",
+      "fumoir": "Fumoir",
       "cave": "Cave",
       "lounge": "Lounge",
       "hotel": "Hôtel",
@@ -1910,7 +1809,11 @@
       "noMatchBody": "Essayez un autre nom, une autre ville, ou élargissez le rayon. Et si le lieu manque à l'annuaire, proposez-le.",
       "noneNearTitle": "Rien dans ce rayon",
       "noneNearBody": "Aucun lieu publié et géolocalisé dans ce rayon. Élargissez-le, ou proposez le lieu qui manque.",
-      "propose": "Proposer un lieu"
+      "propose": "Proposer un lieu",
+      "locateCoarse": "Votre position n'est connue qu'à {km} km près — c'est trop vague pour chercher autour de vous. Sur un ordinateur, le navigateur déduit souvent la position de la connexion et tombe sur le central de l'opérateur. Autorisez la position précise, ou cherchez par nom de ville.",
+      "browseTitle": "Chercher un lieu",
+      "browseBody": "L’annuaire porte toute la France métropolitaine : cherchez par nom ou par ville, ou laissez votre appareil donner sa position pour voir ce qui est autour.",
+      "sampleTitle": "Quelques lieux"
     },
     "sheet": {
       "pendingBanner": "Proposition en attente de relecture. Elle n'est visible que de vous et des relecteurs.",
@@ -2019,7 +1922,8 @@
       "typeInvalid": "Choisissez un type de lieu.",
       "slugEmpty": "Ce nom ne laisse rien pour une adresse : ajoutez au moins une lettre ou un chiffre.",
       "refused": "La proposition n'a pas pu être envoyée.",
-      "signedOut": "Connectez-vous pour proposer un lieu."
+      "signedOut": "Connectez-vous pour proposer un lieu.",
+      "positionCoarse": "Votre position n'est connue qu'à {km} km près : elle n'a pas été recopiée. Saisissez les coordonnées à la main plutôt que de placer un lieu au mauvais endroit."
     },
     "pending": {
       "titleEditor": "Propositions en attente",
@@ -2178,7 +2082,6 @@
     "inboxFull": "Les {count} conversations les plus récentes. Il y en a peut-être d'autres.",
     "notFound": "Cette conversation n'existe pas",
     "notFoundBody": "Le lien est peut-être ancien, ou elle ne vous concerne pas.",
-    "backToInbox": "Revenir aux messages",
     "withPerson": "Avec {name}",
     "unknownPerson": "Membre",
     "older": "Messages plus anciens",
@@ -2205,70 +2108,6 @@
       "deleted": "Message supprimé."
     }
   },
-  "vendor": {
-    "eyebrow": "Espace vendeur",
-    "title": "Ma boutique",
-    "lede": "Vos produits et votre vitrine. Un produit naît en brouillon, se soumet à relecture, et c'est la maison qui publie — modifier une fiche publiée la retire de la vente et la renvoie en relecture.",
-    "restrictedTitle": "Réservé aux vendeurs partenaires",
-    "restrictedBody": "Cet espace gère une boutique de la marketplace, et aucun compte vendeur n'est rattaché au vôtre. L'entrée est humaine : les boutiques partenaires se créent sur invitation — écrivez-nous depuis la page contact si vous vendez des accessoires du cigare.",
-    "pendingNotice": "Votre boutique est en attente d'activation : vous pouvez préparer votre vitrine et vos fiches, rien n'est visible du public.",
-    "suspendedNotice": "Votre boutique est suspendue : votre vitrine et vos produits ne sont plus visibles, et l'écriture est fermée.",
-    "storefrontTitle": "Ma vitrine",
-    "storefrontLede": "Ce que la page publique de votre boutique montre : le nom, la présentation, le contact, le logo.",
-    "nameLabel": "Nom de la boutique",
-    "descriptionLabel": "Présentation",
-    "contactEmailLabel": "Courriel de contact",
-    "contactPhoneLabel": "Téléphone",
-    "logoLabel": "Logo",
-    "logoHint": "WebP, JPEG, PNG ou AVIF, 8 Mo au plus. Il remplace l’actuel.",
-    "legalTitle": "Identité professionnelle",
-    "legalLede": "Demandée par le règlement européen sur les services numériques (art. 30) avant toute vente sur la plateforme. Renseignez-la dès maintenant : le jour de l'ouverture, elle sera exigée.",
-    "legalNameLabel": "Raison sociale",
-    "registrationLabel": "Numéro au registre (SIREN)",
-    "addressLabel": "Adresse professionnelle",
-    "saved": "Enregistré.",
-    "productsTitle": "Mes produits",
-    "createTitle": "Nouveau produit",
-    "createLede": "Il naît en brouillon, invisible du public. Soumettez-le quand la fiche est prête.",
-    "emptyTitle": "Aucun produit pour l’instant",
-    "emptyBody": "Votre premier produit se crée ci-dessus : une catégorie, un titre, un prix. Il naîtra en brouillon.",
-    "editTitle": "Modifier le produit",
-    "closePanel": "Fermer",
-    "statusDraft": "Brouillon",
-    "statusSubmitted": "Soumis à relecture",
-    "statusPublished": "En vente",
-    "statusArchived": "Archivé",
-    "submit": "Soumettre à relecture",
-    "submitHint": "La maison relit, publie ou refuse avec un motif.",
-    "withdraw": "Retirer la soumission",
-    "retract": "Retirer de la vente",
-    "retractConfirm": "Retirer cette fiche de la vente ? Elle repasse en brouillon et devra être relue pour revenir.",
-    "editWarning": "Modifier une fiche publiée la retire de la vente : l'enregistrement la repasse en brouillon, à re-soumettre.",
-    "delete": "Supprimer",
-    "deleteConfirm": "Supprimer ce brouillon et son image ?",
-    "deleteHint": "Une fiche publiée se retire d’abord de la vente, puis se supprime.",
-    "reviewNotePrefix": "Motif du refus",
-    "edit": "Modifier",
-    "saveDraft": "Enregistrer le brouillon",
-    "create": "Créer en brouillon",
-    "settingsLink": "Gérer ma boutique",
-    "settingsLede": "Votre espace vendeur : vos produits, votre vitrine.",
-    "confirmations": {
-      "produit-soumis": "Fiche soumise à relecture.",
-      "soumission-retiree": "Soumission retirée : la fiche reste en brouillon.",
-      "produit-retire": "Fiche retirée de la vente.",
-      "produit-supprime": "Brouillon supprimé.",
-      "refus": "Ce geste n'a pas abouti — la fiche n'est peut-être plus dans l'état où vous l'avez ouverte."
-    },
-    "errors": {
-      "notVendor": "Aucune boutique n'est rattachée à ce compte.",
-      "suspended": "Votre boutique est suspendue : l’écriture est fermée.",
-      "unknown": "Cette action n'a pas abouti."
-    },
-    "publicStorefront": "Voir ma vitrine publique",
-    "viewShop": "Voir la boutique",
-    "storefrontPendingHint": "La vitrine sera visible quand la boutique sera activée par la maison."
-  },
   "shop": {
     "eyebrow": "Boutique",
     "title": "La boutique",
@@ -2278,7 +2117,6 @@
     "searchSubmit": "Chercher",
     "facetCategory": "Catégorie",
     "facetBrand": "Marque",
-    "facetVendor": "Vendeur",
     "facetPrice": "Prix",
     "facetAll": "Tout",
     "clearFilters": "Effacer les filtres",
@@ -2293,18 +2131,13 @@
     "emptyTitle": "Aucun produit ne correspond",
     "emptyBody": "Élargissez la recherche, ou effacez un filtre : la boutique est encore jeune.",
     "shelfEmptyTitle": "La boutique prépare son ouverture",
-    "shelfEmptyBody": "Les premières vitrines se remplissent. Revenez bientôt.",
-    "soldBy": "Vendu par",
+    "shelfEmptyBody": "Le rayon se remplit. Revenez bientôt.",
     "madeBy": "Marque",
     "inStock": "En stock",
     "outOfStock": "Épuisé",
     "reviewsTitle": "Avis",
     "reviewsEmpty": "Aucun avis. Un avis demandera un achat vérifié — la promesse vaut d’attendre.",
-    "vendorShelfTitle": "Les produits de cette boutique",
-    "vendorShelfEmpty": "Cette vitrine est vide pour l’instant.",
-    "vendorContact": "Contact",
     "reportProductSignedOut": "Un problème avec ce produit ? Connectez-vous pour le signaler.",
-    "reportVendorSignedOut": "Un problème avec cette boutique ? Connectez-vous pour la signaler.",
     "backToShop": "Toute la boutique",
     "noImage": "Sans image",
     "demo": {
@@ -2406,16 +2239,15 @@
     "myEntries": "Votre carnet",
     "myEntriesCount": "{count} entrée(s)",
     "myEntriesNone": "Rien encore sur ce cigare.",
-    "privacyNote": "Tout ce que vous écrivez ici naît privé. La portée se choisit entrée par entrée.",
+    "privacyNote": "La portée se choisit entrée par entrée. Le geste de cette fiche part en public ; une entrée écrite depuis votre carnet part en privé.",
     "signInTitle": "Tenir un carnet demande un compte",
     "signInBody": "Ce que vous avez fumé, quand, la note et le mot. Tout y naît privé ; rien ne s’y partage sans votre geste. La cave et la dégustation complète viennent avec.",
     "signInNote": "La lecture, elle, est ouverte.",
     "thumbBar": "{count} en cave",
     "gesture": {
       "title": "J’en fume un",
-      "lede": "Une date, une note ou un mot. Le reste est facultatif.",
-      "score": "Note /100",
-      "scorePlaceholder": "0 à 100",
+      "lede": "Une note, un mot si vous en avez un. Rien n’est obligatoire.",
+      "score": "Votre note",
       "word": "Un mot",
       "wordPlaceholder": "Ce que vous en retenez.",
       "decrement": "Décompter de ma cave",
@@ -2434,7 +2266,64 @@
       "needsSomething": "Sans lot à décompter, une entrée demande au moins une note ou un mot.",
       "venue": "Où ça",
       "venueNone": "— sans lieu —",
-      "venueHint": "Facultatif, et seulement si vous le dites au fil : nommer où l’on fume est une confidence, jamais une obligation."
+      "venueHint": "Facultatif, et seulement si vous le dites au fil : nommer où l’on fume est une confidence, jamais une obligation.",
+      "more": "Le reste — la date, le fil, le lieu"
     }
+  },
+  "theme": {
+    "toLight": "Passer au thème clair",
+    "toDark": "Passer au thème sombre"
+  },
+  "circle": {
+    "eyebrow": "Le Cercle",
+    "title": "Le Cercle",
+    "lede": "Ce que d'autres ont fumé, et ce qu'ils en ont dit.",
+    "plansTitle": "Deux façons d’en être",
+    "freeName": "Libre",
+    "freePrice": "Gratuit",
+    "freeLine": "Votre carnet, votre cave, le référentiel, la boutique.",
+    "freeIncluded": "Comprise",
+    "paidName": "Le Cercle",
+    "paidPrice": "À l’ouverture",
+    "paidLine": "En plus : les avis des membres, le fil, les clubs, l’agenda, les messages.",
+    "paidSoon": "Bientôt",
+    "plansNote": "Le Cercle n’est pas encore ouvert : la caisse attend ses clés (ADR 0018). D’ici là tout est lisible par tout membre, et rien ne se facture.",
+    "feedTitle": "Le fil",
+    "feedAll": "Tout le fil",
+    "feedEmpty": "Rien n’a encore été publié. La première publication sera la vôtre.",
+    "clubsTitle": "Les clubs",
+    "clubsAll": "Tous les clubs",
+    "clubsEmpty": "Aucun club pour l’instant.",
+    "clubsMembersOne": "1 membre",
+    "clubsMembersMany": "{count} membres",
+    "eventsTitle": "L’agenda",
+    "eventsAll": "Tout l’agenda",
+    "eventsEmpty": "Rien d’annoncé pour les semaines qui viennent.",
+    "membersTitle": "Les membres",
+    "membersAll": "L’annuaire",
+    "messagesTitle": "Les messages",
+    "messagesLine": "Écrire à quelqu’un que vous suivez.",
+    "messagesAll": "Ma boîte",
+    "journalTitle": "Le journal",
+    "journalLine": "La partie du site qui se lit sans compte.",
+    "journalAll": "Lire le journal"
+  },
+  "suggestions": {
+    "eyebrow": "Suggestions",
+    "title": "Cinq bagues à essayer",
+    "lede": "Déduites de ce que vous avez fumé — les arômes que vous citez, la force et le module que vous revenez chercher. Aucune n’est déjà dans votre carnet.",
+    "emptyTitle": "Votre carnet ne dit encore rien",
+    "emptyBody": "Notez un cigare — une note en bagues suffit — et cette page vous répondra avec ce qui lui ressemble.",
+    "reasonAromaOne": "1 arôme en commun avec votre carnet",
+    "reasonAromaMany": "{count} arômes en commun avec votre carnet",
+    "reasonProfile": "Proche de votre force et de votre module habituels",
+    "reasonPopular": "Les mieux notées, en attendant que votre carnet parle",
+    "ambianceCourt": "Une demi-heure — un café, une pause",
+    "ambianceMoyen": "Une heure — après un déjeuner",
+    "ambianceLong": "Une soirée — deux heures, assis",
+    "ambianceUnknown": "Le format n’est pas renseigné : le moment reste à deviner.",
+    "open": "Voir la fiche",
+    "howTitle": "Comment cette liste est faite",
+    "howBody": "Trois mesures, dans cet ordre : les arômes que vos entrées citent (ou, si elles n’en citent aucun, ceux du référentiel sur les fiches que vous avez fumées), votre force moyenne pondérée par vos notes, votre cepo moyen. La note des membres ne sert qu’à départager. Une seule fiche par maison : cinq bagues d’une même maison, c’est une suggestion montrée cinq fois."
   }
 }

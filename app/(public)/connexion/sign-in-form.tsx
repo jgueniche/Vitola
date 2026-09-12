@@ -36,9 +36,7 @@ export function SignInForm({ suite, linkError }: { suite: string; linkError: boo
     return (
       <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border p-6">
         <p className="eyebrow">{m.auth.sent}</p>
-        <p className="text-ink-muted measure text-sm leading-relaxed">
-          {m.auth.sentBody.replace('{email}', state.sentTo)}
-        </p>
+        <p className="lede">{m.auth.sentBody.replace('{email}', state.sentTo)}</p>
       </div>
     )
   }

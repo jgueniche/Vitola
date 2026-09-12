@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ReportDialog } from '@/components/moderation/report-dialog'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
@@ -57,11 +58,7 @@ export default async function ShopProductPage({ params }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
-      <p className="text-sm">
-        <Link href={routes.shop()} className="text-ink-muted underline">
-          {copy.backToShop}
-        </Link>
-      </p>
+      <Breadcrumb trail={[{ label: m.nav.shop.label, href: routes.shop() }]} className="-mb-4" />
 
       <div className="flex flex-col gap-8 md:flex-row">
         <div className="w-full md:w-80 md:shrink-0">
@@ -95,17 +92,13 @@ export default async function ShopProductPage({ params }: Props) {
                   >
                     {product.brand}
                   </Link>
-                  {' · '}
                 </>
               ) : null}
-              {copy.soldBy}{' '}
-              {product.vendor ? (
-                <Link href={routes.shopVendor(product.vendor.slug)} className="text-ink underline">
-                  {product.vendor.name}
-                </Link>
-              ) : (
-                '—'
-              )}
+              {/* Who we bought it from is not on the sheet. Since the shop
+                  resells (migration 0034) the seller is us, and naming a
+                  supplier on a public page is neither required nor ours to
+                  publish — it was a shopfront link when a shopfront existed. */}
+              {CATEGORY_LABELS[product.category] ?? product.category}
             </p>
           </div>
 
@@ -171,7 +164,7 @@ export default async function ShopProductPage({ params }: Props) {
         {/* ADR 0015 D3, unchanged by 0016: nothing can write a review until
             the checkout decides « achat vérifié » — the empty state says so
             rather than hiding the section. */}
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.reviewsEmpty}</p>
+        <p className="lede">{copy.reviewsEmpty}</p>
       </section>
     </main>
   )

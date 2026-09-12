@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { ReportDialog } from '@/components/moderation/report-dialog'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { EntryRow } from '@/components/reviews/entry-row'
 import { PostCard } from '@/components/social/post-card'
 import { Button } from '@/components/ui/button'
@@ -10,7 +11,7 @@ import { countryLabel } from '@/lib/cigar'
 import { formatDate } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { reportSlaHours } from '@/lib/moderation/queries'
-import { listMyNotebook, myScoreScale } from '@/lib/reviews/queries'
+import { listMyNotebook } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import {
   countAcceptedRevisions,
@@ -156,11 +157,10 @@ export default async function MemberPage({
     .order('id', { ascending: false })
     .limit(10)
 
-  const [entries, scale, shelf] = await Promise.all([
+  const [entries, shelf] = await Promise.all([
     privacy.show_reviews
       ? listMyNotebook(profile.id, { visibility: 'public' })
       : Promise.resolve([]),
-    myScoreScale(user.id),
     privacy.show_humidor ? readSharedShelf(profile.id) : Promise.resolve([]),
   ])
 
@@ -229,6 +229,14 @@ export default async function MemberPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[
+          { label: m.nav.circle.label, href: routes.hubCircle() },
+          { label: m.members.title, href: routes.members() },
+        ]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">
@@ -329,7 +337,7 @@ export default async function MemberPage({
         ) : (
           <div className="border-rule border-t">
             {entries.map((entry) => (
-              <EntryRow key={entry.id} entry={entry} scale={scale} showCigar />
+              <EntryRow key={entry.id} entry={entry} showCigar />
             ))}
           </div>
         )}
@@ -342,7 +350,7 @@ export default async function MemberPage({
           <p className="text-ink-faint text-sm">{copy.humidorEmpty}</p>
         ) : (
           <>
-            <p className="text-ink-muted measure text-sm leading-relaxed">{copy.humidorNote}</p>
+            <p className="lede">{copy.humidorNote}</p>
             <ul className="flex flex-col gap-2">
               {shelf.map((lot) => (
                 <li

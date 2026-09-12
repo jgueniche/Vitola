@@ -29,17 +29,18 @@ import { chromium, type Browser, type Page } from '@playwright/test'
 const BASE = process.env.PARCOURS_BASE ?? 'http://127.0.0.1:3100'
 const PASSWORD = process.env.PARCOURS_PASSWORD ?? 'cigardeur'
 const MEMBER = process.env.PARCOURS_USER_ONE ?? 'test1@cigardeur.com'
-const VENDOR = process.env.PARCOURS_VENDOR ?? 'vendeur@cigardeur.com'
 const MODERATOR = process.env.PARCOURS_EDITOR ?? 'jgueniche06@gmail.com'
 
 /** Un gabarit par ligne — pas toutes les pages, tous les écrans. */
 const PUBLIC_PAGES = ['/', '/majorite', '/journal', '/mentions-legales', '/sante']
 const MEMBER_PAGES = [
-  '/decouvrir',
-  '/chez-moi',
+  /* Les trois hubs — /decouvrir, /chez-moi, /autour — ont été retirés le
+     12 septembre 2026 (QA) et répondent 308. Leurs sections s'auditent une par
+     une ci-dessous, plus /suggestions et /aromes, qui sont nouveaux. */
   '/cercle',
-  '/autour',
   '/cigares',
+  '/aromes',
+  '/suggestions',
   '/cigares/undercrown-10-robusto',
   '/cigares/undercrown-10-robusto?geste=fumer',
   '/cigares/undercrown-10-robusto/degustation',
@@ -68,7 +69,7 @@ const MODERATOR_PAGES = [
   '/admin/fiches/relire?source=avec',
   '/admin/gammes',
   '/admin/boutique',
-  '/admin/boutique/vendeurs',
+  '/admin/boutique/partenaires',
 ]
 
 /**
@@ -80,7 +81,9 @@ const MODERATOR_PAGES = [
  * redirigent sans panier, donc `auditFunnel` en construit un d'abord — en
  * passant, sans portail ni compte, parce que c'est l'audience du tunnel.
  */
-const SHOP_PAGES = ['/boutique', '/boutique/panier', '/boutique/vendeurs/comptoir-du-cedre']
+/* `/boutique/vendeurs/<slug>` left the list with the marketplace (migration
+   0034): there is no shopfront to audit, because nobody sells here but us. */
+const SHOP_PAGES = ['/boutique', '/boutique/panier']
 
 type Finding = { page: string; impact: string; id: string; help: string; nodes: number }
 
@@ -249,10 +252,8 @@ async function main(): Promise<void> {
     await signIn(member, MEMBER)
     for (const path of MEMBER_PAGES) await audit(member, path)
 
-    console.log('— l’espace vendeur, en vendeur')
-    const vendor = await (await browser.newContext()).newPage()
-    await signIn(vendor, VENDOR)
-    await audit(vendor, '/vendeur')
+    /* L'espace vendeur a disparu avec la marketplace (migration 0034) : il
+       n'y a plus de compte vendeur à auditer. */
 
     console.log('— la file, en modérateur')
     const moderator = await (await browser.newContext()).newPage()

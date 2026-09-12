@@ -145,6 +145,41 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invitations: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          email: string
+          invited_at: string
+          note: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          email: string
+          invited_at?: string
+          note?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          email?: string
+          invited_at?: string
+          note?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invitations_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -1329,6 +1364,24 @@ export type Database = {
       }
     }
     Functions: {
+      suggest_cigars: {
+        Args: { p_limit?: number }
+        Returns: {
+          cigar_id: string | null
+          slug: string | null
+          commercial_name: string | null
+          brand_name: string | null
+          vitola_name: string | null
+          ring_gauge: number | null
+          length_mm: number | null
+          strength: string | null
+          wrapper_shade: string | null
+          aroma_tags: number[] | null
+          shared_aromas: number | null
+          score: number | null
+          reason: string | null
+        }[]
+      }
       sheet_sources: {
         Args: { p_cigar_id: string }
         Returns: {
@@ -1578,6 +1631,7 @@ export type Database = {
       venue_status: "pending" | "published" | "closed"
       venue_type:
         | "civette"
+        | "fumoir"
         | "cave"
         | "lounge"
         | "hotel"
@@ -2431,6 +2485,7 @@ export const Constants = {
       venue_status: ["pending", "published", "closed"],
       venue_type: [
         "civette",
+        "fumoir",
         "cave",
         "lounge",
         "hotel",

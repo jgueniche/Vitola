@@ -26,6 +26,10 @@ export const SEGMENTS = {
   tastings: 'degustations',
   humidor: 'cave',
   statistics: 'statistiques',
+  /* Cinq bagues déduites du carnet (QA du 12 septembre 2026). Le segment est
+     au pluriel parce que la page EST la liste : il n'y a pas de suggestion
+     qu'on lise seule, et rien à mettre sous un identifiant. */
+  suggestions: 'suggestions',
   scanner: 'scanner',
   feed: 'fil',
   members: 'membres',
@@ -36,16 +40,16 @@ export const SEGMENTS = {
   venues: 'lieux',
   journal: 'journal',
   shop: 'boutique',
-  /* La vitrine d'un vendeur pend sous la boutique (`/boutique/vendeurs/…`),
-     parce que c'est une entrée de la boutique ; l'espace de GESTION du
-     vendeur, lui, est `/vendeur` — le motif de /moderation : un espace de
-     travail, pas une page de la section publique. */
-  shopVendors: 'vendeurs',
+  /* Les partenaires — ceux à qui l'on ACHÈTE. Sous `/admin` et nulle part
+     ailleurs : depuis le 12 septembre 2026 la boutique revend (migration
+     0034), donc il n'y a plus de vitrine de vendeur sous `/boutique/…` ni
+     d'espace de gestion `/vendeur`. Un fournisseur est une information de
+     compta, pas une page du site. */
+  adminShopPartners: 'partenaires',
   shopCart: 'panier',
   shopCheckout: 'commande',
   shopCheckoutPayment: 'paiement',
   shopCheckoutDone: 'confirmation',
-  vendorSpace: 'vendeur',
   settings: 'parametres',
   moderation: 'moderation',
   hubDiscover: 'decouvrir',
@@ -111,6 +115,7 @@ export const routes = {
   humidorDetail: (id: string) => `/${SEGMENTS.humidor}/${id}`,
   humidorExport: () => `/${SEGMENTS.humidor}/export`,
   statistics: () => `/${SEGMENTS.statistics}`,
+  suggestions: () => `/${SEGMENTS.suggestions}`,
 
   /* The feed is one page with two tabs, and the tab is a query parameter rather
      than a segment: `/fil?onglet=decouverte` keeps the keyset cursor and the
@@ -152,12 +157,11 @@ export const routes = {
   venuePropose: () => `/${SEGMENTS.venues}/proposer`,
   shop: () => `/${SEGMENTS.shop}`,
   /* Un produit se lit par son slug, comme un lieu ou un club : le nom d'un
-     accessoire est durable et son adresse se partage. Le segment `vendeurs`
-     vit ENTRE la boutique et le slug pour que les deux familles d'adresses ne
-     puissent pas se marcher dessus — un produit nommé « vendeurs » garderait
-     son adresse sous /boutique/vendeurs/… : impossible, le segment est pris. */
+     accessoire est durable et son adresse se partage. Les segments statiques
+     du tunnel (`panier`, `commande`) vivent ENTRE la boutique et le slug pour
+     que les deux familles d'adresses ne puissent pas se marcher dessus — un
+     produit nommé « panier » ne peut pas voler cette adresse. */
   shopProduct: (slug: string) => `/${SEGMENTS.shop}/${slug}`,
-  shopVendor: (slug: string) => `/${SEGMENTS.shop}/${SEGMENTS.shopVendors}/${slug}`,
   /* Le tunnel d'achat pend sous la boutique, en segments statiques — le motif
      de `vendeurs` : un produit nommé « panier » ou « commande » ne peut pas
      voler ces adresses, le segment est pris avant le slug dynamique. */
@@ -166,7 +170,6 @@ export const routes = {
   shopCheckoutPayment: () =>
     `/${SEGMENTS.shop}/${SEGMENTS.shopCheckout}/${SEGMENTS.shopCheckoutPayment}`,
   shopCheckoutDone: () => `/${SEGMENTS.shop}/${SEGMENTS.shopCheckout}/${SEGMENTS.shopCheckoutDone}`,
-  vendorSpace: () => `/${SEGMENTS.vendorSpace}`,
   settings: () => `/${SEGMENTS.settings}`,
   moderation: () => `/${SEGMENTS.moderation}`,
   moderationReport: (id: string) => `/${SEGMENTS.moderation}/${id}`,
@@ -186,7 +189,7 @@ export const routes = {
   adminSheetsReview: () => `/${SEGMENTS.admin}/${SEGMENTS.adminSheets}/${SEGMENTS.review}`,
   adminLines: () => `/${SEGMENTS.admin}/${SEGMENTS.adminLines}`,
   adminShop: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}`,
-  adminShopVendors: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}/${SEGMENTS.shopVendors}`,
+  adminShopPartners: () => `/${SEGMENTS.admin}/${SEGMENTS.adminShop}/${SEGMENTS.adminShopPartners}`,
 
   legalNotice: () => `/${SEGMENTS.legalNotice}`,
   privacy: () => `/${SEGMENTS.privacy}`,
@@ -273,8 +276,8 @@ export function safeSuite(suite: string | null | undefined): string | null {
 
   /* The journal and shop prefixes are public AND worth coming back to: a
      `gated` article sends its reader through the gate (ADR 0012, D3), and the
-     shop sends a signed-out visitor through `/connexion` (the vendor space,
-     an admin checking the shelf) — refusing the return trip would drop them
+     shop sends a signed-out visitor through `/connexion` (an admin checking
+     the shelf) — refusing the return trip would drop them
      on the default page for nothing. Every other public path is still
      refused: bouncing a visitor through the gate toward a page that never
      needed it is the pointless loop this guard exists to cut. */

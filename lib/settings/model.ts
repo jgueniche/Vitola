@@ -12,36 +12,31 @@
  * its input, not its implementation.
  */
 
-import type { ScoreScale } from '@/lib/reviews/model'
 import type { Database } from '@/lib/supabase/database.types'
 
 export type ConsentKind = Database['public']['Enums']['consent_kind']
-export type { ScoreScale }
 
 /* -------------------------------------------------------------------------- */
 /* Preferences — profile_settings.preferences                                 */
 /* -------------------------------------------------------------------------- */
 
 /*
- * `ScoreScale` is `lib/reviews/model.ts`'s, imported rather than redeclared.
- * The notebook is where a scale means something — it renders scores — and two
- * definitions of the same union is how one of them ends up accepting a value
- * the other refuses.
+ * `score_scale` used to live here — the /100 ↔ /20 display choice. It is gone
+ * with migration 0029: the note is read in bands out of five for everybody,
+ * so there is no longer a preference to express. `length_unit` stays, and the
+ * difference is worth naming: the inch is a unit the trade uses, and the note
+ * out of twenty was a taste in display.
  */
-export const SCORE_SCALES = [100, 20] as const satisfies readonly ScoreScale[]
-
 export const LENGTH_UNITS = ['mm', 'in'] as const
 export type LengthUnit = (typeof LENGTH_UNITS)[number]
 
 export type Preferences = {
-  score_scale: ScoreScale
   length_unit: LengthUnit
   email_digest: boolean
 }
 
 /** The column default of migration 0001, restated so a form can start from it. */
 export const DEFAULT_PREFERENCES: Preferences = {
-  score_scale: 100,
   length_unit: 'mm',
   email_digest: false,
 }
@@ -56,12 +51,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
  */
 export function readPreferences(value: unknown): Preferences {
   const raw = isRecord(value) ? value : {}
-  const scale = Number(raw.score_scale)
 
   return {
-    score_scale: (SCORE_SCALES as readonly number[]).includes(scale)
-      ? (scale as ScoreScale)
-      : DEFAULT_PREFERENCES.score_scale,
     length_unit: (LENGTH_UNITS as readonly string[]).includes(String(raw.length_unit))
       ? (raw.length_unit as LengthUnit)
       : DEFAULT_PREFERENCES.length_unit,

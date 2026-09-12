@@ -29,17 +29,28 @@ import {
 
 const SCHEMA = readFileSync(join(process.cwd(), 'docs/phase-0/03-schema-p1.sql'), 'utf8')
 
+/*
+ * `preferences` had its default rewritten by migration 0029, which dropped
+ * `score_scale` from it. The phase-0 schema is the record of what P1 created
+ * and is not edited after the fact, so the authority on THIS default moved to
+ * the migration that last changed it. The privacy default below still reads
+ * from the schema: nothing has touched it.
+ */
+const MIGRATION_0029 = readFileSync(
+  join(process.cwd(), 'supabase/migrations/0029_echelle_de_note_retiree.sql'),
+  'utf8',
+)
+
 describe('the defaults mirror migration 0001', () => {
   it('finds the two column defaults in the schema', () => {
     // Guards the guard: a regex that stops matching would make the assertions
     // below compare a default against itself.
-    expect(SCHEMA).toContain('score_scale')
     expect(SCHEMA).toContain('show_humidor')
   })
 
   it('starts preferences where the column does', () => {
-    const match = /preferences\s+jsonb\s+not null default\s+'([^']+)'/.exec(SCHEMA)
-    expect(match, 'the preferences default is no longer in 0001').not.toBeNull()
+    const match = /set default\s+'([^']+)'::jsonb/.exec(MIGRATION_0029)
+    expect(match, 'the preferences default is no longer set by 0029').not.toBeNull()
     expect(JSON.parse(match![1]!)).toEqual(DEFAULT_PREFERENCES)
   })
 
@@ -57,20 +68,20 @@ describe('the defaults mirror migration 0001', () => {
 
 describe('reading a stored blob', () => {
   it('drops what it does not recognise rather than carrying it forward', () => {
-    const read = readPreferences({ score_scale: 20, length_unit: 'in', couleur: 'bleu' })
-    expect(read).toEqual({ score_scale: 20, length_unit: 'in', email_digest: false })
+    const read = readPreferences({ length_unit: 'in', couleur: 'bleu' })
+    expect(read).toEqual({ length_unit: 'in', email_digest: false })
     expect('couleur' in read).toBe(false)
   })
 
-  it('accepts a scale written as a string, which the CHECK also accepts', () => {
-    // The constraint reads `preferences ->> 'score_scale'`, so both a JSON
-    // number and a JSON string are legitimate rows to find here.
-    expect(readPreferences({ score_scale: '20' }).score_scale).toBe(20)
+  it('ignores a score scale, which migration 0029 retired', () => {
+    // The key survives in old rows: the note is read in bands for everybody
+    // now, so carrying it forward would keep a preference nobody can act on.
+    const read = readPreferences({ score_scale: '20', length_unit: 'mm' })
+    expect('score_scale' in read).toBe(false)
   })
 
-  it('falls back to the trade standard on nonsense', () => {
-    expect(readPreferences({ score_scale: 42 }).score_scale).toBe(100)
-    expect(readPreferences(null).score_scale).toBe(100)
+  it('falls back to the defaults on nonsense', () => {
+    expect(readPreferences(null)).toEqual(DEFAULT_PREFERENCES)
     expect(readPreferences('pas un objet')).toEqual(DEFAULT_PREFERENCES)
     expect(readPreferences([1, 2, 3])).toEqual(DEFAULT_PREFERENCES)
   })

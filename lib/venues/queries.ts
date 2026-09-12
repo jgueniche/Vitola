@@ -109,10 +109,13 @@ function toVenueRow(row: VenueRaw): VenueRow {
  * The directory list — published venues, filtered by what the flag offers,
  * optionally by type and by a text needle on name or city.
  *
- * `ilike` and not the tsvector machinery of `ref.cigars`: two hundred rows of
- * short names do not earn an index of their own, and the needle a person types
- * here is an enseigne or a town, not prose. The day the directory outgrows
- * this, the cigar search is the model to copy.
+ * `ilike` and not the tsvector machinery of `ref.cigars`: the needle a person
+ * types here is an enseigne or a town, not prose. What the day the directory
+ * outgrew two hundred rows actually cost — 12 septembre 2026, 13 482 rows —
+ * was not the machinery but the INDEX: a `%x%` cannot use a B-tree, so the
+ * search became a sequential scan at 45,8 ms per keystroke. Two GIN trigram
+ * indexes (migration 0031) brought it to 4,9 ms on a BitmapOr, and `ilike`
+ * stayed. The cigar search remains the model for the day someone types prose.
  */
 export async function listVenues(options: {
   offeredTypes: readonly VenueType[]
@@ -139,6 +142,28 @@ export async function listVenues(options: {
   const { data, error } = await query
   if (error) throw new Error(`Could not read the venues: ${error.message}`)
   return ((data ?? []) as unknown as VenueRaw[]).map(toVenueRow)
+}
+
+/**
+ * How many venues the directory holds — one head count, no rows.
+ *
+ * Said on the page because it is the page's truth, the way `/cigares` says how
+ * many sheets are documented: 13 482 across 6 739 communes is a different
+ * promise from 200 in ten cities, and a reader who searched their own town and
+ * found nothing should be able to tell which of the two they are looking at.
+ */
+export async function countVenues(offeredTypes: readonly VenueType[]): Promise<number> {
+  const supabase = await createSupabaseServerClient()
+
+  const { count, error } = await supabase
+    .from('venues')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'published')
+    .in('type', [...offeredTypes])
+
+  /* A count is a sentence on a page, never a reason not to render it. */
+  if (error) return 0
+  return count ?? 0
 }
 
 export type NearbyVenue = {
@@ -253,7 +278,11 @@ export async function listVenueReviews(venueId: string): Promise<VenueReviewRow[
   const byId = new Map((people ?? []).map((person) => [person.id, person as PersonRow]))
   /* `rating` is GENERATED STORED from three NOT NULL columns, so it is never
      null in a row that exists — the generated types cannot know that. */
-  return rows.map((row) => ({ ...row, rating: row.rating ?? 0, author: byId.get(row.user_id) ?? null }))
+  return rows.map((row) => ({
+    ...row,
+    rating: row.rating ?? 0,
+    author: byId.get(row.user_id) ?? null,
+  }))
 }
 
 /**
@@ -330,6 +359,9 @@ export async function venuesByIds(
 ): Promise<Map<string, { name: string; slug: string }>> {
   if (ids.length === 0) return new Map()
   const supabase = await createSupabaseServerClient()
-  const { data } = await supabase.from('venues').select('id, name, slug').in('id', [...ids])
+  const { data } = await supabase
+    .from('venues')
+    .select('id, name, slug')
+    .in('id', [...ids])
   return new Map((data ?? []).map((row) => [row.id, { name: row.name, slug: row.slug }]))
 }

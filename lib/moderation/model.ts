@@ -71,7 +71,7 @@ export function adminActFor(
     }
   }
   if (surface === 'shop.vendors') {
-    return { href: routes.adminShopVendors(), label: m.moderation.desk.case.actAdminVendor }
+    return { href: routes.adminShopPartners(), label: m.moderation.desk.case.actAdminVendor }
   }
   return null
 }

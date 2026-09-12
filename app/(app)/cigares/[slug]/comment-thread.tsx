@@ -54,9 +54,7 @@ export async function CommentThread({ cigarId, slug }: { cigarId: string; slug: 
           </h2>
           {comments.length > 0 ? <p className="text-ink-faint text-sm">{count}</p> : null}
         </div>
-        <p className="text-ink-muted measure text-sm leading-relaxed">
-          {m.comments.discussionLede}
-        </p>
+        <p className="lede">{m.comments.discussionLede}</p>
       </div>
 
       {comments.length === 0 ? (

@@ -192,10 +192,6 @@ const BAND_CENTER = (BAND.left + BAND.right) / 2
 export function CigarPlate() {
   const t = m.landing.plate
   const [emberX, emberY] = rot(BURN, TOP - 4)
-  const [emberDotX, emberDotY] = rot(BURN, BOT + 9)
-  const [bandDotX, bandDotY] = rot(BAND_CENTER, TOP - 9)
-  const [wrapDotX, wrapDotY] = rot(600, BOT + 9)
-  const [vitDotX, vitDotY] = rot(1180, BOT + 9)
 
   return (
     <div className="cigar-plate" role="img" aria-label={t.alt}>
@@ -802,96 +798,6 @@ export function CigarPlate() {
             </g>
           </g>
 
-          {/* --------------------------------------------- the annotations
-              A plate in a reference work: leader lines and measurements. */}
-          <g className="plate-note">
-            <circle
-              cx={f(emberDotX)}
-              cy={f(emberDotY)}
-              r={3}
-              fill="none"
-              style={{ stroke: 'var(--color-accent)' }}
-            />
-            <line
-              x1={f(emberDotX)}
-              y1={f(emberDotY + 4)}
-              x2={f(emberDotX)}
-              y2={412}
-              style={{ stroke: 'var(--color-rule-strong)' }}
-            />
-            <text x={f(emberDotX - 74)} y={440} className="plate-label">
-              {t.emberLabel}
-            </text>
-            <text x={f(emberDotX - 74)} y={462} className="plate-value">
-              {t.emberValue}
-            </text>
-          </g>
-          <g className="plate-note">
-            <circle
-              cx={f(bandDotX)}
-              cy={f(bandDotY)}
-              r={3}
-              fill="none"
-              style={{ stroke: 'var(--color-accent)' }}
-            />
-            <line
-              x1={f(bandDotX)}
-              y1={162}
-              x2={f(bandDotX)}
-              y2={f(bandDotY - 4)}
-              style={{ stroke: 'var(--color-rule-strong)' }}
-            />
-            <text x={f(bandDotX)} y={126} textAnchor="middle" className="plate-label">
-              {t.bandLabel}
-            </text>
-            <text x={f(bandDotX)} y={148} textAnchor="middle" className="plate-value">
-              {t.bandValue}
-            </text>
-          </g>
-          <g className="plate-note">
-            <circle
-              cx={f(wrapDotX)}
-              cy={f(wrapDotY)}
-              r={3}
-              fill="none"
-              style={{ stroke: 'var(--color-accent)' }}
-            />
-            <line
-              x1={f(wrapDotX)}
-              y1={f(wrapDotY + 4)}
-              x2={f(wrapDotX)}
-              y2={412}
-              style={{ stroke: 'var(--color-rule-strong)' }}
-            />
-            <text x={f(wrapDotX)} y={440} textAnchor="middle" className="plate-label">
-              {t.wrapperLabel}
-            </text>
-            <text x={f(wrapDotX)} y={462} textAnchor="middle" className="plate-value">
-              {t.wrapperValue}
-            </text>
-          </g>
-          <g className="plate-note">
-            <circle
-              cx={f(vitDotX)}
-              cy={f(vitDotY)}
-              r={3}
-              fill="none"
-              style={{ stroke: 'var(--color-accent)' }}
-            />
-            <line
-              x1={f(vitDotX)}
-              y1={f(vitDotY + 4)}
-              x2={f(vitDotX)}
-              y2={412}
-              style={{ stroke: 'var(--color-rule-strong)' }}
-            />
-            <text x={f(vitDotX)} y={440} textAnchor="middle" className="plate-label">
-              {t.vitolaLabel}
-            </text>
-            <text x={f(vitDotX)} y={462} textAnchor="middle" className="plate-value">
-              <tspan className="plate-mono">{t.vitolaDimensions}</tspan> — {t.vitolaName}
-            </text>
-          </g>
         </svg>
       </div>
     </div>

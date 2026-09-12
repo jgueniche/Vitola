@@ -35,7 +35,10 @@ const LABELS: Record<ReviewVisibility, { label: string; hint: string }> = {
  *
  * `private` is pre-selected because it is the column default, and ADR 0004 ties
  * that default to art. 25: publishing is a gesture one makes, never one one
- * forgets to undo.
+ * forgets to undo. The sheet's « j'en fume un » is the one caller that passes
+ * `initial="public"`, on the owner's instruction of 12 septembre 2026; the
+ * argument and its cost are written out in `smoke-form.tsx`, not here, because
+ * the default belongs to the form and not to the control.
  *
  * One option carries more than a label, and `SCOPE_TRAITS` is what forces this
  * component to render it: **followers**' audience grows after the choice is
@@ -59,18 +62,26 @@ const LABELS: Record<ReviewVisibility, { label: string; hint: string }> = {
 export function ScopeSelector({
   name = 'visibility',
   value,
+  initial = 'private',
   pendingShares = false,
   sharedCount = 0,
   onChange,
 }: {
   name?: string
   value?: ReviewVisibility
+  /**
+   * Where a CREATION form starts. `private` everywhere except the sheet's one
+   * gesture, which the QA session of 12 septembre 2026 moved to `public` —
+   * see the note in `smoke-form.tsx`, which is where that decision is argued.
+   * An EDITING form passes `value` instead and this is ignored.
+   */
+  initial?: ReviewVisibility
   /** True on a creation form, where no entry id exists to hang shares on. */
   pendingShares?: boolean
   sharedCount?: number
   onChange?: (next: ReviewVisibility) => void
 }) {
-  const [selected, setSelected] = useState<ReviewVisibility>(value ?? 'private')
+  const [selected, setSelected] = useState<ReviewVisibility>(value ?? initial)
   const [seen, setSeen] = useState(value)
 
   /*

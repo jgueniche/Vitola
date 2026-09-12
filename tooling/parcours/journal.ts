@@ -145,7 +145,10 @@ async function main(): Promise<void> {
     console.log('\n— Qui écrit')
     await un.goto(`${BASE}/journal/ecrire`)
     await settle(un)
-    check('un membre lit pourquoi la porte n est pas pour lui', await seen(un, 'réservé aux relecteurs') || await seen(un, 'relecteurs', 3000))
+    check(
+      'un membre lit pourquoi la porte n est pas pour lui',
+      (await seen(un, 'réservé aux relecteurs')) || (await seen(un, 'relecteurs', 3000)),
+    )
 
     await editor.goto(`${BASE}/journal/ecrire`)
     await settle(editor)
@@ -221,8 +224,8 @@ async function main(): Promise<void> {
     await settle(editor)
     check(
       'public + fiche liée : refusé en toutes lettres (ADR 0012, D4)',
-      await seen(editor, 'Retirez d’abord les fiches liées', 8000) ||
-        await seen(editor, 'Retirez d\'abord', 2000),
+      (await seen(editor, 'Retirez d’abord les fiches liées', 8000)) ||
+        (await seen(editor, "Retirez d'abord", 2000)),
       await body(editor),
     )
 
@@ -251,7 +254,9 @@ async function main(): Promise<void> {
       .getByRole('button', { name: /entrer|valider|confirmer/i })
       .first()
       .click()
-    await anon.waitForURL(new RegExp(`/journal/${gatedSlug}`), { timeout: 15000 }).catch(() => undefined)
+    await anon
+      .waitForURL(new RegExp(`/journal/${gatedSlug}`), { timeout: 15000 })
+      .catch(() => undefined)
     await settle(anon)
     check(
       'le portail ramène à l article (safeSuite, préfixe journal)',

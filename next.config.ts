@@ -49,6 +49,21 @@ function assertProductionEnvironment(): void {
     )
   }
 
+  /* The locale is a BUILD choice (lib/i18n): `NEXT_PUBLIC_LOCALE=en pnpm build`
+     is the English site. A typo silently ships the French one, which is the
+     worst of the three outcomes — so a value we do not recognise is a red
+     build. Absent is fine: absent means French, which is the default. */
+  const locale = process.env.NEXT_PUBLIC_LOCALE
+  if (locale !== undefined && locale !== 'fr' && locale !== 'en') {
+    problems.push(
+      [
+        `  NEXT_PUBLIC_LOCALE — « ${locale} » is not a locale this build knows.`,
+        '    Leave it unset for French, or set it to `en`. Anything else would',
+        '    silently ship the French site under another domain.',
+      ].join('\n'),
+    )
+  }
+
   if (problems.length === 0) return
 
   throw new Error(

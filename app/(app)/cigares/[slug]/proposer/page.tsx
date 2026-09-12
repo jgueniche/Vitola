@@ -82,7 +82,7 @@ export default async function ProposePage({ params }: Params) {
           {copy.proposeFor} : {cigar.brands?.name ? `${cigar.brands.name} · ` : ''}
           {cigar.commercial_name}
         </p>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.proposeLede}</p>
+        <p className="lede">{copy.proposeLede}</p>
       </div>
 
       <Band variant="divider" />
@@ -99,7 +99,7 @@ export default async function ProposePage({ params }: Params) {
       ) : (
         <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
           <p className="eyebrow">{copy.closedTitle}</p>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.closedBody}</p>
+          <p className="lede">{copy.closedBody}</p>
         </div>
       )}
 

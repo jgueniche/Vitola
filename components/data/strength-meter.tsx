@@ -1,26 +1,24 @@
+import { m } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
  * Perceived strength, in five notches (§5.1 ref.strength).
  *
  * Hairlines rather than a progress bar: a progress bar implies completion, and
- * a strength is not progress. Values keep the vocabulary of the brief.
+ * a strength is not progress.
+ *
+ * The KEYS keep the vocabulary of the brief — they are the enum's own values,
+ * written in French in `ref.strength`, and they are data. The LABELS are copy
+ * and live in the dictionary: they were five French literals here until the
+ * English build, which is the only place a hard-coded label ever shows itself.
  */
 
 export const STRENGTHS = ['leger', 'leger_moyen', 'moyen', 'moyen_corse', 'corse'] as const
 
 export type Strength = (typeof STRENGTHS)[number]
 
-const STRENGTH_LABELS: Record<Strength, string> = {
-  leger: 'Léger',
-  leger_moyen: 'Léger à moyen',
-  moyen: 'Moyen',
-  moyen_corse: 'Moyen-corsé',
-  corse: 'Corsé',
-}
-
 export function strengthLabel(strength: Strength): string {
-  return STRENGTH_LABELS[strength]
+  return m.referential.strengths[strength]
 }
 
 export function StrengthMeter({
@@ -43,7 +41,10 @@ export function StrengthMeter({
     <div className={cn('flex items-center gap-2', className)}>
       <span
         role="img"
-        aria-label={`Force : ${STRENGTH_LABELS[strength]}, ${activeIndex + 1} sur ${STRENGTHS.length}`}
+        aria-label={m.referential.strengthAria
+          .replace('{label}', strengthLabel(strength))
+          .replace('{index}', String(activeIndex + 1))
+          .replace('{total}', String(STRENGTHS.length))}
         className={cn('flex items-end', size === 'lg' ? 'gap-1' : 'gap-0.5')}
       >
         {STRENGTHS.map((notch, index) => (
@@ -60,7 +61,7 @@ export function StrengthMeter({
         ))}
       </span>
       {showLabel ? (
-        <span className="text-ink-muted text-sm">{STRENGTH_LABELS[strength]}</span>
+        <span className="text-ink-muted text-sm">{strengthLabel(strength)}</span>
       ) : null}
     </div>
   )

@@ -1,3 +1,4 @@
+import { m } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
@@ -20,6 +21,13 @@ export const WRAPPER_SHADES = [
 
 export type WrapperShade = (typeof WRAPPER_SHADES)[number]
 
+/*
+ * These six stay literals where the five strengths became messages, and the
+ * difference is not an oversight: `Colorado maduro` and `Oscuro` are the trade
+ * scale's own Spanish, written the same way in French and in English. A
+ * translated copy of them would be six chances to invent a seventh shade. The
+ * accessible name around them IS copy, and it is a message.
+ */
 const SHADE_LABELS: Record<WrapperShade, string> = {
   claro: 'Claro',
   colorado_claro: 'Colorado claro',
@@ -71,7 +79,10 @@ export function WrapperScale({
     <div className={cn('flex items-center gap-2', className)}>
       <span
         role="img"
-        aria-label={`Cape : ${SHADE_LABELS[shade]}, position ${activeIndex + 1} sur ${WRAPPER_SHADES.length}`}
+        aria-label={m.referential.shadeAria
+          .replace('{label}', SHADE_LABELS[shade])
+          .replace('{index}', String(activeIndex + 1))
+          .replace('{total}', String(WRAPPER_SHADES.length))}
         className={cn('flex items-center', size === 'lg' ? 'gap-1.5' : 'gap-1')}
       >
         {WRAPPER_SHADES.map((step, index) => (

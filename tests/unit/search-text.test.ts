@@ -40,19 +40,13 @@ const DIVERGES_FROM_UNACCENT: ReadonlyArray<readonly [string, string]> = [
 ]
 
 describe('foldAccents', () => {
-  it.each(NON_ASCII_IN_REFERENTIAL)(
-    'folds %s exactly as the database does',
-    (input, expected) => {
-      expect(foldAccents(input)).toBe(expected)
-    },
-  )
+  it.each(NON_ASCII_IN_REFERENTIAL)('folds %s exactly as the database does', (input, expected) => {
+    expect(foldAccents(input)).toBe(expected)
+  })
 
-  it.each(DIVERGES_FROM_UNACCENT)(
-    'leaves %s alone where unaccent() would expand it',
-    (input) => {
-      expect(foldAccents(input)).toBe(input)
-    },
-  )
+  it.each(DIVERGES_FROM_UNACCENT)('leaves %s alone where unaccent() would expand it', (input) => {
+    expect(foldAccents(input)).toBe(input)
+  })
 
   it('folds the brand names that motivated all this', () => {
     expect(foldAccents('Cohíba')).toBe('Cohiba')

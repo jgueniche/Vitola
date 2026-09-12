@@ -36,37 +36,11 @@
   }
 }
 
-/* The annotations are a desktop affordance: on a cropped phone plate the
-   leader lines would point off-frame. */
-.cigar-plate .plate-note {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .cigar-plate .plate-note {
-    display: block;
-  }
-}
-
-/* Type on the plate. Sizes are in drawing units (1440 wide), so they follow
-   the plate: 15 draws at 12px on a 1152px page. */
-.cigar-plate .plate-label {
-  font-family: var(--font-eyebrow);
-  font-size: 15px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  fill: var(--color-ink);
-}
-
-.cigar-plate .plate-value {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  fill: var(--color-ink-muted);
-}
-
-.cigar-plate .plate-mono {
-  font-family: var(--font-mono);
-}
+/* Type on the plate. The four annotated captions were removed on
+   12 septembre 2026 (« enlève les descriptions sous le cigare qui fume ») and
+   with them .plate-note, .plate-label, .plate-value and .plate-mono. What is
+   left is stamped ON the band, which is part of the drawing, not a legend
+   under it. Sizes are in drawing units (1440 wide). */
 
 /* The ink stamped on the band. */
 .cigar-plate .plate-band-mark {

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { EmptyState } from '@/components/layout/empty-state'
 import { formatDateTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
@@ -80,12 +81,18 @@ export default async function ClubPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[
+          { label: m.nav.circle.label, href: routes.hubCircle() },
+          { label: m.clubs.title, href: routes.clubs() },
+        ]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{club.name}</h1>
-        {club.description ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{club.description}</p>
-        ) : null}
+        {club.description ? <p className="lede">{club.description}</p> : null}
         <p className="text-ink-faint text-xs">
           {copy.owner}{' '}
           {owner ? (
@@ -114,7 +121,7 @@ export default async function ClubPage({
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-display-sm">{copy.membersTitle}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.membersLede}</p>
+        <p className="lede">{copy.membersLede}</p>
         <ul className="flex flex-col gap-2">
           {members.map((member) => (
             <MemberRow

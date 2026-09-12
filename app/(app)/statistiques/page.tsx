@@ -5,11 +5,13 @@ import { redirect } from 'next/navigation'
 import { Band } from '@/components/band/band'
 import { Figure, FigureRow } from '@/components/data/figures'
 import { EmptyState } from '@/components/layout/empty-state'
+import { MineTabs } from '@/components/layout/mine-tabs'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/cigar'
-import { formatCount, formatScore } from '@/lib/format'
+import { formatRingValue } from '@/components/data/ring-rating'
+import { formatCount, formatMonthBucket } from '@/lib/format'
 import { m } from '@/lib/i18n'
-import { myScoreScale } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { collectStats, meanScore, monthlyBuckets, rankCigars } from '@/lib/stats/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -18,21 +20,6 @@ import { cn } from '@/lib/utils'
 export const metadata: Metadata = { title: m.statistics.title }
 
 const copy = m.statistics
-
-const MONTHS = [
-  'janv.',
-  'févr.',
-  'mars',
-  'avr.',
-  'mai',
-  'juin',
-  'juil.',
-  'août',
-  'sept.',
-  'oct.',
-  'nov.',
-  'déc.',
-]
 
 /**
  * Mes statistiques — F11, which §9 places at the end of P2.
@@ -56,7 +43,7 @@ export default async function StatisticsPage() {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.statistics())}`)
   }
 
-  const [stats, scale] = await Promise.all([collectStats(user.id), myScoreScale(user.id)])
+  const stats = await collectStats(user.id)
 
   const tastings = stats.entries.filter((entry) => entry.kind === 'tasting').length
   const logs = stats.entries.length - tastings
@@ -77,11 +64,9 @@ export default async function StatisticsPage() {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <MineTabs current="statistics" />
+
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {nothingYet ? (
         <EmptyState
@@ -99,13 +84,13 @@ export default async function StatisticsPage() {
             <Figure value={formatCount(stats.entries.length)} label={copy.entriesCount} />
             <Figure value={formatCount(smoked)} label={copy.smokedCount} />
             <Figure
-              value={mean === null ? '—' : formatScore(mean, scale)}
+              value={mean === null ? '—' : formatRingValue(mean)}
               label={copy.meanScore}
               muted={mean === null}
             />
           </FigureRow>
 
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.smokedHint}</p>
+          <p className="lede">{copy.smokedHint}</p>
 
           {stats.truncated ? <p className="text-ink-faint text-xs">{copy.truncated}</p> : null}
 
@@ -130,7 +115,7 @@ export default async function StatisticsPage() {
             </div>
 
             {active === 0 ? (
-              <p className="text-ink-muted measure text-sm leading-relaxed">{copy.rhythmEmpty}</p>
+              <p className="lede">{copy.rhythmEmpty}</p>
             ) : (
               <>
                 {/*
@@ -141,8 +126,7 @@ export default async function StatisticsPage() {
                 */}
                 <ul className="flex items-end gap-1.5">
                   {buckets.map((bucket) => {
-                    const [year, month] = bucket.month.split('-')
-                    const label = `${MONTHS[Number(month) - 1] ?? month} ${year?.slice(2) ?? ''}`
+                    const label = formatMonthBucket(bucket.month)
                     return (
                       <li key={bucket.month} className="flex flex-1 flex-col items-center gap-1">
                         <span className="text-ink-faint text-xs">{bucket.count || ''}</span>
@@ -176,7 +160,7 @@ export default async function StatisticsPage() {
             </div>
 
             {ranked.length === 0 ? (
-              <p className="text-ink-muted measure text-sm leading-relaxed">{copy.topEmpty}</p>
+              <p className="lede">{copy.topEmpty}</p>
             ) : (
               <ol className="flex flex-col gap-1">
                 {ranked.map((row) => (

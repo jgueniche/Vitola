@@ -189,26 +189,3 @@ export function compactScores(scores: Scores): Scores {
   }
   return out
 }
-
-/* -------------------------------------------------------------------------- */
-/* Display preference                                                          */
-/* -------------------------------------------------------------------------- */
-
-export type ScoreScale = 100 | 20
-
-/**
- * Reads `profile_settings.preferences.score_scale` without trusting it.
- *
- * The column is a free jsonb the member may write; only its `score_scale` key
- * is constrained, and only to the two strings `'100'` and `'20'` — via `->>`,
- * so the value may legitimately arrive as either a JSON number or a JSON string
- * depending on who last wrote it. Both are accepted here. Anything else falls
- * back to 100, which is what §5.4 calls the trade standard.
- */
-export function scoreScaleFromPreferences(preferences: unknown): ScoreScale {
-  if (preferences && typeof preferences === 'object' && 'score_scale' in preferences) {
-    const raw = (preferences as { score_scale?: unknown }).score_scale
-    if (raw === 20 || raw === '20') return 20
-  }
-  return 100
-}

@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { acknowledgeReport } from '@/app/(app)/moderation/actions'
 import { Button } from '@/components/ui/button'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { formatDateTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { moderationConfirmation } from '@/lib/moderation/confirmations'
@@ -75,6 +76,11 @@ export default async function ModerationCasePage({ params, searchParams }: Props
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.moderation.desk.title, href: routes.moderation() }]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.case.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">
@@ -101,9 +107,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
         <h2 className="text-ink text-sm font-medium">{copy.case.reasonLabel}</h2>
         <p className="text-ink text-sm">{reasons[report.reason] ?? report.reason}</p>
         <h2 className="text-ink mt-2 text-sm font-medium">{copy.case.detailLabel}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">
-          {report.detail ?? copy.case.noDetail}
-        </p>
+        <p className="lede">{report.detail ?? copy.case.noDetail}</p>
       </section>
 
       <section className="border-rule flex flex-col gap-2 border-t pt-4">
@@ -152,9 +156,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
           <section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <h2 className="font-display text-display-sm">{copy.case.decideTitle}</h2>
-              <p className="text-ink-muted measure text-sm leading-relaxed">
-                {copy.case.decideLede}
-              </p>
+              <p className="lede">{copy.case.decideLede}</p>
             </div>
             <DecideForm
               reportId={report.id}

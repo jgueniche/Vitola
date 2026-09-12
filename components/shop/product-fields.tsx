@@ -1,6 +1,7 @@
-// The one product form, shared by the admin catalogue and the vendor space
-// (ADR 0016: « réutilise les formulaires du catalogue admin »). Client because
-// its parents are `useActionState` forms; it renders inputs only.
+// The one product form. It was shared with the vendor space (ADR 0016); the
+// marketplace is gone (migration 0034) and the admin catalogue is now its only
+// caller. Client because its parent is a `useActionState` form; it renders
+// inputs only.
 'use client'
 
 import { Input, Label, Select, Textarea } from '@/components/ui/field'
@@ -22,10 +23,11 @@ export type ProductFieldValues = {
 export type VendorChoice = { id: string; name: string }
 
 /**
- * `vendorOptions` renders the seller select — the admin's create form only.
- * The vendor space never shows it: a vendor writes at home, the policy makes
- * anything else a forged POST that writes zero rows. On edit the select is
- * absent everywhere: a product does not change vendor (migration 0022).
+ * `vendorOptions` renders the PARTNER select — who we bought the item from.
+ * Optional in both senses: the caller may omit the prop, and the select
+ * carries an empty option, because `products.vendor_id` became nullable with
+ * migration 0034. An item bought before anyone wrote the partner down is still
+ * an item we sell.
  */
 export function ProductFields({
   product,
@@ -39,7 +41,8 @@ export function ProductFields({
       {vendorOptions ? (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="vendor">{copy.vendorLabel}</Label>
-          <Select id="vendor" name="vendor" defaultValue={vendorOptions[0]?.id ?? ''}>
+          <Select id="vendor" name="vendor" defaultValue="">
+            <option value="">{copy.vendorNone}</option>
             {vendorOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.name}

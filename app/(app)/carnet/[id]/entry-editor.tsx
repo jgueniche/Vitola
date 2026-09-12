@@ -6,6 +6,8 @@
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 
+import { RingRating } from '@/components/data/ring-rating'
+import { RingRatingInput } from '@/components/data/ring-rating-input'
 import { ScopeSelector } from '@/components/reviews/scope-selector'
 import { Button } from '@/components/ui/button'
 import { FieldError, Input, Label, Textarea } from '@/components/ui/field'
@@ -72,27 +74,23 @@ export function EntryEditor({
           <Input id="edit-smoked-on" name="smokedOn" type="date" defaultValue={smokedOn} required />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-score">{copy.form.score}</Label>
-          <Input
-            id="edit-score"
-            name="scoreTotal"
-            type="number"
-            inputMode="decimal"
-            min={REVIEW_LIMITS.scoreMin}
-            max={REVIEW_LIMITS.scoreMax}
-            step={0.1}
-            defaultValue={scoreTotal ?? undefined}
-            /* A tasting's total is the mean of its six criteria and is not
-               typed anywhere — showing it editable here would let one number
-               contradict the six that produced it. */
-            readOnly={kind === 'tasting'}
-            aria-readonly={kind === 'tasting' || undefined}
-          />
-          {kind === 'tasting' ? (
+        {/* A tasting's total is the mean of its six criteria and is not typed
+            anywhere — offering the control here would let one number
+            contradict the six that produced it. So a tasting shows its bands
+            and says why, and a log gets the five-band control. */}
+        {kind === 'tasting' ? (
+          <div className="flex flex-col gap-2">
+            <span className="label">{copy.rings.label}</span>
+            <RingRating score={scoreTotal} size="md" showValue />
             <p className="text-ink-faint text-xs">{m.notebook.tasting.stepScoresHint}</p>
-          ) : null}
-        </div>
+          </div>
+        ) : (
+          <RingRatingInput
+            name="scoreTotal"
+            label={copy.rings.label}
+            initialScore={scoreTotal}
+          />
+        )}
       </div>
 
       <div className="flex flex-col gap-2">

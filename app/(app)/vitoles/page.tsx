@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { RingGauge } from '@/components/data/ring-gauge'
 import { shapeLabel } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
@@ -40,6 +41,11 @@ export default async function VitolasPage() {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.cigars.label, href: routes.cigars() }]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-3">
         <p className="eyebrow">{m.referential.eyebrow}</p>
         <h1 className="font-display text-display-md">{m.referential.vitolasTitle}</h1>

@@ -5,7 +5,7 @@ import { DSA_CONTACT_EMAIL } from '@/lib/compliance/dsa'
 import { m } from '@/lib/i18n'
 import { reportSlaHours } from '@/lib/moderation/queries'
 
-export const metadata: Metadata = { title: 'Mentions légales' }
+export const metadata: Metadata = { title: m.legal.noticeTitle }
 
 /**
  * ADR 0005 makes this page part of the reporting mechanism, not a document
@@ -23,7 +23,7 @@ export default async function Page() {
   const hours = await reportSlaHours()
 
   return (
-    <DocumentPage eyebrow="Informations légales" title={m.legal.noticeTitle}>
+    <DocumentPage eyebrow={m.legal.eyebrow} title={m.legal.noticeTitle}>
       <p>{m.legal.placeholder}</p>
 
       <h2 className="font-display text-ink text-display-sm mt-6">{m.legal.dsaTitle}</h2>

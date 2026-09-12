@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { answerEvent, cancelEvent, withdrawFromEvent } from '@/app/(app)/evenements/actions'
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, formatTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
@@ -77,6 +78,14 @@ export default async function EventPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[
+          { label: m.nav.circle.label, href: routes.hubCircle() },
+          { label: m.events.title, href: routes.events() },
+        ]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{KIND_LABELS[event.kind]}</p>
         <h1 className="font-display text-display-md leading-tight">{event.title}</h1>

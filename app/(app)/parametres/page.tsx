@@ -15,7 +15,6 @@ import {
 } from '@/lib/settings/model'
 import { getAccount } from '@/lib/settings/queries'
 import { hasMinRole } from '@/lib/settings/roles'
-import { getMyVendor } from '@/lib/shop/queries'
 import { relationConfirmation } from '@/lib/social/confirmations'
 import { listBlockedPeople } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -71,11 +70,7 @@ export default async function SettingsPage({
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.settings())}`)
   }
 
-  const [account, blocked, vendor] = await Promise.all([
-    getAccount(user.id),
-    listBlockedPeople(),
-    getMyVendor(user.id),
-  ])
+  const [account, blocked] = await Promise.all([getAccount(user.id), listBlockedPeople()])
   /* `tg_handle_new_user()` creates the profile with the account. Its absence is
      a broken trigger, not an empty state, and a 404 says so loudly. */
   if (!account) notFound()
@@ -89,7 +84,7 @@ export default async function SettingsPage({
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         <p className="text-ink-faint text-xs">
           {copy.memberSince.replace('{date}', formatEffectiveDate(account.created_at.slice(0, 10)))}
           {' · '}
@@ -102,7 +97,7 @@ export default async function SettingsPage({
             under a header that already carried an eyebrow, a title, a lede and
             a line of metadata; the header does not need to explain them, the
             screens behind them do. */}
-        {hasMinRole(account.role, 'moderator') || vendor ? (
+        {hasMinRole(account.role, 'moderator') ? (
           <p className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-sm">
             {hasMinRole(account.role, 'moderator') ? (
               <Link href={routes.moderation()} className="text-ink underline underline-offset-4">
@@ -114,11 +109,6 @@ export default async function SettingsPage({
                 {m.admin.settingsLink}
               </Link>
             ) : null}
-            {vendor ? (
-              <Link href={routes.vendorSpace()} className="text-ink underline underline-offset-4">
-                {m.vendor.settingsLink}
-              </Link>
-            ) : null}
           </p>
         ) : null}
       </div>
@@ -126,7 +116,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.profileTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.profileLede}</p>
+          <p className="lede">{copy.profileLede}</p>
         </div>
         <ProfileForm
           handle={account.handle}
@@ -142,7 +132,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.preferencesTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.preferencesLede}</p>
+          <p className="lede">{copy.preferencesLede}</p>
         </div>
         <PreferencesForm preferences={account.preferences} />
       </section>
@@ -150,7 +140,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.privacyTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.privacyLede}</p>
+          <p className="lede">{copy.privacyLede}</p>
         </div>
         <PrivacyForm privacy={account.privacy} />
         <p className="text-ink-faint measure text-xs leading-relaxed">{copy.privacyNotYet}</p>
@@ -165,7 +155,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.blockedTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.blockedLede}</p>
+          <p className="lede">{copy.blockedLede}</p>
         </div>
 
         {confirmation ? (
@@ -201,15 +191,13 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.consentsTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.consentsLede}</p>
+          <p className="lede">{copy.consentsLede}</p>
         </div>
 
         {account.consents.length === 0 ? (
           <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
             <p className="eyebrow">{copy.consentsEmptyTitle}</p>
-            <p className="text-ink-muted measure text-sm leading-relaxed">
-              {copy.consentsEmptyBody}
-            </p>
+            <p className="lede">{copy.consentsEmptyBody}</p>
           </div>
         ) : (
           <ul className="flex flex-col gap-1">
@@ -269,7 +257,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.gdprTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.gdprLede}</p>
+          <p className="lede">{copy.gdprLede}</p>
         </div>
 
         <div className="flex flex-col gap-2">

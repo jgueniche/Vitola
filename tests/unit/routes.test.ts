@@ -70,7 +70,6 @@ describe('routes', () => {
   it('treats everything under the shop prefix as public, checkout included', () => {
     for (const path of [
       routes.shopProduct('coupe-cigare-guillotine'),
-      routes.shopVendor('comptoir-du-cedre'),
       routes.shopCart(),
       routes.shopCheckout(),
       routes.shopCheckoutPayment(),
@@ -94,9 +93,7 @@ describe('routes', () => {
     expect(isPublicPath('/api/signalements')).toBe(false)
     expect(isApiPath('/api/signalements')).toBe(true)
     expect(safeSuite(routes.shopProduct('coupe-guillotine'))).toBe('/boutique/coupe-guillotine')
-    expect(safeSuite(routes.shopVendor('comptoir-du-cedre'))).toBe(
-      '/boutique/vendeurs/comptoir-du-cedre',
-    )
+    expect(safeSuite(routes.shopCart())).toBe('/boutique/panier')
   })
 
   it('treats every tobacco route as gated', () => {

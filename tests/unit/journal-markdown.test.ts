@@ -14,9 +14,17 @@ import { parseArticle, parseInline, plainText } from '@/lib/journal/markdown'
 describe('structure', () => {
   it('splits headings, paragraphs, lists and quotes', () => {
     const blocks = parseArticle(
-      ['## Titre', '', 'Un paragraphe', 'sur deux lignes.', '', '- un', '- deux', '', '> citée'].join(
-        '\n',
-      ),
+      [
+        '## Titre',
+        '',
+        'Un paragraphe',
+        'sur deux lignes.',
+        '',
+        '- un',
+        '- deux',
+        '',
+        '> citée',
+      ].join('\n'),
     )
     expect(blocks.map((block) => block.kind)).toEqual(['heading', 'paragraph', 'list', 'quote'])
     expect(blocks[1]).toMatchObject({

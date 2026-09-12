@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
 import { formatPrice } from '@/lib/cigar'
@@ -104,10 +105,12 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.humidor.label, href: routes.humidor() }]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
-        <Link href={routes.humidor()} className="eyebrow text-ink-muted hover:text-ink w-fit">
-          {copy.backToHumidor}
-        </Link>
         <h1 className="font-display text-display-md leading-tight">{humidor.name}</h1>
         <p className="text-ink-muted text-sm">
           {humidor.capacity
@@ -131,7 +134,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.lotsTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lotsLede}</p>
+          <p className="lede">{copy.lotsLede}</p>
         </div>
 
         {lots.length === 0 ? (
@@ -200,7 +203,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.addTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.addLede}</p>
+          <p className="lede">{copy.addLede}</p>
         </div>
 
         {/* A GET form, so the search is a URL: no JavaScript, back-button
@@ -273,7 +276,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.readingsTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.readingsLede}</p>
+          <p className="lede">{copy.readingsLede}</p>
         </div>
 
         {latest && humidor.target_rh !== null && latest.rh !== null ? (
@@ -288,7 +291,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
         <ReadingForm humidorId={id} />
 
         {readings.length === 0 ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.readingsEmpty}</p>
+          <p className="lede">{copy.readingsEmpty}</p>
         ) : (
           <ul className="flex flex-col gap-1">
             {readings.map((reading) => (
@@ -316,7 +319,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.csvTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.csvLede}</p>
+          <p className="lede">{copy.csvLede}</p>
         </div>
         <a href={routes.humidorExport()} download className="w-fit">
           <Button variant="secondary">{copy.csvExport}</Button>
@@ -399,16 +402,16 @@ function LotPanel({
       {lot.qty > 0 ? (
         <section className="flex flex-col gap-2">
           <h3 className="text-ink text-sm font-medium">{copy.smokeTitle}</h3>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.smokeLede}</p>
+          <p className="lede">{copy.smokeLede}</p>
           <SmokeForm itemId={lot.id} slug={lot.cigar?.slug ?? null} today={today} max={lot.qty} />
         </section>
       ) : (
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.emptyLotHint}</p>
+        <p className="lede">{copy.emptyLotHint}</p>
       )}
 
       <section className="flex flex-col gap-2">
         <h3 className="text-ink text-sm font-medium">{copy.eventTitle}</h3>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.eventLede}</p>
+        <p className="lede">{copy.eventLede}</p>
         <EventForm itemId={lot.id} humidorId={humidorId} today={today} />
       </section>
 

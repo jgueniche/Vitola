@@ -108,9 +108,10 @@ describe('the bounds mirror migration 0008', () => {
   })
 
   it('caps the notes where humidor_items_notes_len does', () => {
-    const match = /humidor_items_notes_len\s+check \(notes\s+is null or length\(notes\)\s+<= (\d+)\)/.exec(
-      M0008,
-    )
+    const match =
+      /humidor_items_notes_len\s+check \(notes\s+is null or length\(notes\)\s+<= (\d+)\)/.exec(
+        M0008,
+      )
     expect(Number(match?.[1])).toBe(HUMIDOR_LIMITS.notesMax)
   })
 

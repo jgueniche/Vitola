@@ -1,7 +1,7 @@
 # Provenance des données d'amorçage
 
 **Exigé par le §2 du brief.** L'article L341-1 du code de la propriété intellectuelle protège les
-bases de données par un droit *sui generis* : extraire une part substantielle d'une base
+bases de données par un droit _sui generis_ : extraire une part substantielle d'une base
 concurrente est une contrefaçon, indépendamment du droit d'auteur. En cas de contestation, c'est à
 nous de démontrer que nos données n'en proviennent pas. Ce document est cette démonstration.
 
@@ -9,14 +9,14 @@ nous de démontrer que nos données n'en proviennent pas. Ce document est cette 
 
 ## 1. Six sources, six régimes
 
-| Source | Ce qu'elle fournit | Régime |
-|---|---|---|
-| **A — Saisie de mémoire** | Manufactures, marques, vitoles, 123 fiches curées, codes de boîte | À relire (§2) |
-| **B — Arrêté d'homologation des prix (Douane)** | 900 prix de vente au détail, 817 fiches supplémentaires | Donnée publique officielle, exacte à sa date |
-| **C — Sites officiels des fabricants** | Habanos S.A. : confirmation de 13 vitoles, ajout d'une vitole manquante, la force par marque (§9) ; Davidoff, Arturo Fuente, Padrón, Oliva, Plasencia, Rocky Patel : force, arômes et cotes transcrits de leurs pages, avec leur URL (§10) | Spécifications publiées par le fabricant, citées |
-| **D — Nomenclature rédigée pour ce projet** | 11 familles d'arômes, 76 descripteurs | Vocabulaire de dégustation, écrit ici |
-| **E — Registre des buralistes (DGDDI)** | 200 lieux (`07_venues.csv`) | Donnée publique officielle, exacte à sa date (2018) — voir §7 |
-| **F — Planches de démonstration de la boutique** | 10 visuels de produits, 2 logos (`shop-images/*.svg`) | Dessinés pour ce projet, sans objet réel représenté — voir §8 |
+| Source                                           | Ce qu'elle fournit                                                                                                                                                                                                                         | Régime                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| **A — Saisie de mémoire**                        | Manufactures, marques, vitoles, 123 fiches curées, codes de boîte                                                                                                                                                                          | À relire (§2)                                                 |
+| **B — Arrêté d'homologation des prix (Douane)**  | 900 prix de vente au détail, 817 fiches supplémentaires                                                                                                                                                                                    | Donnée publique officielle, exacte à sa date                  |
+| **C — Sites officiels des fabricants**           | Habanos S.A. : confirmation de 13 vitoles, ajout d'une vitole manquante, la force par marque (§9) ; Davidoff, Arturo Fuente, Padrón, Oliva, Plasencia, Rocky Patel : force, arômes et cotes transcrits de leurs pages, avec leur URL (§10) | Spécifications publiées par le fabricant, citées              |
+| **D — Nomenclature rédigée pour ce projet**      | 11 familles d'arômes, 76 descripteurs                                                                                                                                                                                                      | Vocabulaire de dégustation, écrit ici                         |
+| **E — Registre des buralistes (DGDDI)**          | 200 lieux (`07_venues.csv`)                                                                                                                                                                                                                | Donnée publique officielle, exacte à sa date (2018) — voir §7 |
+| **F — Planches de démonstration de la boutique** | 10 visuels de produits, 2 logos (`shop-images/*.svg`)                                                                                                                                                                                      | Dessinés pour ce projet, sans objet réel représenté — voir §8 |
 
 ### Source A — saisie de mémoire
 
@@ -30,7 +30,7 @@ Formulé sans détour, parce que la formulation compte ici :
 - **Aucune requête réseau n'a été émise** vers un site du secteur au moment de la saisie.
 - Les données correspondent à des **faits de métier publics et non originaux** : noms de marques,
   pays de production, noms de vitoles, dimensions nominales, mois en espagnol. Des faits bruts ne
-  sont protégeables ni par le droit d'auteur ni, isolément, par le droit *sui generis* — c'est leur
+  sont protégeables ni par le droit d'auteur ni, isolément, par le droit _sui generis_ — c'est leur
   extraction massive depuis une base identifiée qui l'est, et il n'y en a pas eu.
 - La **sélection et l'organisation** (quelles marques retenir, quels champs, quels regroupements)
   sont propres à ce projet et découlent du modèle de données du §5.1 du brief.
@@ -38,10 +38,10 @@ Formulé sans détour, parce que la formulation compte ici :
 ### Source B — l'arrêté d'homologation des prix
 
 **Arrêté du 5 août 2026 portant homologation des prix de vente au détail des tabacs manufacturés
-en France, applicable au 1er septembre 2026.** Publié au Journal officiel et diffusé en *open data*
+en France, applicable au 1er septembre 2026.** Publié au Journal officiel et diffusé en _open data_
 par la Direction générale des douanes et droits indirects.
 
-C'est une **publication officielle de l'État français**, pas une base tierce : le droit *sui generis*
+C'est une **publication officielle de l'État français**, pas une base tierce : le droit _sui generis_
 de l'article L341-1 CPI ne s'y applique pas, et les textes officiels sont librement réutilisables.
 Le fichier a été téléchargé directement depuis `douane.gouv.fr`, converti en texte et analysé par un
 script ; aucun site du secteur n'a été sollicité.
@@ -96,7 +96,7 @@ La distinction mérite d'être posée, parce qu'elle n'est pas la même que pour
 Une roue des arômes publiée — celle d'un institut œnologique, d'une revue, d'un torréfacteur — est
 une **œuvre de sélection et d'arrangement** : quelqu'un a décidé quelles familles retenir, comment
 les nommer, quoi ranger sous quoi. C'est exactement ce que protègent le droit d'auteur et, pour un
-ensemble structuré, le droit *sui generis*. Recopier une roue existante en la traduisant serait le
+ensemble structuré, le droit _sui generis_. Recopier une roue existante en la traduisant serait le
 même geste que recopier une base de fiches.
 
 Ce qui n'est pas protégeable, en revanche, c'est qu'un cigare puisse sentir le cèdre, le poivre
@@ -131,28 +131,28 @@ référentiel vérifié.
 
 C'est pour cette raison que le chargement est conçu ainsi :
 
-| Garde-fou | Effet |
-|---|---|
-| **Toutes les fiches cigares sont chargées en `draft`** | Aucune n'est visible d'un visiteur anonyme. La RLS l'impose, ce n'est pas une convention. |
-| **Un prix ne peut exister sans sa source et sa date** | Contrainte de table, pas convention. Un prix orphelin est refusé à l'insertion. |
-| **Un prix unitaire au-dessus de 1 500 € échoue en CI** | Garde-fou contre un prix de boîte lu comme un prix unitaire. Le cigare le plus cher de l'arrêté est à 750 € l'unité. |
-| **15 vitoles portent `Dimensions à vérifier`** | Cotes de confiance moyenne, signalées plutôt qu'omises : le relecteur n'a qu'à confirmer. |
-| **45 fiches non cubaines n'ont aucune vitole** | Les cotes exactes varient d'une manufacture à l'autre et ne sont pas connues avec certitude. Les rattacher au format cubain le plus proche aurait introduit une donnée fausse. Le format annoncé figure en note. |
-| **Les sigles d'usine cubains sont signalés** | Voir §4. |
-| **Aucune année de fondation incertaine n'a été inventée** | Le champ reste vide. |
+| Garde-fou                                                 | Effet                                                                                                                                                                                                            |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Toutes les fiches cigares sont chargées en `draft`**    | Aucune n'est visible d'un visiteur anonyme. La RLS l'impose, ce n'est pas une convention.                                                                                                                        |
+| **Un prix ne peut exister sans sa source et sa date**     | Contrainte de table, pas convention. Un prix orphelin est refusé à l'insertion.                                                                                                                                  |
+| **Un prix unitaire au-dessus de 1 500 € échoue en CI**    | Garde-fou contre un prix de boîte lu comme un prix unitaire. Le cigare le plus cher de l'arrêté est à 750 € l'unité.                                                                                             |
+| **15 vitoles portent `Dimensions à vérifier`**            | Cotes de confiance moyenne, signalées plutôt qu'omises : le relecteur n'a qu'à confirmer.                                                                                                                        |
+| **45 fiches non cubaines n'ont aucune vitole**            | Les cotes exactes varient d'une manufacture à l'autre et ne sont pas connues avec certitude. Les rattacher au format cubain le plus proche aurait introduit une donnée fausse. Le format annoncé figure en note. |
+| **Les sigles d'usine cubains sont signalés**              | Voir §4.                                                                                                                                                                                                         |
+| **Aucune année de fondation incertaine n'a été inventée** | Le champ reste vide.                                                                                                                                                                                             |
 
 ## 3. Niveaux de confiance, par jeu de données
 
-| Fichier | Lignes | Confiance | Ce qui reste à vérifier |
-|---|---:|---|---|
-| `01_manufacturers.csv` | 30 | **Élevée** sur les noms, pays et groupes | Raisons sociales exactes, villes |
-| `02_brands.csv` | 114 | **Élevée** sur les noms, pays, `is_cuban` | Les années de fondation, quand elles sont renseignées. Les rattachements marque → manufacture pour les marques non cubaines, qui changent de main. |
-| `03_vitolas.csv` | 51 | **Confirmée par source officielle** pour 13, **élevée** pour 24, **moyenne** pour 14 | Les 14 marquées `Dimensions à vérifier` |
-| `04_cigars.csv` — 123 curées | 123 | **Élevée** sur le couple marque + nom commercial. **Moyenne** sur la force et la cape, qui sont des appréciations conventionnelles. | Toutes les forces et capes. Les années de sortie. Les 45 fiches sans vitole. |
-| `04_cigars.csv` — 817 issues de l'arrêté | 817 | **Élevée** sur le nom et le prix (source officielle). **Nulle** sur le reste : ces colonnes sont vides. | Libellés à normaliser, vitoles / forces / capes à renseigner. |
-| Prix (900 fiches) | 900 | **Élevée à la date du 1ᵉʳ septembre 2026** | Rien à vérifier, mais **à rafraîchir à chaque arrêté** |
-| `05_box_codes.csv` | 18 | **Élevée** pour les 12 codes de mois. **Faible** pour les 6 sigles d'usine. | Voir §4 |
-| `06_aroma_taxonomy.csv` | 87 | **Sans objet** — une nomenclature n'est pas vraie ou fausse, elle est utile ou non | Rien à vérifier factuellement. À rouvrir si un descripteur manque à l'usage : c'est le seul retour qui compte. |
+| Fichier                                  | Lignes | Confiance                                                                                                                           | Ce qui reste à vérifier                                                                                                                            |
+| ---------------------------------------- | -----: | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `01_manufacturers.csv`                   |     30 | **Élevée** sur les noms, pays et groupes                                                                                            | Raisons sociales exactes, villes                                                                                                                   |
+| `02_brands.csv`                          |    114 | **Élevée** sur les noms, pays, `is_cuban`                                                                                           | Les années de fondation, quand elles sont renseignées. Les rattachements marque → manufacture pour les marques non cubaines, qui changent de main. |
+| `03_vitolas.csv`                         |     51 | **Confirmée par source officielle** pour 13, **élevée** pour 24, **moyenne** pour 14                                                | Les 14 marquées `Dimensions à vérifier`                                                                                                            |
+| `04_cigars.csv` — 123 curées             |    123 | **Élevée** sur le couple marque + nom commercial. **Moyenne** sur la force et la cape, qui sont des appréciations conventionnelles. | Toutes les forces et capes. Les années de sortie. Les 45 fiches sans vitole.                                                                       |
+| `04_cigars.csv` — 817 issues de l'arrêté |    817 | **Élevée** sur le nom et le prix (source officielle). **Nulle** sur le reste : ces colonnes sont vides.                             | Libellés à normaliser, vitoles / forces / capes à renseigner.                                                                                      |
+| Prix (900 fiches)                        |    900 | **Élevée à la date du 1ᵉʳ septembre 2026**                                                                                          | Rien à vérifier, mais **à rafraîchir à chaque arrêté**                                                                                             |
+| `05_box_codes.csv`                       |     18 | **Élevée** pour les 12 codes de mois. **Faible** pour les 6 sigles d'usine.                                                         | Voir §4                                                                                                                                            |
+| `06_aroma_taxonomy.csv`                  |     87 | **Sans objet** — une nomenclature n'est pas vraie ou fausse, elle est utile ou non                                                  | Rien à vérifier factuellement. À rouvrir si un descripteur manque à l'usage : c'est le seul retour qui compte.                                     |
 
 ## 4. Le cas particulier des codes d'usine cubains
 
@@ -210,30 +210,55 @@ engagerait notre propre base.
 - Registre complet : 24 434 établissements, chacun avec enseigne, adresse, code postal, commune,
   nature du débit et géolocalisation — la géolocalisation vient du registre lui-même, aucun
   géocodeur tiers n'a été sollicité
+- Export rejouable, tel qu'il a été appelé le 12 septembre 2026 :
+  `GET https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/annuaire-des-buralistes-de-france-metropolitaine-2018/exports/csv?delimiter=%3B`
 - Reporté dans `venues` avec `source = 'douane-fr-2018'` et `source_date = 2018-01-01`, par
   contrainte de table (`venues_source_dated`) : une donnée officielle sans date devient une
   désinformation en silence
 
-**La règle de sélection des 200, déterministe et rejouable** : les communes du registre sont
-parcourues par taille décroissante (Paris, Marseille, Lyon, Bordeaux, Toulouse, Nice, Nantes,
-Montpellier, Saint-Étienne, Brest…) ; dans chacune, les établissements **portant une enseigne et
-une géolocalisation**, triés par code postal, enseigne puis adresse, à raison de 25 au plus par
-commune, jusqu'à 200 lignes.
+### La règle de sélection — toute la France, depuis le 12 septembre 2026
 
-**Pourquoi « portant une enseigne » ampute certaines villes** : le registre ne donne pas de nom
-commercial à la plupart des débits de Lyon (3 nommés sur 157), de Montpellier ou de Strasbourg.
-Fabriquer une enseigne à partir de l'adresse aurait mis un libellé inventé sur une carte — le même
-geste que rattacher une fiche à la vitole « la plus proche », refusé au §2. Un lieu sans nom
-attendra une contribution ; une ville sous-représentée aussi.
+La QA humaine du 12 septembre l'a demandé en une phrase : « chercher encore d'autres civettes et
+les lieux (par ex : Chesnay ou cigare store), il faut compléter la liste avec toute la France,
+gros travail mais très important ». Le premier exemple donné, **CIVETTE NOUVELLE FRANCE au
+Chesnay**, est exactement ce que l'ancienne règle laissait dehors — Le Chesnay n'est pas une des
+grandes communes.
+
+**Règle actuelle, déterministe et rejouable** : tout établissement du registre qui porte **à la
+fois une enseigne exploitable et une géolocalisation**, trié par code postal, enseigne puis
+adresse. Aucun plafond par commune, aucune sélection de villes.
+
+- **13 482 lignes**, 6 739 communes, 95 départements, toutes géolocalisées
+- Les 200 lignes du 23 août **gardent leur slug à l'identique** : le slug est la clé de
+  rapprochement du rejeu, et `status` n'est jamais réécrit — un lieu passé `closed` parce que
+  quelqu'un l'a signalé fermé ne doit pas ressusciter parce que la sélection s'élargit
+- Slug : `slugify(enseigne)-slugify(commune)`, et l'**identifiant de ligne du registre** en
+  suffixe quand cette base est déjà prise (deux « Le Relais » dans la même commune). Le suffixe
+  vient du registre, donc il est stable d'un rejeu à l'autre
+
+**Ce que « enseigne exploitable » écarte, et c'est tout :**
+
+- **10 731 établissements sans enseigne.** Le registre ne donne pas de nom commercial à la
+  plupart des débits — 3 nommés sur 157 à Lyon. Fabriquer une enseigne à partir de l'adresse
+  mettrait un libellé inventé sur une carte : le même geste que rattacher une fiche à la vitole
+  « la plus proche », refusé au §2. Un lieu sans nom attend une contribution.
+- **215 établissements nommés mais sans géolocalisation.** Le critère de sortie de P5 est une
+  recherche par distance ; une ligne sans point y est invisible.
+- **6 établissements dont l'enseigne est un caractère de remplissage** — `-`, `/`, `?`, `_`.
+  `venues_name_len` les refuse (minimum deux caractères) et il a raison : un lieu qui s'appelle
+  « / » est une ligne que personne ne peut lire.
 
 **Ce que cette source ne donne pas, et qui reste vide** : horaires, téléphone, site, fumoir,
 ventilation. Ce sont les colonnes vivantes, remplies par la contribution et la revendication
-(ADR 0011, D3) — jamais approximées ici.
+(ADR 0011, D3) — jamais approximées ici. Le type `fumoir` (migration 0030) ne vient donc **pas**
+du registre : un débit de tabac n'est pas un fumoir, et aucune ligne de seed n'en porte le type.
 
 **Ces lieux datent.** Le millésime du registre est 2018 : des établissements ont fermé, des
 enseignes ont changé. Chaque fiche affiche sa source et sa date ; une fermeture se signale
 (`inaccurate`) et se consigne par le statut `closed`, que le rejeu du seed **ne rouvre jamais**
-(voir l'en-tête de `seed_venues.sql`).
+(voir l'en-tête de `seed_venues.sql`). À 13 482 lignes plutôt que 200, cette phrase compte
+davantage : la proportion de fiches périmées est la même, leur nombre absolu est soixante-sept
+fois plus grand.
 
 ## 8. Source F — les planches de démonstration de la boutique
 
@@ -269,8 +294,8 @@ produits versés à l'écran par le porteur gardent leurs propres photographies.
 
 ---
 
-*Dernière mise à jour : aux planches de démonstration de la boutique (5 septembre 2026). Toute
-modification manuelle des CSV ou des planches doit être consignée ici.*
+_Dernière mise à jour : aux planches de démonstration de la boutique (5 septembre 2026). Toute
+modification manuelle des CSV ou des planches doit être consignée ici._
 
 ## 9. Les propositions d'amorçage des fiches cubaines
 
@@ -284,10 +309,10 @@ a proposé, qui a décidé, et pourquoi.
 
 Deux faits par ligne, chacun sous un régime déjà décrit :
 
-| Fait | Régime | Ce que la ligne dit |
-|---|---|---|
+| Fait                    | Régime                                                                                                                                                             | Ce que la ligne dit                                                                                                                                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **La vitole de galera** | A (saisie de mémoire, à relire) — le rattachement marque → galera est un fait de métier standard du vitolario Habanos ; §5 le range en deuxième poste de relecture | 38 fiches, uniquement quand la galera existe déjà dans `03_vitolas.csv` — **aucune vitole n'est créée**. Les rattachements incertains (Wide Edmundo, Río Seco, Secretos, les éditions limitées…) sont laissés vides plutôt que devinés. |
-| **La force** | C (spécification publiée par le fabricant) — Habanos S.A. publie une *fortaleza* par marque : ligero, ligero a medio, medio, medio a fuerte, fuerte | 129 fiches, la classification de la marque reportée sur l'échelle du §5.1. Deux marques sont laissées vides faute de certitude sur la classification (La Flor de Cano, Quintero). |
+| **La force**            | C (spécification publiée par le fabricant) — Habanos S.A. publie une _fortaleza_ par marque : ligero, ligero a medio, medio, medio a fuerte, fuerte                | 129 fiches, la classification de la marque reportée sur l'échelle du §5.1. Deux marques sont laissées vides faute de certitude sur la classification (La Flor de Cano, Quintero).                                                       |
 
 **Ce que le CSV ne contient pas, et pourquoi.** Aucune **cape** : elle varie d'une boîte à
 l'autre, et une teinte proposée serait une appréciation, pas une spécification. Aucun **arôme** :
@@ -354,14 +379,14 @@ Six fabricants, ceux que l'audit nommait, page par page, à leur adresse publiqu
 été lues telles que le serveur les rend ; aucun script de collecte n'existe dans le dépôt, et
 aucun site du secteur autre que ces six n'a été sollicité.
 
-| Fabricant | Ce que la page publie | Ce qui a été transcrit |
-|---|---|---|
-| **Davidoff** (`us.davidoffgeneva.com/product/…`) | La description officielle de chaque cigare, dans les métadonnées de la fiche produit | Un mot de force quand il est un cran (« mild », « medium-intense », « full-bodied ») ; les notes nommées (« oak wood, liquorice », « roasted coffee and leather »…) |
-| **Arturo Fuente** (`arturofuente.com/_download/AF_catalog_EN.pdf`, Fuente Marketing Ltd, mars 2019) | Les cotes de chaque vitole par gamme ; peu de mots de force ; aucune note d'arôme propre | Les cotes qui coïncident **exactement** avec un format conventionnel de la base ; « full-flavor, robust » pour Destino al Siglo |
-| **Padrón** (`padron.com/<série>/`) | Un paragraphe par série, les cotes par vitole ; aucune note d'arôme | La force par série (« full-bodied », « medium- to full-bodied ») |
-| **Oliva** (`olivacigar.com/cigars/<gamme>/`) | Un paragraphe par gamme, les cotes par vitole | « medium body », « medium-bodied » ; « rich coffee and dark chocolate tones », « cedar and coffee » |
-| **Plasencia** (`plasenciacigars.com/collection/<collection>/`) | Un champ **Strength** à cinq feuilles, un paragraphe de notes, les cotes | Les feuilles allumées sur cinq → l'échelle du §5.1 ; les notes nommées |
-| **Rocky Patel** (`rockypatel.com/cigar/<cigare>/`) | Un champ **STRENGTH** (« Medium », « Medium-Full »…), les cotes ; presque jamais de notes | Le champ, quand il est un cran ; les notes de Conviction |
+| Fabricant                                                                                           | Ce que la page publie                                                                     | Ce qui a été transcrit                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Davidoff** (`us.davidoffgeneva.com/product/…`)                                                    | La description officielle de chaque cigare, dans les métadonnées de la fiche produit      | Un mot de force quand il est un cran (« mild », « medium-intense », « full-bodied ») ; les notes nommées (« oak wood, liquorice », « roasted coffee and leather »…) |
+| **Arturo Fuente** (`arturofuente.com/_download/AF_catalog_EN.pdf`, Fuente Marketing Ltd, mars 2019) | Les cotes de chaque vitole par gamme ; peu de mots de force ; aucune note d'arôme propre  | Les cotes qui coïncident **exactement** avec un format conventionnel de la base ; « full-flavor, robust » pour Destino al Siglo                                     |
+| **Padrón** (`padron.com/<série>/`)                                                                  | Un paragraphe par série, les cotes par vitole ; aucune note d'arôme                       | La force par série (« full-bodied », « medium- to full-bodied »)                                                                                                    |
+| **Oliva** (`olivacigar.com/cigars/<gamme>/`)                                                        | Un paragraphe par gamme, les cotes par vitole                                             | « medium body », « medium-bodied » ; « rich coffee and dark chocolate tones », « cedar and coffee »                                                                 |
+| **Plasencia** (`plasenciacigars.com/collection/<collection>/`)                                      | Un champ **Strength** à cinq feuilles, un paragraphe de notes, les cotes                  | Les feuilles allumées sur cinq → l'échelle du §5.1 ; les notes nommées                                                                                              |
+| **Rocky Patel** (`rockypatel.com/cigar/<cigare>/`)                                                  | Un champ **STRENGTH** (« Medium », « Medium-Full »…), les cotes ; presque jamais de notes | Le champ, quand il est un cran ; les notes de Conviction                                                                                                            |
 
 **Une réserve, dite.** `davidoff.com` redirige notre point de sortie vers `us.davidoffgeneva.com`,
 le site de Davidoff of Geneva USA — filiale d'Oettinger Davidoff AG, le fabricant. Les
@@ -408,13 +433,13 @@ pas), 48 avec un profil aromatique. Aucune ligne sans source.
 `seed_propositions.sql` avec les lignes du CSV inlinées, puis `apply_propositions.sql`), l'auteur et
 le relecteur étant le compte du porteur — comme au §9 :
 
-| Mesure | Avant | Après |
-|---|---|---|
-| Fiches publiées avec une vitole | 155 | **170** |
-| Fiches publiées avec une force | 252 | **325** |
-| Fiches publiées avec un profil aromatique | 0 | **48** |
-| Fiches publiées sans vitole ni force | 686 | **601** |
-| Propositions citant une source | 0 | **106** (toutes acceptées) |
+| Mesure                                    | Avant | Après                      |
+| ----------------------------------------- | ----- | -------------------------- |
+| Fiches publiées avec une vitole           | 155   | **170**                    |
+| Fiches publiées avec une force            | 252   | **325**                    |
+| Fiches publiées avec un profil aromatique | 0     | **48**                     |
+| Fiches publiées sans vitole ni force      | 686   | **601**                    |
+| Propositions citant une source            | 0     | **106** (toutes acceptées) |
 
 ### Ce qui a été laissé vide, et pourquoi
 
