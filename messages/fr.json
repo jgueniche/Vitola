@@ -185,7 +185,12 @@
       "completenessHint": "Pour trouver ce qui manque plutôt que le subir : chaque entrée liste les fiches auxquelles il manque ce fait — c’est là qu’une proposition sourcée compte.",
       "missingVitola": "Sans vitole",
       "missingStrength": "Sans force",
-      "missingAromas": "Sans arômes"
+      "missingAromas": "Sans arômes",
+      "aroma": "Arômes",
+      "aromaHint": "Les onze familles de la roue. Le descripteur exact se choisit sur la roue elle-même.",
+      "rating": "Note des membres",
+      "ratingFloor": "{count} bagues et plus",
+      "ratingAll": "5 bagues"
     },
     "results": {
       "one": "1 fiche",
@@ -287,7 +292,22 @@
     },
     "card": {
       "sparse": "Format, force et cape non renseignés.",
-      "proposeValues": "Proposer ces valeurs"
+      "proposeValues": "Proposer ces valeurs",
+      "onlyAdminGaps": "Champs vides : visibles des relecteurs."
+    },
+    "sections": {
+      "label": "Le référentiel",
+      "brands": "Les marques",
+      "vitolas": "Le vitolario",
+      "aromas": "La roue des arômes",
+      "boxCodes": "Les codes de boîte",
+      "compare": "Comparer",
+      "contribute": "Contribuer"
+    },
+    "teaser": {
+      "title": "Le référentiel complet est réservé aux membres",
+      "body": "Voici {shown} fiches sur {total}. La recherche, les facettes, le comparateur et les notes des membres s’ouvrent avec un compte — gratuit.",
+      "cta": "Créer un compte ou se connecter"
     }
   },
   "auth": {
@@ -1037,10 +1057,14 @@
   "aromas": {
     "eyebrow": "Nomenclature",
     "title": "Roue des arômes",
-    "lede": "Le vocabulaire commun de la dégustation : onze familles, et sous chacune les descripteurs qu'un carnet peut employer. Cette liste ne juge pas — elle sert autant à nommer un défaut qu'un plaisir.",
+    "lede": "Onze familles, soixante-seize descripteurs. C’est le vocabulaire d’une dégustation — et la porte d’entrée du référentiel par le goût.",
     "count": "{families} familles, {descriptors} descripteurs",
     "emptyTitle": "La roue n'est pas encore chargée",
-    "emptyBody": "La nomenclature des arômes arrive avec l'amorçage du référentiel."
+    "emptyBody": "La nomenclature des arômes arrive avec l'amorçage du référentiel.",
+    "wheelTitle": "La roue",
+    "wheelHint": "Choisissez une famille sur l’anneau extérieur, puis un descripteur : la liste vous mène aux fiches qui le portent.",
+    "listTitle": "Les onze familles",
+    "activeTitle": "Fiches qui citent cet arôme"
   },
   "humidor": {
     "eyebrow": "Cave",
@@ -1827,12 +1851,13 @@
     }
   },
   "venues": {
-    "eyebrow": "Les lieux",
-    "title": "Les lieux",
-    "lede": "Où fumer, où se faire conseiller. Un annuaire informatif : les avis portent sur l'accueil, le confort et le conseil — jamais sur les produits. Rien ne s'y vend, rien ne s'y recommande.",
-    "sourceNote": "Les civettes viennent du registre officiel des débits de tabac (DGDDI, millésime 2018), sous Licence Ouverte. Le reste vient des membres. Un établissement fermé se signale depuis sa fiche.",
+    "eyebrow": "Partenaires",
+    "title": "Les partenaires",
+    "lede": "Civettes et fumoirs, autour de vous. Ni prix, ni produit du tabac — l’accueil et le conseil, jamais l’étal.",
+    "sourceNote": "Ces adresses viennent du registre officiel des buralistes (douanes, 2018, Licence Ouverte) : {count} lieux dans toute la France métropolitaine. Certains ont fermé depuis — signalez-le et la fiche passera en « fermé ».",
     "types": {
       "civette": "Civette",
+      "fumoir": "Fumoir",
       "cave": "Cave",
       "lounge": "Lounge",
       "hotel": "Hôtel",
@@ -1871,7 +1896,11 @@
       "noMatchBody": "Essayez un autre nom, une autre ville, ou élargissez le rayon. Et si le lieu manque à l'annuaire, proposez-le.",
       "noneNearTitle": "Rien dans ce rayon",
       "noneNearBody": "Aucun lieu publié et géolocalisé dans ce rayon. Élargissez-le, ou proposez le lieu qui manque.",
-      "propose": "Proposer un lieu"
+      "propose": "Proposer un lieu",
+      "locateCoarse": "Votre position n'est connue qu'à {km} km près — c'est trop vague pour chercher autour de vous. Sur un ordinateur, le navigateur déduit souvent la position de la connexion et tombe sur le central de l'opérateur. Autorisez la position précise, ou cherchez par nom de ville.",
+      "browseTitle": "Chercher un lieu",
+      "browseBody": "L’annuaire porte toute la France métropolitaine : cherchez par nom ou par ville, ou laissez votre appareil donner sa position pour voir ce qui est autour.",
+      "sampleTitle": "Quelques lieux"
     },
     "sheet": {
       "pendingBanner": "Proposition en attente de relecture. Elle n'est visible que de vous et des relecteurs.",
@@ -1980,7 +2009,8 @@
       "typeInvalid": "Choisissez un type de lieu.",
       "slugEmpty": "Ce nom ne laisse rien pour une adresse : ajoutez au moins une lettre ou un chiffre.",
       "refused": "La proposition n'a pas pu être envoyée.",
-      "signedOut": "Connectez-vous pour proposer un lieu."
+      "signedOut": "Connectez-vous pour proposer un lieu.",
+      "positionCoarse": "Votre position n'est connue qu'à {km} km près : elle n'a pas été recopiée. Saisissez les coordonnées à la main plutôt que de placer un lieu au mauvais endroit."
     },
     "pending": {
       "titleEditor": "Propositions en attente",
@@ -1996,7 +2026,8 @@
       "withdrawn": "Proposition retirée.",
       "reviewed": "Avis enregistré.",
       "reviewDeleted": "Avis retiré."
-    }
+    },
+    "directoryCount": "{count} lieux, {communes} communes."
   },
   "clubs": {
     "eyebrow": "Les clubs",
@@ -2374,7 +2405,7 @@
     "thumbBar": "{count} en cave",
     "gesture": {
       "title": "J’en fume un",
-      "lede": "Une date, une note ou un mot. Le reste est facultatif.",
+      "lede": "Une note, un mot si vous en avez un. Rien n’est obligatoire.",
       "score": "Note /100",
       "scorePlaceholder": "0 à 100",
       "word": "Un mot",
@@ -2395,7 +2426,8 @@
       "needsSomething": "Sans lot à décompter, une entrée demande au moins une note ou un mot.",
       "venue": "Où ça",
       "venueNone": "— sans lieu —",
-      "venueHint": "Facultatif, et seulement si vous le dites au fil : nommer où l’on fume est une confidence, jamais une obligation."
+      "venueHint": "Facultatif, et seulement si vous le dites au fil : nommer où l’on fume est une confidence, jamais une obligation.",
+      "more": "Le reste — la date, le fil, le lieu"
     }
   },
   "theme": {

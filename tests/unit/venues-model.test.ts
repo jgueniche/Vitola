@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -33,20 +33,24 @@ import {
 
 const M0016 = readFileSync(join(process.cwd(), 'supabase/migrations/0016_lieux.sql'), 'utf8')
 
+/** Every migration, for the rules that a later one is allowed to extend. */
+const MIGRATIONS_DIR = join(process.cwd(), 'supabase/migrations')
+const MIGRATIONS = readdirSync(MIGRATIONS_DIR)
+  .filter((name) => name.endsWith('.sql'))
+  .map((name) => readFileSync(join(MIGRATIONS_DIR, name), 'utf8'))
+
 describe('the bounds mirror migration 0016', () => {
   it('bounds a venue name the way venues_name_len does', () => {
-    const match = /venues_name_len\s+check \(length\(btrim\(name\)\) between (\d+) and (\d+)\)/.exec(
-      M0016,
-    )
+    const match =
+      /venues_name_len\s+check \(length\(btrim\(name\)\) between (\d+) and (\d+)\)/.exec(M0016)
     expect(match, 'venues_name_len is no longer in migration 0016').not.toBeNull()
     expect(Number(match?.[1])).toBe(VENUE_LIMITS.nameMin)
     expect(Number(match?.[2])).toBe(VENUE_LIMITS.nameMax)
   })
 
   it('bounds a city the way venues_city_len does', () => {
-    const match = /venues_city_len\s+check \(length\(btrim\(city\)\) between (\d+) and (\d+)\)/.exec(
-      M0016,
-    )
+    const match =
+      /venues_city_len\s+check \(length\(btrim\(city\)\) between (\d+) and (\d+)\)/.exec(M0016)
     expect(match).not.toBeNull()
     expect(Number(match?.[1])).toBe(VENUE_LIMITS.cityMin)
     expect(Number(match?.[2])).toBe(VENUE_LIMITS.cityMax)
@@ -66,10 +70,22 @@ describe('the bounds mirror migration 0016', () => {
   })
 
   it('lists exactly the venue_type values of the enum', () => {
+    /*
+     * An enum grows across migrations, so the guard has to read them all.
+     * 0016 created the seven and 0030 added `fumoir` — a test that reads only
+     * the creating migration would have failed for its own reason the first
+     * time a value was appended, which is exactly what happened on
+     * 12 septembre 2026.
+     */
     const block = /create type public\.venue_type as enum \(([\s\S]*?)\);/.exec(M0016)
     expect(block).not.toBeNull()
-    const declared = [...(block?.[1] ?? '').matchAll(/'([a-z_]+)'/g)].map((match) => match[1])
-    expect([...VENUE_TYPES].sort()).toEqual([...declared].sort())
+    const created = [...(block?.[1] ?? '').matchAll(/'([a-z_]+)'/g)].map((match) => match[1])
+
+    const added = MIGRATIONS.flatMap((sql) => [
+      ...sql.matchAll(/alter type public\.venue_type add value (?:if not exists )?'([a-z_]+)'/g),
+    ]).map((match) => match[1])
+
+    expect([...VENUE_TYPES].sort()).toEqual([...new Set([...created, ...added])].sort())
   })
 
   it('knows the seven hour keys the CHECK allows', () => {
@@ -131,9 +147,10 @@ describe('venueSlug', () => {
 
 describe('readHours', () => {
   it('drops unknown keys and blank values, keeps the seven days in order', () => {
-    expect(
-      readHours({ mon: '09:00–19:00', xxx: 'nope', sun: '  ', sat: 'fermé' }),
-    ).toEqual({ mon: '09:00–19:00', sat: 'fermé' })
+    expect(readHours({ mon: '09:00–19:00', xxx: 'nope', sun: '  ', sat: 'fermé' })).toEqual({
+      mon: '09:00–19:00',
+      sat: 'fermé',
+    })
     expect(readHours(null)).toEqual({})
     expect(readHours(['mon'])).toEqual({})
     expect(hasHours({})).toBe(false)

@@ -4,13 +4,16 @@ import { notFound } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { Input, Label, Select } from '@/components/ui/field'
+import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { venueConfirmation } from '@/lib/venues/confirmations'
 import { formatDistance, isVenueType, VENUE_SEARCH, type VenueType } from '@/lib/venues/model'
 import {
+  countVenues,
   listPendingVenues,
   listVenues,
   venuesFlag,
@@ -31,17 +34,27 @@ function firstParam(value: string | string[] | undefined): string | undefined {
 }
 
 /**
- * L'annuaire des lieux (ADR 0011, F8).
+ * L'annuaire des partenaires (ADR 0011, F8).
  *
  * Readable by a signed-out visitor past the age gate, like the referential:
  * `venues_select_public` serves published rows to `anon`. The whole section
  * lives behind `venues_enabled` (Q6) — flag off, this is a 404, and the flag's
  * payload lists the types the directory offers.
  *
- * Two searches, one page. Text — a needle over names and cities, plain `ilike`
- * over two hundred rows. Distance — `venues_nearby()` when the URL carries a
- * position, which only « Me localiser » or a shared link puts there: the
- * position is read on the device, when asked, and stored nowhere.
+ * Two searches, one page. Text — a needle over names and cities, `ilike` over
+ * two GIN trigram indexes since the directory reached 13 482 rows (migration
+ * 0031). Distance — `venues_nearby()` when the URL carries a position, which
+ * only « Me localiser » or a shared link puts there: the position is read on
+ * the device, when asked, and stored nowhere.
+ *
+ * **What the 12 septembre 2026 QA changed.** The directory went from 200 rows
+ * in ten cities to the whole register (« il faut compléter la liste avec toute
+ * la France »), and that broke the page's resting state rather than its
+ * queries: with 200 rows, listing a hundred of them was the directory; with
+ * 13 482 it is a hundred arbitrary tobacconists sorted by town, which answers
+ * a question nobody asked. So with neither a needle nor a position the page
+ * now says what it holds and offers the two ways in, and the sample below it
+ * is labelled as a sample.
  */
 export default async function VenuesPage({
   searchParams,
@@ -72,26 +85,27 @@ export default async function VenuesPage({
 
   const user = await currentUser()
 
-  const [nearby, listed, pending] = await Promise.all([
+  const [nearby, listed, pending, total] = await Promise.all([
     hasPoint
       ? venuesNearby({ lat, lng, radiusKm, offeredTypes: flag.types, type })
       : Promise.resolve<NearbyVenue[]>([]),
     hasPoint ? Promise.resolve<VenueRow[]>([]) : listVenues({ offeredTypes: flag.types, type, q }),
     user ? listPendingVenues() : Promise.resolve<VenueRow[]>([]),
+    countVenues(flag.types),
   ])
+
+  /* Neither a needle nor a position: the list below is a sample of thirteen
+     thousand and says so, rather than pretending to be the directory. */
+  const browsing = !hasPoint && !q && !type
 
   const shown = hasPoint ? nearby.length : listed.length
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-        <p className="text-ink-muted measure text-xs leading-relaxed">{copy.sourceNote}</p>
-      </div>
-
-      <Band variant="divider" />
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
+      <p className="text-ink-faint measure -mt-4 text-xs leading-relaxed">
+        {copy.sourceNote.replace('{count}', formatCount(total))}
+      </p>
 
       {done ? (
         <p role="status" className="text-ink-muted text-sm">
@@ -145,12 +159,20 @@ export default async function VenuesPage({
 
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-ink-muted text-sm tabular-nums">
-          {shown === 1 ? copy.list.countOne : copy.list.countMany.replace('{count}', String(shown))}
+          {browsing
+            ? copy.list.sampleTitle
+            : shown === 1
+              ? copy.list.countOne
+              : copy.list.countMany.replace('{count}', String(shown))}
         </p>
         <Link href={routes.venuePropose()} className="text-accent text-sm hover:underline">
           {copy.list.propose}
         </Link>
       </div>
+
+      {browsing ? (
+        <EmptyState title={copy.list.browseTitle} description={copy.list.browseBody} />
+      ) : null}
 
       {shown === 0 ? (
         hasPoint ? (

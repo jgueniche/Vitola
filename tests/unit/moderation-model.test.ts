@@ -76,12 +76,14 @@ describe('the vocabulary mirrors the SQL', () => {
   })
 
   it('bounds the note and the act reason the way the CHECKs of 0004 do', () => {
-    const decision = /reports_decision_len check \(decision_note is null or length\(decision_note\) <= (\d+)\)/.exec(
-      M0004,
-    )
-    const action = /moderation_actions_reason_len check \(length\(btrim\(reason\)\) between 1 and (\d+)\)/.exec(
-      M0004,
-    )
+    const decision =
+      /reports_decision_len check \(decision_note is null or length\(decision_note\) <= (\d+)\)/.exec(
+        M0004,
+      )
+    const action =
+      /moderation_actions_reason_len check \(length\(btrim\(reason\)\) between 1 and (\d+)\)/.exec(
+        M0004,
+      )
     expect(Number(decision![1])).toBe(MOD_LIMITS.note)
     expect(Number(action![1])).toBe(MOD_LIMITS.actReason)
   })

@@ -29,8 +29,21 @@ const copy = m.cigarStats
  * private one is none, whoever is reading. They are the members' half of the
  * question the owner asked — "y a-t-il bien les arômes ?" — the referential's
  * half is the sheet's own profile, rendered by the page above this card.
+ *
+ * **`variant="rail"`** is the QA session of 12 septembre 2026: « sous l'encart
+ * vous et ce cigare c'est là qu'il faut mettre la note des membres et l'entrée
+ * carnet ». In a 26rem rail the two-column card would be a box inside a box,
+ * which the design system forbids outright — so the rail variant is lines
+ * between hairlines: the note, what it is made of, the histogram. Same numbers,
+ * same boundary, one container less.
  */
-export async function StatsPanel({ stats }: { stats: CigarStats | null }) {
+export async function StatsPanel({
+  stats,
+  variant = 'page',
+}: {
+  stats: CigarStats | null
+  variant?: 'page' | 'rail'
+}) {
   const cited = stats?.top_aromas ?? []
   const labels = await aromaLabels(cited.map((aroma) => aroma.id))
 
@@ -41,6 +54,55 @@ export async function StatsPanel({ stats }: { stats: CigarStats | null }) {
    * §4.6 — and the cited aromas still render below it when they exist.
    */
   const empty = !stats || stats.review_count === 0
+
+  if (variant === 'rail') {
+    return (
+      <section aria-labelledby="notes" className="flex flex-col gap-3">
+        <h2 id="notes" className="font-display text-display-sm">
+          {copy.title}
+        </h2>
+
+        {empty ? (
+          <p className="text-ink-muted text-sm">{copy.emptyLine}</p>
+        ) : (
+          <div className="border-rule flex flex-col gap-3 border-t border-b py-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+              <ScoreMark score={stats.bayesian_score} size="lg" />
+              <span className="text-ink-muted text-xs">
+                {stats.review_count === 1
+                  ? copy.publicOne
+                  : copy.publicMany.replace('{count}', formatCount(stats.review_count))}
+              </span>
+            </div>
+            <Distribution distribution={stats.distribution} />
+          </div>
+        )}
+
+        {cited.length > 0 ? (
+          <div className="flex flex-col gap-1.5">
+            <span className="eyebrow">{copy.citedAromas}</span>
+            <ul className="flex flex-wrap gap-2">
+              {cited.map((aroma) => {
+                const label = labels.get(aroma.id)
+                if (!label) return null
+                return (
+                  <li
+                    key={aroma.id}
+                    className="border-rule-strong text-ink rounded-band inline-flex items-baseline gap-1.5 border px-2 py-1 text-xs"
+                  >
+                    {label}
+                    <span className="text-ink-faint font-mono tabular-nums">
+                      {formatCount(aroma.n)}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : null}
+      </section>
+    )
+  }
 
   return (
     <section aria-labelledby="notes" className="flex flex-col gap-3">

@@ -18,9 +18,8 @@ const M0017 = readFileSync(join(process.cwd(), 'supabase/migrations/0017_editori
 
 describe('the bounds mirror migration 0017', () => {
   it('bounds a title the way articles_title_len does', () => {
-    const match = /articles_title_len\s+check \(length\(btrim\(title\)\) between (\d+) and (\d+)\)/.exec(
-      M0017,
-    )
+    const match =
+      /articles_title_len\s+check \(length\(btrim\(title\)\) between (\d+) and (\d+)\)/.exec(M0017)
     expect(match).not.toBeNull()
     expect(Number(match?.[1])).toBe(JOURNAL_LIMITS.titleMin)
     expect(Number(match?.[2])).toBe(JOURNAL_LIMITS.titleMax)
@@ -28,7 +27,9 @@ describe('the bounds mirror migration 0017', () => {
 
   it('bounds excerpt, body and tags the way the CHECKs do', () => {
     expect(M0017).toContain(`length(excerpt) <= ${JOURNAL_LIMITS.excerptMax}`)
-    expect(M0017).toContain(`length(body_md) between ${JOURNAL_LIMITS.bodyMin} and ${JOURNAL_LIMITS.bodyMax}`)
+    expect(M0017).toContain(
+      `length(body_md) between ${JOURNAL_LIMITS.bodyMin} and ${JOURNAL_LIMITS.bodyMax}`,
+    )
     expect(M0017).toContain(`array_length(tags, 1) <= ${JOURNAL_LIMITS.tagsMax}`)
     expect(M0017).toContain(
       `reading_time_min between ${JOURNAL_LIMITS.readingTimeMin} and ${JOURNAL_LIMITS.readingTimeMax}`,

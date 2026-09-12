@@ -4,10 +4,11 @@
 // The selection also has to travel with the form, which it does through the
 // hidden inputs at the bottom — so this is a fancy <select multiple>, not a
 // second source of truth.
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { m } from '@/lib/i18n'
-import type { AromaFamily } from '@/lib/aromas/queries'
+import type { AromaDescriptor, AromaFamily } from '@/lib/aromas/queries'
 import { ring } from '@/lib/aromas/wheel'
 import { REVIEW_LIMITS } from '@/lib/reviews/model'
 import { cn } from '@/lib/utils'
@@ -43,12 +44,23 @@ const DESCRIPTOR_OUTER = 142
  * keyboard handlers, and every selected descriptor is also a real chip button
  * below the wheel. Someone who never sees the circle can still work entirely
  * from the chips and the family buttons.
+ *
+ * **The second mode, and why it lives here.** Pass `hrefFor` and the wheel
+ * stops being an input and becomes a way in: each descriptor is a link, and
+ * `/aromes` uses it to send a reader to the sheets that cite that aroma. The
+ * QA session of 12 septembre 2026 asked for the wheel back — « pourquoi t'as
+ * enlevé la roue » — and the honest place for a wheel on a reference page is
+ * as a map, not as a form nobody submits. One geometry, two behaviours: a
+ * second component would have been eighty lines of the same arithmetic, and
+ * the day one of the two rings moved they would have disagreed.
  */
 export function AromaWheel({
   families,
   name = 'aromaTags',
   initial = [],
   onSelectionChange,
+  hrefFor,
+  activeSlugs = [],
 }: {
   families: AromaFamily[]
   name?: string
@@ -57,9 +69,14 @@ export function AromaWheel({
      form watching itself never learns that the wheel moved. The tasting form's
      autosave hangs off this callback for exactly that reason. */
   onSelectionChange?: (ids: number[]) => void
+  /** Set it and the wheel navigates instead of selecting. See the note above. */
+  hrefFor?: (descriptor: AromaDescriptor) => string
+  /** In navigation mode, which descriptors the current URL already asks for. */
+  activeSlugs?: readonly string[]
 }) {
   const [selected, setSelected] = useState<number[]>(initial)
   const [focused, setFocused] = useState(0)
+  const navigate = hrefFor !== undefined
 
   const family = families[focused]
   const familySectors = useMemo(
@@ -165,18 +182,32 @@ export function AromaWheel({
           {(family?.descriptors ?? []).map((descriptor, index) => {
             const sector = descriptorSectors[index]
             if (!sector) return null
-            const picked = selected.includes(descriptor.id)
+            const picked = navigate
+              ? activeSlugs.includes(descriptor.slug)
+              : selected.includes(descriptor.id)
+
+            /* In navigation mode the segment is an SVG <a>, so it is a real
+               link — middle-click, copy address, everything. The list of the
+               same links sits beside the wheel for anyone not pointing at a
+               circle. */
+            const Segment = navigate ? 'a' : 'g'
+            const segmentProps = navigate
+              ? ({ href: hrefFor?.(descriptor), 'aria-label': descriptor.label } as const)
+              : ({
+                  role: 'checkbox' as const,
+                  tabIndex: 0,
+                  'aria-checked': picked,
+                  'aria-label': descriptor.label,
+                  'aria-disabled': !picked && full ? true : undefined,
+                  onClick: () => toggle(descriptor.id),
+                  onKeyDown: (event: React.KeyboardEvent) =>
+                    onSegmentKey(event, () => toggle(descriptor.id)),
+                } as const)
 
             return (
-              <g
+              <Segment
                 key={descriptor.id}
-                role="checkbox"
-                tabIndex={0}
-                aria-checked={picked}
-                aria-label={descriptor.label}
-                aria-disabled={!picked && full ? true : undefined}
-                onClick={() => toggle(descriptor.id)}
-                onKeyDown={(event) => onSegmentKey(event, () => toggle(descriptor.id))}
+                {...segmentProps}
                 className="cursor-pointer focus:outline-none"
               >
                 <path
@@ -206,7 +237,7 @@ export function AromaWheel({
                 >
                   {descriptor.label}
                 </text>
-              </g>
+              </Segment>
             )
           })}
 
@@ -221,9 +252,32 @@ export function AromaWheel({
 
         {/* --- the running total, and the only control a chip needs ------- */}
         <div className="flex w-full flex-col gap-3">
-          <p className="text-ink-muted text-sm leading-relaxed">{copy.stepAromasHint}</p>
+          {navigate ? (
+            /* The same links as the segments, in reading order: the fallback
+               that makes the circle an affordance rather than the interface. */
+            <>
+              <p className="text-ink-muted text-sm leading-relaxed">{m.aromas.wheelHint}</p>
+              <ul className="border-rule flex flex-col border-t">
+                {(family?.descriptors ?? []).map((descriptor) => (
+                  <li key={descriptor.id} className="border-rule border-b">
+                    <Link
+                      href={hrefFor?.(descriptor) ?? '#'}
+                      aria-current={activeSlugs.includes(descriptor.slug) ? 'true' : undefined}
+                      className="text-ink-muted hover:text-ink flex items-baseline justify-between gap-4 py-2 text-sm transition-colors duration-(--duration-quick)"
+                    >
+                      {descriptor.label}
+                      <span className="text-ink-faint font-mono text-xs">{descriptor.slug}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          {navigate ? null : (
+            <p className="text-ink-muted text-sm leading-relaxed">{copy.stepAromasHint}</p>
+          )}
 
-          {selected.length === 0 ? (
+          {navigate ? null : selected.length === 0 ? (
             <p className="text-ink-faint text-sm">{copy.aromaEmpty}</p>
           ) : (
             <ul className="flex flex-wrap gap-2">
@@ -243,7 +297,7 @@ export function AromaWheel({
             </ul>
           )}
 
-          {selected.length > 0 ? (
+          {!navigate && selected.length > 0 ? (
             <button
               type="button"
               onClick={() => apply([])}
@@ -255,8 +309,9 @@ export function AromaWheel({
         </div>
       </div>
 
-      {/* What actually travels with the form. The wheel is the affordance. */}
-      {selected.map((id) => (
+      {/* What actually travels with the form. The wheel is the affordance.
+          Nothing travels in navigation mode: a link carries its own state. */}
+      {(navigate ? [] : selected).map((id) => (
         <input key={id} type="hidden" name={name} value={id} />
       ))}
     </div>

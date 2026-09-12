@@ -16,8 +16,16 @@
 --
 -- Provenance : « Adresses des buralistes de France métropolitaine — 2018 »,
 -- DGDDI, Licence Ouverte v2.0 (Etalab), data.economie.gouv.fr. Chaque ligne
--- porte source et source_date ; la règle de sélection des 200 est dans
--- PROVENANCE.md §7. OSM est explicitement refusé (ODbL) — voir l'ADR 0011.
+-- porte source et source_date ; la règle de sélection est dans PROVENANCE.md
+-- §7. OSM est explicitement refusé (ODbL) — voir l'ADR 0011.
+--
+-- Depuis le 12 septembre 2026 le fichier porte TOUTE la France métropolitaine
+-- — 13 482 lignes, 6 739 communes, 95 départements — au lieu des 200 du
+-- 23 août. La QA humaine l'avait demandé en une phrase : « chercher encore
+-- d'autres civettes et les lieux, il faut compléter la liste avec toute la
+-- France, gros travail mais très important ». La règle de sélection a perdu son
+-- plafond par commune, et rien d'autre n'a changé : même source, même licence,
+-- même millésime, aucune base tierce.
 -- =============================================================================
 
 \set ON_ERROR_STOP on
@@ -63,9 +71,12 @@ on conflict (slug) do update
 do $$
 declare n integer;
 begin
+  -- Le plancher suit le fichier : 13 482 lignes depuis le 12 septembre 2026.
+  -- Un plancher qui reste à 200 ne dirait plus rien le jour où le chargement
+  -- s'arrête à mi-course — et c'est exactement le cas qu'il existe pour voir.
   select count(*) into n from public.venues where source = 'douane-fr-2018';
-  if n < 200 then
-    raise exception 'VITOLA_SEED_GAP: % lieux du registre au lieu de 200 au moins', n;
+  if n < 13000 then
+    raise exception 'VITOLA_SEED_GAP: % lieux du registre au lieu de 13 000 au moins', n;
   end if;
 
   -- Le critère de sortie suppose des points : une ligne du registre sans

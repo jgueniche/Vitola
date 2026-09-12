@@ -1578,6 +1578,7 @@ export type Database = {
       venue_status: "pending" | "published" | "closed"
       venue_type:
         | "civette"
+        | "fumoir"
         | "cave"
         | "lounge"
         | "hotel"
@@ -2431,6 +2432,7 @@ export const Constants = {
       venue_status: ["pending", "published", "closed"],
       venue_type: [
         "civette",
+        "fumoir",
         "cave",
         "lounge",
         "hotel",

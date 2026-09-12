@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { BreadcrumbWithCurrent } from '@/components/layout/breadcrumb'
 import { SpecStrip } from '@/components/data/spec-strip'
 import type { Strength } from '@/components/data/strength-meter'
 import type { WrapperShade } from '@/components/data/wrapper-scale'
@@ -18,11 +19,7 @@ import {
 import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
-import {
-  aromaLabels,
-  getCigarStats,
-  listReviewsForCigar,
-} from '@/lib/reviews/queries'
+import { aromaLabels, getCigarStats, listReviewsForCigar } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
 import { sheetSources } from '@/lib/wiki/queries'
@@ -136,33 +133,27 @@ export default async function CigarPage({ params, searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto max-w-6xl px-4 py-10 pb-28 lg:pb-16">
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-14">
+      {/*
+        Two columns, and the QA session of 12 septembre 2026 decided which
+        column holds what: « sous l'encart vous et ce cigare c'est là qu'il
+        faut mettre la note des membres et l'entrée carnet ». So the right
+        column is the people — your gesture, the members' note, their entries —
+        and the left is the referential and the discussion of the sheet. The
+        note used to sit under the whole sheet, five screens from the gesture
+        it comments on.
+      */}
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_26rem] lg:gap-14">
         {/* ---------------- 1 · the sheet ---------------- */}
         <div className="flex flex-col gap-6 lg:col-start-1 lg:row-start-1">
-          <nav
-            aria-label={copy.breadcrumb}
-            className="text-ink-muted flex flex-wrap items-center gap-2 text-xs"
-          >
-            <Link href={routes.cigars()} className="hover:text-ink">
-              {m.nav.cigars.label}
-            </Link>
-            {brand ? (
-              <>
-                <span aria-hidden="true" className="text-ink-faint">
-                  ›
-                </span>
-                <Link href={routes.brand(brand.slug)} className="hover:text-ink">
-                  {brand.name}
-                </Link>
-              </>
-            ) : null}
-            <span aria-hidden="true" className="text-ink-faint">
-              ›
-            </span>
-            <span className="text-ink" aria-current="page">
-              {cigar.commercial_name}
-            </span>
-          </nav>
+          {/* The site's one breadcrumb component since 12 septembre 2026: one
+              hop back on a phone, the whole path on a desk. */}
+          <BreadcrumbWithCurrent
+            trail={[
+              { label: m.nav.cigars.label, href: routes.cigars() },
+              ...(brand ? [{ label: brand.name, href: routes.brand(brand.slug) }] : []),
+            ]}
+            current={cigar.commercial_name}
+          />
 
           <Band brand={brand?.name} vitola={cigar.commercial_name} />
 
@@ -353,22 +344,19 @@ export default async function CigarPage({ params, searchParams }: Props) {
           </p>
         </div>
 
-        {/* ---------------- 2 · you and this cigar ---------------- */}
-        <aside className="self-start lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        {/* ------- 2 · you and this cigar, then what the members say ------- */}
+        <aside className="flex flex-col gap-8 self-start lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <RailSection
             cigar={{ id: cigar.id, slug: cigar.slug, commercial_name: cigar.commercial_name }}
             entries={entries}
             gestureOpen={gestureOpen}
           />
-        </aside>
 
-        {/* ---------------- 3 · what the members say ---------------- */}
-        <div className="flex flex-col gap-10 lg:col-start-1 lg:row-start-2">
           <Band variant="divider">
             <span className="eyebrow">{copy.membersBand}</span>
           </Band>
 
-          <StatsPanel stats={stats} />
+          <StatsPanel stats={stats} variant="rail" />
 
           <section aria-labelledby="entrees" className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
@@ -385,14 +373,17 @@ export default async function CigarPage({ params, searchParams }: Props) {
                   <EntryRow
                     key={entry.id}
                     entry={entry}
-                            showAuthor
+                    showAuthor
                     isMine={user?.id === entry.user_id}
                   />
                 ))}
               </div>
             )}
           </section>
+        </aside>
 
+        {/* ---------------- 3 · the discussion of the sheet ---------------- */}
+        <div className="flex flex-col gap-10 lg:col-start-1 lg:row-start-2">
           <CommentThread cigarId={cigar.id} slug={cigar.slug} />
         </div>
       </div>

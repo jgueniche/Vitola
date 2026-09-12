@@ -9,6 +9,7 @@ import { proposeVenue, type VenueFormState } from '@/app/(app)/lieux/actions'
 import { Button } from '@/components/ui/button'
 import { FieldError, Input, Label, Select } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
+import { GEOLOCATION, isCoarse } from '@/lib/venues/geolocation'
 import { HOURS_DAYS, VENUE_LIMITS, type VenueType } from '@/lib/venues/model'
 
 const copy = m.venues.propose
@@ -33,8 +34,15 @@ export function ProposeVenueForm({ offeredTypes }: { offeredTypes: readonly Venu
   // and uncontrolled is the React warning that always means a real bug.
   const [lat, setLat] = useState('')
   const [lng, setLng] = useState('')
-  const [locating, setLocating] = useState<'idle' | 'locating' | 'failed'>('idle')
+  const [locating, setLocating] = useState<'idle' | 'locating' | 'failed' | 'coarse'>('idle')
 
+  /* The same options and the same refusal as « Me localiser » on the list, and
+     for the same reason (`lib/venues/geolocation.ts`): without
+     `enableHighAccuracy` a desktop browser answers from the IP address, which
+     is the operator's exchange. Copying a 15 km-accurate fix into these two
+     fields would put a venue on the map fourteen kilometres from its door —
+     and unlike a search, that one PERSISTS: `venues.geo` is what every later
+     distance search reads. */
   function locate() {
     if (!('geolocation' in navigator)) {
       setLocating('failed')
@@ -43,12 +51,20 @@ export function ProposeVenueForm({ offeredTypes }: { offeredTypes: readonly Venu
     setLocating('locating')
     navigator.geolocation.getCurrentPosition(
       (result) => {
+        if (isCoarse(result.coords.accuracy)) {
+          setLocating('coarse')
+          return
+        }
         setLat(result.coords.latitude.toFixed(5))
         setLng(result.coords.longitude.toFixed(5))
         setLocating('idle')
       },
       () => setLocating('failed'),
-      { maximumAge: 60_000, timeout: 10_000 },
+      {
+        enableHighAccuracy: true,
+        maximumAge: GEOLOCATION.maximumAgeMs,
+        timeout: GEOLOCATION.timeoutMs,
+      },
     )
   }
 
@@ -184,6 +200,11 @@ export function ProposeVenueForm({ offeredTypes }: { offeredTypes: readonly Venu
           ) : null}
         </div>
         {locating === 'failed' ? <FieldError>{copy.locateFailed}</FieldError> : null}
+        {locating === 'coarse' ? (
+          <FieldError>
+            {copy.positionCoarse.replace('{km}', String(GEOLOCATION.maxAccuracyMetres / 1000))}
+          </FieldError>
+        ) : null}
       </fieldset>
 
       {state.error ? <FieldError>{state.error}</FieldError> : null}

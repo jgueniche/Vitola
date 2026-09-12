@@ -47,9 +47,8 @@ describe('the bounds mirror migration 0010', () => {
   })
 
   it('caps a comment at what post_comments_body_len allows', () => {
-    const match = /post_comments_body_len check \(length\(btrim\(body\)\) between 1 and (\d+)\)/.exec(
-      M0010,
-    )
+    const match =
+      /post_comments_body_len check \(length\(btrim\(body\)\) between 1 and (\d+)\)/.exec(M0010)
     expect(Number(match?.[1])).toBe(POST_LIMITS.commentMax)
   })
 
@@ -113,16 +112,18 @@ describe('what may be published', () => {
   })
 
   it('mirrors posts_session_has_cigar', () => {
-    const match = /posts_session_has_cigar check \(kind <> '([a-z_]+)' or cigar_id is not null\)/.exec(
-      M0010,
-    )
+    const match =
+      /posts_session_has_cigar check \(kind <> '([a-z_]+)' or cigar_id is not null\)/.exec(M0010)
     expect(match, 'posts_session_has_cigar is no longer in migration 0010').not.toBeNull()
     expect(kindNeedsCigar(match![1] as never)).toBe(true)
   })
 })
 
 describe('the keyset cursor', () => {
-  const cursor = { createdAt: '2026-08-23T09:15:00.123Z', id: 'a1000000-0000-4000-8000-000000000001' }
+  const cursor = {
+    createdAt: '2026-08-23T09:15:00.123Z',
+    id: 'a1000000-0000-4000-8000-000000000001',
+  }
 
   it('survives a round trip', () => {
     expect(decodeCursor(encodeCursor(cursor))).toEqual(cursor)

@@ -5,12 +5,15 @@ import { wrapperShadeLabel, type WrapperShade } from '@/components/data/wrapper-
 import { countryLabel } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
+import type { AromaFamily } from '@/lib/aromas/queries'
 import {
+  BAND_FLOORS,
   COMPLETENESS,
   EMPTY_FACETS,
   facetsToSearchParams,
   isFacetActive,
   STRENGTHS,
+  toggleBandFloor,
   toggleCompleteness,
   toggleFacet,
   WRAPPER_SHADES,
@@ -78,10 +81,19 @@ function FacetLink({ label, active, target }: { label: string; active: boolean; 
 export function FacetPanel({
   facets,
   countries,
+  aromaFamilies,
 }: {
   facets: Facets
   /** Origins present in the published set, so no facet leads to zero results. */
   countries: readonly string[]
+  /**
+   * The eleven families, and only the families. « Affiner avec les arômes »
+   * (QA du 12 septembre 2026) at the grain a side panel can hold: seventy-six
+   * descriptors as chips would be taller than the results beside them. The
+   * descriptor grain lives on the wheel of `/aromes`, which writes the same
+   * `arome=` key — one filter, two entrances.
+   */
+  aromaFamilies: readonly AromaFamily[]
 }) {
   return (
     <aside className="flex flex-col gap-6" aria-label={m.referential.facets.title}>
@@ -118,6 +130,37 @@ export function FacetPanel({
           />
         ))}
       </FacetGroup>
+
+      <FacetGroup title={m.referential.facets.rating}>
+        {BAND_FLOORS.map((floor) => (
+          <FacetLink
+            key={floor}
+            label={
+              floor === 5
+                ? m.referential.facets.ratingAll
+                : m.referential.facets.ratingFloor.replace('{count}', String(floor))
+            }
+            active={facets.minBands === floor}
+            target={href(toggleBandFloor(facets, floor))}
+          />
+        ))}
+      </FacetGroup>
+
+      {aromaFamilies.length > 0 ? (
+        <FacetGroup title={m.referential.facets.aroma}>
+          {aromaFamilies.map((family) => (
+            <FacetLink
+              key={family.slug}
+              label={family.label}
+              active={facets.aromas.includes(family.slug)}
+              target={href(toggleFacet(facets, 'aromas', family.slug))}
+            />
+          ))}
+          <p className="text-ink-faint basis-full text-xs leading-relaxed">
+            {m.referential.facets.aromaHint}
+          </p>
+        </FacetGroup>
+      ) : null}
 
       <FacetGroup title={m.referential.facets.completeness}>
         {COMPLETENESS.map((value) => (

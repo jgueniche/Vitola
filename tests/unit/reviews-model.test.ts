@@ -34,15 +34,9 @@ import {
  * this fails; leave the old warning in the copy and it fails too.
  */
 
-const M0003 = readFileSync(
-  join(process.cwd(), 'supabase/migrations/0003_carnet.sql'),
-  'utf8',
-)
+const M0003 = readFileSync(join(process.cwd(), 'supabase/migrations/0003_carnet.sql'), 'utf8')
 
-const M0010 = readFileSync(
-  join(process.cwd(), 'supabase/migrations/0010_social.sql'),
-  'utf8',
-)
+const M0010 = readFileSync(join(process.cwd(), 'supabase/migrations/0010_social.sql'), 'utf8')
 
 const MESSAGES = readFileSync(join(process.cwd(), 'messages/fr.json'), 'utf8')
 
@@ -54,9 +48,10 @@ describe('the bounds mirror migration 0003', () => {
   })
 
   it('caps the pairing note at what reviews_pairing_len allows', () => {
-    const match = /reviews_pairing_len\s+check \(pairing_text is null or length\(pairing_text\) <= (\d+)\)/.exec(
-      M0003,
-    )
+    const match =
+      /reviews_pairing_len\s+check \(pairing_text is null or length\(pairing_text\) <= (\d+)\)/.exec(
+        M0003,
+      )
     expect(Number(match?.[1])).toBe(REVIEW_LIMITS.pairingTextMax)
   })
 
@@ -88,7 +83,7 @@ describe('the bounds mirror migration 0003', () => {
   })
 
   it('defaults to the scope the column defaults to', () => {
-    expect(M0003).toContain('public.review_visibility not null default \'private\'')
+    expect(M0003).toContain("public.review_visibility not null default 'private'")
     expect(DEFAULT_SCOPE).toBe('private')
   })
 
@@ -200,4 +195,3 @@ describe('compactScores', () => {
     expect(compactScores({ burn: 0 })).toEqual({ burn: 0 })
   })
 })
-

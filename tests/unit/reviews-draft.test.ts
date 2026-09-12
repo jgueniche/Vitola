@@ -71,7 +71,9 @@ describe('building a draft from a form', () => {
 
   it('keeps the scope, and refuses one the enum does not have', () => {
     expect(draftFromEntries(entries([['visibility', 'public']]), 'now').visibility).toBe('public')
-    expect(draftFromEntries(entries([['visibility', 'everyone']]), 'now').visibility).toBe('private')
+    expect(draftFromEntries(entries([['visibility', 'everyone']]), 'now').visibility).toBe(
+      'private',
+    )
   })
 
   it('reads the blind checkbox, which posts "on" or nothing at all', () => {
@@ -87,7 +89,13 @@ describe('building a draft from a form', () => {
 })
 
 describe('draftHasContent', () => {
-  const bare = { startedAt: 'now', fields: {}, aromaTags: [], visibility: 'private' as const, isBlind: false }
+  const bare = {
+    startedAt: 'now',
+    fields: {},
+    aromaTags: [],
+    visibility: 'private' as const,
+    isBlind: false,
+  }
 
   it('is false for a form nobody has touched', () => {
     expect(draftHasContent(bare)).toBe(false)
@@ -135,9 +143,7 @@ describe('parsing what came back out of storage', () => {
   })
 
   it('falls back to the safest scope when the stored one is unknown', () => {
-    const parsed = parseDraft(
-      JSON.stringify({ startedAt: 'now', fields: {}, visibility: 'world' }),
-    )
+    const parsed = parseDraft(JSON.stringify({ startedAt: 'now', fields: {}, visibility: 'world' }))
     expect(parsed?.visibility).toBe('private')
   })
 

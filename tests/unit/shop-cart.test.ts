@@ -191,7 +191,9 @@ describe('the demo order', () => {
     const order = {
       reference: 'QA-AAAAAA',
       placedAt: new Date().toISOString(),
-      lines: [{ title: 'Coupe-cigare guillotine', slug: 'coupe-guillotine', qty: 1, priceEur: 24.9 }],
+      lines: [
+        { title: 'Coupe-cigare guillotine', slug: 'coupe-guillotine', qty: 1, priceEur: 24.9 },
+      ],
       totals: cartTotals([{ priceEur: 24.9, qty: 1 }]),
       shipping: {
         fullName: 'Camille Dupont',
