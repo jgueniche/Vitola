@@ -511,6 +511,21 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   assertion « vide » vieillit avec le catalogue : « la catégorie `coupe` est vide » était vraie
   le 25 août et fausse dès que le catalogue de QA a eu des coupe-cigares. Une vacuité se
   construit (un texte introuvable), elle ne se suppose pas.
+- **Une API de géolocalisation répond ce qu'on lui demande, y compris une approximation.**
+  `getCurrentPosition` sans `enableHighAccuracy` laisse un ordinateur répondre depuis l'adresse IP,
+  donc depuis le central de l'opérateur : Marnes-la-Coquette rendait des lieux du 13ᵉ. Le rayon de
+  l'erreur était dans la réponse — `coords.accuracy` — et n'était pas lu. Un point sans son
+  exactitude n'est pas un point, et un `maximumAge` généreux rend une position d'hier.
+- **Un garde-fou de copie ne se déclenche qu'en changeant de langue.** Quinze chaînes visibles
+  étaient écrites en dur dans des composants — l'avertissement sanitaire, le pied de page, la 404,
+  les cinq crans de force, douze abréviations de mois — et ont survécu à neuf phases, à `pnpm check`
+  et à quatre relectures. Aucune ne se voit en français, toutes se voient sous `lang="en"`. Le
+  corollaire est plus utile que le constat : un second dictionnaire est un **test**, et il faut le
+  faire tourner en build, pas seulement le traduire.
+- **Un agrégat qui appelle `jsonb_object_keys` compte une clé par ligne.** L'auto-contrôle de la
+  0028 affirmait que la répartition des bagues rendait cinq clés ; il lisait « r1,r1,r1,r1,r2,… »
+  parce que la fonction est *set-returning* et multiplie les lignes avant le `string_agg`. Une
+  assertion de forme sur du JSON agrégé passe par un `select distinct`.
 - **Un masque ou un filtre SVG a une région, et sa région par défaut est la boîte de ce qu'il
   habille.** `maskUnits` et `filterUnits` valent `objectBoundingBox` : la région est la boîte
   englobante de la géométrie, plus un dixième, et tout ce qu'un flou ou un déplacement étale
@@ -699,3 +714,97 @@ d'un bloc, la source à un clic ; les treize Winston Churchill de Davidoff, 145 
 Fuente, les Padrón 1964 et les Rocky Patel sans champ de force attendent une page qui dise un
 cran ou une note (PROVENANCE §10 les liste) ; l'échelle d'intensité de Davidoff se rend côté
 client et n'a pas été transcrite. La cape reste hors de tout script.
+
+## La première QA humaine — 12 septembre 2026
+
+Vingt-huit demandes en une session (« il y a énormément de chantier, c'est normal c'est notre
+1ᵉʳᵉ phase de QA »), plus une correction en cours de route sur l'accueil. Trois ADR avant le
+code — [0017](docs/adr/0017-la-boutique-en-revente.md) (la boutique revend),
+[0018](docs/adr/0018-l-abonnement-du-cercle.md) (deux formules), et
+[0019](docs/adr/0019-deux-langues-un-build.md) (deux langues) —, sept migrations `0028` à `0034`,
+et neuf composants nouveaux.
+
+**Ce qui est à l'écran** : la note **en bagues sur 5** partout (`cigar_stats` recalcule sa
+répartition en cinq seaux, l'échelle /100 ↔ /20 disparaît avec le réglage qui la portait) ;
+« Chez moi » éclaté en **Mon carnet** et **Ma cave**, quatre onglets qui se nomment ; un
+**thème clair** en marron très pâle, choisi par un bouton et retenu par le navigateur ; un
+**menu** et un **fil d'Ariane sur 28 écrans** ; une **suggestion de cinq bagues** déduite du
+carnet (`suggest_cigars`, 23 ms) ; la **géolocalisation recalée** ; **13 482 lieux** au lieu de
+200, limités aux civettes et aux fumoirs ; `/cercle` avec ses deux formules et de vraies
+lignes ; la **boutique en revente**, la marketplace retirée ; **trois comptes invités
+administrateurs** ; l'accueil réduit à une phrase, la planche et la porte ; et le site en
+**anglais**, dictionnaire complet et vérifié.
+
+**Six règles qui ne se contournent pas :**
+
+1. **Une bague est un seau, et le seau est en SQL.** `ringBucket()` recopie le
+   `greatest(1, ceil(score / 20))` de la 0028 pour que la carte et la vue comptent pareil ;
+   `tests/unit/reviews-rings.test.ts` compare les deux. La colonne reste sur 100 — c'est le
+   **geste** qui est sur cinq, et la politique de confidentialité le dit maintenant ainsi.
+2. **Une position sans son exactitude n'est pas une position.** Le bouton « me localiser »
+   demandait au navigateur une réponse rapide : sans `enableHighAccuracy`, un ordinateur répond
+   depuis l'adresse IP, donc depuis le central de l'opérateur — Marnes-la-Coquette rendait des
+   lieux du 13ᵉ. `coords.accuracy` était dans la réponse et n'était pas lu. `lib/venues/geolocation.ts`
+   exige la précision, refuse un délai périmé (`maximumAge: 0`) et **dit** au lecteur quand sa
+   position n'est connue qu'à 12 km près, au lieu de chercher autour d'un point faux.
+3. **Personne ne vend ici que nous.** L'ADR 0017 remplace la 0016 : `vendors.owner_id` disparaît
+   avec l'espace vendeur et les deux policies de `storage.objects` qui le lisaient,
+   `products_select_published` ne teste plus que le statut — suspendre un partenaire ne retire
+   plus de la vente un stock déjà payé —, et DAC7 quitte le chemin avec le vendeur tiers.
+4. **Une porte d'abonnement sera une policy, jamais une page.** `/cercle` annonce deux formules
+   et ne retient rien (ADR 0018). Quand la caisse existera, l'abonnement entrera dans le prédicat
+   des quatre policies SELECT de `reviews`, découpé **par rôle** — la branche `public` sert aussi
+   `anon`. La moyenne publique d'un cigare, elle, ne se ferme pas : c'est ce qui fixe le périmètre
+   du payant.
+5. **La locale est une décision de compilation.** 120 des 164 fichiers lisent la copie à la portée
+   du module et Next 16 n'a pas de contexte de requête synchrone : `NEXT_PUBLIC_LOCALE=en pnpm build`
+   est le site anglais (ADR 0019). `Record<Locale, Messages>` casse le build sur une clé
+   manquante, `tests/unit/i18n-parity.test.ts` prend l'autre sens — clé orpheline, interpolation
+   renommée, message vide —, et une valeur inconnue est un build rouge.
+6. **Un compte ne se crée pas par un script.** `admin_invitations` (0033) porte l'adresse et le
+   rôle ; `tg_handle_new_user()` le lit à la première connexion. Écrire dans `auth.users` depuis
+   une migration fabriquerait un compte sans mot de passe et sans trace.
+
+**Mesuré, pas supposé** : recherche de lieu 45,8 ms → **4,9 ms** (deux index trigrammes, 0031) ;
+`venues_nearby()` **48 ms** et le balayage KNN 11 ms sur 13 482 lignes ; `suggest_cigars` **23 ms** ;
+`pnpm check` vert (**421 tests**) ; les deux builds compilent et prérendent 61 pages, et **aucune
+chaîne française ne subsiste dans une page prérendue du build anglais**.
+
+**Ce que seule une seconde langue trouve** : **quinze chaînes visibles n'avaient pas de clé** et
+rendaient du français sous `lang="en"` — l'avertissement sanitaire (dont la clé existait, non
+lue), les cinq liens du pied et son nom de repère, quatre titres de pages légales, la 404, la
+frontière d'erreur, le titre du portail, les cinq crans de force, deux noms accessibles construits
+par gabarit, et un tableau de douze abréviations de mois que `Intl` formate désormais. Neuf phases
+et `pnpm check` ne les avaient jamais vues : **un garde-fou de copie ne se déclenche qu'en
+changeant de langue.**
+
+**Trois chaînes étaient fausses plutôt que non traduites**, corrigées des deux côtés : la
+politique de confidentialité décrivait encore une note sur 100 que la 0028 a remplacée ; deux
+libellés d'administration affirmaient qu'un produit publié n'était pas encore visible, faux depuis
+l'ouverture de la boutique ; et le portail demandait « Quel est votre date de naissance ».
+
+**Une collision à ne pas « corriger »** : l'anglais de *vitole* **est** le nom commercial —
+`vitola`. Le contrôle de `check-tokens` l'a trouvé sur sept libellés et il avait raison deux fois :
+un `<dt>` qui dit « Vitola » sur un site qui s'appelle Vitola est ambigu pour le lecteur. Le
+libellé nu dit **Format**, les termes d'art espagnols prennent la forme du vitolario (« Salida
+name », « Galera name »), et le mot reste en minuscule dans le fil du texte. **Le garde-fou n'a pas
+été assoupli** : `messages/` est le fichier où un nom de marque a le plus de chances d'être tapé à
+la main.
+
+**Ce qui n'a pas été fait, et pourquoi** :
+
+- **Les photos de cigares.** Il n'existe pas de corpus sous licence ouverte, et PROVENANCE
+  interdit les deux contournements (recopier une base tierce, produire une image de mémoire).
+  Une photographie est protégée par l'art. L112-2 du CPI : le seul chemin est une licence écrite
+  par marque. Aucune colonne, aucun bucket, aucun écran d'attente n'a été construit — un
+  emplacement vide promet une image qui n'arrive pas.
+- **« Les marques apparaissent si elles payent »** : reporté par le porteur lui-même
+  (« donc à voir un peu plus tard »).
+- **Le parcours navigateur du tunnel d'achat**, perdu avec `tooling/parcours/marketplace.ts`
+  (ADR 0017, avec son déclencheur).
+- **Les écrans qui exigent une session** — carnet, cave, fil, paramètres, statistiques — n'ont pas
+  été relus en anglais dans un navigateur : ils redirigent vers la connexion. Leur copie vient des
+  mêmes sections que le reste et la parité est prouvée clé par clé, mais ce n'est pas la même
+  chose que de les avoir lus.
+- **Les 109 encarts `rounded-[3px] border` écrits à la main** qui restent (173 au 6 septembre) :
+  l'allègement continue là où l'audit du 6 l'a laissé.

@@ -1696,3 +1696,50 @@ une absence ; la règle retire l'animation et laisse un panache immobile.
 l'accueil sans `max-width` : sur un écran de 1440 px le cigare faisait 1440 px. Elle est bornée à
 `max-w-5xl` (64 rem), un cran sous les colonnes de texte, centrée, avec la marge des sections. Le
 recadrage sur téléphone ne change pas.
+
+## La première QA humaine — 12 septembre 2026
+
+### Ce qui est livré
+
+Vingt-huit demandes en une session, trois ADR (0017, 0018, 0019), sept migrations `0028` à `0034`,
+neuf composants nouveaux, un dictionnaire anglais complet. Le détail est dans `CLAUDE.md`,
+« La première QA humaine ». `pnpm check` vert (421 tests) ; les deux builds prérendent 61 pages.
+
+### Décisions prises en construisant
+
+**La note globale reste sur 100 en base, et cinq bagues à l'écran.** Convertir la colonne aurait
+demandé de réécrire les six sous-notes de la dégustation (qui sont sur 10 et dont la moyenne fait
+le total), la moyenne bayésienne de `cigar_stats`, et toutes les entrées déjà écrites. Le seau est
+donc calculé — `greatest(1, ceil(score / 20))` — des deux côtés, et `lib/reviews/rings.ts` recopie
+la formule SQL sous test. Ce qui a changé de nature, c'est ce que le lecteur **donne** : la
+politique de confidentialité décrit désormais « une note de une à cinq bagues », parce qu'un
+document qui dit ce qui est enregistré ne peut pas décrire un geste qui n'existe plus.
+
+**Le thème se retient dans `localStorage`, pas dans un cookie.** Un cookie lu dans le layout racine
+rendrait **toutes** les routes dynamiques, et l'accueil comme le journal perdraient leur prérendu —
+c'est le critère de sortie mesuré de P6. Le prix est un éclair de thème par défaut au premier
+rendu, réduit par un script d'amorçage de 120 octets posé avant la peinture. `useSyncExternalStore`
+parce que `react-hooks/set-state-in-effect` refuse un `useEffect` qui lit le stockage, et parce que
+le rendu serveur doit annoncer le thème par défaut sans mentir.
+
+**Les 200 lieux d'origine gardent leur slug.** Le seed passe de 200 à 13 482 lignes du même registre
+DGDDI ; les slugs d'origine sont retrouvés par nom + adresse + code postal + commune normalisés, et
+seuls les nouveaux portent l'identifiant de ligne en cas de collision. Sans cela, tout avis et tout
+événement rattaché à un lieu de la première vague aurait changé d'adresse en silence.
+
+**« Civette » et « fumoir » seulement, et les six autres types restent dans l'enum.** La charge
+utile de `venues_enabled` liste les types offerts (ADR 0011, règle 5) : restreindre est un `UPDATE`
+d'une ligne, pas une migration d'enum. Retirer les valeurs aurait cassé les lieux déjà publiés
+qui les portent.
+
+**Le tri des suggestions mélange trois termes, et c'est mesuré.** La première version rendait cinq
+Plasencia par ordre alphabétique : la proximité aromatique seule favorise les fiches les mieux
+renseignées d'une même marque. Le score garde donc un terme de complétude et une diversité d'une
+fiche par marque (`row_number() over (partition by ...)`), et `suggest_cigars` répond en 23 ms.
+
+**Le mot anglais de « vitole » est le nom commercial, et le garde-fou avait raison.**
+`check-tokens` refuse `\bVitola\b` hors de `lib/brand.ts`, `messages/` comprise. Plutôt que
+d'assouplir la règle pour le fichier où un nom de marque a le plus de chances d'être tapé à la
+main, le libellé nu est devenu **Format**, les termes d'art espagnols prennent la forme du
+vitolario, et le mot reste en minuscule dans le fil du texte — ce qui est aussi plus juste pour le
+lecteur.
