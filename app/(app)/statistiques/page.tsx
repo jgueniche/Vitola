@@ -7,9 +7,9 @@ import { Figure, FigureRow } from '@/components/data/figures'
 import { EmptyState } from '@/components/layout/empty-state'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/cigar'
-import { formatCount, formatScore } from '@/lib/format'
+import { formatRingValue } from '@/components/data/ring-rating'
+import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
-import { myScoreScale } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { collectStats, meanScore, monthlyBuckets, rankCigars } from '@/lib/stats/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -56,7 +56,7 @@ export default async function StatisticsPage() {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.statistics())}`)
   }
 
-  const [stats, scale] = await Promise.all([collectStats(user.id), myScoreScale(user.id)])
+  const stats = await collectStats(user.id)
 
   const tastings = stats.entries.filter((entry) => entry.kind === 'tasting').length
   const logs = stats.entries.length - tastings
@@ -99,7 +99,7 @@ export default async function StatisticsPage() {
             <Figure value={formatCount(stats.entries.length)} label={copy.entriesCount} />
             <Figure value={formatCount(smoked)} label={copy.smokedCount} />
             <Figure
-              value={mean === null ? '—' : formatScore(mean, scale)}
+              value={mean === null ? '—' : formatRingValue(mean)}
               label={copy.meanScore}
               muted={mean === null}
             />

@@ -10,7 +10,7 @@ import { countryLabel } from '@/lib/cigar'
 import { formatDate } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { reportSlaHours } from '@/lib/moderation/queries'
-import { listMyNotebook, myScoreScale } from '@/lib/reviews/queries'
+import { listMyNotebook } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import {
   countAcceptedRevisions,
@@ -156,11 +156,10 @@ export default async function MemberPage({
     .order('id', { ascending: false })
     .limit(10)
 
-  const [entries, scale, shelf] = await Promise.all([
+  const [entries, shelf] = await Promise.all([
     privacy.show_reviews
       ? listMyNotebook(profile.id, { visibility: 'public' })
       : Promise.resolve([]),
-    myScoreScale(user.id),
     privacy.show_humidor ? readSharedShelf(profile.id) : Promise.resolve([]),
   ])
 
@@ -329,7 +328,7 @@ export default async function MemberPage({
         ) : (
           <div className="border-rule border-t">
             {entries.map((entry) => (
-              <EntryRow key={entry.id} entry={entry} scale={scale} showCigar />
+              <EntryRow key={entry.id} entry={entry} showCigar />
             ))}
           </div>
         )}

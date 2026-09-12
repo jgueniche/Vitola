@@ -6,7 +6,6 @@ import { formatEffectiveDate } from '@/lib/cigar'
 import { formatCount, todayInBrandZone } from '@/lib/format'
 import { listHumidors, lotsForCigar } from '@/lib/humidor/queries'
 import { m } from '@/lib/i18n'
-import type { ScoreScale } from '@/lib/reviews/model'
 import type { ReviewWithContext } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
@@ -38,12 +37,10 @@ const copy = m.sheet
 export async function RailSection({
   cigar,
   entries,
-  scale,
   gestureOpen,
 }: {
   cigar: { id: string; slug: string; commercial_name: string }
   entries: ReviewWithContext[]
-  scale: ScoreScale
   gestureOpen: boolean
 }) {
   const user = await currentUser()
@@ -168,7 +165,7 @@ export async function RailSection({
                       href={routes.notebookEntry(entry.id)}
                       className="text-ink hover:text-accent-bright grid grid-cols-[2.75rem_minmax(0,1fr)] items-baseline gap-3"
                     >
-                      <ScoreMark score={entry.score_total} scale={scale} size="sm" />
+                      <ScoreMark score={entry.score_total} size="sm" />
                       <span className="text-ink-muted text-xs">
                         {formatEffectiveDate(entry.smoked_on)}
                         {' · '}

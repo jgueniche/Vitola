@@ -1,11 +1,6 @@
-import { formatScore } from '@/lib/format'
+import { RingRating } from '@/components/data/ring-rating'
 import { m } from '@/lib/i18n'
-import {
-  SCOPE_TRAITS,
-  type ReviewKind,
-  type ReviewVisibility,
-  type ScoreScale,
-} from '@/lib/reviews/model'
+import { SCOPE_TRAITS, type ReviewKind, type ReviewVisibility } from '@/lib/reviews/model'
 import { cn } from '@/lib/utils'
 
 const scopeCopy = m.notebook.scope
@@ -19,66 +14,37 @@ const scopeCopy = m.notebook.scope
  */
 
 /**
- * A score, on the member's chosen scale (§5.4).
+ * A note, in bands out of five.
  *
- * `formatScore()` divides at the last moment; nothing converts on the way into
- * the database, where a score is always out of a hundred. Storing the displayed
- * value would put two scales in one column and lose which is which.
+ * `reviews.score_total` is still stored out of a hundred — migration 0028 says
+ * why in three lines — and `RingRating` divides at the last moment. Nothing
+ * converts on the way into the database, where a note is always out of a
+ * hundred: storing the displayed value would put two scales in one column and
+ * lose which is which.
  *
- * An entry without a score is not a failure to fill a field: a notebook entry
+ * An entry without a note is not a failure to fill a field: a notebook entry
  * may be a sentence and no number, and `reviews_log_says_something` allows
  * exactly that. It is written out rather than left blank so the row does not
  * read as broken.
+ *
+ * Three sizes, one per use: `lg` for the one number a page is about — the
+ * weighted mean, an entry's own page — with the figure beside the bands;
+ * `md` for an entry in a list; `sm` for a rail, a card, a table, where the
+ * bands alone are the whole statement. The unit never has to be written: five
+ * bands are visibly five bands.
  */
 export function ScoreMark({
   score,
-  scale = 100,
   size = 'md',
 }: {
   score: number | null
-  scale?: ScoreScale
   size?: 'sm' | 'md' | 'lg'
 }) {
   if (score === null) {
     return <span className="text-ink-faint text-sm">{m.notebook.entry.noScore}</span>
   }
 
-  /*
-   * Three sizes, one per use (design system of 5 septembre 2026): 48px for the
-   * one number a page is about — the weighted mean, an entry's own page — set
-   * in Inter because a score is *read* (§4.3's arbitration rule); 24px for an
-   * entry in a list, in the mono that lines a column up; 16px for a rail, a
-   * card, a table. The `/100` stays small and faint in every size: it is the
-   * unit, not the number.
-   */
-  if (size === 'lg') {
-    return (
-      <span className="inline-flex items-baseline gap-1.5">
-        <span className="text-[3rem] leading-[3.25rem] font-medium tabular-nums">
-          {formatScore(score, scale)}
-        </span>
-        <span className="text-ink-faint font-mono text-sm">/{scale}</span>
-      </span>
-    )
-  }
-
-  if (size === 'md') {
-    return (
-      <span className="inline-flex flex-col">
-        <span className="font-mono text-2xl leading-7 tabular-nums">
-          {formatScore(score, scale)}
-        </span>
-        <span className="text-ink-faint font-mono text-xs">/{scale}</span>
-      </span>
-    )
-  }
-
-  return (
-    <span className="inline-flex items-baseline gap-1">
-      <span className={cn('font-mono text-base tabular-nums')}>{formatScore(score, scale)}</span>
-      <span className="text-ink-faint font-mono text-xs">/{scale}</span>
-    </span>
-  )
+  return <RingRating score={score} size={size} showValue={size === 'lg'} />
 }
 
 const SCOPE_LABELS: Record<ReviewVisibility, string> = {

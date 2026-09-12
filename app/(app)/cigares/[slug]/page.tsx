@@ -22,7 +22,6 @@ import {
   aromaLabels,
   getCigarStats,
   listReviewsForCigar,
-  myScoreScale,
 } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
@@ -119,7 +118,6 @@ export default async function CigarPage({ params, searchParams }: Props) {
   )
     .map(([column, label]) => ({ label, source: sources.get(column)?.source ?? null }))
     .filter((spec): spec is { label: string; source: string } => spec.source !== null)
-  const scale = user ? await myScoreScale(user.id) : 100
 
   const vitola = cigar.vitolas
   const brand = cigar.brands
@@ -360,7 +358,6 @@ export default async function CigarPage({ params, searchParams }: Props) {
           <RailSection
             cigar={{ id: cigar.id, slug: cigar.slug, commercial_name: cigar.commercial_name }}
             entries={entries}
-            scale={scale}
             gestureOpen={gestureOpen}
           />
         </aside>
@@ -371,7 +368,7 @@ export default async function CigarPage({ params, searchParams }: Props) {
             <span className="eyebrow">{copy.membersBand}</span>
           </Band>
 
-          <StatsPanel stats={stats} scale={scale} />
+          <StatsPanel stats={stats} />
 
           <section aria-labelledby="entrees" className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
@@ -388,8 +385,7 @@ export default async function CigarPage({ params, searchParams }: Props) {
                   <EntryRow
                     key={entry.id}
                     entry={entry}
-                    scale={scale}
-                    showAuthor
+                            showAuthor
                     isMine={user?.id === entry.user_id}
                   />
                 ))}

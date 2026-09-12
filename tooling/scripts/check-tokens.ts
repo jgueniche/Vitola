@@ -45,6 +45,15 @@ const RAW_PALETTE = [
   'alerte',
   'erreur',
   'erreur-readable',
+  'tabac-pale',
+  'tabac-pale-raised',
+  'creme',
+  'brou',
+  'brou-ink',
+  'brou-muted',
+  'brou-faint',
+  'laiton-sombre',
+  'laiton-sombre-deep',
 ]
 
 const UTILITY_PREFIXES = ['bg', 'text', 'border', 'ring', 'fill', 'stroke', 'from', 'to', 'via']

@@ -6,7 +6,7 @@ import { HealthNotice } from '@/components/compliance/health-notice'
 import { SkipLink } from '@/components/layout/skip-link'
 import { BRAND } from '@/lib/brand'
 import { SITE_INDEXABLE, SITE_ORIGIN } from '@/lib/site'
-import { THEME_COLOR_DARK } from '@/lib/theme'
+import { THEME_BOOTSTRAP, THEME_COLOR_DARK } from '@/lib/theme'
 
 import './globals.css'
 
@@ -73,6 +73,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${bodoni.variable} ${marcellus.variable} ${inter.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Before the body paints, so a member who chose the pale ground never
+            sees the dark one flash first. Four lines, no dependency, and every
+            page stays static — see lib/theme.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+      </head>
       <body className="min-h-dvh antialiased">
         <SkipLink />
         {/* Permanent, non-dismissible, above everything (§2). */}

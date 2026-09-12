@@ -1,10 +1,8 @@
 import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
 
 import {
-  scoreScaleFromPreferences,
   type ReviewKind,
   type ReviewVisibility,
-  type ScoreScale,
   type Scores,
 } from './model'
 
@@ -429,25 +427,3 @@ export async function getCigarStats(cigarId: string): Promise<CigarStats | null>
   }
 }
 
-/**
- * The member's display scale (§5.4), out of 100 or out of 20.
- *
- * Falls back to 100 and swallows the error to do it, for the same reason
- * `reportSlaHours()` does: a preference that cannot be read is a preference, not
- * an outage, and a notebook that fails to render because of one is worse than a
- * notebook showing the trade default.
- */
-export async function myScoreScale(userId: string): Promise<ScoreScale> {
-  try {
-    const supabase = await createSupabaseServerClient()
-    const { data } = await supabase
-      .from('profile_settings')
-      .select('preferences')
-      .eq('id', userId)
-      .maybeSingle()
-
-    return scoreScaleFromPreferences(data?.preferences)
-  } catch {
-    return 100
-  }
-}

@@ -16,7 +16,6 @@ import {
   getReview,
   listShares,
   listThirds,
-  myScoreScale,
   searchMembers,
 } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
@@ -73,14 +72,13 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
   const isMine = user?.id === entry.user_id
   const rawQuery = Array.isArray(query.q) ? (query.q[0] ?? '') : (query.q ?? '')
 
-  const [thirds, aromas, shares, results, scale, slaHours] = await Promise.all([
+  const [thirds, aromas, shares, results, slaHours] = await Promise.all([
     entry.kind === 'tasting' ? listThirds(entry.id) : Promise.resolve([]),
     aromaLabels(entry.aroma_tags),
     isMine ? listShares(entry.id) : Promise.resolve([]),
     isMine && user && rawQuery.trim().length >= 2
       ? searchMembers(rawQuery, user.id)
       : Promise.resolve([]),
-    user ? myScoreScale(user.id) : Promise.resolve(100 as const),
     reportSlaHours(),
   ])
 
@@ -132,7 +130,7 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
       <Band variant="divider" />
 
       <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
-        <ScoreMark score={entry.score_total} scale={scale} size="lg" />
+        <ScoreMark score={entry.score_total} size="lg" />
         {entry.strength_perceived ? (
           <StrengthMeter strength={entry.strength_perceived as Strength} />
         ) : null}

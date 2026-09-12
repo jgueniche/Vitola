@@ -183,7 +183,11 @@ export function AromaWheel({
                   d={sector.path}
                   className={cn(
                     'transition-colors duration-(--duration-quick)',
-                    picked ? 'fill-accent' : full ? 'fill-surface' : 'fill-surface hover:fill-surface-raised',
+                    picked
+                      ? 'fill-accent'
+                      : full
+                        ? 'fill-surface'
+                        : 'fill-surface hover:fill-surface-raised',
                   )}
                   stroke="currentColor"
                   strokeWidth={0.75}
@@ -207,12 +211,7 @@ export function AromaWheel({
           })}
 
           {/* --- the hub says where one is and how much is chosen ---------- */}
-          <text
-            x={0}
-            y={-8}
-            textAnchor="middle"
-            className="fill-ink font-display text-[15px]"
-          >
+          <text x={0} y={-8} textAnchor="middle" className="fill-ink font-display text-[15px]">
             {family?.label ?? ''}
           </text>
           <text x={0} y={12} textAnchor="middle" className="fill-ink-faint text-[10px]">

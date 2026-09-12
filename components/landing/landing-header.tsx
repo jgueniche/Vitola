@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { ThemeToggle } from '@/components/layout/theme-toggle'
+
 import { BRAND } from '@/lib/brand'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -23,7 +25,8 @@ export function LandingHeader() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4">
         <span className="wordmark text-ink">{BRAND.name}</span>
 
-        <nav aria-label={m.landing.nav.label} className="flex items-center gap-6 text-sm">
+        <nav aria-label={m.landing.nav.label} className="flex items-center gap-4 text-sm sm:gap-6">
+          <ThemeToggle />
           <Link
             href={routes.shop()}
             className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"

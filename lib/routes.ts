@@ -26,6 +26,10 @@ export const SEGMENTS = {
   tastings: 'degustations',
   humidor: 'cave',
   statistics: 'statistiques',
+  /* Cinq bagues déduites du carnet (QA du 12 septembre 2026). Le segment est
+     au pluriel parce que la page EST la liste : il n'y a pas de suggestion
+     qu'on lise seule, et rien à mettre sous un identifiant. */
+  suggestions: 'suggestions',
   scanner: 'scanner',
   feed: 'fil',
   members: 'membres',
@@ -111,6 +115,7 @@ export const routes = {
   humidorDetail: (id: string) => `/${SEGMENTS.humidor}/${id}`,
   humidorExport: () => `/${SEGMENTS.humidor}/export`,
   statistics: () => `/${SEGMENTS.statistics}`,
+  suggestions: () => `/${SEGMENTS.suggestions}`,
 
   /* The feed is one page with two tabs, and the tab is a query parameter rather
      than a segment: `/fil?onglet=decouverte` keeps the keyset cursor and the

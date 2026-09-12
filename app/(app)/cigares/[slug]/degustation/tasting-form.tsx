@@ -23,7 +23,7 @@ import { ScopeSelector } from '@/components/reviews/scope-selector'
 import { Button } from '@/components/ui/button'
 import { FieldError, Input, Label, Select, Textarea } from '@/components/ui/field'
 import type { AromaFamily } from '@/lib/aromas/queries'
-import { formatScore } from '@/lib/format'
+import { RingRating, formatRingValue } from '@/components/data/ring-rating'
 import { m } from '@/lib/i18n'
 import {
   draftFromEntries,
@@ -292,9 +292,15 @@ export function TastingForm({
           {total === null ? (
             <span className="text-ink-faint text-sm">{copy.totalPending}</span>
           ) : (
-            <span className="font-mono text-3xl tabular-nums">
-              {formatScore(total)}
-              <span className="text-ink-faint text-xs">/100</span>
+            /* The six criteria stay out of ten — that is the exercise, and
+               ADR 0004's arbitration keeps the total un-typeable. What changed
+               on 12 septembre 2026 is only how the total READS: the bands it
+               comes to, and the figure beside them. */
+            <span className="flex items-center gap-3">
+              <RingRating score={total} size="lg" />
+              <span className="text-ink-muted text-sm tabular-nums">
+                {formatRingValue(total)} {m.notebook.rings.unit}
+              </span>
             </span>
           )}
         </div>

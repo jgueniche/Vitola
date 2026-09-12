@@ -1,27 +1,19 @@
-import type { Metadata } from 'next'
+import { permanentRedirect } from 'next/navigation'
 
-import { HubPage } from '@/components/layout/hub'
-import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 
-export const metadata: Metadata = { title: m.nav.discover.title }
-
-const copy = m.nav
-
+/**
+ * « Page découvrir ça saute » (QA du 12 septembre 2026).
+ *
+ * The hub's only content was six links to pages that all still exist, so it
+ * was a click charged for nothing. Its sections now hang under the list they
+ * belong to — `/cigares` carries the brands, the vitolas, the wheel, the box
+ * codes and the contribution queue as a row of links.
+ *
+ * A redirect rather than a deletion: the address was in the header of every
+ * page of the site for two weeks, so it is in histories and in bookmarks.
+ * `permanentRedirect` answers 308, which is what "this moved" means.
+ */
 export default function DiscoverHubPage() {
-  return (
-    <HubPage
-      eyebrow={copy.discover.label}
-      title={copy.discover.title}
-      lede={copy.discover.lede}
-      cards={[
-        { ...copy.cards.cigars, href: routes.cigars() },
-        { ...copy.cards.brands, href: routes.brands() },
-        { ...copy.cards.vitolas, href: routes.vitolas() },
-        { ...copy.cards.aromas, href: routes.aromas() },
-        { ...copy.cards.boxCodes, href: routes.boxCodes() },
-        { ...copy.cards.contributions, href: routes.contributions() },
-      ]}
-    />
-  )
+  permanentRedirect(routes.cigars())
 }

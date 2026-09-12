@@ -6,25 +6,9 @@
   },
   "nav": {
     "mainLabel": "Navigation principale",
-    "discover": {
-      "label": "Découvrir",
-      "title": "Découvrir",
-      "lede": "Le référentiel : ce que le site sait des cigares — vérifié, sourcé, et corrigeable par vous."
-    },
-    "mine": {
-      "label": "Chez moi",
-      "title": "Chez moi",
-      "lede": "Votre carnet, votre cave, vos chiffres. Tout y naît privé ; rien ne s'y partage sans votre geste."
-    },
     "circle": {
-      "label": "Le cercle",
-      "title": "Le cercle",
-      "lede": "Le fil, les membres, les clubs, l'agenda, les messages. On s'y abonne librement, et on s'en retire pareil."
-    },
-    "around": {
-      "label": "Autour",
-      "title": "Autour",
-      "lede": "Ce qui existe hors de l'écran : les lieux où fumer, et le journal — lisible sans compte."
+      "label": "Le Cercle",
+      "title": "Le Cercle"
     },
     "cards": {
       "cigars": {
@@ -84,8 +68,8 @@
         "body": "Écrire à quelqu'un que vous suivez. Pas chiffré de bout en bout, et dit."
       },
       "venues": {
-        "title": "Les lieux",
-        "body": "Civettes, caves et fumoirs autour de vous — sans prix, jamais."
+        "title": "Les partenaires",
+        "body": "Civettes et fumoirs autour de vous — sans prix, jamais."
       },
       "journal": {
         "title": "Le journal",
@@ -93,7 +77,11 @@
       },
       "shop": {
         "title": "La boutique",
-        "body": "Les bons accessoires, choisis par des vendeurs que nous relisons — coupes, caves, hygromètres. Jamais de tabac."
+        "body": "Les accessoires que nous achetons à nos partenaires et revendons ici — coupes, caves, hygromètres. Jamais de tabac."
+      },
+      "suggestions": {
+        "title": "Vos suggestions",
+        "body": "Cinq bagues à essayer, déduites de ce que vous avez fumé."
       }
     },
     "shop": {
@@ -108,12 +96,36 @@
     "cigars": {
       "label": "Cigares"
     },
-    "searchLabel": "Rechercher une fiche cigare"
+    "searchLabel": "Rechercher une fiche cigare",
+    "menu": {
+      "open": "Menu",
+      "close": "Fermer",
+      "label": "Sections du site"
+    },
+    "trail": {
+      "label": "Fil d'ariane",
+      "home": "Accueil"
+    },
+    "partners": {
+      "label": "Partenaires"
+    },
+    "notebook": {
+      "label": "Mon carnet"
+    },
+    "humidor": {
+      "label": "Ma cave"
+    },
+    "suggestions": {
+      "label": "Suggestions"
+    },
+    "account": {
+      "label": "Mon compte"
+    },
+    "searchAction": "Rechercher"
   },
   "home": {
     "eyebrow": "Comprendre ce que l'on fume",
     "title": "Le référentiel du cigare, écrit par ceux qui le fument.",
-    "lede": "Un référentiel encyclopédique, un carnet de dégustation structuré, une cave numérique et une boutique d’accessoires. Le tabac ne s’y vend pas — les accessoires, si.",
     "enter": "Entrer",
     "enterHint": "L'accès est réservé aux personnes majeures."
   },
@@ -308,64 +320,12 @@
       "shop": "Boutique"
     },
     "hero": {
-      "lede": "Un référentiel encyclopédique, un carnet de dégustation et une cave numérique, tenus par ceux qui fument. Le tabac ne s’y vend pas.",
+      "lede": "Un référentiel, un carnet, une cave. Tenus par ceux qui fument.",
       "shopCta": "Parcourir la boutique d’accessoires"
     },
     "plate": {
-      "emberLabel": "La braise",
-      "emberValue": "Combustion — env. 90 min",
-      "bandLabel": "La bague",
-      "bandValue": "Papier imprimé — env. 34 mm",
-      "wrapperLabel": "La cape",
-      "wrapperValue": "Colorado maduro — 4ᵉ nuance sur 6",
-      "vitolaLabel": "La vitole",
-      "vitolaDimensions": "52 × 164 mm",
-      "vitolaName": "corona gorda",
       "bandVitola": "Corona gorda · 52 × 164",
-      "alt": "Planche : un cigare allumé vu de côté, la cendre et la braise à gauche, la bague au tiers droit. Quatre légendes — la braise, combustion d’environ 90 minutes ; la bague, papier imprimé d’environ 34 mm ; la cape, colorado maduro, quatrième nuance sur six ; la vitole, 52 × 164 mm, corona gorda."
-    },
-    "inside": {
-      "eyebrow": "Derrière la porte",
-      "title": "Ce que le site contient.",
-      "body": "Six espaces et un seul compte. L’accès est réservé aux personnes majeures ; votre date de naissance ne sert qu’à le vérifier."
-    },
-    "modules": {
-      "referentiel": {
-        "number": "01",
-        "name": "Le référentiel",
-        "line": "Manufactures, marques, vitoles et fiches — sourcées, relues, versionnées, corrigées par ceux qui les lisent."
-      },
-      "carnet": {
-        "number": "02",
-        "name": "Le carnet",
-        "line": "Ce que vous avez fumé, quand, la note et les arômes. Pour vous seul, pour quelques personnes ou pour tous."
-      },
-      "cave": {
-        "number": "03",
-        "name": "La cave",
-        "line": "L’inventaire réel, le grand livre des entrées et des sorties, l’hygrométrie relevée."
-      },
-      "reseau": {
-        "number": "04",
-        "name": "Le fil",
-        "line": "Un fil d’abonnements et un fil de découverte, des sessions partagées, des clubs, des événements."
-      },
-      "lieux": {
-        "number": "05",
-        "name": "Les lieux",
-        "line": "Civettes, caves et lounges autour de vous. Les avis portent sur l’accueil et le conseil, jamais sur un produit."
-      },
-      "boutique": {
-        "number": "06",
-        "name": "La boutique",
-        "line": "Des accessoires, et rien d’autre. En accès libre, sans compte."
-      }
-    },
-    "final": {
-      "eyebrow": "Accès réservé aux majeurs",
-      "title": "Ce site traite de produits du tabac. La loi en réserve l'accès aux personnes majeures.",
-      "body": "Votre date de naissance sert uniquement à vérifier cette condition. Elle n'est pas conservée tant que vous n'avez pas de compte : un cookie signé mémorise seulement que la vérification a eu lieu.",
-      "help": "Se faire aider : Tabac info service — 39 89, du lundi au samedi. Gratuit et confidentiel."
+      "alt": "Planche : un cigare allumé vu de côté, la cendre et la braise à gauche, la bague au tiers droit, un filet de fumée qui monte."
     }
   },
   "comments": {
@@ -426,12 +386,6 @@
       "scope": "Portée",
       "scopeAll": "Toutes",
       "apply": "Filtrer"
-    },
-    "scale": {
-      "legend": "Afficher les notes",
-      "hundred": "Sur 100",
-      "twenty": "Sur 20",
-      "hint": "Préférence d'affichage. Les notes restent enregistrées sur 100."
     },
     "kind": {
       "log": "Note de carnet",
@@ -588,6 +542,14 @@
       "shareUnknown": "Ce membre n'a pas pu être nommé.",
       "shareDuplicate": "Cette personne est déjà nommée.",
       "draftCigar": "Ce cigare n'accepte pas d'entrée."
+    },
+    "rings": {
+      "of": "{value} bagues sur {max}",
+      "pickOne": "1 bague",
+      "pickMany": "{value} bagues sur {max}",
+      "none": "Pas de note",
+      "label": "Votre note",
+      "unit": "bagues"
     }
   },
   "cigarStats": {
@@ -601,7 +563,7 @@
     "recent": "Sur 90 jours",
     "recentCount": "{count} note(s)",
     "recentNone": "Aucune note sur les 90 derniers jours.",
-    "distribution": "Répartition",
+    "distribution": "Répartition en bagues",
     "lastReview": "Dernière note le {date}",
     "onlyPublic": "Ne comptent ici que les entrées publiques.",
     "entriesTitle": "Entrées de carnet",
@@ -616,7 +578,9 @@
     "entriesCount": "{count} · les publiques, et les vôtres",
     "entriesCountOne": "1 · la vôtre, ou une publique",
     "hint": "Moyenne bayésienne : un cigare noté une seule fois ne domine pas un cigare noté trente fois. Ne comptent ici que les entrées publiques.",
-    "lastReviewLabel": "Dernière note"
+    "lastReviewLabel": "Dernière note",
+    "bandOne": "1 bague",
+    "bandMany": "{count} bagues"
   },
   "moderation": {
     "report": {
@@ -1302,8 +1266,6 @@
     "roleHint": "Le rôle et la réputation ne se modifient pas d'ici, ni d'ailleurs : ils sont hors de tout droit d'écriture client.",
     "preferencesTitle": "Préférences d'affichage",
     "preferencesLede": "Comment les chiffres vous sont montrés. Rien de ce qui suit ne change ce qui est enregistré.",
-    "scoreScale": "Échelle des notes",
-    "scoreScaleHint": "Les notes sont enregistrées sur 100 ; l'échelle est une préférence d'affichage, jamais une conversion au stockage.",
     "hundred": "Sur 100",
     "twenty": "Sur 20",
     "lengthUnit": "Unité de longueur",
@@ -1363,8 +1325,7 @@
       "notAllowed": "Cette modification vous a été refusée.",
       "notStored": "Le réglage n'a pas été enregistré.",
       "unknown": "Cette action n'a pas abouti."
-    },
-    "scaleChange": "Changer"
+    }
   },
   "boxCodes": {
     "eyebrow": "Codes de boîte",
@@ -2436,5 +2397,43 @@
       "venueNone": "— sans lieu —",
       "venueHint": "Facultatif, et seulement si vous le dites au fil : nommer où l’on fume est une confidence, jamais une obligation."
     }
+  },
+  "theme": {
+    "toLight": "Passer au thème clair",
+    "toDark": "Passer au thème sombre"
+  },
+  "circle": {
+    "eyebrow": "Le Cercle",
+    "title": "Le Cercle",
+    "lede": "Ce que d'autres ont fumé, et ce qu'ils en ont dit.",
+    "plansTitle": "Deux façons d’en être",
+    "freeName": "Libre",
+    "freePrice": "Gratuit",
+    "freeLine": "Votre carnet, votre cave, le référentiel, la boutique.",
+    "freeIncluded": "Comprise",
+    "paidName": "Le Cercle",
+    "paidPrice": "À l’ouverture",
+    "paidLine": "En plus : les avis des membres, le fil, les clubs, l’agenda, les messages.",
+    "paidSoon": "Bientôt",
+    "plansNote": "Le Cercle n’est pas encore ouvert : la caisse attend ses clés (ADR 0016). D’ici là tout est lisible par tout membre, et rien ne se facture.",
+    "feedTitle": "Le fil",
+    "feedAll": "Tout le fil",
+    "feedEmpty": "Rien n’a encore été publié. La première publication sera la vôtre.",
+    "clubsTitle": "Les clubs",
+    "clubsAll": "Tous les clubs",
+    "clubsEmpty": "Aucun club pour l’instant.",
+    "clubsMembersOne": "1 membre",
+    "clubsMembersMany": "{count} membres",
+    "eventsTitle": "L’agenda",
+    "eventsAll": "Tout l’agenda",
+    "eventsEmpty": "Rien d’annoncé pour les semaines qui viennent.",
+    "membersTitle": "Les membres",
+    "membersAll": "L’annuaire",
+    "messagesTitle": "Les messages",
+    "messagesLine": "Écrire à quelqu’un que vous suivez.",
+    "messagesAll": "Ma boîte",
+    "journalTitle": "Le journal",
+    "journalLine": "La partie du site qui se lit sans compte.",
+    "journalAll": "Lire le journal"
   }
 }

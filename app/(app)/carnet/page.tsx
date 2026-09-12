@@ -12,7 +12,6 @@ import { REVIEW_SCOPES, type ReviewKind, type ReviewVisibility } from '@/lib/rev
 import {
   listMyNotebook,
   listSharedWithMe,
-  myScoreScale,
   type ReviewWithContext,
 } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
@@ -135,10 +134,9 @@ export default async function NotebookPage({ searchParams }: Search) {
     ? (rawScope as ReviewVisibility)
     : undefined
 
-  const [entries, shared, scale] = await Promise.all([
+  const [entries, shared] = await Promise.all([
     listMyNotebook(user.id, { kind, visibility: scope }),
     listSharedWithMe(user.id),
-    myScoreScale(user.id),
   ])
 
   const filtered = kind !== undefined || scope !== undefined
@@ -164,18 +162,17 @@ export default async function NotebookPage({ searchParams }: Search) {
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <div className="flex flex-col gap-2">
-        <p className="eyebrow">
-          {m.nav.mine.label} · {copy.eyebrow}
-        </p>
+        <p className="eyebrow">{copy.eyebrow}</p>
         <h1 id="mon-carnet" className="font-display text-display-md leading-tight">
           {copy.title}
         </h1>
         <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
       </div>
 
-      {/* One toolbar on two hairlined rows: what kind, who reads, which scale.
-          The scale control moved to /parametres with the other display
-          preferences; what stays is the fact and the way to change it. */}
+      {/* One toolbar on two hairlined rows: what kind, and who reads.
+          The third row used to name the display scale and link to the setting
+          that changed it; since 0028 there is one scale — the band — so the
+          row said something nobody could act on. */}
       <div className="border-rule flex flex-col border-t border-b">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -194,15 +191,8 @@ export default async function NotebookPage({ searchParams }: Search) {
           </div>
           <p className="text-ink-muted flex flex-wrap items-center gap-x-2 text-xs">
             {entries.length > 0 ? (
-              <>
-                <span>{count}</span>
-                <span className="text-ink-faint">·</span>
-              </>
+              <span>{count}</span>
             ) : null}
-            <span>{scale === 100 ? copy.scale.hundred : copy.scale.twenty}</span>
-            <Link href={routes.settings()} className="hover:text-ink underline underline-offset-4">
-              {m.settings.scaleChange}
-            </Link>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3">
@@ -249,7 +239,7 @@ export default async function NotebookPage({ searchParams }: Search) {
               <h2 className="eyebrow text-accent">{group.label}</h2>
               <div className="border-rule border-t">
                 {group.entries.map((entry) => (
-                  <EntryRow key={entry.id} entry={entry} scale={scale} showCigar showScope isMine />
+                  <EntryRow key={entry.id} entry={entry} showCigar showScope isMine />
                 ))}
               </div>
             </div>
@@ -270,7 +260,7 @@ export default async function NotebookPage({ searchParams }: Search) {
         ) : (
           <div className="border-rule border-t">
             {shared.map((entry) => (
-              <EntryRow key={entry.id} entry={entry} scale={scale} showCigar showAuthor />
+              <EntryRow key={entry.id} entry={entry} showCigar showAuthor />
             ))}
           </div>
         )}

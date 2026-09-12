@@ -2,7 +2,6 @@ import { ScoreMark } from '@/components/reviews/entry-parts'
 import { formatEffectiveDate } from '@/lib/cigar'
 import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
-import type { ScoreScale } from '@/lib/reviews/model'
 import { aromaLabels, type CigarStats } from '@/lib/reviews/queries'
 
 const copy = m.cigarStats
@@ -31,13 +30,7 @@ const copy = m.cigarStats
  * question the owner asked — "y a-t-il bien les arômes ?" — the referential's
  * half is the sheet's own profile, rendered by the page above this card.
  */
-export async function StatsPanel({
-  stats,
-  scale = 100,
-}: {
-  stats: CigarStats | null
-  scale?: ScoreScale
-}) {
+export async function StatsPanel({ stats }: { stats: CigarStats | null }) {
   const cited = stats?.top_aromas ?? []
   const labels = await aromaLabels(cited.map((aroma) => aroma.id))
 
@@ -61,7 +54,7 @@ export async function StatsPanel({
         <div className="border-rule bg-surface grid rounded-[3px] border sm:grid-cols-[12.5rem_minmax(0,1fr)]">
           <div className="border-rule flex flex-col justify-center gap-1 border-b p-5 sm:border-r sm:border-b-0">
             <span className="eyebrow">{copy.bayesian}</span>
-            <ScoreMark score={stats.bayesian_score} scale={scale} size="lg" />
+            <ScoreMark score={stats.bayesian_score} size="lg" />
             <span className="text-ink-muted text-xs">
               {stats.review_count === 1
                 ? copy.publicOne
@@ -74,7 +67,7 @@ export async function StatsPanel({
               <div className="flex flex-col gap-0.5">
                 <dt className="eyebrow">{copy.mean}</dt>
                 <dd className="text-base font-medium tabular-nums">
-                  <ScoreMark score={stats.mean_score} scale={scale} size="sm" />
+                  <ScoreMark score={stats.mean_score} size="sm" />
                 </dd>
               </div>
               <div className="flex flex-col gap-0.5">
@@ -82,7 +75,7 @@ export async function StatsPanel({
                 <dd className="text-base font-medium tabular-nums">
                   {stats.review_count_90d > 0 ? (
                     <>
-                      <ScoreMark score={stats.mean_score_90d} scale={scale} size="sm" />
+                      <ScoreMark score={stats.mean_score_90d} size="sm" />
                       <span className="text-ink-muted text-xs font-normal">
                         {' · '}
                         {copy.recentCount.replace('{count}', formatCount(stats.review_count_90d))}
@@ -137,12 +130,19 @@ export async function StatsPanel({
   )
 }
 
+/*
+ * One bar per band, five bands, best first — the keys migration 0028 writes.
+ *
+ * The ten-point brackets of 0003 ('lt60', 'b60_69'…) could not survive the
+ * switch: a note of one band and a note of two both land under sixty, so two
+ * bars of the histogram were one bar wearing two labels.
+ */
 const BARS = [
-  { key: 'b90_100', label: '90–100' },
-  { key: 'b80_89', label: '80–89' },
-  { key: 'b70_79', label: '70–79' },
-  { key: 'b60_69', label: '60–69' },
-  { key: 'lt60', label: '< 60' },
+  { key: 'r5', bands: 5 },
+  { key: 'r4', bands: 4 },
+  { key: 'r3', bands: 3 },
+  { key: 'r2', bands: 2 },
+  { key: 'r1', bands: 1 },
 ] as const
 
 /** Five bars, 160px wide: one dimension, no axis, no library, no full-width zero. */
@@ -151,12 +151,16 @@ function Distribution({ distribution }: { distribution: Record<string, number> }
   return (
     <div className="flex flex-col gap-1.5">
       <span className="eyebrow">{copy.distribution}</span>
-      <ul className="grid grid-cols-[3rem_10rem_1.5rem] items-center gap-x-3 gap-y-1">
+      <ul className="grid grid-cols-[4.5rem_10rem_1.5rem] items-center gap-x-3 gap-y-1">
         {BARS.map((bar) => {
           const value = distribution[bar.key] ?? 0
           return (
             <li key={bar.key} className="contents">
-              <span className="text-ink-faint font-mono text-xs tabular-nums">{bar.label}</span>
+              <span className="text-ink-faint text-xs tabular-nums">
+                {bar.bands === 1
+                  ? copy.bandOne
+                  : copy.bandMany.replace('{count}', String(bar.bands))}
+              </span>
               <span className="bg-surface-raised h-1.5 rounded-[3px]">
                 <span
                   className="bg-accent block h-1.5 rounded-[3px]"

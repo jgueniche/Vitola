@@ -7,7 +7,6 @@ import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import {
   LENGTH_UNITS,
-  SCORE_SCALES,
   readPreferences,
   readPrivacy,
 } from '@/lib/settings/model'
@@ -132,11 +131,6 @@ export async function saveProfile(
 /* -------------------------------------------------------------------------- */
 
 const preferencesSchema = z.object({
-  scoreScale: z.coerce.number().refine(
-    (value): value is (typeof SCORE_SCALES)[number] =>
-      (SCORE_SCALES as readonly number[]).includes(value),
-    copy.unknown,
-  ),
   lengthUnit: z.enum(LENGTH_UNITS),
   emailDigest: z.preprocess((value) => value === 'on' || value === 'true', z.boolean()),
 })
@@ -146,7 +140,6 @@ export async function savePreferences(
   formData: FormData,
 ): Promise<SettingsState> {
   const parsed = preferencesSchema.safeParse({
-    scoreScale: formData.get('scoreScale'),
     lengthUnit: formData.get('lengthUnit'),
     emailDigest: formData.get('emailDigest'),
   })
@@ -167,9 +160,6 @@ export async function savePreferences(
     .update({
       preferences: {
         ...readPreferences(before?.preferences),
-        // A number, because that is what the column default holds. The CHECK
-        // reads `preferences ->> 'score_scale'`, which is text either way.
-        score_scale: parsed.data.scoreScale,
         length_unit: parsed.data.lengthUnit,
         email_digest: parsed.data.emailDigest,
       },

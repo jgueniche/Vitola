@@ -4,7 +4,7 @@ import { KindBadge, ScopeBadge, ScoreMark } from '@/components/reviews/entry-par
 import { formatEffectiveDate } from '@/lib/cigar'
 import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
-import { SCORE_KEYS, SUB_SCORE_MAX, type ScoreKey, type ScoreScale } from '@/lib/reviews/model'
+import { SCORE_KEYS, SUB_SCORE_MAX, type ScoreKey } from '@/lib/reviews/model'
 import type { ReviewWithContext } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 
@@ -34,14 +34,12 @@ const copy = m.notebook.entry
  */
 export function EntryRow({
   entry,
-  scale = 100,
   showCigar = false,
   showAuthor = false,
   showScope = false,
   isMine = false,
 }: {
   entry: ReviewWithContext
-  scale?: ScoreScale
   showCigar?: boolean
   showAuthor?: boolean
   showScope?: boolean
@@ -57,7 +55,7 @@ export function EntryRow({
   return (
     <article className="border-rule grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 border-b py-5">
       <div className="flex flex-col">
-        <ScoreMark score={entry.score_total} scale={scale} size="md" />
+        <ScoreMark score={entry.score_total} size="md" />
       </div>
 
       <div className="flex min-w-0 flex-col gap-2.5">

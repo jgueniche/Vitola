@@ -12,7 +12,6 @@ import {
   REVIEW_SCOPES,
   SCOPE_TRAITS,
   SCORE_KEYS,
-  scoreScaleFromPreferences,
   SUB_SCORE_MAX,
   totalFromScores,
 } from '@/lib/reviews/model'
@@ -202,17 +201,3 @@ describe('compactScores', () => {
   })
 })
 
-describe('the display scale', () => {
-  it('reads twenty whether it was stored as a number or as a string', () => {
-    expect(scoreScaleFromPreferences({ score_scale: 20 })).toBe(20)
-    expect(scoreScaleFromPreferences({ score_scale: '20' })).toBe(20)
-  })
-
-  it('falls back to the trade standard on anything else', () => {
-    expect(scoreScaleFromPreferences({ score_scale: 50 })).toBe(100)
-    expect(scoreScaleFromPreferences({})).toBe(100)
-    expect(scoreScaleFromPreferences(null)).toBe(100)
-    expect(scoreScaleFromPreferences('nonsense')).toBe(100)
-    expect(scoreScaleFromPreferences(undefined)).toBe(100)
-  })
-})

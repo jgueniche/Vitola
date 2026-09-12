@@ -142,20 +142,6 @@ export function PreferencesForm({ preferences }: { preferences: Preferences }) {
     <form action={action} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="scoreScale">{copy.scoreScale}</Label>
-          <Select
-            id="scoreScale"
-            name="scoreScale"
-            defaultValue={String(preferences.score_scale)}
-            key={`scale-${preferences.score_scale}`}
-          >
-            <option value="100">{copy.hundred}</option>
-            <option value="20">{copy.twenty}</option>
-          </Select>
-          <p className="text-ink-muted text-xs leading-relaxed">{copy.scoreScaleHint}</p>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
           <Label htmlFor="lengthUnit">{copy.lengthUnit}</Label>
           <Select
             id="lengthUnit"
