@@ -21,7 +21,9 @@ dans `docs/decisions-log.md`, pas ici.
 | [0013](./0013-le-back-office-de-moderation.md) | Le modérateur entre dans `mod` par des portes de la taille du geste ; la décision emporte son acte | **Acceptée** | 2026-08-23 |
 | [0014](./0014-le-back-office-d-administration.md) | L'administration regroupe ce qui existe ; le drapeau devient un acte tracé | **Acceptée** | 2026-08-25 |
 | [0015](./0015-le-catalogue-avant-la-caisse.md) | Le catalogue naît avant la caisse, et il s'alimente sans développeur | **Acceptée** | 2026-08-25 |
-| [0016](./0016-la-marketplace-d-accessoires.md) | La marketplace d'accessoires : deux entrées, un vendeur qui ne publie pas, pas un euro qui circule | **Acceptée** — GO du porteur du 25 août ; D7 (modèle d'argent) reste ouverte | 2026-08-25 |
+| [0016](./0016-la-marketplace-d-accessoires.md) | La marketplace d'accessoires : deux entrées, un vendeur qui ne publie pas, pas un euro qui circule | **Remplacée par [0017](./0017-la-boutique-en-revente.md)** — la marketplace est retirée le 12 septembre 2026 | 2026-08-25 |
+| [0017](./0017-la-boutique-en-revente.md) | La boutique revend : personne ne vend ici que nous | **Acceptée** — QA du 12 septembre ; remplace la 0016 | 2026-09-12 |
+| [0018](./0018-l-abonnement-du-cercle.md) | Deux formules : le carnet reste libre, la parole des autres est le Cercle | **Acceptée** pour ce qui s'annonce, **non armée** pour ce qui se facture | 2026-09-12 |
 
 ## Statuts
 

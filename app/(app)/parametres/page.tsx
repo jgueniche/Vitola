@@ -15,7 +15,6 @@ import {
 } from '@/lib/settings/model'
 import { getAccount } from '@/lib/settings/queries'
 import { hasMinRole } from '@/lib/settings/roles'
-import { getMyVendor } from '@/lib/shop/queries'
 import { relationConfirmation } from '@/lib/social/confirmations'
 import { listBlockedPeople } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -71,11 +70,7 @@ export default async function SettingsPage({
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.settings())}`)
   }
 
-  const [account, blocked, vendor] = await Promise.all([
-    getAccount(user.id),
-    listBlockedPeople(),
-    getMyVendor(user.id),
-  ])
+  const [account, blocked] = await Promise.all([getAccount(user.id), listBlockedPeople()])
   /* `tg_handle_new_user()` creates the profile with the account. Its absence is
      a broken trigger, not an empty state, and a 404 says so loudly. */
   if (!account) notFound()
@@ -102,7 +97,7 @@ export default async function SettingsPage({
             under a header that already carried an eyebrow, a title, a lede and
             a line of metadata; the header does not need to explain them, the
             screens behind them do. */}
-        {hasMinRole(account.role, 'moderator') || vendor ? (
+        {hasMinRole(account.role, 'moderator') ? (
           <p className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-sm">
             {hasMinRole(account.role, 'moderator') ? (
               <Link href={routes.moderation()} className="text-ink underline underline-offset-4">
@@ -112,11 +107,6 @@ export default async function SettingsPage({
             {hasMinRole(account.role, 'admin') ? (
               <Link href={routes.admin()} className="text-ink underline underline-offset-4">
                 {m.admin.settingsLink}
-              </Link>
-            ) : null}
-            {vendor ? (
-              <Link href={routes.vendorSpace()} className="text-ink underline underline-offset-4">
-                {m.vendor.settingsLink}
               </Link>
             ) : null}
           </p>

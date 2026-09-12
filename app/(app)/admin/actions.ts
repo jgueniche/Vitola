@@ -236,7 +236,9 @@ export async function deleteLine(formData: FormData): Promise<void> {
   const { data } = await ref.from('lines').delete().eq('id', parsed.data.id).select('id')
 
   revalidatePath(routes.adminLines())
-  redirect(`${routes.adminLines()}?fait=${!data || data.length === 0 ? 'refus' : 'gamme-supprimee'}`)
+  redirect(
+    `${routes.adminLines()}?fait=${!data || data.length === 0 ? 'refus' : 'gamme-supprimee'}`,
+  )
 }
 
 /* -------------------------------------------------------------------------- */
@@ -259,7 +261,11 @@ export async function createProduct(
   const parsed = parseProductForm(formData)
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
 
-  const refused = refuseTobaccoWording(parsed.data.title, parsed.data.brand, parsed.data.description)
+  const refused = refuseTobaccoWording(
+    parsed.data.title,
+    parsed.data.brand,
+    parsed.data.description,
+  )
   if (refused) return { error: refused }
 
   const slug = clubSlug(parsed.data.title)
@@ -314,10 +320,16 @@ export async function updateProduct(
   const id = z.uuid().safeParse(formData.get('id'))
   const parsed = parseProductForm(formData)
   if (!id.success || !parsed.success) {
-    return { error: parsed.success ? copy.unknown : (parsed.error.issues[0]?.message ?? copy.unknown) }
+    return {
+      error: parsed.success ? copy.unknown : (parsed.error.issues[0]?.message ?? copy.unknown),
+    }
   }
 
-  const refused = refuseTobaccoWording(parsed.data.title, parsed.data.brand, parsed.data.description)
+  const refused = refuseTobaccoWording(
+    parsed.data.title,
+    parsed.data.brand,
+    parsed.data.description,
+  )
   if (refused) return { error: refused }
 
   const image = readProductImage(formData)
@@ -383,7 +395,8 @@ export async function setProductStatus(formData: FormData): Promise<void> {
     .eq('id', parsed.data.id)
     .select('id')
 
-  const fait = !data || data.length === 0 ? 'refus' : (PRODUCT_OUTCOME[parsed.data.status] ?? 'refus')
+  const fait =
+    !data || data.length === 0 ? 'refus' : (PRODUCT_OUTCOME[parsed.data.status] ?? 'refus')
   revalidatePath(routes.adminShop())
   redirect(`${routes.adminShop()}?produit=${parsed.data.id}&fait=${fait}`)
 }
@@ -423,7 +436,7 @@ export async function refuseProduct(formData: FormData): Promise<void> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Marketplace vendors (ADR 0016)                                              */
+/* Partners — those we buy from (migration 0034, ex-ADR 0016 marketplace)      */
 /* -------------------------------------------------------------------------- */
 
 const createVendorSchema = z.object({
@@ -431,25 +444,20 @@ const createVendorSchema = z.object({
     .string()
     .transform((value) => value.trim())
     .pipe(z.string().min(2, m.admin.errors.vendorNameNeeded).max(120, m.admin.errors.tooLong)),
-  ownerHandle: z.preprocess(
-    (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
-    z
-      .string()
-      .transform((value) => value.trim().toLowerCase())
-      .nullable(),
-  ),
 })
 
 /**
- * D1: the entry is human. A vendor is born `pending` (status is outside the
- * INSERT grant), attached to an account when a handle is given — looked up
- * under `profiles_select_directory`, so a hidden profile reads as unknown.
+ * The entry is human, and that half of ADR 0016's D1 survives the marketplace:
+ * an admin adds a partner, a partner is born `pending` (status is outside the
+ * INSERT grant), and nothing self-registers.
+ *
+ * What does not survive is the account attachment. `owner_id` is gone with
+ * migration 0034: nobody sells here but us, so there is no account to hang a
+ * shopfront on — and a column naming a member for no reason is a personal
+ * datum waiting to be repurposed.
  */
 export async function createVendor(_previous: AdminState, formData: FormData): Promise<AdminState> {
-  const parsed = createVendorSchema.safeParse({
-    name: formData.get('name'),
-    ownerHandle: formData.get('ownerHandle'),
-  })
+  const parsed = createVendorSchema.safeParse({ name: formData.get('name') })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
 
   const slug = clubSlug(parsed.data.name)
@@ -457,28 +465,14 @@ export async function createVendor(_previous: AdminState, formData: FormData): P
 
   const supabase = await createSupabaseServerClient()
 
-  let ownerId: string | null = null
-  if (parsed.data.ownerHandle) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('handle', parsed.data.ownerHandle)
-      .maybeSingle()
-    if (!profile) return { error: copy.handleUnknown }
-    ownerId = profile.id
-  }
-
   const { data, error } = await supabase
     .schema('shop')
     .from('vendors')
-    .insert({ name: parsed.data.name, slug, owner_id: ownerId })
+    .insert({ name: parsed.data.name, slug })
     .select('id')
 
   if (error) {
     if (error.code === '42501') return { error: copy.notAdmin }
-    if (error.code === '23505' && error.message.includes('vendors_owner_key')) {
-      return { error: copy.handleTaken }
-    }
     if (error.code === '23505') return { error: copy.vendorExists }
     if (error.code === '23514' && error.message.includes('VITOLA_TOBACCO_LISTING')) {
       return { error: copy.titleRefused }
@@ -487,7 +481,7 @@ export async function createVendor(_previous: AdminState, formData: FormData): P
   }
   if (!data || data.length === 0) return { error: copy.notAdmin }
 
-  revalidatePath(routes.adminShopVendors())
+  revalidatePath(routes.adminShopPartners())
   return { done: true }
 }
 
@@ -516,9 +510,10 @@ export async function setVendorStatus(formData: FormData): Promise<void> {
     .eq('id', parsed.data.id)
     .select('id')
 
-  const fait = !data || data.length === 0 ? 'refus' : (VENDOR_OUTCOME[parsed.data.status] ?? 'refus')
-  revalidatePath(routes.adminShopVendors())
-  redirect(`${routes.adminShopVendors()}?fait=${fait}`)
+  const fait =
+    !data || data.length === 0 ? 'refus' : (VENDOR_OUTCOME[parsed.data.status] ?? 'refus')
+  revalidatePath(routes.adminShopPartners())
+  redirect(`${routes.adminShopPartners()}?fait=${fait}`)
 }
 
 /**
@@ -538,53 +533,14 @@ export async function deleteVendor(formData: FormData): Promise<void> {
     .eq('id', parsed.data.id)
     .select('id')
 
-  const fait = error?.code === '23503' ? 'vendeur-plein' : data && data.length > 0 ? 'vendeur-supprime' : 'refus'
-  revalidatePath(routes.adminShopVendors())
-  redirect(`${routes.adminShopVendors()}?fait=${fait}`)
-}
-
-const attachOwnerSchema = z.object({
-  id: z.uuid(),
-  handle: z
-    .string()
-    .transform((value) => value.trim().toLowerCase())
-    .pipe(z.string().min(1, m.admin.errors.handleUnknown)),
-})
-
-export async function attachVendorOwner(
-  _previous: AdminState,
-  formData: FormData,
-): Promise<AdminState> {
-  const parsed = attachOwnerSchema.safeParse({
-    id: formData.get('id'),
-    handle: formData.get('handle'),
-  })
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? copy.unknown }
-
-  const supabase = await createSupabaseServerClient()
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('handle', parsed.data.handle)
-    .maybeSingle()
-  if (!profile) return { error: copy.handleUnknown }
-
-  const { data, error } = await supabase
-    .schema('shop')
-    .from('vendors')
-    .update({ owner_id: profile.id })
-    .eq('id', parsed.data.id)
-    .select('id')
-
-  if (error) {
-    if (error.code === '23505') return { error: copy.handleTaken }
-    if (error.code === '42501') return { error: copy.notAdmin }
-    return { error: copy.unknown }
-  }
-  if (!data || data.length === 0) return { error: copy.notAdmin }
-
-  revalidatePath(routes.adminShopVendors())
-  return { done: true }
+  const fait =
+    error?.code === '23503'
+      ? 'vendeur-plein'
+      : data && data.length > 0
+        ? 'vendeur-supprime'
+        : 'refus'
+  revalidatePath(routes.adminShopPartners())
+  redirect(`${routes.adminShopPartners()}?fait=${fait}`)
 }
 
 export async function deleteProduct(formData: FormData): Promise<void> {

@@ -145,6 +145,41 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invitations: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          email: string
+          invited_at: string
+          note: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          email: string
+          invited_at?: string
+          note?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          email?: string
+          invited_at?: string
+          note?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invitations_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string

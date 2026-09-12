@@ -82,7 +82,7 @@ export default async function AdminPage() {
               .replace('{active}', String(counts.vendorsActive))
               .replace('{pending}', String(counts.vendorsPending))
               .replace('{suspended}', String(counts.vendorsSuspended))}
-            href={routes.adminShopVendors()}
+            href={routes.adminShopPartners()}
             link={copy.dash.shopVendorsLink}
           />
         </ul>

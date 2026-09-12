@@ -2,6 +2,96 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La première QA humaine — six décisions qu'il faut pouvoir retrouver
+
+Session du 12 septembre 2026, première phase de QA humaine. Les gros morceaux sont ailleurs :
+[ADR 0017](adr/0017-la-boutique-en-revente.md) pour la boutique en revente,
+[ADR 0018](adr/0018-l-abonnement-du-cercle.md) pour les deux formules du Cercle, et les migrations
+0028 à 0034 pour le reste. Ce qui suit est ce qui n'avait pas de place ailleurs.
+
+### 1. Le geste de la fiche part en `public`, et cela renverse un défaut du RGPD
+
+« J'en fume un ya trop de trucs à remplir c'est trop long **(tout le monde de base peut voir)** ».
+La première moitié est un raccourcissement : quatre contrôles sur sept sont repliés dans un
+`<details>` et la note se clique en cinq bagues.
+
+La seconde moitié **renverse un défaut consigné deux fois**. L'ADR 0004 lie `private` à l'art. 25
+du RGPD — publier est un geste qu'on fait, jamais un qu'on oublie de défaire — et l'ADR 0006 D3
+dit que ce qui sort de la cave entre au carnet en `private`. Le porteur demande l'inverse, en
+autant de mots, et c'est sa décision comme responsable de traitement.
+
+**Ce que le code doit en échange, et qui est tenu** : le renversement n'est jamais silencieux. Le
+sélecteur de portée reste déplié au-dessus du pli, `public` est allumé, et la phrase sous la
+rangée dit que l'entrée sera publique et qu'elle compte dans la moyenne publique. Le défaut est
+une constante nommée (`DEFAULT_SCOPE` dans `smoke-form.tsx`), donc il y a exactement un endroit
+où le remettre à `private`.
+
+**Ce qui rouvre** : un avis juridique avant l'ouverture commerciale, avec l'illustration de
+l'accueil — même dossier, même échéance.
+
+### 2. Les photos de cigares : nous n'y avons pas accès, et c'est définitif sans une licence
+
+« On aimerait si tu y a accès pouvoir mettre les photos de chaque cigares (sinon en note contacter
+les marques des vitoles) ». **Nous n'y avons pas accès, et la note est le bon réflexe.**
+
+Une photo de produit est une œuvre protégée (art. L112-2 CPI) ; il n'existe aucun corpus de
+photographie de cigares sous licence ouverte, et PROVENANCE interdit la collecte automatisée
+comme la reprise d'une base tierce. Les trois régimes du dépôt ne couvrent aucun cas :
+- régime A (données publiques officielles) — un décret de prix n'a pas d'images ;
+- régime B/E (licence ouverte) — le registre des buralistes n'en a pas non plus ;
+- régime C (la spécification que le fabricant publie lui-même) — il publie des **textes** que l'on
+  transcrit, et ses images restent les siennes.
+
+**La seule voie** est une autorisation écrite du fabricant ou du distributeur, par marque. Ce
+n'est pas un chantier de développement : c'est un courrier. Rien n'est construit en attendant —
+ni colonne, ni bucket, ni écran « photo à venir » —, parce qu'une colonne vide est le registre de
+consentements à l'envers (fin de P1, refus n° 1).
+
+**Ce qui rouvre** : la première autorisation écrite reçue. Ce jour-là, la migration est une
+colonne `ref.cigars.image_path`, un bucket, et une ligne de PROVENANCE par marque autorisée —
+avec la référence du courrier.
+
+### 3. La planche de l'accueil perd ses légendes, donc perd sa défense
+
+« Tu m'enlèves les descriptions sous le cigare qui fume. » Les quatre légendes annotées
+partent — et il faut dire ce qu'elles faisaient. Elles **étaient** la défense §2 de
+l'illustration : une planche d'ouvrage de référence, des légendes en mesures et non en adjectifs.
+
+Ce qui reste : aucune marque, aucun adjectif, aucun produit nommé sur la page. C'est une défense
+**plus mince**, et l'entrée « Cigare allumé en page publique » du `CLAUDE.md` racine le dit
+désormais dans ces termes. Même déclencheur qu'avant : un avis de conseil juridique.
+
+### 4. `/cigares` pour un visiteur est un mur de connexion, pas un mur d'âge
+
+« Page sans connexion : boutique, partenaires, cigares — on en met quelques uns puis vous
+connecter. » Traduit : un visiteur **sans compte** voit neuf fiches et une invitation.
+
+La frontière 18+ **ne bouge pas**. La règle 1 du `CLAUDE.md` racine et le §2 du brief mettent le
+référentiel tabac derrière le portail, `tests/unit/routes.test.ts` l'affirme, et rien dans une
+session de QA ne déplace cela. Ce qui change est qui voit **tout** le référentiel, pas qui passe
+la porte.
+
+### 5. Le vendor report reste dans le CHECK, et n'est plus signalable
+
+La vitrine de vendeur disparaît (ADR 0017), donc le bouton « Signaler cette boutique » aussi. La
+valeur `vendor` reste dans le CHECK de `mod.reports` et dans `REPORTABLE` : les signalements déjà
+déposés contre une vitrine doivent rester lisibles, et une file de modération qui ne sait pas
+ouvrir sa propre histoire est pire qu'une surface que personne ne peut atteindre. Le dossier rend
+le nom du partenaire et **aucun lien public** — un lien vers un 404 est pire que pas de lien.
+
+### 6. Ce que la QA a trouvé qui était un vrai bug, et pas une préférence
+
+Trois choses, et elles valent d'être distinguées du reste :
+
+- **« Me localiser » cherchait autour du central de l'opérateur.** `enableHighAccuracy` était
+  absent, donc le navigateur répondait depuis l'adresse IP — quatorze kilomètres, pas une dérive.
+  Et `coords.accuracy` était dans la réponse depuis le premier jour sans que personne ne le lise.
+- **La carte cigare disait dans son propre commentaire que toute la carte était un lien.** Seul
+  le titre l'était.
+- **La recherche des lieux est devenue un balayage de table** en passant de 200 à 13 482 lignes :
+  45,8 ms par frappe, ramenés à 4,9 ms par deux index trigramme (migration 0031). Mesuré avant
+  d'être corrigé, et le chiffre est dans le commentaire de la requête.
+
 ## La QA de la boutique publique se durcit — rejouée, auditée, illustrée
 
 ### Ce qui est livré

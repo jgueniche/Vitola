@@ -9,16 +9,11 @@ import { routes } from '@/lib/routes'
 
 import { setVendorStatus } from '../../actions'
 import { AdminRestricted, adminView } from '../../shell'
-import {
-  AttachOwnerForm,
-  CreateVendorForm,
-  DeleteVendorForm,
-  SuspendVendorForm,
-} from './vendor-forms'
+import { CreateVendorForm, DeleteVendorForm, SuspendVendorForm } from './partner-forms'
 
-export const metadata: Metadata = { title: m.admin.vendors.title }
+export const metadata: Metadata = { title: m.admin.partners.title }
 
-const copy = m.admin.vendors
+const copy = m.admin.partners
 
 const CONFIRMATIONS: Record<string, string> = {
   'vendeur-active': m.admin.confirmations.vendeurActive,
@@ -51,7 +46,7 @@ function missingTraceability(vendor: AdminVendorRow): string[] {
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 export default async function AdminVendorsPage({ searchParams }: Props) {
-  const isAdmin = await adminView(routes.adminShopVendors())
+  const isAdmin = await adminView(routes.adminShopPartners())
   if (!isAdmin) return <AdminRestricted />
 
   const query = await searchParams
@@ -103,12 +98,6 @@ export default async function AdminVendorsPage({ searchParams }: Props) {
                         /{vendor.slug}
                         {' · '}
                         {copy.productsCount.replace('{n}', String(vendor.productCount))}
-                        {' · '}
-                        {vendor.ownerHandle
-                          ? `${copy.ownerPrefix} @${vendor.ownerHandle}`
-                          : vendor.owner_id === null && vendor.slug === 'vitola'
-                            ? copy.ownerNoneHouse
-                            : copy.ownerNone}
                       </span>
                     </span>
                     <span className="eyebrow">{STATUS_LABELS[vendor.status] ?? vendor.status}</span>
@@ -134,17 +123,8 @@ export default async function AdminVendorsPage({ searchParams }: Props) {
                     ) : (
                       <SuspendVendorForm vendorId={vendor.id} />
                     )}
-                    {vendor.slug !== 'vitola' ? <AttachOwnerForm vendorId={vendor.id} /> : null}
                     {vendor.slug !== 'vitola' && vendor.productCount === 0 ? (
                       <DeleteVendorForm vendorId={vendor.id} />
-                    ) : null}
-                    {vendor.status === 'active' ? (
-                      <Link
-                        href={routes.shopVendor(vendor.slug)}
-                        className="text-accent text-sm underline"
-                      >
-                        {copy.shopfrontLink}
-                      </Link>
                     ) : null}
                   </div>
                 </li>

@@ -295,14 +295,18 @@ export async function targetPreview(
       .maybeSingle()
     if (!data) return null
     const statuses: Record<string, string> = {
-      pending: m.admin.vendors.statusPending,
-      suspended: m.admin.vendors.statusSuspended,
+      pending: m.admin.partners.statusPending,
+      suspended: m.admin.partners.statusSuspended,
     }
     return {
       title: data.name,
       byline: data.status === 'active' ? null : (statuses[data.status] ?? data.status),
       excerpt: data.description,
-      href: routes.shopVendor(data.slug),
+      /* No public address any more: the shopfronts went with the
+         marketplace (migration 0034). The folder names the partner and
+         stops there — an admin finds them in /admin/boutique/partenaires,
+         and a link to a 404 is worse than no link. */
+      href: null,
       hidden: false,
     }
   }

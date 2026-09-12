@@ -74,7 +74,7 @@ export default async function AdminShopPage({ searchParams }: Props) {
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="lede">{copy.lede}</p>
         <p className="text-sm">
-          <Link href={routes.adminShopVendors()} className="text-ink underline">
+          <Link href={routes.adminShopPartners()} className="text-ink underline">
             {copy.vendorsLink}
           </Link>{' '}
           <span className="text-ink-faint text-xs">{copy.vendorsLede}</span>

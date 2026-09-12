@@ -9,15 +9,9 @@ import { Button } from '@/components/ui/button'
 import { FieldError, FieldStatus, Input, Label } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 
-import {
-  attachVendorOwner,
-  createVendor,
-  deleteVendor,
-  setVendorStatus,
-  type AdminState,
-} from '../../actions'
+import { createVendor, deleteVendor, setVendorStatus, type AdminState } from '../../actions'
 
-const copy = m.admin.vendors
+const copy = m.admin.partners
 
 export function CreateVendorForm() {
   const [state, action, pending] = useActionState<AdminState, FormData>(createVendor, {})
@@ -29,11 +23,6 @@ export function CreateVendorForm() {
           <Label htmlFor="vendor-name">{copy.nameLabel}</Label>
           <Input id="vendor-name" name="name" maxLength={120} />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="vendor-owner">{copy.ownerLabel}</Label>
-          <Input id="vendor-owner" name="ownerHandle" maxLength={30} />
-          <p className="text-ink-muted text-xs">{copy.ownerHint}</p>
-        </div>
       </div>
       {state.error ? <FieldError>{state.error}</FieldError> : null}
       {state.done ? <FieldStatus>{copy.created}</FieldStatus> : null}
@@ -42,25 +31,6 @@ export function CreateVendorForm() {
           {copy.create}
         </Button>
       </div>
-    </form>
-  )
-}
-
-export function AttachOwnerForm({ vendorId }: { vendorId: string }) {
-  const [state, action, pending] = useActionState<AdminState, FormData>(attachVendorOwner, {})
-
-  return (
-    <form action={action} className="flex flex-wrap items-end gap-2">
-      <input type="hidden" name="id" value={vendorId} />
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={`attach-${vendorId}`}>{copy.attachLabel}</Label>
-        <Input id={`attach-${vendorId}`} name="handle" maxLength={30} />
-      </div>
-      <Button type="submit" variant="secondary" size="sm" disabled={pending}>
-        {copy.attach}
-      </Button>
-      {state.error ? <FieldError>{state.error}</FieldError> : null}
-      {state.done ? <FieldStatus>{m.admin.confirmations.compteRattache}</FieldStatus> : null}
     </form>
   )
 }

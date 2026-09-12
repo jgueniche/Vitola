@@ -38,14 +38,22 @@ async function settle(page: Page): Promise<void> {
 }
 
 async function text(page: Page): Promise<string> {
-  return (await page.locator('main').innerText().catch(() => '')) ?? ''
+  return (
+    (await page
+      .locator('main')
+      .innerText()
+      .catch(() => '')) ?? ''
+  )
 }
 
 async function signIn(page: Page): Promise<void> {
   await page.goto(`${BASE}/majorite`)
   await settle(page)
   await page.locator('input[name="birthDate"]').fill('1985-04-02')
-  await page.getByRole('button', { name: /entrer|valider|confirmer/i }).first().click()
+  await page
+    .getByRole('button', { name: /entrer|valider|confirmer/i })
+    .first()
+    .click()
   await settle(page)
   await page.goto(`${BASE}/connexion`)
   await settle(page)
@@ -75,7 +83,7 @@ async function main(): Promise<void> {
     check('les six sigles y sont aussi', contains(body, 'El Laguito'))
     check(
       'et la mise en garde sur ce que le décodeur ne prouve pas',
-      contains(body, "il ne dit pas si une boîte est authentique"),
+      contains(body, 'il ne dit pas si une boîte est authentique'),
     )
 
     console.log('\n2. Un code complet')
@@ -86,11 +94,7 @@ async function main(): Promise<void> {
     check('le code est dans l’URL, donc partageable', page.url().includes('code='), page.url())
     check('le mois est lu', contains(body, 'avril'), body.slice(0, 300))
     check("l'année est lue", contains(body, '2019'), body.slice(0, 300))
-    check(
-      "l'ambiguïté du siècle est dite, pas cachée",
-      contains(body, '1919'),
-      body.slice(0, 400),
-    )
+    check("l'ambiguïté du siècle est dite, pas cachée", contains(body, '1919'), body.slice(0, 400))
     check("l'usine est donnée avec son doute", contains(body, 'à vérifier'), body.slice(0, 400))
 
     console.log('\n3. Un groupe inconnu ne devient pas une usine probable')
@@ -103,7 +107,11 @@ async function main(): Promise<void> {
     console.log('\n4. Un code illisible le dit')
     await page.goto(`${BASE}/codes-de-boite?code=%2F%2F%2F`)
     await settle(page)
-    check('rien à lire', contains(await text(page), 'Rien à lire'), (await text(page)).slice(0, 200))
+    check(
+      'rien à lire',
+      contains(await text(page), 'Rien à lire'),
+      (await text(page)).slice(0, 200),
+    )
 
     /* ---------------------------------------------- le comparateur ------ */
     console.log('\n5. Le comparateur, vide')
@@ -117,12 +125,20 @@ async function main(): Promise<void> {
     await page.locator('input[name="q"]').fill('undercrown')
     await page.getByRole('button', { name: 'Chercher' }).click()
     await settle(page)
-    check('la recherche répond', contains(await text(page), 'Undercrown'), (await text(page)).slice(0, 200))
+    check(
+      'la recherche répond',
+      contains(await text(page), 'Undercrown'),
+      (await text(page)).slice(0, 200),
+    )
 
     await page.getByRole('button', { name: 'Ajouter' }).first().click()
     await settle(page)
     body = await text(page)
-    check('une seule fiche demande la seconde', contains(body, 'Ajoutez-en une seconde'), body.slice(0, 300))
+    check(
+      'une seule fiche demande la seconde',
+      contains(body, 'Ajoutez-en une seconde'),
+      body.slice(0, 300),
+    )
 
     await page.getByRole('button', { name: 'Ajouter' }).first().click()
     await settle(page)
@@ -135,11 +151,7 @@ async function main(): Promise<void> {
     // `verified_at` est rempli sur les 940 fiches, `verified_by` sur aucune, et
     // 862 n'ont jamais été lues par personne. Aucun écran ne montre cette
     // colonne ; celui-ci ne sera pas le premier.
-    check(
-      'aucune relecture n’est affirmée',
-      !contains(body, 'Relue le'),
-      body.slice(0, 500),
-    )
+    check('aucune relecture n’est affirmée', !contains(body, 'Relue le'), body.slice(0, 500))
     check('la page dit que la comparaison est une URL', contains(body, 'se copie'))
 
     console.log('\n7. Retirer une fiche')

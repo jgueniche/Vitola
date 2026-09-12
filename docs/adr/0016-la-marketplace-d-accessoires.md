@@ -1,7 +1,14 @@
 # 0016 — La marketplace d'accessoires : deux entrées, un vendeur qui ne publie pas, et pas un euro qui circule
 
-- **Statut** : **Acceptée** le 25 août 2026 — GO du porteur (« la marketplace d'accessoires,
-  l'option B de la discussion du 25 août »), qui déclenche le point 2 de « Quand rouvrir » de
+- **Statut** : **Remplacée par [l'ADR 0017](./0017-la-boutique-en-revente.md)** le 12 septembre
+  2026 — la première session de QA humaine retire la marketplace (« on va laisser tomber la
+  marketplace ; on va plutôt partir du principe qu'on achète nous à des partenaires et puis on
+  revend derrière nous »). D1 à D5 sont annulées ou réécrites par la 0017, et D7 disparaît avec son
+  objet. Ce document reste lisible tel qu'il a été écrit : il porte le contexte d'époque, et c'est
+  la règle du dossier (`README.md`). **Ne pas s'en servir comme d'une description de l'état
+  actuel.**
+- **Statut d'origine** : Acceptée le 25 août 2026 — GO du porteur (« la marketplace d'accessoires,
+  l'option B de la discussion du 25 août »), qui déclenchait le point 2 de « Quand rouvrir » de
   l'ADR 0015
 - **Date** : 2026-08-25
 - **Décideur** : @jgueniche

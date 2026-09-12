@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/layout/empty-state'
 import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
-import { listAccounts } from '@/lib/admin/queries'
+import { listAccounts, listInvitations } from '@/lib/admin/queries'
 import { formatEffectiveDate } from '@/lib/cigar'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -27,6 +27,12 @@ const copy = m.admin.accounts
  *
  * The search is a `<form method="get">` — shareable, reloadable, zero client
  * JavaScript, like the member directory it mirrors.
+ *
+ * The invitations at the bottom answer the one question a directory of
+ * existing accounts cannot: who has been invited and has not come yet
+ * (migration 0033). Read-only here on purpose — writing the list is a
+ * migration, because an invitation grants a role and a role grant that can be
+ * typed into a form is a role grant with no trace.
  */
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
@@ -36,7 +42,7 @@ export default async function AdminAccountsPage({ searchParams }: Props) {
 
   const query = await searchParams
   const q = typeof query.q === 'string' ? query.q : ''
-  const accounts = await listAccounts(q)
+  const [accounts, invitations] = await Promise.all([listAccounts(q), listInvitations()])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -95,6 +101,41 @@ export default async function AdminAccountsPage({ searchParams }: Props) {
           </p>
         </div>
       )}
+
+      <section aria-labelledby="invitations" className="flex flex-col gap-3">
+        <SectionHead
+          id="invitations"
+          level="h2"
+          size="sm"
+          title={copy.invitationsTitle}
+          lede={copy.invitationsLede}
+        />
+        {invitations.length === 0 ? (
+          <p className="text-ink-faint text-sm">{copy.invitationsEmpty}</p>
+        ) : (
+          <ul className="border-rule flex flex-col border-t">
+            {invitations.map((invitation) => (
+              <li
+                key={invitation.email}
+                className="border-rule flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b py-3"
+              >
+                <span className="text-ink text-sm">{invitation.email}</span>
+                <span className="flex flex-wrap items-baseline gap-x-3 text-xs">
+                  <span className="text-ink-muted">{invitation.role}</span>
+                  <span className={invitation.claimed_at ? 'text-ink-faint' : 'text-caution'}>
+                    {invitation.claimed_at
+                      ? copy.invitationsClaimed.replace(
+                          '{date}',
+                          formatEffectiveDate(invitation.claimed_at.slice(0, 10)),
+                        )
+                      : copy.invitationsPending}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   )
 }

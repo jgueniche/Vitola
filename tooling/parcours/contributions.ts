@@ -50,7 +50,12 @@ async function settle(page: Page): Promise<void> {
 }
 
 async function text(page: Page): Promise<string> {
-  return (await page.locator('main').innerText().catch(() => '')) ?? ''
+  return (
+    (await page
+      .locator('main')
+      .innerText()
+      .catch(() => '')) ?? ''
+  )
 }
 
 /** Attend la réponse d'une écriture : confirmation ou refus. Voir parametres.ts. */
@@ -90,7 +95,10 @@ async function signIn(page: Page, email: string): Promise<void> {
   await page.goto(`${BASE}/majorite`)
   await settle(page)
   await page.locator('input[name="birthDate"]').fill('1985-04-02')
-  await page.getByRole('button', { name: /entrer|valider|confirmer/i }).first().click()
+  await page
+    .getByRole('button', { name: /entrer|valider|confirmer/i })
+    .first()
+    .click()
   await settle(page)
   await page.goto(`${BASE}/connexion`)
   await settle(page)
@@ -101,7 +109,11 @@ async function signIn(page: Page, email: string): Promise<void> {
 }
 
 /** Dépose une proposition sur `discontinued_year`. Chaîne vide = remettre à nul. */
-async function propose(page: Page, year: string, why: string): Promise<{ ok: boolean; message: string }> {
+async function propose(
+  page: Page,
+  year: string,
+  why: string,
+): Promise<{ ok: boolean; message: string }> {
   await page.goto(`${BASE}/cigares/${SLUG}/proposer`)
   await settle(page)
   await page.locator('input[name="discontinued_year"]').fill(year)
@@ -128,7 +140,11 @@ async function main(): Promise<void> {
     await member.goto(`${BASE}/cigares/${SLUG}/proposer`)
     await settle(member)
 
-    check('la page rend', contains(await text(member), 'Proposer une correction'), await text(member))
+    check(
+      'la page rend',
+      contains(await text(member), 'Proposer une correction'),
+      await text(member),
+    )
     original = await member.locator('input[name="discontinued_year"]').inputValue()
     check(
       'les champs sont préremplis, pas vides',
@@ -143,7 +159,7 @@ async function main(): Promise<void> {
     console.log('\n2. Une proposition qui ne propose rien est refusée par une phrase')
     await member.getByRole('button', { name: 'Proposer' }).click()
     const empty = await settled(member)
-    check('elle dit qu’on n’a rien changé', empty.message.includes("rien changé"), empty.message)
+    check('elle dit qu’on n’a rien changé', empty.message.includes('rien changé'), empty.message)
 
     console.log('\n3. Deux propositions sur le même champ')
     const first = await propose(member, '2020', 'Parcours : première proposition.')
@@ -155,7 +171,11 @@ async function main(): Promise<void> {
     await member.goto(`${BASE}/contributions`)
     await settle(member)
     let body = await text(member)
-    check('ses propositions sont là', contains(body, 'Année d’arrêt') || contains(body, "Année d'arrêt"), body.slice(0, 400))
+    check(
+      'ses propositions sont là',
+      contains(body, 'Année d’arrêt') || contains(body, "Année d'arrêt"),
+      body.slice(0, 400),
+    )
     check('elles sont en attente', contains(body, 'En attente'), body.slice(0, 400))
     check(
       'la file lui est expliquée plutôt que cachée',
@@ -170,7 +190,11 @@ async function main(): Promise<void> {
     await settle(editor)
     body = await text(editor)
     check('la file est visible', contains(body, 'en attente'), body.slice(0, 300))
-    check('avec le diff lisible', contains(body, '2020') && contains(body, '2021'), body.slice(0, 600))
+    check(
+      'avec le diff lisible',
+      contains(body, '2020') && contains(body, '2021'),
+      body.slice(0, 600),
+    )
     check('et de quoi décider', contains(body, 'Accepter et appliquer'))
 
     console.log('\n6. Un refus sans mot est refusé')
@@ -201,7 +225,10 @@ async function main(): Promise<void> {
     console.log('\n8. La seconde est devenue périmée, et le dit')
     await editor.goto(`${BASE}/contributions`)
     await settle(editor)
-    await editor.locator('textarea[name="comment"]').first().fill('Parcours : sur une fiche qui a bougé.')
+    await editor
+      .locator('textarea[name="comment"]')
+      .first()
+      .fill('Parcours : sur une fiche qui a bougé.')
     await editor.getByRole('button', { name: 'Accepter et appliquer' }).first().click()
     const stale = await settled(editor)
     check('elle est refusée comme périmée', stale.message.includes('a changé'), stale.message)
@@ -217,7 +244,10 @@ async function main(): Promise<void> {
     // comme la réponse de celui-ci ferait échouer une action qui réussit.
     await editor.goto(`${BASE}/contributions`)
     await settle(editor)
-    await editor.locator('textarea[name="comment"]').first().fill('Parcours : refusée, la fiche a bougé.')
+    await editor
+      .locator('textarea[name="comment"]')
+      .first()
+      .fill('Parcours : refusée, la fiche a bougé.')
     await editor.getByRole('button', { name: 'Refuser' }).first().click()
     const refused = await decided(editor, 'refusee')
     check(
@@ -225,7 +255,11 @@ async function main(): Promise<void> {
       refused && contains(await text(editor), 'Refusée, avec votre mot'),
       `${editor.url()} · ${(await text(editor)).slice(0, 200)}`,
     )
-    check('la file est vide', contains(await text(editor), 'La file est vide'), (await text(editor)).slice(-400))
+    check(
+      'la file est vide',
+      contains(await text(editor), 'La file est vide'),
+      (await text(editor)).slice(-400),
+    )
 
     console.log('\n10. Le membre voit les deux décisions, et le mot du relecteur')
     await member.goto(`${BASE}/contributions`)
@@ -240,7 +274,11 @@ async function main(): Promise<void> {
     await editor.goto(`${BASE}/cigares/${SLUG}/historique`)
     await settle(editor)
     body = await text(editor)
-    check('les deux propositions y sont', contains(body, 'Acceptée') && contains(body, 'Refusée'), body.slice(0, 500))
+    check(
+      'les deux propositions y sont',
+      contains(body, 'Acceptée') && contains(body, 'Refusée'),
+      body.slice(0, 500),
+    )
   } finally {
     console.log('\nRemise en état du référentiel, par le produit')
     try {
@@ -268,10 +306,10 @@ async function main(): Promise<void> {
 
   console.log(`\n${passed} assertions passées, ${failures.length} échec(s)`)
   for (const failure of failures) console.log(`  - ${failure}`)
+  console.log('\nNote : les lignes de ref.cigar_revisions décidées restent — une décision est de')
   console.log(
-    '\nNote : les lignes de ref.cigar_revisions décidées restent — une décision est de',
+    "l'histoire, et aucun écran ne l'efface. À retirer en SQL si la file doit repartir vide.",
   )
-  console.log("l'histoire, et aucun écran ne l'efface. À retirer en SQL si la file doit repartir vide.")
   process.exit(failures.length === 0 ? 0 : 1)
 }
 

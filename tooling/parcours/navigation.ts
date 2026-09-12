@@ -40,18 +40,31 @@ async function settle(page: Page): Promise<void> {
 }
 
 async function header(page: Page): Promise<string> {
-  return (await page.locator('header').innerText().catch(() => '')) ?? ''
+  return (
+    (await page
+      .locator('header')
+      .innerText()
+      .catch(() => '')) ?? ''
+  )
 }
 
 async function main(page: Page): Promise<string> {
-  return (await page.locator('main').innerText().catch(() => '')) ?? ''
+  return (
+    (await page
+      .locator('main')
+      .innerText()
+      .catch(() => '')) ?? ''
+  )
 }
 
 async function passGate(page: Page): Promise<void> {
   await page.goto(`${BASE}/majorite`)
   await settle(page)
   await page.locator('input[name="birthDate"]').fill('1985-04-02')
-  await page.getByRole('button', { name: /entrer|valider|confirmer/i }).first().click()
+  await page
+    .getByRole('button', { name: /entrer|valider|confirmer/i })
+    .first()
+    .click()
   await settle(page)
 }
 
@@ -73,50 +86,98 @@ async function run(): Promise<void> {
   const member = await (await browser.newContext()).newPage()
 
   try {
-    console.log('\n1. Un visiteur du portail voit deux univers, pas quatre')
+    console.log('\n1. Un visiteur du portail voit trois sections, et pas une de plus')
     await passGate(visitor)
     await visitor.goto(`${BASE}/cigares`)
     await settle(visitor)
     const anonHeader = await header(visitor)
-    check('Découvrir et Autour sont là', contains(anonHeader, 'Découvrir') && contains(anonHeader, 'Autour'), anonHeader)
+    for (const label of ['Boutique', 'Cigares', 'Partenaires']) {
+      check(`« ${label} » est dans l’en-tête`, contains(anonHeader, label), anonHeader)
+    }
     check(
-      'Chez moi et Le cercle n’y sont pas — une entrée qui renvoie à la connexion est une promesse cassée',
-      !contains(anonHeader, 'Chez moi') && !contains(anonHeader, 'cercle'),
+      'les sections du membre n’y sont pas — une entrée qui renvoie à la connexion est une promesse cassée',
+      !contains(anonHeader, 'Mon carnet') &&
+        !contains(anonHeader, 'Ma cave') &&
+        !contains(anonHeader, 'Cercle'),
       anonHeader,
     )
-    check('et plus aucune entrée à plat', !contains(anonHeader, 'Codes de boîte') && !contains(anonHeader, 'Vitoles'))
+    check(
+      'et les trois hubs retirés n’y sont plus',
+      !contains(anonHeader, 'Découvrir') &&
+        !contains(anonHeader, 'Autour') &&
+        !contains(anonHeader, 'Chez moi'),
+      anonHeader,
+    )
 
-    console.log('\n2. Connecté, les quatre univers, notifications et paramètres')
+    console.log('\n2. Connecté, les sept entrées, les notifications et les paramètres')
     await signIn(member)
     await member.goto(`${BASE}/cigares`)
     await settle(member)
     const memberHeader = await header(member)
-    for (const label of ['Découvrir', 'Chez moi', 'cercle', 'Autour', 'Mon compte']) {
+    for (const label of [
+      'Boutique',
+      'Cigares',
+      'Partenaires',
+      'Mon carnet',
+      'Ma cave',
+      'Suggestions',
+      'Cercle',
+    ]) {
       check(`« ${label} » est dans l’en-tête`, contains(memberHeader, label), memberHeader)
     }
 
-    console.log('\n3. Chaque hub liste ses sections, et elles répondent')
-    await member.goto(`${BASE}/decouvrir`)
-    await settle(member)
-    const discover = await main(member)
-    check('Découvrir porte le référentiel', contains(discover, 'cigares') && contains(discover, 'codes de boîte') && contains(discover, 'Contribuer'), discover.slice(0, 400))
+    console.log('\n3. Les trois hubs retirés répondent 308 vers ce qui les remplace')
+    for (const [from, to] of [
+      ['/decouvrir', '/cigares'],
+      ['/autour', '/lieux'],
+      ['/chez-moi', '/carnet'],
+    ]) {
+      await member.goto(`${BASE}${from}`)
+      await settle(member)
+      check(
+        `${from} mène à ${to}`,
+        new URL(member.url()).pathname === to,
+        new URL(member.url()).pathname,
+      )
+    }
 
-    await member.goto(`${BASE}/chez-moi`)
-    await settle(member)
-    const mine = await main(member)
-    check('Chez moi porte le carnet, la cave, les statistiques', contains(mine, 'carnet') && contains(mine, 'cave') && contains(mine, 'statistiques'))
-    const notebookHref = await member.locator('main a', { hasText: 'carnet' }).first().getAttribute('href')
-    check('la carte du carnet pointe où il vit', notebookHref === '/carnet', String(notebookHref))
+    console.log('\n4. Le carnet, la cave, les suggestions et les chiffres partagent leurs onglets')
+    for (const path of ['/carnet', '/cave', '/suggestions', '/statistiques']) {
+      await member.goto(`${BASE}${path}`)
+      await settle(member)
+      const body = await main(member)
+      check(
+        `${path} porte les quatre onglets`,
+        contains(body, 'Mon carnet') &&
+          contains(body, 'Ma cave') &&
+          contains(body, 'Suggestions') &&
+          contains(body, 'statistiques'),
+        body.slice(0, 300),
+      )
+    }
 
-    await member.goto(`${BASE}/cercle`)
+    console.log('\n5. Le référentiel porte ses sections sous la liste')
+    await member.goto(`${BASE}/cigares`)
     await settle(member)
-    const circle = await main(member)
-    check('Le cercle porte le fil, les membres, les clubs, l’agenda, les messages', contains(circle, 'fil') && contains(circle, 'membres') && contains(circle, 'clubs') && contains(circle, 'agenda') && contains(circle, 'messages'))
+    const cigars = await main(member)
+    for (const label of [
+      'marques',
+      'vitolario',
+      'roue des arômes',
+      'codes de boîte',
+      'Contribuer',
+    ]) {
+      check(`« ${label} » est sous la liste`, contains(cigars, label), cigars.slice(0, 600))
+    }
 
-    await member.goto(`${BASE}/autour`)
+    console.log('\n6. Le fil d’ariane ramène en arrière')
+    await member.goto(`${BASE}/aromes`)
     await settle(member)
-    const around = await main(member)
-    check('Autour porte les lieux (drapeau ouvert) et le journal', contains(around, 'lieux') && contains(around, 'journal'))
+    const trailHref = await member
+      .locator('nav[aria-label*="ariane"] a', { hasText: 'igares' })
+      .first()
+      .getAttribute('href')
+    check('la roue des arômes ramène aux cigares', trailHref === '/cigares', String(trailHref))
   } catch (cause) {
     failures.push(`exception : ${String(cause)}`)
     console.log(`  FAIL exception : ${String(cause)}`)

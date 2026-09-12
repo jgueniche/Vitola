@@ -1,3 +1,4 @@
+import type { AppRole } from '@/lib/settings/roles'
 import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
 
 /**
@@ -39,8 +40,7 @@ export type AdminCounts = {
 export async function adminCounts(): Promise<AdminCounts> {
   const [db, ref] = await Promise.all([createSupabaseServerClient(), referential()])
 
-  const count = async (query: PromiseLike<{ count: number | null }>) =>
-    (await query).count ?? 0
+  const count = async (query: PromiseLike<{ count: number | null }>) => (await query).count ?? 0
 
   const [
     revisionsPending,
@@ -60,10 +60,17 @@ export async function adminCounts(): Promise<AdminCounts> {
     vendorsPending,
     vendorsSuspended,
   ] = await Promise.all([
-    count(ref.from('cigar_revisions').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+    count(
+      ref
+        .from('cigar_revisions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending'),
+    ),
     count(db.from('venues').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     count(db.from('articles').select('id', { count: 'exact', head: true }).eq('status', 'draft')),
-    count(ref.from('cigars').select('id', { count: 'exact', head: true }).eq('status', 'published')),
+    count(
+      ref.from('cigars').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    ),
     count(
       ref
         .from('cigars')
@@ -77,10 +84,18 @@ export async function adminCounts(): Promise<AdminCounts> {
     count(db.from('profiles').select('id', { count: 'exact', head: true })),
     count(db.schema('shop').from('products').select('id', { count: 'exact', head: true })),
     count(
-      db.schema('shop').from('products').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+      db
+        .schema('shop')
+        .from('products')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'draft'),
     ),
     count(
-      db.schema('shop').from('products').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+      db
+        .schema('shop')
+        .from('products')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'published'),
     ),
     /* The review queue of the vendor flow (ADR 0016, D3): a draft that has
        been submitted and not yet decided. */
@@ -93,10 +108,18 @@ export async function adminCounts(): Promise<AdminCounts> {
         .not('submitted_at', 'is', null),
     ),
     count(
-      db.schema('shop').from('vendors').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      db
+        .schema('shop')
+        .from('vendors')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'active'),
     ),
     count(
-      db.schema('shop').from('vendors').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      db
+        .schema('shop')
+        .from('vendors')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending'),
     ),
     count(
       db
@@ -200,6 +223,39 @@ export type SheetRow = {
   verified_at: string | null
   verified_by: string | null
   brands: { name: string } | null
+}
+
+export type InvitationRow = {
+  email: string
+  role: AppRole
+  note: string | null
+  invited_at: string
+  claimed_at: string | null
+}
+
+/**
+ * The addresses that will arrive with a role above `member` (migration 0033).
+ *
+ * Admin-only by policy, and the table carries no client GRANT for `anon` —
+ * it names people by their e-mail address, which is personal data under
+ * art. 4. What this read is FOR is the one question `/admin/comptes` could not
+ * answer: who has been invited and has not come yet. A promotion of an
+ * existing account still happens on that member's profile.
+ *
+ * Pending first, then the claimed ones: a claimed invitation is history, and
+ * history belongs under the thing that is still waiting.
+ */
+export async function listInvitations(): Promise<InvitationRow[]> {
+  const supabase = await createSupabaseServerClient()
+
+  const { data, error } = await supabase
+    .from('admin_invitations')
+    .select('email, role, note, invited_at, claimed_at')
+    .order('claimed_at', { ascending: true, nullsFirst: true })
+    .order('email', { ascending: true })
+
+  if (error) return []
+  return (data ?? []) as InvitationRow[]
 }
 
 export async function listSheets(filter: SheetFilter, search: string): Promise<SheetRow[]> {
@@ -372,7 +428,11 @@ export type VendorOption = { id: string; name: string; slug: string }
  */
 export async function listVendorOptions(): Promise<VendorOption[]> {
   const db = await createSupabaseServerClient()
-  const { data, error } = await db.schema('shop').from('vendors').select('id, name, slug').order('name')
+  const { data, error } = await db
+    .schema('shop')
+    .from('vendors')
+    .select('id, name, slug')
+    .order('name')
   if (error) throw new Error(`Could not read the vendor options: ${error.message}`)
   const options = (data ?? []) as VendorOption[]
   return options.sort((a, b) =>

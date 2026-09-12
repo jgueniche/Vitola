@@ -95,17 +95,13 @@ export default async function ShopProductPage({ params }: Props) {
                   >
                     {product.brand}
                   </Link>
-                  {' · '}
                 </>
               ) : null}
-              {copy.soldBy}{' '}
-              {product.vendor ? (
-                <Link href={routes.shopVendor(product.vendor.slug)} className="text-ink underline">
-                  {product.vendor.name}
-                </Link>
-              ) : (
-                '—'
-              )}
+              {/* Who we bought it from is not on the sheet. Since the shop
+                  resells (migration 0034) the seller is us, and naming a
+                  supplier on a public page is neither required nor ours to
+                  publish — it was a shopfront link when a shopfront existed. */}
+              {CATEGORY_LABELS[product.category] ?? product.category}
             </p>
           </div>
 
