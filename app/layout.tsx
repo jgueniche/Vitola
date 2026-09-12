@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { HealthNotice } from '@/components/compliance/health-notice'
 import { SkipLink } from '@/components/layout/skip-link'
 import { BRAND } from '@/lib/brand'
+import { LANG, LOCALE } from '@/lib/i18n'
 import { SITE_INDEXABLE, SITE_ORIGIN } from '@/lib/site'
 import { THEME_BOOTSTRAP, THEME_COLOR_DARK } from '@/lib/theme'
 
@@ -69,7 +70,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
-      lang={BRAND.defaultLanguage}
+      lang={LANG[LOCALE]}
       className={`${bodoni.variable} ${marcellus.variable} ${inter.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >

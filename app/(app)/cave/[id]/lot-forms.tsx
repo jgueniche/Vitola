@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useActionState } from 'react'
 
 import { ScopeSelector } from '@/components/reviews/scope-selector'
+import { RingRatingInput } from '@/components/data/ring-rating-input'
 import { Button } from '@/components/ui/button'
 import { FieldError, FieldStatus, Input, Label, Select, Textarea } from '@/components/ui/field'
 import { HUMIDOR_LIMITS } from '@/lib/humidor/model'
@@ -71,18 +72,12 @@ export function SmokeForm({
           <Label htmlFor={`smoke-date-${itemId}`}>{copy.smokeDate}</Label>
           <Input id={`smoke-date-${itemId}`} name="occurredOn" type="date" defaultValue={today} />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`smoke-score-${itemId}`}>{copy.smokeScore}</Label>
-          <Input
-            id={`smoke-score-${itemId}`}
-            name="score"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={100}
-          />
-        </div>
       </div>
+
+      {/* Five bands, like everywhere since migration 0028. The number input
+          that stood here asked for a figure out of a hundred, which is the
+          scale the column holds and not the one anybody reads. */}
+      <RingRatingInput name="score" label={copy.smokeScore} />
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={`smoke-body-${itemId}`}>{copy.smokeBody}</Label>

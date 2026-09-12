@@ -1,4 +1,8 @@
 import { BRAND } from '@/lib/brand'
+import { INTL_LOCALE, LOCALE } from '@/lib/i18n'
+
+/** The tag every formatter here uses: the BUILD's language, not the brand's. */
+const FORMAT_LOCALE = INTL_LOCALE[LOCALE]
 
 /** Cepo x length, the way it is written on a box: `52 × 150 mm`. */
 export function formatDimensions(ringGauge: number, lengthMm: number): string {
@@ -11,7 +15,7 @@ export function millimetresToInches(lengthMm: number): number {
 }
 
 export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat(BRAND.locale, { dateStyle: 'long' }).format(date)
+  return new Intl.DateTimeFormat(FORMAT_LOCALE, { dateStyle: 'long' }).format(date)
 }
 
 /**
@@ -23,16 +27,38 @@ export function formatDate(date: Date): string {
  * that; a time does not.
  */
 export function formatDateTime(date: Date): string {
-  return new Intl.DateTimeFormat(BRAND.locale, {
+  return new Intl.DateTimeFormat(FORMAT_LOCALE, {
     dateStyle: 'long',
     timeStyle: 'short',
     timeZone: BRAND.timeZone,
   }).format(date)
 }
 
+/**
+ * A `YYYY-MM` bucket as a short month and a two-digit year: `févr. 26`, `Feb 26`.
+ *
+ * `/statistiques` carried a hand-written array of twelve French abbreviations,
+ * which is exactly what `Intl` exists to avoid — and which the English build
+ * rendered « août 26 » under `lang="en"`. The month is formatted from a UTC
+ * midday rather than the 1st at 00:00: the zone shift of a midnight would
+ * occasionally name the previous month.
+ */
+export function formatMonthBucket(bucket: string): string {
+  const [year, month] = bucket.split('-')
+  const index = Number(month)
+  if (!year || !Number.isInteger(index) || index < 1 || index > 12) return bucket
+
+  const label = new Intl.DateTimeFormat(FORMAT_LOCALE, {
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(2000, index - 1, 1, 12)))
+
+  return `${label} ${year.slice(2)}`
+}
+
 /** The hour alone, for the second half of an interval on the same day. */
 export function formatTime(date: Date): string {
-  return new Intl.DateTimeFormat(BRAND.locale, {
+  return new Intl.DateTimeFormat(FORMAT_LOCALE, {
     timeStyle: 'short',
     timeZone: BRAND.timeZone,
   }).format(date)
@@ -105,7 +131,7 @@ export function toBrandZoneWallClock(instant: Date): string {
 }
 
 export function formatCount(value: number): string {
-  return new Intl.NumberFormat(BRAND.locale).format(value)
+  return new Intl.NumberFormat(FORMAT_LOCALE).format(value)
 }
 
 /**

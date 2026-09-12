@@ -1,5 +1,4 @@
-import { BRAND } from '@/lib/brand'
-import { m } from '@/lib/i18n'
+import { INTL_LOCALE, LOCALE, m } from '@/lib/i18n'
 import { RING_MAX, ringsToHalves } from '@/lib/reviews/rings'
 import { cn } from '@/lib/utils'
 
@@ -124,7 +123,7 @@ function BandGlyph({ className, filled = false }: { className?: string; filled?:
 /** One decimal, never rounded up to a flattering whole band. */
 export function formatRingValue(scoreOutOf100: number): string {
   const rings = scoreOutOf100 / (100 / RING_MAX)
-  return new Intl.NumberFormat(BRAND.locale, {
+  return new Intl.NumberFormat(INTL_LOCALE[LOCALE], {
     minimumFractionDigits: Number.isInteger(rings) ? 0 : 1,
     maximumFractionDigits: 1,
   }).format(rings)

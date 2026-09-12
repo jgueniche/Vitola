@@ -270,7 +270,9 @@ export default async function SerialReviewPage({ searchParams }: Props) {
             </dt>
             <dd>{copy.shortcutPrevious}</dd>
             <dt>
-              <kbd className="border-rule rounded-[3px] border px-1.5 py-0.5 font-mono">Échap</kbd>
+              <kbd className="border-rule rounded-[3px] border px-1.5 py-0.5 font-mono">
+                {m.common.escapeKey}
+              </kbd>
             </dt>
             <dd>{copy.shortcutEscape}</dd>
           </dl>

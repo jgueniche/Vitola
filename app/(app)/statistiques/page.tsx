@@ -10,7 +10,7 @@ import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/cigar'
 import { formatRingValue } from '@/components/data/ring-rating'
-import { formatCount } from '@/lib/format'
+import { formatCount, formatMonthBucket } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { collectStats, meanScore, monthlyBuckets, rankCigars } from '@/lib/stats/queries'
@@ -20,21 +20,6 @@ import { cn } from '@/lib/utils'
 export const metadata: Metadata = { title: m.statistics.title }
 
 const copy = m.statistics
-
-const MONTHS = [
-  'janv.',
-  'févr.',
-  'mars',
-  'avr.',
-  'mai',
-  'juin',
-  'juil.',
-  'août',
-  'sept.',
-  'oct.',
-  'nov.',
-  'déc.',
-]
 
 /**
  * Mes statistiques — F11, which §9 places at the end of P2.
@@ -141,8 +126,7 @@ export default async function StatisticsPage() {
                 */}
                 <ul className="flex items-end gap-1.5">
                   {buckets.map((bucket) => {
-                    const [year, month] = bucket.month.split('-')
-                    const label = `${MONTHS[Number(month) - 1] ?? month} ${year?.slice(2) ?? ''}`
+                    const label = formatMonthBucket(bucket.month)
                     return (
                       <li key={bucket.month} className="flex flex-1 flex-col items-center gap-1">
                         <span className="text-ink-faint text-xs">{bucket.count || ''}</span>

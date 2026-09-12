@@ -6,7 +6,7 @@ import { m } from '@/lib/i18n'
 import { AgeGateForm } from './age-gate-form'
 
 export const metadata: Metadata = {
-  title: 'Accès réservé aux majeurs',
+  title: m.ageGate.metaTitle,
   robots: { index: false, follow: false },
 }
 
