@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { StrengthMeter, type Strength } from '@/components/data/strength-meter'
 import { ReportDialog } from '@/components/moderation/report-dialog'
 import { KindBadge, ScopeBadge, ScoreMark } from '@/components/reviews/entry-parts'
@@ -96,11 +97,12 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-3">
-        <Link href={routes.notebook()} className="eyebrow hover:text-accent-bright w-fit">
-          {m.notebook.backToNotebook}
-        </Link>
+      <Breadcrumb
+        trail={[{ label: m.nav.notebook.label, href: routes.notebook() }]}
+        className="-mb-4"
+      />
 
+      <div className="flex flex-col gap-3">
         {entry.cigar ? (
           <Link
             href={routes.cigar(entry.cigar.slug)}

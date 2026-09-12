@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { ReportDialog } from '@/components/moderation/report-dialog'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { EntryRow } from '@/components/reviews/entry-row'
 import { PostCard } from '@/components/social/post-card'
 import { Button } from '@/components/ui/button'
@@ -228,6 +229,14 @@ export default async function MemberPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[
+          { label: m.nav.circle.label, href: routes.hubCircle() },
+          { label: m.members.title, href: routes.members() },
+        ]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { EmptyState } from '@/components/layout/empty-state'
 import { SectionHead } from '@/components/layout/section-head'
 import { m } from '@/lib/i18n'
@@ -53,6 +54,11 @@ export default async function EventsPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.circle.label, href: routes.hubCircle() }]}
+        className="-mb-4"
+      />
+
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       <Band variant="divider" />

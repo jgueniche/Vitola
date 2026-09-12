@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { acknowledgeReport } from '@/app/(app)/moderation/actions'
 import { Button } from '@/components/ui/button'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { formatDateTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { moderationConfirmation } from '@/lib/moderation/confirmations'
@@ -75,6 +76,11 @@ export default async function ModerationCasePage({ params, searchParams }: Props
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.moderation.desk.title, href: routes.moderation() }]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.case.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">

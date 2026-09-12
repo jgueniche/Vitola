@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
 import { readCode } from '@/lib/boxcode/decode'
 import { m } from '@/lib/i18n'
+import { routes } from '@/lib/routes'
 import { listBoxCodes, type BoxCode } from '@/lib/referential/queries'
 
 export const metadata: Metadata = { title: m.boxCodes.title }
@@ -59,6 +61,11 @@ export default async function BoxCodesPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.cigars.label, href: routes.cigars() }]}
+        className="-mb-4"
+      />
+
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       <form method="get" className="flex flex-wrap items-end gap-3">

@@ -320,7 +320,6 @@
     "emptyFilteredBody": "Ce filtre ne renvoie rien pour le moment. Retirez-le pour retrouver le carnet entier.",
     "filtersReset": "Tout le carnet",
     "openEntry": "Ouvrir l'entrée",
-    "backToNotebook": "Retour au carnet",
     "sharedWithMeTitle": "Partagé avec moi",
     "sharedWithMeLede": "Les entrées que d'autres membres vous ont nommément ouvertes.",
     "sharedWithMeEmpty": "Personne ne vous a encore nommé sur une entrée.",
@@ -1009,7 +1008,6 @@
     "delete": "Supprimer cette cave",
     "deleteConfirm": "Supprimer cette cave ? Ses lots, son grand livre et ses relevés partent avec elle. Vos entrées de carnet, elles, restent.",
     "open": "Ouvrir",
-    "backToHumidor": "Retour à la cave",
     "countOne": "1 cave",
     "countMany": "{count} caves",
     "totalCigars": "cigares en cave",
@@ -1500,8 +1498,7 @@
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer cette publication ? Les braises et les commentaires disparaissent avec elle.",
       "deleted": "Publication supprimée.",
-      "notFound": "Cette publication n'existe pas, ou ne vous est pas ouverte.",
-      "backToFeed": "Retour au fil"
+      "notFound": "Cette publication n'existe pas, ou ne vous est pas ouverte."
     },
     "ember": {
       "add": "Braise",
@@ -2082,7 +2079,6 @@
     "inboxFull": "Les {count} conversations les plus récentes. Il y en a peut-être d'autres.",
     "notFound": "Cette conversation n'existe pas",
     "notFoundBody": "Le lien est peut-être ancien, ou elle ne vous concerne pas.",
-    "backToInbox": "Revenir aux messages",
     "withPerson": "Avec {name}",
     "unknownPerson": "Membre",
     "older": "Messages plus anciens",

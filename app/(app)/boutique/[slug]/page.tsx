@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ReportDialog } from '@/components/moderation/report-dialog'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
@@ -57,11 +58,7 @@ export default async function ShopProductPage({ params }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
-      <p className="text-sm">
-        <Link href={routes.shop()} className="text-ink-muted underline">
-          {copy.backToShop}
-        </Link>
-      </p>
+      <Breadcrumb trail={[{ label: m.nav.shop.label, href: routes.shop() }]} className="-mb-4" />
 
       <div className="flex flex-col gap-8 md:flex-row">
         <div className="w-full md:w-80 md:shrink-0">

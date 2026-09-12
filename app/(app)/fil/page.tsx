@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { EmptyState } from '@/components/layout/empty-state'
 import { SectionHead } from '@/components/layout/section-head'
 import { PostCard } from '@/components/social/post-card'
@@ -94,6 +95,11 @@ export default async function FeedPage({ searchParams }: Search) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.circle.label, href: routes.hubCircle() }]}
+        className="-mb-4"
+      />
+
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       <Band variant="divider" />

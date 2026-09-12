@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 
 import { publishVenue, closeVenue } from '@/app/(app)/lieux/actions'
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { ReportDialog } from '@/components/moderation/report-dialog'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
@@ -93,6 +94,11 @@ export default async function VenuePage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.partners.label, href: routes.venues() }]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.types[venue.type]}</p>
         <h1 className="font-display text-display-md leading-tight">{venue.name}</h1>

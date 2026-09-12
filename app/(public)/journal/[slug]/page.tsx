@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { ArticleBody } from '@/components/journal/article-body'
 import { formatDate } from '@/lib/format'
 import { m } from '@/lib/i18n'
@@ -53,6 +54,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb trail={[{ label: m.journal.title, href: routes.journal() }]} className="-mb-4" />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">
           <Link href={routes.journal()} className="hover:text-accent">

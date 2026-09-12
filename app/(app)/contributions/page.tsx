@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { EmptyState } from '@/components/layout/empty-state'
 import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
@@ -73,6 +74,11 @@ export default async function ContributionsPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.cigars.label, href: routes.cigars() }]}
+        className="-mb-4"
+      />
+
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {/* What just happened, carried by the URL because the form that did it is

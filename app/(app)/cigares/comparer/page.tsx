@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { SectionHead } from '@/components/layout/section-head'
 import { StrengthMeter, type Strength } from '@/components/data/strength-meter'
 import { Button } from '@/components/ui/button'
@@ -135,6 +136,11 @@ export default async function ComparePage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.cigars.label, href: routes.cigars() }]}
+        className="-mb-4"
+      />
+
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {kept.length === 0 ? (

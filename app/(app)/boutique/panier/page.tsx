@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { isFeatureEnabled } from '@/lib/flags'
@@ -59,6 +60,8 @@ export default async function ShopCartPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
+      <Breadcrumb trail={[{ label: m.nav.shop.label, href: routes.shop() }]} className="-mb-4" />
+
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {done ? (

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
 import { formatPrice } from '@/lib/cigar'
@@ -104,10 +105,12 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
+      <Breadcrumb
+        trail={[{ label: m.nav.humidor.label, href: routes.humidor() }]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
-        <Link href={routes.humidor()} className="eyebrow text-ink-muted hover:text-ink w-fit">
-          {copy.backToHumidor}
-        </Link>
         <h1 className="font-display text-display-md leading-tight">{humidor.name}</h1>
         <p className="text-ink-muted text-sm">
           {humidor.capacity

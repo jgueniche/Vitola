@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { deleteMessage, markConversationRead } from '@/app/(app)/messages/actions'
 import { Band } from '@/components/band/band'
+import { Breadcrumb } from '@/components/layout/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
@@ -74,15 +75,20 @@ export default async function ConversationPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
+      <Breadcrumb
+        trail={[
+          { label: m.nav.circle.label, href: routes.hubCircle() },
+          { label: m.messaging.title, href: routes.conversations() },
+        ]}
+        className="-mb-4"
+      />
+
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-sm leading-tight">
           {copy.withPerson.replace('{name}', otherName)}
         </h1>
         <p className="text-ink-faint text-xs">
-          <Link href={routes.conversations()} className="text-accent hover:underline">
-            {copy.backToInbox}
-          </Link>
           {profile?.handle ? (
             <>
               {' · '}
