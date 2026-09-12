@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { SectionHead } from '@/components/layout/section-head'
 import { adminCounts } from '@/lib/admin/queries'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
@@ -35,11 +36,7 @@ export default async function AdminPage() {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {/* The shop first — QA said its administration was invisible, and a
           dashboard is where an admin looks first. State, queue, vendors: each
@@ -47,7 +44,7 @@ export default async function AdminPage() {
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.dash.shopTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.dash.shopLede}</p>
+          <p className="lede">{copy.dash.shopLede}</p>
         </div>
         <p
           className={`border-l-2 pl-3 text-sm ${shopOpen ? 'border-accent text-ink' : 'border-rule-strong text-ink'}`}
@@ -153,7 +150,7 @@ export default async function AdminPage() {
 
       <section className="flex flex-col gap-2">
         <h2 className="font-display text-display-sm">{copy.dash.flagsTitle}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.dash.flagsLede}</p>
+        <p className="lede">{copy.dash.flagsLede}</p>
         <p className="text-sm">
           <Link href={routes.adminFlags()} className="text-accent underline">
             {copy.dash.flagsLink}

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { DiffView } from '@/components/wiki/diff-view'
 import { SourceLine } from '@/components/wiki/source-line'
@@ -72,11 +73,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {/* What just happened, carried by the URL because the form that did it is
           no longer on the page. `role="status"` so it is announced, like every
@@ -90,7 +87,7 @@ export default async function ContributionsPage({ searchParams }: Props) {
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.mineTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.mineLede}</p>
+          <p className="lede">{copy.mineLede}</p>
         </div>
 
         {mine.length === 0 ? (
@@ -144,13 +141,13 @@ export default async function ContributionsPage({ searchParams }: Props) {
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.queueTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.queueLede}</p>
+          <p className="lede">{copy.queueLede}</p>
         </div>
 
         {!isEditor ? (
           <div className="flex flex-col gap-1">
             <p className="text-ink text-sm font-medium">{copy.notEditorTitle}</p>
-            <p className="text-ink-muted measure text-sm leading-relaxed">{copy.notEditorBody}</p>
+            <p className="lede">{copy.notEditorBody}</p>
           </div>
         ) : pending.length === 0 ? (
           <EmptyState title={copy.queueEmptyTitle} description={copy.queueEmptyBody} />

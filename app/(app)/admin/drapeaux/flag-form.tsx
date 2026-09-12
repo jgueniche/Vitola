@@ -57,7 +57,7 @@ export function FlagForm({
           {enabled ? copy.stateOn : copy.stateOff}
         </span>
       </div>
-      <p className="text-ink-muted measure text-sm leading-relaxed">{description}</p>
+      <p className="lede">{description}</p>
       {warning ? (
         <p className="border-rule text-ink measure border-l-2 pl-3 text-sm leading-relaxed">
           {warning}

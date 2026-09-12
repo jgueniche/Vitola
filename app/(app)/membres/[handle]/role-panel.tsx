@@ -91,7 +91,7 @@ export function RolePanel({
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-medium">{copy.roleTitle}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.roleLede}</p>
+        <p className="lede">{copy.roleLede}</p>
       </div>
 
       <dl className="text-ink-muted flex flex-wrap gap-x-8 gap-y-1 text-sm">

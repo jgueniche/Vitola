@@ -83,9 +83,7 @@ export default async function ClubPage({
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{club.name}</h1>
-        {club.description ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{club.description}</p>
-        ) : null}
+        {club.description ? <p className="lede">{club.description}</p> : null}
         <p className="text-ink-faint text-xs">
           {copy.owner}{' '}
           {owner ? (
@@ -114,7 +112,7 @@ export default async function ClubPage({
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-display-sm">{copy.membersTitle}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.membersLede}</p>
+        <p className="lede">{copy.membersLede}</p>
         <ul className="flex flex-col gap-2">
           {members.map((member) => (
             <MemberRow

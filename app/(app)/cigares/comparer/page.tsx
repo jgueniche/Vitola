@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { StrengthMeter, type Strength } from '@/components/data/strength-meter'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
@@ -134,11 +135,7 @@ export default async function ComparePage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {kept.length === 0 ? (
         <EmptyState
@@ -154,9 +151,7 @@ export default async function ComparePage({ searchParams }: Props) {
         />
       ) : (
         <section className="flex flex-col gap-4">
-          {kept.length === 1 ? (
-            <p className="text-ink-muted measure text-sm leading-relaxed">{copy.needTwo}</p>
-          ) : null}
+          {kept.length === 1 ? <p className="lede">{copy.needTwo}</p> : null}
 
           {/* Wide content scrolls inside its own container, never the page. */}
           <div className="overflow-x-auto">
@@ -241,7 +236,7 @@ export default async function ComparePage({ searchParams }: Props) {
         <h2 className="font-display text-display-sm">{copy.searchLabel}</h2>
 
         {kept.length >= MAX ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.full}</p>
+          <p className="lede">{copy.full}</p>
         ) : (
           <>
             <form method="get" className="flex flex-wrap items-end gap-3">

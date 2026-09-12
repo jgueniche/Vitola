@@ -1329,6 +1329,24 @@ export type Database = {
       }
     }
     Functions: {
+      suggest_cigars: {
+        Args: { p_limit?: number }
+        Returns: {
+          cigar_id: string | null
+          slug: string | null
+          commercial_name: string | null
+          brand_name: string | null
+          vitola_name: string | null
+          ring_gauge: number | null
+          length_mm: number | null
+          strength: string | null
+          wrapper_shade: string | null
+          aroma_tags: number[] | null
+          shared_aromas: number | null
+          score: number | null
+          reason: string | null
+        }[]
+      }
       sheet_sources: {
         Args: { p_cigar_id: string }
         Returns: {

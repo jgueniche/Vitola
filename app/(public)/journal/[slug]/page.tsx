@@ -72,9 +72,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             ? ` · ${copy.readingTime.replace('{min}', String(article.reading_time_min))}`
             : null}
         </p>
-        {article.excerpt ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{article.excerpt}</p>
-        ) : null}
+        {article.excerpt ? <p className="lede">{article.excerpt}</p> : null}
       </div>
 
       <Band variant="divider" />

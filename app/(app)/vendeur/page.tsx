@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -60,11 +61,11 @@ export default async function VendorSpacePage({ searchParams }: Props) {
   if (!vendor) {
     return (
       <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
-        <div className="flex flex-col gap-2">
-          <p className="eyebrow">{copy.eyebrow}</p>
-          <h1 className="font-display text-display-md leading-tight">{copy.restrictedTitle}</h1>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.restrictedBody}</p>
-        </div>
+        <SectionHead
+          eyebrow={copy.eyebrow}
+          title={copy.restrictedTitle}
+          lede={copy.restrictedBody}
+        />
       </main>
     )
   }
@@ -88,7 +89,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
         <h1 className="font-display text-display-md leading-tight">
           {copy.title} — {vendor.name}
         </h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         {/* The two addresses a vendor keeps asking for: their own shopfront as
             the public reads it, and the shelf their products sit on. */}
         <p className="text-sm">
@@ -176,7 +177,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
         <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
           <div className="flex flex-col gap-1">
             <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
-            <p className="text-ink-muted measure text-sm leading-relaxed">{copy.createLede}</p>
+            <p className="lede">{copy.createLede}</p>
           </div>
           <VendorCreateProductForm />
         </section>
@@ -236,7 +237,7 @@ export default async function VendorSpacePage({ searchParams }: Props) {
       <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.storefrontTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.storefrontLede}</p>
+          <p className="lede">{copy.storefrontLede}</p>
         </div>
         {suspended ? null : <StorefrontForm vendor={vendor} />}
       </section>

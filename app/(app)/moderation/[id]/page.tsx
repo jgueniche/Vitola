@@ -101,9 +101,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
         <h2 className="text-ink text-sm font-medium">{copy.case.reasonLabel}</h2>
         <p className="text-ink text-sm">{reasons[report.reason] ?? report.reason}</p>
         <h2 className="text-ink mt-2 text-sm font-medium">{copy.case.detailLabel}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">
-          {report.detail ?? copy.case.noDetail}
-        </p>
+        <p className="lede">{report.detail ?? copy.case.noDetail}</p>
       </section>
 
       <section className="border-rule flex flex-col gap-2 border-t pt-4">
@@ -152,9 +150,7 @@ export default async function ModerationCasePage({ params, searchParams }: Props
           <section className="flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <h2 className="font-display text-display-sm">{copy.case.decideTitle}</h2>
-              <p className="text-ink-muted measure text-sm leading-relaxed">
-                {copy.case.decideLede}
-              </p>
+              <p className="lede">{copy.case.decideLede}</p>
             </div>
             <DecideForm
               reportId={report.id}

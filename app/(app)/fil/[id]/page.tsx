@@ -85,7 +85,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         </h2>
 
         {comments.length === 0 ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.comments.empty}</p>
+          <p className="lede">{copy.comments.empty}</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {comments.map((comment) => {

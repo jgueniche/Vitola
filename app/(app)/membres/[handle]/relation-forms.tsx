@@ -132,7 +132,7 @@ function UnblockForm({
 }) {
   return (
     <div className="border-caution flex flex-col gap-3 border-l-2 pl-4">
-      <p className="text-ink-muted measure text-sm leading-relaxed">{copy.blockedNotice}</p>
+      <p className="lede">{copy.blockedNotice}</p>
       <Relation
         action={unblock}
         userId={userId}

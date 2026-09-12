@@ -61,7 +61,7 @@ export default async function TastingPage({ params }: Params) {
         <h1 className="font-display text-display-md leading-tight">
           {m.notebook.tasting.title.replace('{cigar}', cigar.commercial_name)}
         </h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{m.notebook.tasting.lede}</p>
+        <p className="lede">{m.notebook.tasting.lede}</p>
       </div>
 
       <Band variant="divider" />

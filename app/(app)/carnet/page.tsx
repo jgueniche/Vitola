@@ -4,16 +4,14 @@ import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
+import { MineTabs } from '@/components/layout/mine-tabs'
 import { EntryRow } from '@/components/reviews/entry-row'
 import { buttonClass } from '@/components/ui/button'
 import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { REVIEW_SCOPES, type ReviewKind, type ReviewVisibility } from '@/lib/reviews/model'
-import {
-  listMyNotebook,
-  listSharedWithMe,
-  type ReviewWithContext,
-} from '@/lib/reviews/queries'
+import { listMyNotebook, listSharedWithMe, type ReviewWithContext } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { currentUser } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -161,13 +159,12 @@ export default async function NotebookPage({ searchParams }: Search) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 id="mon-carnet" className="font-display text-display-md leading-tight">
-          {copy.title}
-        </h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      {/* The two halves of what used to be the « Chez moi » hub, plus the two
+          pages that belong with them. Split in the nav on 12 septembre 2026,
+          kept one click apart here. */}
+      <MineTabs current="notebook" />
+
+      <SectionHead id="mon-carnet" eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {/* One toolbar on two hairlined rows: what kind, and who reads.
           The third row used to name the display scale and link to the setting
@@ -190,9 +187,7 @@ export default async function NotebookPage({ searchParams }: Search) {
             </div>
           </div>
           <p className="text-ink-muted flex flex-wrap items-center gap-x-2 text-xs">
-            {entries.length > 0 ? (
-              <span>{count}</span>
-            ) : null}
+            {entries.length > 0 ? <span>{count}</span> : null}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3">
@@ -253,7 +248,7 @@ export default async function NotebookPage({ searchParams }: Search) {
             {copy.sharedWithMeTitle}
           </span>
         </Band>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.sharedWithMeLede}</p>
+        <p className="lede">{copy.sharedWithMeLede}</p>
 
         {shared.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.sharedWithMeEmpty}</p>

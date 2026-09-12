@@ -62,7 +62,7 @@ export default async function HistoryPage({ params }: Params) {
           {cigar.brands?.name ? `${cigar.brands.name} · ` : ''}
           {cigar.commercial_name}
         </p>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.historyLede}</p>
+        <p className="lede">{copy.historyLede}</p>
       </div>
 
       <Band variant="divider" />

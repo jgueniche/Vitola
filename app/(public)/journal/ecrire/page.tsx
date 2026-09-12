@@ -72,7 +72,7 @@ export default async function ComposePage({
           </Link>
         </p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
       </div>
 
       <Band variant="divider" />
@@ -84,7 +84,7 @@ export default async function ComposePage({
       ) : null}
 
       {!isEditor ? (
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.reserved}</p>
+        <p className="lede">{copy.reserved}</p>
       ) : (
         <>
           <section className="flex flex-col gap-2">

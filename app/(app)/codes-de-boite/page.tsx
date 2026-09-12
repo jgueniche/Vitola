@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Band } from '@/components/band/band'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
 import { readCode } from '@/lib/boxcode/decode'
@@ -58,11 +59,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       <form method="get" className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1.5">
@@ -82,12 +79,12 @@ export default async function BoxCodesPage({ searchParams }: Props) {
       {reading === null ? (
         <div className="flex flex-col gap-1">
           <p className="text-ink text-sm font-medium">{copy.emptyTitle}</p>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.emptyBody}</p>
+          <p className="lede">{copy.emptyBody}</p>
         </div>
       ) : reading.empty ? (
         <div className="flex flex-col gap-1">
           <p className="text-ink text-sm font-medium">{copy.nothingTitle}</p>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.nothingBody}</p>
+          <p className="lede">{copy.nothingBody}</p>
         </div>
       ) : (
         <section className="flex flex-col gap-4">
@@ -135,7 +132,7 @@ export default async function BoxCodesPage({ searchParams }: Props) {
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.tableTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.tableLede}</p>
+          <p className="lede">{copy.tableLede}</p>
         </div>
 
         <div>

@@ -89,7 +89,7 @@ export default async function SettingsPage({
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         <p className="text-ink-faint text-xs">
           {copy.memberSince.replace('{date}', formatEffectiveDate(account.created_at.slice(0, 10)))}
           {' · '}
@@ -126,7 +126,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.profileTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.profileLede}</p>
+          <p className="lede">{copy.profileLede}</p>
         </div>
         <ProfileForm
           handle={account.handle}
@@ -142,7 +142,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.preferencesTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.preferencesLede}</p>
+          <p className="lede">{copy.preferencesLede}</p>
         </div>
         <PreferencesForm preferences={account.preferences} />
       </section>
@@ -150,7 +150,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.privacyTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.privacyLede}</p>
+          <p className="lede">{copy.privacyLede}</p>
         </div>
         <PrivacyForm privacy={account.privacy} />
         <p className="text-ink-faint measure text-xs leading-relaxed">{copy.privacyNotYet}</p>
@@ -165,7 +165,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.blockedTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.blockedLede}</p>
+          <p className="lede">{copy.blockedLede}</p>
         </div>
 
         {confirmation ? (
@@ -201,15 +201,13 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.consentsTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.consentsLede}</p>
+          <p className="lede">{copy.consentsLede}</p>
         </div>
 
         {account.consents.length === 0 ? (
           <div className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border px-4 py-4">
             <p className="eyebrow">{copy.consentsEmptyTitle}</p>
-            <p className="text-ink-muted measure text-sm leading-relaxed">
-              {copy.consentsEmptyBody}
-            </p>
+            <p className="lede">{copy.consentsEmptyBody}</p>
           </div>
         ) : (
           <ul className="flex flex-col gap-1">
@@ -269,7 +267,7 @@ export default async function SettingsPage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-display-sm">{copy.gdprTitle}</h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.gdprLede}</p>
+          <p className="lede">{copy.gdprLede}</p>
         </div>
 
         <div className="flex flex-col gap-2">

@@ -249,7 +249,7 @@ export default async function VenuePage({
         </div>
 
         {reviews.length === 0 ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.reviews.empty}</p>
+          <p className="lede">{copy.reviews.empty}</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {reviews.map((review) => (

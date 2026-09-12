@@ -65,7 +65,7 @@ function Section({
     <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-5">
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-medium">{title}</h2>
-        {hint ? <p className="text-ink-muted measure text-sm leading-relaxed">{hint}</p> : null}
+        {hint ? <p className="lede">{hint}</p> : null}
       </div>
       {children}
     </section>

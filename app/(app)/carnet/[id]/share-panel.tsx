@@ -55,7 +55,7 @@ export function SharePanel({
         <h2 id="partages" className="text-base font-medium">
           {copy.title}
         </h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         {/* Said plainly rather than by hiding the panel: a member who has named
             people and then narrowed the scope should still see who is on the
             list, and understand why nobody is reading. */}

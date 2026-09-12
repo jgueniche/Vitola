@@ -36,7 +36,7 @@ export default async function JournalPage() {
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         <p className="text-sm">
           {/* Always underlined: a link in running text told apart by colour
               alone is invisible to anyone who does not see that colour. */}
@@ -72,9 +72,7 @@ export default async function JournalPage() {
               >
                 {article.title}
               </Link>
-              {article.excerpt ? (
-                <p className="text-ink-muted measure text-sm leading-relaxed">{article.excerpt}</p>
-              ) : null}
+              {article.excerpt ? <p className="lede">{article.excerpt}</p> : null}
               {article.audience === 'gated' ? (
                 <p className="eyebrow text-ink-faint text-xs">{copy.gatedBadge}</p>
               ) : null}

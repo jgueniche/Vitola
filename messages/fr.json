@@ -11,77 +11,9 @@
       "title": "Le Cercle"
     },
     "cards": {
-      "cigars": {
-        "title": "Les cigares",
-        "body": "940 fiches, la recherche par force, cape et origine, le comparateur."
-      },
-      "brands": {
-        "title": "Les marques",
-        "body": "Les maisons et leurs manufactures."
-      },
-      "vitolas": {
-        "title": "Les vitoles",
-        "body": "Les formats — cepo, module, et leurs noms d'usine."
-      },
-      "aromas": {
-        "title": "La roue des arômes",
-        "body": "Onze familles, 76 descripteurs, le vocabulaire de la dégustation."
-      },
-      "boxCodes": {
-        "title": "Les codes de boîte",
-        "body": "Le décodeur — qui dit « inconnu » plutôt que de deviner."
-      },
-      "contributions": {
-        "title": "Contribuer",
-        "body": "Proposer une correction ; un relecteur l'applique. L'historique reste."
-      },
-      "notebook": {
-        "title": "Le carnet",
-        "body": "Ce que vous avez fumé, quand, la note et le mot. Privé par défaut."
-      },
-      "humidor": {
-        "title": "La cave",
-        "body": "Vos lots, leur âge, l'hygrométrie, ce qui est à faire tourner."
-      },
       "statistics": {
         "title": "Les statistiques",
         "body": "Votre rythme sur douze mois, les cigares qui reviennent."
-      },
-      "feed": {
-        "title": "Le fil",
-        "body": "Les publications des gens que vous suivez, et la découverte."
-      },
-      "members": {
-        "title": "Les membres",
-        "body": "L'annuaire, les profils, les abonnements — libres et révocables."
-      },
-      "clubs": {
-        "title": "Les clubs",
-        "body": "Des groupes et leurs calendriers. Jamais un second fil."
-      },
-      "events": {
-        "title": "L'agenda",
-        "body": "Dégustations et rencontres, annoncées à une heure qui tient."
-      },
-      "messages": {
-        "title": "Les messages",
-        "body": "Écrire à quelqu'un que vous suivez. Pas chiffré de bout en bout, et dit."
-      },
-      "venues": {
-        "title": "Les partenaires",
-        "body": "Civettes et fumoirs autour de vous — sans prix, jamais."
-      },
-      "journal": {
-        "title": "Le journal",
-        "body": "Articles, lexique, guides. La partie du site qui se lit sans compte."
-      },
-      "shop": {
-        "title": "La boutique",
-        "body": "Les accessoires que nous achetons à nos partenaires et revendons ici — coupes, caves, hygromètres. Jamais de tabac."
-      },
-      "suggestions": {
-        "title": "Vos suggestions",
-        "body": "Cinq bagues à essayer, déduites de ce que vous avez fumé."
       }
     },
     "shop": {
@@ -2467,5 +2399,24 @@
     "journalTitle": "Le journal",
     "journalLine": "La partie du site qui se lit sans compte.",
     "journalAll": "Lire le journal"
+  },
+  "suggestions": {
+    "eyebrow": "Suggestions",
+    "title": "Cinq bagues à essayer",
+    "lede": "Déduites de ce que vous avez fumé — les arômes que vous citez, la force et le module que vous revenez chercher. Aucune n’est déjà dans votre carnet.",
+    "emptyTitle": "Votre carnet ne dit encore rien",
+    "emptyBody": "Notez un cigare — une note en bagues suffit — et cette page vous répondra avec ce qui lui ressemble.",
+    "reasonAromaOne": "1 arôme en commun avec votre carnet",
+    "reasonAromaMany": "{count} arômes en commun avec votre carnet",
+    "reasonProfile": "Proche de votre force et de votre module habituels",
+    "reasonPopular": "Les mieux notées, en attendant que votre carnet parle",
+    "ambianceLabel": "Le moment",
+    "ambianceCourt": "Une demi-heure — un café, une pause",
+    "ambianceMoyen": "Une heure — après un déjeuner",
+    "ambianceLong": "Une soirée — deux heures, assis",
+    "ambianceUnknown": "Le format n’est pas renseigné : le moment reste à deviner.",
+    "open": "Voir la fiche",
+    "howTitle": "Comment cette liste est faite",
+    "howBody": "Trois mesures, dans cet ordre : les arômes que vos entrées citent (ou, si elles n’en citent aucun, ceux du référentiel sur les fiches que vous avez fumées), votre force moyenne pondérée par vos notes, votre cepo moyen. La note des membres ne sert qu’à départager. Une seule fiche par maison : cinq bagues d’une même maison, c’est une suggestion montrée cinq fois."
   }
 }

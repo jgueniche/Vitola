@@ -171,7 +171,7 @@ export default async function ShopProductPage({ params }: Props) {
         {/* ADR 0015 D3, unchanged by 0016: nothing can write a review until
             the checkout decides « achat vérifié » — the empty state says so
             rather than hiding the section. */}
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.reviewsEmpty}</p>
+        <p className="lede">{copy.reviewsEmpty}</p>
       </section>
     </main>
   )

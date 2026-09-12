@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { isFeatureEnabled } from '@/lib/flags'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -60,11 +61,7 @@ export default async function ShopPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {total === 0 ? (
         <EmptyState title={copy.shelfEmptyTitle} description={copy.shelfEmptyBody} />

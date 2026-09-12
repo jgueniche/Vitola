@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { formatDateTime } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { moderationConfirmation } from '@/lib/moderation/confirmations'
@@ -52,11 +53,11 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
   if (!isModerator) {
     return (
       <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-12">
-        <div className="flex flex-col gap-2">
-          <p className="eyebrow">{copy.eyebrow}</p>
-          <h1 className="font-display text-display-md leading-tight">{copy.restrictedTitle}</h1>
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.restrictedBody}</p>
-        </div>
+        <SectionHead
+          eyebrow={copy.eyebrow}
+          title={copy.restrictedTitle}
+          lede={copy.restrictedBody}
+        />
       </main>
     )
   }
@@ -72,9 +73,7 @@ export default async function ModerationQueuePage({ searchParams }: Props) {
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">
-          {copy.lede.replace('{hours}', String(slaHours))}
-        </p>
+        <p className="lede">{copy.lede.replace('{hours}', String(slaHours))}</p>
       </div>
 
       {confirmation ? (

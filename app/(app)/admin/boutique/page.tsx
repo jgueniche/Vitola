@@ -72,7 +72,7 @@ export default async function AdminShopPage({ searchParams }: Props) {
       <div className="flex flex-col gap-2">
         <p className="eyebrow">{m.admin.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
+        <p className="lede">{copy.lede}</p>
         <p className="text-sm">
           <Link href={routes.adminShopVendors()} className="text-ink underline">
             {copy.vendorsLink}
@@ -94,7 +94,7 @@ export default async function AdminShopPage({ searchParams }: Props) {
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-display-sm">{copy.queueTitle}</h2>
         {queue.length === 0 ? (
-          <p className="text-ink-muted measure text-sm leading-relaxed">{copy.queueEmpty}</p>
+          <p className="lede">{copy.queueEmpty}</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {queue.map((product) => (

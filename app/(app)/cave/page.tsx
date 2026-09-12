@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 
 import { Figure, FigureRow } from '@/components/data/figures'
 import { EmptyState } from '@/components/layout/empty-state'
+import { MineTabs } from '@/components/layout/mine-tabs'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/cigar'
 import { formatCount } from '@/lib/format'
@@ -52,11 +54,9 @@ export default async function HumidorPage() {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <MineTabs current="humidor" />
+
+      <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
 
       {humidors.length === 0 ? (
         <EmptyState
@@ -133,7 +133,7 @@ export default async function HumidorPage() {
 
           <section className="flex flex-col gap-3">
             <h2 className="font-display text-display-sm">{copy.csvTitle}</h2>
-            <p className="text-ink-muted measure text-sm leading-relaxed">{copy.csvLede}</p>
+            <p className="lede">{copy.csvLede}</p>
             <div>
               {/* A plain anchor, not a fetch: the export is a route handler
                   that answers with a file, and a browser already knows what to
@@ -149,7 +149,7 @@ export default async function HumidorPage() {
 
       <section className="border-rule flex flex-col gap-3 border-t pt-8">
         <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.createLede}</p>
+        <p className="lede">{copy.createLede}</p>
         <HumidorForm mode="create" />
       </section>
     </main>

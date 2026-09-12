@@ -223,7 +223,7 @@ export default async function VenuesPage({
               ? copy.pending.titleEditor
               : copy.pending.titleMine}
           </h2>
-          <p className="text-ink-muted measure text-sm leading-relaxed">
+          <p className="lede">
             {pending.some((venue) => venue.created_by !== user?.id)
               ? copy.pending.ledeEditor
               : copy.pending.ledeMine}

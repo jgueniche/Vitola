@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { EmptyState } from '@/components/layout/empty-state'
+import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
 import { listAllLines, listBrandOptions } from '@/lib/admin/queries'
 import { m } from '@/lib/i18n'
@@ -42,11 +43,7 @@ export default async function AdminLinesPage({ searchParams }: Props) {
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
-      <div className="flex flex-col gap-2">
-        <p className="eyebrow">{m.admin.eyebrow}</p>
-        <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
-        <p className="text-ink-muted measure text-sm leading-relaxed">{copy.lede}</p>
-      </div>
+      <SectionHead eyebrow={m.admin.eyebrow} title={copy.title} lede={copy.lede} />
 
       {done ? (
         <p role="status" className="border-accent text-ink border-l-2 py-1 pl-3 text-sm">

@@ -341,7 +341,7 @@ export default async function MemberPage({
           <p className="text-ink-faint text-sm">{copy.humidorEmpty}</p>
         ) : (
           <>
-            <p className="text-ink-muted measure text-sm leading-relaxed">{copy.humidorNote}</p>
+            <p className="lede">{copy.humidorNote}</p>
             <ul className="flex flex-col gap-2">
               {shelf.map((lot) => (
                 <li

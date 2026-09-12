@@ -70,9 +70,7 @@ export default async function ShopVendorPage({ params }: Props) {
         <div className="flex min-w-0 flex-col gap-2">
           <p className="eyebrow">{copy.eyebrow}</p>
           <h1 className="font-display text-display-md leading-tight">{vendor.name}</h1>
-          {vendor.description ? (
-            <p className="text-ink-muted measure text-sm leading-relaxed">{vendor.description}</p>
-          ) : null}
+          {vendor.description ? <p className="lede">{vendor.description}</p> : null}
           {vendor.contact_email ? (
             <p className="text-ink-faint text-xs">
               {copy.vendorContact} : {vendor.contact_email}
