@@ -188,7 +188,28 @@ export async function SiteHeader() {
         </div>
 
         <ThemeToggle className="ml-auto lg:ml-0" />
-        <SiteMenu links={nav.map((item) => ({ ...item }))} trailing={trailing} />
+        <SiteMenu
+          links={nav.map((item) => ({ ...item }))}
+          trailing={trailing}
+          /* The sign-out control, which on a phone had nowhere to be: the
+             account rail above is `hidden lg:flex`, and a POST cannot travel as
+             a `MenuLink`. The address is shown with it because a phone is the
+             device most likely to hold more than one account. */
+          footer={
+            user ? (
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <span className="text-ink-faint text-xs">
+                  {user.email ? `${m.auth.signedInAs} · ${user.email}` : m.auth.signedInAs}
+                </span>
+                <form action={signOut}>
+                  <button type="submit" className="text-accent py-2 text-sm">
+                    {m.auth.signOut}
+                  </button>
+                </form>
+              </div>
+            ) : null
+          }
+        />
       </div>
     </header>
   )

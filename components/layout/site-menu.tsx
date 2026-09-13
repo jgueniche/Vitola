@@ -6,7 +6,7 @@
 import { Menu, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -34,8 +34,26 @@ export type MenuLink = { label: string; href: string; accent?: boolean }
  * effect: `react-hooks/set-state-in-effect` refuses the effect, and React
  * documents the render-time reconciliation. Without it the panel stays open
  * over the page you just navigated to.
+ *
+ * `footer` exists because signing out is a POST and this component knew only
+ * how to render links. QA of 13 septembre 2026: « on n'arrive pas à se
+ * déconnecter » on a phone — and it was exact, not approximate. The sign-out
+ * form lived in the account rail, which is `hidden lg:flex`, so a signed-in
+ * member on a narrow screen had NO control at all: not a hidden one, not a
+ * hard-to-find one, none. A slot for arbitrary children is the fix rather than
+ * a second link type, because the next thing the menu needs to carry will not
+ * be a link either.
  */
-export function SiteMenu({ links, trailing }: { links: MenuLink[]; trailing?: MenuLink[] }) {
+export function SiteMenu({
+  links,
+  trailing,
+  footer,
+}: {
+  links: MenuLink[]
+  trailing?: MenuLink[]
+  /** Rendered under the links — a server-owned node, typically a POST form. */
+  footer?: ReactNode
+}) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [seen, setSeen] = useState(pathname)
@@ -111,6 +129,8 @@ export function SiteMenu({ links, trailing }: { links: MenuLink[]; trailing?: Me
             ))}
           </ul>
         </nav>
+
+        {footer ? <div className="border-rule border-t pt-3">{footer}</div> : null}
       </div>
     </>
   )

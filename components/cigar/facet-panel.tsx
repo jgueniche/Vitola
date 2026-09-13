@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 
 import { strengthLabel, type Strength } from '@/components/data/strength-meter'
@@ -78,11 +79,7 @@ function FacetLink({ label, active, target }: { label: string; active: boolean; 
   )
 }
 
-export function FacetPanel({
-  facets,
-  countries,
-  aromaFamilies,
-}: {
+type PanelProps = {
   facets: Facets
   /** Origins present in the published set, so no facet leads to zero results. */
   countries: readonly string[]
@@ -94,21 +91,88 @@ export function FacetPanel({
    * `arome=` key — one filter, two entrances.
    */
   aromaFamilies: readonly AromaFamily[]
-}) {
-  return (
-    <aside className="flex flex-col gap-6" aria-label={m.referential.facets.title}>
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-base font-medium">{m.referential.facets.title}</h2>
-        {isFacetActive(facets) ? (
-          <Link
-            href={href({ ...EMPTY_FACETS, query: facets.query })}
-            className="text-ink-muted hover:text-ink text-xs underline underline-offset-4"
-          >
-            {m.referential.facets.clearAll}
-          </Link>
-        ) : null}
-      </div>
+}
 
+/**
+ * Two shapes, one body — and the duplication is the cheaper of the two costs.
+ *
+ * QA of 13 septembre 2026: « sur mobile, toute la partie de filtre est
+ * beaucoup trop longue, il faut qu'elle soit sous un menu déroulant replié par
+ * défaut ». Under `md` this panel is a full-width block ABOVE the results, so a
+ * reader arriving on `/cigares` scrolled past thirty-odd chips before seeing a
+ * single cigar. From `md` up it is the 16rem sidebar it was built to be, and
+ * collapsing it there would leave a column holding one word.
+ *
+ * A disclosure whose initial state depends on the viewport cannot be written in
+ * CSS: `open` is a DOM attribute, and a closed `<details>` hides its content in
+ * the UA shadow root, where a stylesheet cannot reach it. That leaves two
+ * options, and both cost something:
+ *
+ *   - **a client component** reading `matchMedia`. It renders closed on the
+ *     server and opens after hydration — a visible layout shift in the sidebar,
+ *     on the page P8 measured at CLS 0, plus the first JavaScript this panel has
+ *     ever needed. Its whole design is that a facet is an `<a>`.
+ *   - **two wrappers around one body.** Roughly 35 extra anchors of static HTML,
+ *     and exactly one of the two is in the accessibility tree at any width,
+ *     because `hidden md:block` is `display: none` and that removes a subtree
+ *     from the tree rather than merely hiding it.
+ *
+ * The second keeps zero JavaScript and zero layout shift, so the second wins.
+ * `FacetGroups` is the single source of the thirty-five links; only the frame
+ * around it differs.
+ */
+export function FacetPanel(props: PanelProps) {
+  return (
+    <>
+      <details className="border-rule group border-t border-b md:hidden">
+        <summary className="text-ink flex cursor-pointer list-none items-center justify-between gap-3 py-3 text-sm [&::-webkit-details-marker]:hidden">
+          <span className="flex items-baseline gap-2">
+            <span className="font-medium">{m.referential.facets.title}</span>
+            {isFacetActive(props.facets) ? (
+              <span className="text-accent text-xs">{m.referential.facets.someActive}</span>
+            ) : null}
+          </span>
+          <ChevronDown
+            aria-hidden="true"
+            strokeWidth={1.5}
+            className="text-ink-muted size-4 shrink-0 transition-transform duration-(--duration-quick) group-open:rotate-180"
+          />
+        </summary>
+        <div className="flex flex-col gap-6 pt-1 pb-5">
+          <ClearAll facets={props.facets} />
+          <FacetGroups {...props} />
+        </div>
+      </details>
+
+      <aside
+        className="hidden flex-col gap-6 md:flex"
+        aria-label={m.referential.facets.title}
+      >
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-base font-medium">{m.referential.facets.title}</h2>
+          <ClearAll facets={props.facets} />
+        </div>
+        <FacetGroups {...props} />
+      </aside>
+    </>
+  )
+}
+
+function ClearAll({ facets }: { facets: Facets }) {
+  if (!isFacetActive(facets)) return null
+  return (
+    <Link
+      href={href({ ...EMPTY_FACETS, query: facets.query })}
+      className="text-ink-muted hover:text-ink self-start text-xs underline underline-offset-4"
+    >
+      {m.referential.facets.clearAll}
+    </Link>
+  )
+}
+
+function FacetGroups({ facets, countries, aromaFamilies }: PanelProps) {
+  return (
+    <>
       <FacetGroup title={m.referential.facets.strength}>
         {STRENGTHS.map((strength) => (
           <FacetLink
@@ -188,6 +252,6 @@ export function FacetPanel({
           ))}
         </FacetGroup>
       ) : null}
-    </aside>
+    </>
   )
 }

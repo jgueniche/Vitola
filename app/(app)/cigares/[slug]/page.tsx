@@ -4,9 +4,15 @@ import { notFound } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
 import { BreadcrumbWithCurrent } from '@/components/layout/breadcrumb'
+import { Disclosure } from '@/components/layout/disclosure'
 import { SpecStrip } from '@/components/data/spec-strip'
 import type { Strength } from '@/components/data/strength-meter'
-import type { WrapperShade } from '@/components/data/wrapper-scale'
+import {
+  WrapperScale,
+  WRAPPER_SHADES,
+  shadeLabel,
+  type WrapperShade,
+} from '@/components/data/wrapper-scale'
 import { EntryRow } from '@/components/reviews/entry-row'
 import { StatsPanel } from '@/components/reviews/stats-panel'
 import {
@@ -167,12 +173,19 @@ export default async function CigarPage({ params, searchParams }: Props) {
             {cigar.lines ? <p className="text-ink-muted text-sm">{cigar.lines.name}</p> : null}
           </div>
 
+          {/* The three facts the QA of 13 septembre asked for, in that order:
+              cepo, force, arômes. Everything else is one fold down — eighteen
+              facts in one column put the gesture below two screens of scroll
+              on a phone. */}
           <SpecStrip
             slug={cigar.slug}
             ringGauge={vitola?.ring_gauge ?? null}
             lengthMm={vitola?.length_mm ?? null}
             strength={(cigar.strength as Strength | null) ?? null}
-            shade={(cigar.wrapper_shade as WrapperShade | null) ?? null}
+            aromas={cigar.aroma_tags
+              .map((id) => profile.get(id))
+              .filter((label): label is string => label !== undefined)}
+            aromaSource={aromaSource}
           />
 
           {sourcedSpecs.length > 0 ? (
@@ -194,65 +207,76 @@ export default async function CigarPage({ params, searchParams }: Props) {
             </ul>
           ) : null}
 
-          {/* The aroma profile of the referential (migration 0025): what one
-              finds from one box to the next — « selon le fabricant » when the
-              last accepted proposal cited a source (0026, 0027), « selon le
-              référentiel » otherwise. The members' most-cited aromas are a
-              different fact and live with the notes, below; the two are never
-              merged. */}
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="eyebrow">{copy.aromas}</span>
-              {aromaSource ? (
-                <>
-                  <span className="label">{copy.aromasFromMaker}</span>
-                  <span className="text-ink-faint text-xs">
-                    {copy.aromasFromMakerLede}
-                    {' · '}
-                    <a
-                      href={aromaSource}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-ink underline underline-offset-4"
-                    >
-                      {copy.sourceLink}
-                    </a>
+          {/* Two folds, named by what is inside them. The leaf first: a shade
+              and three origins are one subject, and the shade was the strip's
+              third cell until the aromas took its place. */}
+          <Disclosure
+            title={copy.foldLeaf}
+            hint={
+              cigar.wrapper_shade
+                ? shadeLabel(cigar.wrapper_shade as WrapperShade)
+                : copy.notProvidedF
+            }
+          >
+            <dl className="grid gap-x-10 sm:grid-cols-2">
+              <Fact label={copy.wrapper}>
+                {cigar.wrapper_shade ? (
+                  <span className="flex flex-col gap-1.5">
+                    <span>{shadeLabel(cigar.wrapper_shade as WrapperShade)}</span>
+                    <WrapperScale
+                      shade={cigar.wrapper_shade as WrapperShade}
+                      showLabel={false}
+                      size="lg"
+                    />
+                    <span className="text-ink-faint text-xs">
+                      {copy.shadeStep.replace(
+                        '{n}',
+                        String(WRAPPER_SHADES.indexOf(cigar.wrapper_shade as WrapperShade) + 1),
+                      )}
+                    </span>
                   </span>
-                </>
-              ) : (
-                <span className="text-ink-faint text-xs">{copy.aromasLede}</span>
-              )}
-            </div>
-            {cigar.aroma_tags.length > 0 ? (
-              <ul className="flex flex-wrap gap-2">
-                {cigar.aroma_tags.map((id) => {
-                  const label = profile.get(id)
-                  if (!label) return null
-                  return (
-                    <li
-                      key={id}
-                      className="border-rule-strong text-ink rounded-[3px] border px-2 py-1 text-xs"
+                ) : (
+                  <span className="text-ink-faint">
+                    {copy.notProvidedF}
+                    {' · '}
+                    <Link
+                      href={propose}
+                      className="text-accent hover:text-accent-bright text-xs underline underline-offset-4"
                     >
-                      {label}
-                    </li>
-                  )
-                })}
-              </ul>
-            ) : (
-              <p className="text-ink-faint text-sm">
-                {copy.notProvidedPl}
-                {' · '}
-                <Link
-                  href={propose}
-                  className="text-accent hover:text-accent-bright text-xs underline underline-offset-4"
-                >
-                  {copy.proposeAromas}
-                </Link>
-              </p>
-            )}
-          </div>
+                      {copy.proposeShade}
+                    </Link>
+                  </span>
+                )}
+              </Fact>
+              <Fact label={copy.wrapperOrigin}>
+                {cigar.wrapper_origin ? (
+                  countryLabel(cigar.wrapper_origin)
+                ) : (
+                  <span className="text-ink-faint">{copy.notProvidedF}</span>
+                )}
+              </Fact>
+              <Fact label={copy.binderOrigin}>
+                {cigar.binder_origin ? (
+                  countryLabel(cigar.binder_origin)
+                ) : (
+                  <span className="text-ink-faint">{copy.notProvidedF}</span>
+                )}
+              </Fact>
+              <Fact label={copy.fillerOrigins}>
+                {cigar.filler_origins.length > 0 ? (
+                  cigar.filler_origins.map((code) => countryLabel(code)).join(', ')
+                ) : (
+                  <span className="text-ink-faint">{copy.notProvidedF}</span>
+                )}
+              </Fact>
+            </dl>
+          </Disclosure>
 
-          <dl className="grid gap-x-10 sm:grid-cols-2">
+          <Disclosure
+            title={copy.foldSheet}
+            hint={vitola ? vitola.name_salida : copy.notProvidedF}
+          >
+            <dl className="grid gap-x-10 sm:grid-cols-2">
             <Fact label={copy.salida}>
               {vitola ? (
                 <Link
@@ -267,27 +291,6 @@ export default async function CigarPage({ params, searchParams }: Props) {
             </Fact>
             <Fact label={copy.galera}>
               {vitola?.name_galera ?? <span className="text-ink-faint">{copy.notProvidedF}</span>}
-            </Fact>
-            <Fact label={copy.wrapperOrigin}>
-              {cigar.wrapper_origin ? (
-                countryLabel(cigar.wrapper_origin)
-              ) : (
-                <span className="text-ink-faint">{copy.notProvidedF}</span>
-              )}
-            </Fact>
-            <Fact label={copy.binderOrigin}>
-              {cigar.binder_origin ? (
-                countryLabel(cigar.binder_origin)
-              ) : (
-                <span className="text-ink-faint">{copy.notProvidedF}</span>
-              )}
-            </Fact>
-            <Fact label={copy.fillerOrigins}>
-              {cigar.filler_origins.length > 0 ? (
-                cigar.filler_origins.map((code) => countryLabel(code)).join(', ')
-              ) : (
-                <span className="text-ink-faint">{copy.notProvidedF}</span>
-              )}
             </Fact>
             <Fact label={copy.release}>
               {releaseTypeLabel(cigar.release_type)}
@@ -315,7 +318,8 @@ export default async function CigarPage({ params, searchParams }: Props) {
             <Fact label={copy.line}>
               {cigar.lines?.name ?? <span className="text-ink-faint">{copy.notProvidedF}</span>}
             </Fact>
-          </dl>
+            </dl>
+          </Disclosure>
 
           {/* The wiki footer: provenance first, the doors after. A correction
               is proposed while looking at what is wrong; the history is where

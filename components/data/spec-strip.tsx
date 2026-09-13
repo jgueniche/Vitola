@@ -6,12 +6,6 @@ import {
   strengthLabel,
   type Strength,
 } from '@/components/data/strength-meter'
-import {
-  WrapperScale,
-  WRAPPER_SHADES,
-  shadeLabel,
-  type WrapperShade,
-} from '@/components/data/wrapper-scale'
 import { formatDimensions } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -19,8 +13,9 @@ import { routes } from '@/lib/routes'
 const copy = m.referential.cigar
 
 /**
- * The three measures a sheet is read by — cepo × longueur, force, cape — each
- * under its own label, with the gauge beneath the value.
+ * The three measures a sheet is read by, in the order the reader asked for
+ * them — **cepo, force, arômes** — each under its own label, with its gauge
+ * beneath the value.
  *
  * The design audit of 5 septembre 2026 found the gauges rendered without a
  * word: "50 × 124 mm", five bars, six dots, and nothing saying cepo, force or
@@ -28,23 +23,34 @@ const copy = m.referential.cigar
  * about 100px, so it showed nothing. Here the silhouette is drawn to scale on
  * a 235mm reference — the longest vitola of the referential — in a 200px box.
  *
- * A missing value stays a cell, and the cell is the door of the wiki: 862 of
- * the 940 published sheets have no vitola, and §4.6 says an empty state is an
- * invitation. The link opens the proposal form on the sheet; the form itself
- * decides who may propose (a signed-in member, when contributions are open).
+ * The third cell was the **cape** until the QA of 13 septembre 2026 asked for
+ * « en premier le cepo, puis la force, puis l'arôme » — and that is the right
+ * three: two are what the cigar IS, the third is what it tastes of. The shade
+ * is a fact about the leaf and reads with the other three origins, one fold
+ * down. Nothing is deleted; the order changed.
+ *
+ * A missing value stays a cell, and the cell is the door of the wiki: 770 of
+ * the 940 published sheets have no vitola and 892 no aroma profile, and §4.6
+ * says an empty state is an invitation. The link opens the proposal form on the
+ * sheet; the form itself decides who may propose (a signed-in member, when
+ * contributions are open).
  */
 export function SpecStrip({
   slug,
   ringGauge,
   lengthMm,
   strength,
-  shade,
+  aromas,
+  aromaSource,
 }: {
   slug: string
   ringGauge: number | null
   lengthMm: number | null
   strength: Strength | null
-  shade: WrapperShade | null
+  /** The referential's own descriptors, already resolved to labels. */
+  aromas: readonly string[]
+  /** The maker's page, when the last accepted proposal cited one (0026, 0027). */
+  aromaSource: string | null
 }) {
   const propose = routes.cigarPropose(slug)
 
@@ -84,20 +90,46 @@ export function SpecStrip({
         )}
       </div>
 
+      {/* The referential's aroma profile (migration 0025): what one finds from
+          one box to the next. « Selon le fabricant » when the last accepted
+          proposal cited a source (0026, 0027), « selon le référentiel »
+          otherwise — and NEVER merged with the members' most-cited aromas,
+          which are a different fact and live with the notes. */}
       <div className="flex flex-col gap-2.5 py-4 sm:pl-5">
-        <dt className="eyebrow">{copy.wrapper}</dt>
-        {shade ? (
+        <dt className="eyebrow">{copy.aromas}</dt>
+        {aromas.length > 0 ? (
           <>
-            <dd className="text-xl leading-6">{shadeLabel(shade)}</dd>
-            <dd>
-              <WrapperScale shade={shade} showLabel={false} size="lg" />
+            <dd className="flex flex-wrap gap-1.5">
+              {aromas.map((label) => (
+                <span
+                  key={label}
+                  className="border-rule-strong text-ink rounded-[3px] border px-2 py-0.5 text-sm"
+                >
+                  {label}
+                </span>
+              ))}
             </dd>
             <dd className="text-ink-faint text-xs">
-              {copy.shadeStep.replace('{n}', String(WRAPPER_SHADES.indexOf(shade) + 1))}
+              {aromaSource ? (
+                <>
+                  {copy.aromasFromMaker}
+                  {' · '}
+                  <a
+                    href={aromaSource}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-ink underline underline-offset-4"
+                  >
+                    {copy.sourceLink}
+                  </a>
+                </>
+              ) : (
+                copy.aromasLede
+              )}
             </dd>
           </>
         ) : (
-          <Missing label={copy.notProvidedF} action={copy.proposeShade} href={propose} />
+          <Missing label={copy.notProvidedPl} action={copy.proposeAromas} href={propose} />
         )}
       </div>
     </dl>

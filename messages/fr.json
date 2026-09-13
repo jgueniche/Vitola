@@ -142,7 +142,8 @@
       "aromaHint": "Les onze familles de la roue. Le descripteur exact se choisit sur la roue elle-même.",
       "rating": "Note des membres",
       "ratingFloor": "{count} bagues et plus",
-      "ratingAll": "5 bagues"
+      "ratingAll": "5 bagues",
+      "someActive": "filtres actifs"
     },
     "results": {
       "one": "1 fiche",
@@ -204,7 +205,9 @@
       "aromasFromMakerLede": "Transcrits de la page que le fabricant publie — la source est à un clic.",
       "sourceLink": "source",
       "specsFromMaker": "{fields} : selon le fabricant",
-      "specsFromMakerSep": ", "
+      "specsFromMakerSep": ", ",
+      "foldLeaf": "La feuille",
+      "foldSheet": "La vitole, la sortie, le prix"
     },
     "brand": {
       "cuban": "Marque cubaine",
