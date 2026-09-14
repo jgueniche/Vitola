@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { CigarPlate } from '@/components/landing/cigar-plate'
-import { LandingHeader } from '@/components/landing/landing-header'
+import { PublicHeader } from '@/components/layout/public-header'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 
@@ -40,7 +40,7 @@ const ENTER =
 export default function HomePage() {
   return (
     <>
-      <LandingHeader />
+      <PublicHeader atHome />
 
       {/* The whole page is one screen's worth: the door is above the fold on a
           laptop, and there is nothing under it to scroll toward. */}
