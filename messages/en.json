@@ -142,7 +142,8 @@
       "aromaHint": "The eleven families of the wheel. The exact descriptor is picked on the wheel itself.",
       "rating": "Members’ rating",
       "ratingFloor": "{count} bands and up",
-      "ratingAll": "5 bands"
+      "ratingAll": "5 bands",
+      "someActive": "filters on"
     },
     "results": {
       "one": "1 sheet",
@@ -204,7 +205,9 @@
       "aromasFromMakerLede": "Transcribed from the page the maker publishes — the source is one click away.",
       "sourceLink": "source",
       "specsFromMaker": "{fields}: according to the maker",
-      "specsFromMakerSep": ", "
+      "specsFromMakerSep": ", ",
+      "foldLeaf": "The leaf",
+      "foldSheet": "Format, release, price"
     },
     "brand": {
       "cuban": "Cuban brand",
