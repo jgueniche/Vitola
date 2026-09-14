@@ -139,6 +139,26 @@ type Finding = {
 
 const findings: Finding[] = []
 
+/**
+ * Les contrôles qui n'ont RIEN TROUVÉ À REGARDER.
+ *
+ * La première version de la passe mobile en a sauté trois sur cinq en écrivant
+ * « rien à ouvrir », et le bilan a rendu 0 violation sur 47 écrans — un vert
+ * dont trois cinquièmes de la partie neuve n'avaient rien vérifié. C'est la
+ * vacuité que `CLAUDE.md` met en garde contre depuis P0 : « une assertion dont
+ * la donnée de test n'existe pas réussit sans rien tester ».
+ *
+ * Un contrôle qui ne trouve pas sa cible est donc une LACUNE, comptée à part et
+ * qui fait sortir en erreur. Pas une violation d'accessibilité — l'audit ne sait
+ * pas si la page est accessible, et c'est précisément ce qu'il doit dire.
+ */
+const gaps: string[] = []
+
+function gap(message: string): void {
+  gaps.push(message)
+  console.log(`  LACUNE ${message}`)
+}
+
 /** La fenêtre de la passe en cours — lue par `auditCurrent`, posée par `runPass`. */
 let current: Viewport = VIEWPORTS.desktop as Viewport
 
@@ -299,15 +319,27 @@ async function auditFunnel(page: Page): Promise<void> {
  * compte et le bouton de déconnexion, un admin une entrée de plus. Trois
  * analyses, donc, et pas une.
  */
-async function auditMenuOpen(page: Page, role: string): Promise<void> {
+async function auditMenuOpen(page: Page, role: string, path: string): Promise<void> {
+  /* Une page de `app/(public)/` n'a PAS d'en-tête de site — seul
+     `app/(app)/layout.tsx` porte `SiteHeader`. Le chemin est donc un argument,
+     et il doit en être un de ce groupe, sans quoi le contrôle ne trouve rien et
+     le dit à tort. Le premier jet visait `/journal` : le seul préfixe public du
+     site, et celui qui n'a aucune navigation. */
+  await page.goto(`${BASE}${path}`)
+  await settle(page)
   const burger = page.locator('header button[aria-controls="menu-du-site"]')
   if ((await burger.count()) === 0) {
-    console.log(`  (—) pas de menu sur cette page — rien à ouvrir (${role})`)
+    gap(`aucun menu à ouvrir sur ${path} en ${role} — un écran du portail sans menu est lui-même une trouvaille`)
     return
   }
   await burger.first().click()
   await settle(page)
-  await auditCurrent(page, `menu du site ouvert (${role})`)
+  const opened = await burger.first().getAttribute('aria-expanded')
+  if (opened !== 'true') {
+    gap(`le menu de ${path} ne s'est pas ouvert en ${role} (aria-expanded=${opened})`)
+    return
+  }
+  await auditCurrent(page, `menu du site ouvert (${role}, ${path})`)
 }
 
 /**
@@ -319,13 +351,23 @@ async function auditMenuOpen(page: Page, role: string): Promise<void> {
  * (filtres) ou soient fermés par défaut (fiche) est la raison de cette
  * fonction, pas une excuse pour l'omettre.
  */
-async function auditFoldsOpen(page: Page, path: string): Promise<void> {
+async function auditFoldsOpen(page: Page, path: string, expected: number): Promise<void> {
+  /* `expected` est le nombre de replis que cette page DOIT avoir à cette
+     largeur. Sans lui, une page qui n'a pas fini de rendre — l'API du projet
+     répond en secondes quand elle va mal — se lit « aucun repli » et le
+     contrôle se tait. */
   await page.goto(`${BASE}${path}`)
   await settle(page)
   const folds = page.locator('main details')
-  const count = await folds.count()
-  if (count === 0) {
-    console.log(`  (—) aucun repli sur ${path} à cette largeur`)
+  let count = await folds.count()
+  if (count !== expected) {
+    /* Une seconde chance, et une seule : un rendu en retard n'est pas une
+       absence, et un délai fixe de plus serait du sable dans les yeux. */
+    await page.waitForSelector('main details', { timeout: 15000 }).catch(() => undefined)
+    count = await folds.count()
+  }
+  if (count !== expected) {
+    gap(`${path} rend ${count} repli(s) au lieu de ${expected} — non audité replié/déplié`)
     return
   }
   for (let i = 0; i < count; i += 1) await folds.nth(i).locator('summary').click()
@@ -380,18 +422,17 @@ async function runPass(browser: Browser, viewport: Viewport): Promise<void> {
   /* Ce que la largeur étroite replie, et que la passe large n'a jamais eu à
      ouvrir parce que rien n'y était replié. */
   console.log('— ce que le mobile replie, ouvert')
-  await auditFoldsOpen(member, '/cigares')
-  await auditFoldsOpen(member, '/cigares/undercrown-10-robusto')
+  /* Les nombres sont ceux de la QA du 13 septembre : un repli de filtres sur la
+     liste, deux replis de faits sur une fiche. Si l'un change, ce contrôle doit
+     échouer et être relu — pas s'adapter en silence. */
+  await auditFoldsOpen(member, '/cigares', 1)
+  await auditFoldsOpen(member, '/cigares/undercrown-10-robusto', 2)
 
-  await anon.goto(`${BASE}/journal`)
-  await settle(anon)
-  await auditMenuOpen(anon, 'visiteur')
-  await member.goto(`${BASE}/cigares`)
-  await settle(member)
-  await auditMenuOpen(member, 'membre')
-  await moderator.goto(`${BASE}/admin`)
-  await settle(moderator)
-  await auditMenuOpen(moderator, 'admin')
+  /* `/boutique` pour le visiteur : le seul écran de `app/(app)/` — donc portant
+     l'en-tête — qu'on atteint sans compte ni portail. */
+  await auditMenuOpen(anon, 'visiteur', '/boutique')
+  await auditMenuOpen(member, 'membre', '/cigares')
+  await auditMenuOpen(moderator, 'admin', '/admin')
 }
 
 async function main(): Promise<void> {
@@ -449,10 +490,20 @@ async function main(): Promise<void> {
     console.log(`${viewport.name} — ${seen.length} violation(s)`)
   }
 
+  if (gaps.length > 0) {
+    console.log(`\n=== Lacunes — ${gaps.length} contrôle(s) qui n'ont rien trouvé à regarder`)
+    for (const message of gaps) console.log(`  ${message}`)
+    console.log(
+      "  Un audit ne peut pas rendre « 0 violation » sur un écran qu'il n'a pas regardé :\n" +
+        '  ces lignes sont un verdict manquant, pas un verdict favorable.',
+    )
+  }
+
   const critical = byImpact.get('critical')?.length ?? 0
   console.log(`\nCritère §9 : ${critical} violation(s) critique(s).`)
   console.log(`Barre de P8 : ${findings.length} violation(s), tous impacts confondus.`)
-  if (critical > 0) process.exitCode = 1
+  console.log(`Lacunes : ${gaps.length}.`)
+  if (critical > 0 || gaps.length > 0) process.exitCode = 1
 }
 
 void main()
