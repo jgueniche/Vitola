@@ -19,6 +19,27 @@
  * casse le build cache ce qui cassera le prochain. Depuis P8, la barre tenue
  * est 0 violation tous impacts confondus, et le bilan le compte aussi.
  *
+ * ## Deux fenêtres, depuis le 14 septembre 2026
+ *
+ * L'audit ne connaissait qu'une largeur : celle par défaut de Playwright,
+ * 1280 × 720. La QA du 13 septembre a trouvé trois défauts qu'il ne pouvait
+ * donc pas voir — un bouton de déconnexion qui n'existait pas sous `lg`, une
+ * fiche de vingt faits en une colonne, un panneau de filtres au-dessus des
+ * résultats. **Une largeur non testée est une largeur non vue**, et trois
+ * écrans sur quatre du site sont regardés sur un téléphone.
+ *
+ * Il tourne donc deux fois, sur la MÊME liste de gabarits : 1280 × 720, puis
+ * 390 × 844 (un iPhone 12, `isMobile`). `AUDIT_VIEWPORTS` choisit
+ * (`desktop`, `mobile`, ou les deux par défaut).
+ *
+ * Et la passe mobile fait une chose de plus, sans quoi elle mentirait : elle
+ * **ouvre ce que le mobile replie**. Un `<details>` fermé retire son contenu
+ * du document — axe ne l'analyse pas, et un audit qui ne regarde que l'état
+ * replié rend un vert là où se trouve précisément le risque. Le menu du site,
+ * les filtres de `/cigares` et les deux replis d'une fiche sont donc audités
+ * ouverts aussi. Le menu une fois par RÔLE et non par page : c'est le même
+ * composant partout, mais son contenu dépend du rôle.
+ *
  * `@axe-core/playwright` est la seule dépendance ajoutée pour P8, et sa
  * justification est le §9 lui-même : le critère de sortie la nomme.
  */
@@ -85,9 +106,61 @@ const MODERATOR_PAGES = [
    0034): there is no shopfront to audit, because nobody sells here but us. */
 const SHOP_PAGES = ['/boutique', '/boutique/panier']
 
-type Finding = { page: string; impact: string; id: string; help: string; nodes: number }
+type Viewport = {
+  name: string
+  width: number
+  height: number
+  isMobile: boolean
+}
+
+/* 1280 × 720 est ce que Playwright donne par défaut, donc ce que l'audit a
+   toujours mesuré ; 390 × 844 est un iPhone 12, la largeur la plus étroite
+   qu'un lecteur apporte en pratique. `isMobile` n'est pas cosmétique : il pose
+   un viewport meta mobile et des événements tactiles, donc les cibles de touche
+   et les survols se comportent comme sur l'appareil. */
+const VIEWPORTS: Record<string, Viewport> = {
+  desktop: { name: 'desktop 1280', width: 1280, height: 720, isMobile: false },
+  mobile: { name: 'mobile 390', width: 390, height: 844, isMobile: true },
+}
+
+const REQUESTED = (process.env.AUDIT_VIEWPORTS ?? 'desktop,mobile')
+  .split(',')
+  .map((name) => name.trim())
+  .filter((name) => name !== '')
+
+type Finding = {
+  viewport: string
+  page: string
+  impact: string
+  id: string
+  help: string
+  nodes: number
+}
 
 const findings: Finding[] = []
+
+/**
+ * Les contrôles qui n'ont RIEN TROUVÉ À REGARDER.
+ *
+ * La première version de la passe mobile en a sauté trois sur cinq en écrivant
+ * « rien à ouvrir », et le bilan a rendu 0 violation sur 47 écrans — un vert
+ * dont trois cinquièmes de la partie neuve n'avaient rien vérifié. C'est la
+ * vacuité que `CLAUDE.md` met en garde contre depuis P0 : « une assertion dont
+ * la donnée de test n'existe pas réussit sans rien tester ».
+ *
+ * Un contrôle qui ne trouve pas sa cible est donc une LACUNE, comptée à part et
+ * qui fait sortir en erreur. Pas une violation d'accessibilité — l'audit ne sait
+ * pas si la page est accessible, et c'est précisément ce qu'il doit dire.
+ */
+const gaps: string[] = []
+
+function gap(message: string): void {
+  gaps.push(message)
+  console.log(`  LACUNE ${message}`)
+}
+
+/** La fenêtre de la passe en cours — lue par `auditCurrent`, posée par `runPass`. */
+let current: Viewport = VIEWPORTS.desktop as Viewport
 
 async function settle(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle').catch(() => undefined)
@@ -124,6 +197,7 @@ async function auditCurrent(page: Page, label: string): Promise<void> {
   const results = await new AxeBuilder({ page }).analyze()
   for (const violation of results.violations) {
     findings.push({
+      viewport: current.name,
       page: label,
       impact: violation.impact ?? 'unknown',
       id: violation.id,
@@ -236,41 +310,149 @@ async function auditFunnel(page: Page): Promise<void> {
   await auditCurrent(page, '/boutique/commande/confirmation')
 }
 
+/**
+ * Le menu du site, ouvert — une fois par rôle.
+ *
+ * C'est le même composant sur chaque page, donc l'ouvrir sur les quarante-huit
+ * serait quarante-huit fois la même analyse. Son CONTENU, lui, dépend du rôle :
+ * un visiteur y lit trois sections et « Se connecter », un membre sept plus son
+ * compte et le bouton de déconnexion, un admin une entrée de plus. Trois
+ * analyses, donc, et pas une.
+ */
+async function auditMenuOpen(page: Page, role: string, path: string): Promise<void> {
+  /* Une page de `app/(public)/` n'a PAS d'en-tête de site — seul
+     `app/(app)/layout.tsx` porte `SiteHeader`. Le chemin est donc un argument,
+     et il doit en être un de ce groupe, sans quoi le contrôle ne trouve rien et
+     le dit à tort. Le premier jet visait `/journal` : le seul préfixe public du
+     site, et celui qui n'a aucune navigation. */
+  await page.goto(`${BASE}${path}`)
+  await settle(page)
+  const burger = page.locator('header button[aria-controls="menu-du-site"]')
+  if ((await burger.count()) === 0) {
+    gap(`aucun menu à ouvrir sur ${path} en ${role} — un écran du portail sans menu est lui-même une trouvaille`)
+    return
+  }
+  await burger.first().click()
+  await settle(page)
+  const opened = await burger.first().getAttribute('aria-expanded')
+  if (opened !== 'true') {
+    gap(`le menu de ${path} ne s'est pas ouvert en ${role} (aria-expanded=${opened})`)
+    return
+  }
+  await auditCurrent(page, `menu du site ouvert (${role}, ${path})`)
+}
+
+/**
+ * Les replis, ouverts.
+ *
+ * Un `<details>` fermé retire son contenu du document : axe ne l'analyse pas,
+ * et une passe qui ne regarde que l'état replié rendrait un vert là où est
+ * précisément le risque. Le fait que ces replis n'existent QUE sous `md`
+ * (filtres) ou soient fermés par défaut (fiche) est la raison de cette
+ * fonction, pas une excuse pour l'omettre.
+ */
+async function auditFoldsOpen(page: Page, path: string, expected: number): Promise<void> {
+  /* `expected` est le nombre de replis que cette page DOIT avoir à cette
+     largeur. Sans lui, une page qui n'a pas fini de rendre — l'API du projet
+     répond en secondes quand elle va mal — se lit « aucun repli » et le
+     contrôle se tait. */
+  await page.goto(`${BASE}${path}`)
+  await settle(page)
+  const folds = page.locator('main details')
+  let count = await folds.count()
+  if (count !== expected) {
+    /* Une seconde chance, et une seule : un rendu en retard n'est pas une
+       absence, et un délai fixe de plus serait du sable dans les yeux. */
+    await page.waitForSelector('main details', { timeout: 15000 }).catch(() => undefined)
+    count = await folds.count()
+  }
+  if (count !== expected) {
+    gap(`${path} rend ${count} repli(s) au lieu de ${expected} — non audité replié/déplié`)
+    return
+  }
+  for (let i = 0; i < count; i += 1) await folds.nth(i).locator('summary').click()
+  await settle(page)
+  await auditCurrent(page, `${path} (${count} repli·s ouvert·s)`)
+}
+
+/**
+ * Une passe complète, dans une fenêtre.
+ *
+ * Les contextes sont recréés à chaque passe : un contexte porte sa fenêtre et
+ * ses cookies, et réutiliser celui de la passe précédente auditerait la
+ * seconde largeur avec la première. C'est le genre d'erreur qui rend un audit
+ * vert pour la raison qu'on ne voulait pas.
+ */
+async function runPass(browser: Browser, viewport: Viewport): Promise<void> {
+  current = viewport
+  const shape = { viewport: { width: viewport.width, height: viewport.height }, isMobile: viewport.isMobile }
+  console.log(`\n########## ${viewport.name} (${viewport.width} × ${viewport.height})`)
+
+  console.log('— pages publiques, en visiteur')
+  const anon = await (await browser.newContext(shape)).newPage()
+  for (const path of PUBLIC_PAGES) await audit(anon, path)
+
+  console.log('— pages du portail, en membre')
+  const member = await (await browser.newContext(shape)).newPage()
+  await signIn(member, MEMBER)
+  for (const path of MEMBER_PAGES) await audit(member, path)
+
+  /* L'espace vendeur a disparu avec la marketplace (migration 0034) : il
+     n'y a plus de compte vendeur à auditer. */
+
+  console.log('— la file, en modérateur')
+  const moderator = await (await browser.newContext(shape)).newPage()
+  await signIn(moderator, MODERATOR)
+  for (const path of MODERATOR_PAGES) await audit(moderator, path)
+
+  console.log('— la boutique publique, si le drapeau l’ouvre')
+  const probe = await member.goto(`${BASE}/boutique`)
+  if (probe?.status() === 404) {
+    console.log('  (—) shop_enabled fermé — gabarits /boutique non audités (nommé, pas caché)')
+  } else {
+    for (const path of SHOP_PAGES) await audit(member, path)
+
+    console.log('— le tunnel d’achat de démonstration, en passant (sans portail)')
+    const passerby = await (await browser.newContext(shape)).newPage()
+    await auditFunnel(passerby)
+  }
+
+  if (!viewport.isMobile) return
+
+  /* Ce que la largeur étroite replie, et que la passe large n'a jamais eu à
+     ouvrir parce que rien n'y était replié. */
+  console.log('— ce que le mobile replie, ouvert')
+  /* Les nombres sont ceux de la QA du 13 septembre : un repli de filtres sur la
+     liste, deux replis de faits sur une fiche. Si l'un change, ce contrôle doit
+     échouer et être relu — pas s'adapter en silence. */
+  await auditFoldsOpen(member, '/cigares', 1)
+  await auditFoldsOpen(member, '/cigares/undercrown-10-robusto', 2)
+
+  /* `/boutique` pour le visiteur : le seul écran de `app/(app)/` — donc portant
+     l'en-tête — qu'on atteint sans compte ni portail. */
+  await auditMenuOpen(anon, 'visiteur', '/boutique')
+  await auditMenuOpen(member, 'membre', '/cigares')
+  await auditMenuOpen(moderator, 'admin', '/admin')
+}
+
 async function main(): Promise<void> {
+  const viewports = REQUESTED.map((name) => VIEWPORTS[name]).filter(
+    (viewport): viewport is Viewport => viewport !== undefined,
+  )
+  if (viewports.length === 0) {
+    console.error(
+      `AUDIT_VIEWPORTS ne nomme aucune fenêtre connue (${Object.keys(VIEWPORTS).join(', ')}).`,
+    )
+    process.exitCode = 1
+    return
+  }
+
   let browser: Browser | null = null
   try {
     browser = await chromium.launch({
       executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH ?? '/opt/pw-browsers/chromium',
     })
-
-    console.log('— pages publiques, en visiteur')
-    const anon = await (await browser.newContext()).newPage()
-    for (const path of PUBLIC_PAGES) await audit(anon, path)
-
-    console.log('— pages du portail, en membre')
-    const member = await (await browser.newContext()).newPage()
-    await signIn(member, MEMBER)
-    for (const path of MEMBER_PAGES) await audit(member, path)
-
-    /* L'espace vendeur a disparu avec la marketplace (migration 0034) : il
-       n'y a plus de compte vendeur à auditer. */
-
-    console.log('— la file, en modérateur')
-    const moderator = await (await browser.newContext()).newPage()
-    await signIn(moderator, MODERATOR)
-    for (const path of MODERATOR_PAGES) await audit(moderator, path)
-
-    console.log('— la boutique publique, si le drapeau l’ouvre')
-    const probe = await member.goto(`${BASE}/boutique`)
-    if (probe?.status() === 404) {
-      console.log('  (—) shop_enabled fermé — gabarits /boutique non audités (nommé, pas caché)')
-    } else {
-      for (const path of SHOP_PAGES) await audit(member, path)
-
-      console.log('— le tunnel d’achat de démonstration, en passant (sans portail)')
-      const passerby = await (await browser.newContext()).newPage()
-      await auditFunnel(passerby)
-    }
+    for (const viewport of viewports) await runPass(browser, viewport)
   } finally {
     if (browser) await browser.close()
   }
@@ -288,14 +470,40 @@ async function main(): Promise<void> {
     if (list.length === 0) continue
     console.log(`\n${impact} — ${list.length} :`)
     for (const finding of list) {
-      console.log(`  ${finding.page}  [${finding.id}] ${finding.help} (${finding.nodes} noeud·s)`)
+      console.log(
+        `  [${finding.viewport}] ${finding.page}  [${finding.id}] ${finding.help} ` +
+          `(${finding.nodes} noeud·s)`,
+      )
     }
+  }
+
+  /* Par fenêtre aussi : un total de zéro ne dit pas laquelle des deux a été
+     regardée, et c'est exactement la confusion qui a laissé passer trois
+     défauts de mobile pendant neuf phases. */
+  console.log('\n=== Bilan par fenêtre')
+  for (const viewport of Object.values(VIEWPORTS)) {
+    const seen = findings.filter((finding) => finding.viewport === viewport.name)
+    if (!REQUESTED.some((name) => VIEWPORTS[name]?.name === viewport.name)) {
+      console.log(`${viewport.name} — non auditée (hors de AUDIT_VIEWPORTS)`)
+      continue
+    }
+    console.log(`${viewport.name} — ${seen.length} violation(s)`)
+  }
+
+  if (gaps.length > 0) {
+    console.log(`\n=== Lacunes — ${gaps.length} contrôle(s) qui n'ont rien trouvé à regarder`)
+    for (const message of gaps) console.log(`  ${message}`)
+    console.log(
+      "  Un audit ne peut pas rendre « 0 violation » sur un écran qu'il n'a pas regardé :\n" +
+        '  ces lignes sont un verdict manquant, pas un verdict favorable.',
+    )
   }
 
   const critical = byImpact.get('critical')?.length ?? 0
   console.log(`\nCritère §9 : ${critical} violation(s) critique(s).`)
   console.log(`Barre de P8 : ${findings.length} violation(s), tous impacts confondus.`)
-  if (critical > 0) process.exitCode = 1
+  console.log(`Lacunes : ${gaps.length}.`)
+  if (critical > 0 || gaps.length > 0) process.exitCode = 1
 }
 
 void main()
