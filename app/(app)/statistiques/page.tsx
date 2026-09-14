@@ -205,11 +205,24 @@ export default async function StatisticsPage() {
   )
 }
 
+/**
+ * Une paire d'un `<dl>` — et le conteneur est un `<div>`, pas un `<span>`.
+ *
+ * Un `<dl>` n'admet directement que `<dt>`, `<dd>`, `<div>`, `<script>` et
+ * `<template>`. Le `<span>` qui était ici depuis P2 (22 août) rendait donc DEUX
+ * violations `serious` : la liste contenait un élément interdit, et ses quatre
+ * `<dt>`/`<dd>` n'étaient plus contenus par une liste de définitions.
+ *
+ * Trois semaines invisibles, et l'audit de P8 ne mentait pas : tout ce bloc vit
+ * derrière `nothingYet`, donc sur un compte de test sans entrée de carnet le
+ * `<dl>` n'existait pas. « Une vacuité se construit, elle ne se suppose pas » —
+ * ici c'est l'audit qui auditait un état vide sans le dire.
+ */
 function Pair({ label, value }: { label: string; value: string }) {
   return (
-    <span className="flex items-baseline gap-2">
+    <div className="flex items-baseline gap-2">
       <dt className="label">{label}</dt>
       <dd className="text-ink">{value}</dd>
-    </span>
+    </div>
   )
 }
