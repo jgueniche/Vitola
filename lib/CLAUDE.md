@@ -12,37 +12,37 @@ Seuils de couverture sur `lib/` : 80 % des instructions, 75 % des branches (`vit
 
 Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ailleurs est un bug :
 
-| Fichier | Définit |
-|---|---|
-| `brand.ts` | Le nom commercial. Nulle part ailleurs (§1, et Q7 est encore ouverte). |
-| `routes.ts` | Les segments d'URL français et la liste des routes publiques. |
-| `theme.ts` | Les deux seules couleurs qui doivent exister en TypeScript (meta tags, images OG). |
-| `compliance/age-gate.ts` | La signature du cookie 18+ et le calcul de majorité. |
-| `compliance/tobacco-terms.ts` | Le lexique interdit en boutique. Repris par un trigger en P7. |
-| `compliance/dsa.ts` | Les motifs de signalement, les surfaces signalables, le délai annoncé. |
-| `i18n/index.ts` | Le point d'entrée de toute copie visible. |
-| `release.ts` | La phase de la roadmap et le commit déployé, servis par `/api/health`. |
-| `reviews/model.ts` | Les quatre portées, ce que chacune fait *aujourd'hui*, les bornes de `reviews`, et l'échelle des six critères. |
-| `reviews/draft.ts` | Ce qu'est un brouillon de dégustation valide, et ce qui le rend invalide. |
-| `humidor/model.ts` | Le signe d'un mouvement, les bornes de la cave, la courbe de maturité, le format CSV. |
-| `stats/queries.ts` | Ce que comptent les statistiques, et le plafond qu'elles annoncent. |
-| `settings/model.ts` | Les défauts de `profile_settings`, et la base légale de chaque consentement. |
-| `wiki/model.ts` | Les treize colonnes qu'une contribution peut proposer — le profil aromatique depuis la 0025 — et la forme d'un diff. |
-| `boxcode/decode.ts` | La **forme** d'un code de boîte. Le **sens** est en base, dans `ref.box_codes`. |
-| `site.ts` | L'origine sur laquelle le site répond — sitemap et `metadataBase`. |
-| `flags.ts` | La lecture d'un drapeau, et le repli fermé qui va avec. |
-| `social/model.ts` | Ce qu'est une publication, les deux portées qu'elle accepte, et **le curseur keyset**. |
-| `social/confirmations.ts` | Ce qu'un `?fait=…` veut dire, pour les pages qui en reçoivent un. |
-| `social/groups.ts` | Les bornes d'un club, d'un événement et d'un message, le vocabulaire des deux enums, et **le slug d'un club**. |
-| `venues/model.ts` | Les bornes d'un lieu et d'un avis, les trois critères du §5.7, la forme de `hours`, le slug d'un lieu. |
-| `journal/model.ts` | Les bornes d'un article, les six catégories, le temps de lecture calculé. |
-| `journal/markdown.ts` | **Le sous-ensemble Markdown de l'ADR 0012**, parsé en arbre typé — jamais en HTML. Ses tests portent les cas d'injection. |
-| `shop/cart.ts` | **Le tunnel d'achat de démonstration** : le panier-cookie et ses bornes, les totaux en centimes, l'adresse, la carte fictive, la commande `QA-`. Un cookie y est une entrée attaquant-typée. |
+| Fichier                       | Définit                                                                                                                                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `brand.ts`                    | Le nom commercial. Nulle part ailleurs (§1, et Q7 est encore ouverte).                                                                                                                       |
+| `routes.ts`                   | Les segments d'URL français et la liste des routes publiques.                                                                                                                                |
+| `theme.ts`                    | Les deux seules couleurs qui doivent exister en TypeScript (meta tags, images OG).                                                                                                           |
+| `compliance/age-gate.ts`      | La signature du cookie 18+ et le calcul de majorité.                                                                                                                                         |
+| `compliance/tobacco-terms.ts` | Le lexique interdit en boutique. Repris par un trigger en P7.                                                                                                                                |
+| `compliance/dsa.ts`           | Les motifs de signalement, les surfaces signalables, le délai annoncé.                                                                                                                       |
+| `i18n/index.ts`               | Le point d'entrée de toute copie visible.                                                                                                                                                    |
+| `release.ts`                  | La phase de la roadmap et le commit déployé, servis par `/api/health`.                                                                                                                       |
+| `reviews/model.ts`            | Les quatre portées, ce que chacune fait _aujourd'hui_, les bornes de `reviews`, et l'échelle des six critères.                                                                               |
+| `reviews/draft.ts`            | Ce qu'est un brouillon de dégustation valide, et ce qui le rend invalide.                                                                                                                    |
+| `humidor/model.ts`            | Le signe d'un mouvement, les bornes de la cave, la courbe de maturité, le format CSV.                                                                                                        |
+| `stats/queries.ts`            | Ce que comptent les statistiques, et le plafond qu'elles annoncent.                                                                                                                          |
+| `settings/model.ts`           | Les défauts de `profile_settings`, et la base légale de chaque consentement.                                                                                                                 |
+| `wiki/model.ts`               | Les treize colonnes qu'une contribution peut proposer — le profil aromatique depuis la 0025 — et la forme d'un diff.                                                                         |
+| `boxcode/decode.ts`           | La **forme** d'un code de boîte. Le **sens** est en base, dans `ref.box_codes`.                                                                                                              |
+| `site.ts`                     | L'origine sur laquelle le site répond — sitemap et `metadataBase`.                                                                                                                           |
+| `flags.ts`                    | La lecture d'un drapeau, et le repli fermé qui va avec.                                                                                                                                      |
+| `social/model.ts`             | Ce qu'est une publication, les deux portées qu'elle accepte, et **le curseur keyset**.                                                                                                       |
+| `social/confirmations.ts`     | Ce qu'un `?fait=…` veut dire, pour les pages qui en reçoivent un.                                                                                                                            |
+| `social/groups.ts`            | Les bornes d'un club, d'un événement et d'un message, le vocabulaire des deux enums, et **le slug d'un club**.                                                                               |
+| `venues/model.ts`             | Les bornes d'un lieu et d'un avis, les trois critères du §5.7, la forme de `hours`, le slug d'un lieu.                                                                                       |
+| `journal/model.ts`            | Les bornes d'un article, les six catégories, le temps de lecture calculé.                                                                                                                    |
+| `journal/markdown.ts`         | **Le sous-ensemble Markdown de l'ADR 0012**, parsé en arbre typé — jamais en HTML. Ses tests portent les cas d'injection.                                                                    |
+| `shop/cart.ts`                | **Le tunnel d'achat de démonstration** : le panier-cookie et ses bornes, les totaux en centimes, l'adresse, la carte fictive, la commande `QA-`. Un cookie y est une entrée attaquant-typée. |
 
 ## Le garde-fou tabac ne s'applique pas aux commentaires
 
 Mesuré, pas supposé, et consigné dans l'ADR 0005 : passés six commentaires de fiche parfaitement
-ordinaires, `isShopTextAllowed()` en refuse quatre — *cigare*, *havane*, *boîte de 25*, *vitole*.
+ordinaires, `isShopTextAllowed()` en refuse quatre — _cigare_, _havane_, _boîte de 25_, _vitole_.
 Le garde-fou n'est pas cassé ; il existe pour refuser une **annonce de boutique**, et le vocabulaire
 d'une annonce interdite est celui d'un commentaire légitime.
 
@@ -166,3 +166,40 @@ Conséquence pratique : ces fonctions restent « mes caves », et la cave d'un t
 `social/queries.ts` → `shared_humidor_shelf()`, qui projette trois colonnes et jamais le prix. Une
 policy filtre des lignes ; elle ne sait pas cacher une colonne, et un prix de tabac sur le profil
 d'un membre est précisément ce que le §2 regarde.
+
+## Un échec de lecture n'est pas un refus de lecture
+
+**La règle est l'[ADR 0020](../docs/adr/0020-echouer-franchement-ou-se-rendre-vide.md) : ce qui est
+le sujet d'une page échoue franchement, ce qui l'accompagne se rend vide en le disant.**
+
+Elle ne change rien à ce dossier, et c'est voulu : **les 79 lectures de `**/queries.ts` continuent
+de jeter.** Aucun `catch` n'a été ajouté ici, et il ne faut pas en ajouter. La raison est la même
+que celle qui interdit de doubler une policy :
+
+> `catch { return [] }` **est** un doublage de policy. `reviews`, `posts`, `venues` et `products`
+> rendent légitimement zéro ligne — 937 fiches sur 940 n'ont aucune note publique — donc « rien »
+> venu d'un `catch` est indiscernable de « rien » venu d'une policy. Le repli survivrait à ce qu'il
+> double, et il dirait au lecteur « il n'y a rien » au nom d'une base qui n'a pas répondu.
+
+La décision se prend **au site d'appel**, jamais ici, et pour une raison qui se mesure :
+`listAromaWheel()` est **le sujet** de `/aromes` et **une facette** de `/cigares`. Une requête ne
+sait pas qui l'appelle. Le mécanisme est `accessory()` dans `lib/degrade.ts`, qui rend
+`{ ok: true, value }` ou `{ ok: false }` — sans valeur sur la branche qui échoue, pour qu'il n'y
+ait rien à prendre pour de la donnée.
+
+**Quatre replis existent et sont argumentés** : `isFeatureEnabled()`, `reportSlaHours()`,
+`publicPublishedArticles()` et `venuesFlag()`. `tests/unit/degrade.test.ts` relit les fichiers de
+requêtes et échoue si un cinquième apparaît — et échoue aussi si l'un de ces quatre disparaît sans
+que la liste suive.
+
+### `currentUser()` est le cas où cela coûtait le plus cher
+
+`lib/supabase/server.ts` rendait `null` sur **n'importe quelle** erreur, sous le commentaire « a
+broken session is not a 500 ». Vrai d'une session cassée, faux d'une panne : le 14 septembre 2026,
+pendant que l'API d'auth répondait 502, un membre connecté ouvrant `/carnet`, `/cave` ou `/fil`
+était **renvoyé à la page de connexion**. Le site ne disait pas « je n'ai pas pu lire », il disait
+« vous n'êtes pas connecté » — un fait sur le lecteur, et faux.
+
+Le partage se fait désormais sur la **forme de l'erreur**, vérifiée contre l'API réelle et non
+devinée : `AuthSessionMissingError` porte un **400**, un jeton illisible un **403** — donc `null`
+est la vraie réponse ; tout le reste (5xx, transport, statut inconnu) **jette**.

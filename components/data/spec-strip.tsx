@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Unavailable } from '@/components/layout/unavailable'
 
 import {
   StrengthMeter,
@@ -42,6 +43,7 @@ export function SpecStrip({
   strength,
   aromas,
   aromaSource,
+  aromasUnavailable = false,
 }: {
   slug: string
   ringGauge: number | null
@@ -49,6 +51,13 @@ export function SpecStrip({
   strength: Strength | null
   /** The referential's own descriptors, already resolved to labels. */
   aromas: readonly string[]
+  /**
+   * The sheet holds aromas but their labels could not be read (ADR 0020).
+   * Without it this strip prints « Non renseignés » under a field that IS
+   * filled, and offers a contribution link for work already done — an
+   * absence read as an emptiness, which is the one thing the rule forbids.
+   */
+  aromasUnavailable?: boolean
   /** The maker's page, when the last accepted proposal cited one (0026, 0027). */
   aromaSource: string | null
 }) {
@@ -128,6 +137,10 @@ export function SpecStrip({
               )}
             </dd>
           </>
+        ) : aromasUnavailable ? (
+          <dd>
+            <Unavailable />
+          </dd>
         ) : (
           <Missing label={copy.notProvidedPl} action={copy.proposeAromas} href={propose} />
         )}

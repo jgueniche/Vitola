@@ -46,15 +46,12 @@ export async function CommentThread({ cigarId, slug }: { cigarId: string; slug: 
       : m.comments.countMany.replace('{count}', String(comments.length))
 
   return (
-    <section aria-labelledby="commentaires" className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <h2 id="commentaires" className="font-display text-display-sm">
-            {m.comments.discussionTitle}
-          </h2>
-          {comments.length > 0 ? <p className="text-ink-faint text-sm">{count}</p> : null}
-        </div>
-        <p className="lede">{m.comments.discussionLede}</p>
+    <section aria-labelledby="commentaires" className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+        <h2 id="commentaires" className="font-display text-display-sm">
+          {m.comments.discussionTitle}
+        </h2>
+        {comments.length > 0 ? <p className="text-ink-faint text-sm">{count}</p> : null}
       </div>
 
       {comments.length === 0 ? (
@@ -99,8 +96,6 @@ export async function CommentThread({ cigarId, slug }: { cigarId: string; slug: 
           </Link>
         </p>
       )}
-
-      <p className="text-ink-faint measure text-xs leading-relaxed">{m.comments.rule}</p>
 
       {/* The entry itself is reportable too, and for a different reason than a
           comment: an entry can be inaccurate, or read as promotional. Signed-in

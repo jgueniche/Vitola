@@ -1,5 +1,8 @@
 {
   "common": {
+    "unavailable": {
+      "body": "momentarily unreadable. Nothing is lost: reload the page in a moment."
+    },
     "skipToContent": "Skip to content",
     "back": "Back",
     "search": "Search",
@@ -61,7 +64,12 @@
       "label": "Suggestions"
     },
     "account": {
-      "label": "My account"
+      "label": "My account",
+      "profile": "My public profile",
+      "menuLabel": "Account and settings",
+      "open": "Open the account menu",
+      "close": "Close the account menu",
+      "unread": "{count} unread notification(s)"
     },
     "searchAction": "Search"
   },
@@ -151,8 +159,7 @@
       "none": "No sheet matches",
       "noneHint": "Widen the criteria, or clear the filters.",
       "emptyTitle": "The reference is not open to the public yet",
-      "emptyBody": "The sheets are in the database but none has been reviewed. A sheet is only visible once a reviewer has checked it: that is the rule of the reference, not a temporary display limit.",
-      "lede": "{total} published sheets · {withVitola} with a vitola · {withStrength} with a strength · {withAromas} with an aroma profile — the rest is waiting for your corrections."
+      "emptyBody": "The sheets are in the database but none has been reviewed. A sheet is only visible once a reviewer has checked it: that is the rule of the reference, not a temporary display limit."
     },
     "pagination": {
       "previous": "Previous",
@@ -314,7 +321,6 @@
     "title": "Comments",
     "countOne": "1 comment",
     "countMany": "{count} comments",
-    "rule": "A comment informs; it does not praise. Anything that urges consumption is taken down.",
     "emptyTitle": "Nobody has written here yet",
     "emptyBody": "Say what you know about this cigar: how it is built, how it smokes, or what this sheet states and does not match.",
     "formLabel": "Your comment",
@@ -339,7 +345,6 @@
     "hiddenByModeration": "Hidden by moderation — {reason}",
     "hiddenNoReason": "reason on file",
     "discussionTitle": "Discussion of the sheet",
-    "discussionLede": "What is said about the sheet itself — a construction, a smoke, a figure that does not match. To rate the cigar, that is the notebook.",
     "signInLine": "Reading is open to everyone; writing needs an account."
   },
   "notebook": {
@@ -537,13 +542,11 @@
     "entriesLede": "The public entries, and yours.",
     "entriesEmpty": "No entry to show on this sheet.",
     "mine": "Your entry",
-    "emptyLine": "No public rating. Yours would be the first — it only counts if you make it public.",
+    "emptyLine": "No public rating.",
     "publicOne": "1 public rating",
     "publicMany": "{count} public ratings",
     "citedAromas": "Aromas the members cite most",
     "citedAromasHint": "In the members’ public entries — a different fact from the reference profile above, and never mixed with it.",
-    "entriesCount": "{count} · the public ones, and yours",
-    "entriesCountOne": "1 · yours, or a public one",
     "hint": "Bayesian mean: a cigar rated once does not outrank a cigar rated thirty times. Only public entries count here.",
     "lastReviewLabel": "Last rated",
     "bandOne": "1 band",
@@ -2242,7 +2245,6 @@
     "myEntries": "Your notebook",
     "myEntriesCount": "{count} entr(y/ies)",
     "myEntriesNone": "Nothing on this cigar yet.",
-    "privacyNote": "The scope is chosen entry by entry. This sheet’s gesture starts public; an entry written from your notebook starts private.",
     "signInTitle": "Keeping a notebook needs an account",
     "signInBody": "What you smoked, when, the rating and the word. Everything starts private there; nothing is shared without your doing. The humidor and the full tasting come with it.",
     "signInNote": "Reading, though, is open.",

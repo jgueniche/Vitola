@@ -68,7 +68,7 @@ export function CommentItem(props: CommentItemProps) {
   }
 
   return (
-    <li className="border-rule flex flex-col gap-2 border-b py-5 last:border-b-0">
+    <li className="border-rule flex flex-col gap-1.5 border-b py-3.5 last:border-b-0">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="eyebrow text-ink">{props.authorLabel}</span>
         <time dateTime={props.createdAt} className="text-ink-faint text-xs">

@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
+
 import { Band } from '@/components/band/band'
 import { BreadcrumbWithCurrent } from '@/components/layout/breadcrumb'
 import { Disclosure } from '@/components/layout/disclosure'
@@ -22,7 +25,6 @@ import {
   releaseTypeLabel,
   shapeLabel,
 } from '@/lib/cigar'
-import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { getCigarBySlug } from '@/lib/referential/queries'
 import { aromaLabels, getCigarStats, listReviewsForCigar } from '@/lib/reviews/queries'
@@ -98,19 +100,38 @@ export default async function CigarPage({ params, searchParams }: Props) {
   const cigar = await getCigarBySlug(slug)
   if (!cigar) notFound()
 
+  /*
+   * The sheet is the SUBJECT and is read above, bare: it throws, and it must
+   * (ADR 0020). If it came back `null` on a failure, `notFound()` would tell
+   * the reader « this cigar does not exist » about a referential whose whole
+   * value is provenance.
+   *
+   * Everything below ACCOMPANIES it. `listReviewsForCigar` is the sharpest
+   * case on the site: four SELECT policies decide what it returns, 937 sheets
+   * out of 940 have no public entry, so an empty array from a catch would be
+   * indistinguishable from an empty array from the RLS. Hence `accessory`,
+   * which has no value to mistake on its failing branch.
+   *
+   * `currentUser()` stays bare: it is not an accompaniment, it is the identity
+   * the rail and « votre entrée » are about.
+   */
   const [user, stats, entries, profile, sources] = await Promise.all([
     currentUser(),
-    getCigarStats(cigar.id),
-    /* Every entry this reader may see — four SELECT policies decide, nothing
-       here restates them. The rail picks "mine" out of the same list. */
-    listReviewsForCigar(cigar.id),
-    aromaLabels(cigar.aroma_tags),
+    accessory(getCigarStats(cigar.id)),
+    accessory(listReviewsForCigar(cigar.id)),
+    accessory(aromaLabels(cigar.aroma_tags)),
     /* Where each column comes from (0027): the source cited by the last
        approved proposal that wrote it, through a door that shows a URL and a
        date and nothing of the queue. The seed's values have no row. */
-    sheetSources(cigar.id),
+    accessory(sheetSources(cigar.id)),
   ])
-  const aromaSource = sources.get('aroma_tags')?.source ?? null
+
+  /* A missing provenance line is an absence a reader cannot misread — it says
+     nothing rather than something false — so this one degrades to silence
+     rather than to a notice. The entries and the note below do not. */
+  const sourceOf = (column: string): string | null =>
+    sources.ok ? (sources.value.get(column)?.source ?? null) : null
+  const aromaSource = sourceOf('aroma_tags')
   /* The two measures of the strip that a manufacturer publishes, when the
      sheet holds them from a sourced proposal — one line each, never a card. */
   const sourcedSpecs = (
@@ -119,7 +140,7 @@ export default async function CigarPage({ params, searchParams }: Props) {
       ['strength', m.contributions.fieldStrength],
     ] as const
   )
-    .map(([column, label]) => ({ label, source: sources.get(column)?.source ?? null }))
+    .map(([column, label]) => ({ label, source: sourceOf(column) }))
     .filter((spec): spec is { label: string; source: string } => spec.source !== null)
 
   const vitola = cigar.vitolas
@@ -131,11 +152,6 @@ export default async function CigarPage({ params, searchParams }: Props) {
     vitola ? shapeLabel(vitola.shape) : null,
     cigar.release_year ? `${copy.since} ${cigar.release_year}` : null,
   ].filter((part): part is string => part !== null)
-
-  const entryCount =
-    entries.length === 1
-      ? m.cigarStats.entriesCountOne
-      : m.cigarStats.entriesCount.replace('{count}', formatCount(entries.length))
 
   return (
     <main id="contenu" className="mx-auto max-w-6xl px-4 py-10 pb-28 lg:pb-16">
@@ -182,9 +198,17 @@ export default async function CigarPage({ params, searchParams }: Props) {
             ringGauge={vitola?.ring_gauge ?? null}
             lengthMm={vitola?.length_mm ?? null}
             strength={(cigar.strength as Strength | null) ?? null}
-            aromas={cigar.aroma_tags
-              .map((id) => profile.get(id))
-              .filter((label): label is string => label !== undefined)}
+            aromas={
+              profile.ok
+                ? cigar.aroma_tags
+                    .map((id) => profile.value.get(id))
+                    .filter((label): label is string => label !== undefined)
+                : []
+            }
+            /* The sheet HAS aromas but their labels did not come back: without
+               this the strip would print « Non renseignés » and invite a
+               contribution to fill a field that is already filled. */
+            aromasUnavailable={!profile.ok && cigar.aroma_tags.length > 0}
             aromaSource={aromaSource}
           />
 
@@ -272,52 +296,49 @@ export default async function CigarPage({ params, searchParams }: Props) {
             </dl>
           </Disclosure>
 
-          <Disclosure
-            title={copy.foldSheet}
-            hint={vitola ? vitola.name_salida : copy.notProvidedF}
-          >
+          <Disclosure title={copy.foldSheet} hint={vitola ? vitola.name_salida : copy.notProvidedF}>
             <dl className="grid gap-x-10 sm:grid-cols-2">
-            <Fact label={copy.salida}>
-              {vitola ? (
-                <Link
-                  href={routes.vitola(vitola.slug)}
-                  className="text-accent-bright hover:text-accent underline underline-offset-4"
-                >
-                  {vitola.name_salida}
-                </Link>
-              ) : (
-                <span className="text-ink-faint">{copy.notProvidedF}</span>
-              )}
-            </Fact>
-            <Fact label={copy.galera}>
-              {vitola?.name_galera ?? <span className="text-ink-faint">{copy.notProvidedF}</span>}
-            </Fact>
-            <Fact label={copy.release}>
-              {releaseTypeLabel(cigar.release_type)}
-              {cigar.release_year ? ` · ${cigar.release_year}` : null}
-              {cigar.discontinued_year ? (
-                <span className="text-ink-muted">
-                  {' '}
-                  {copy.discontinued.replace('{year}', String(cigar.discontinued_year))}
-                </span>
-              ) : null}
-            </Fact>
-            {/* The price and its effective date are one fact, never two. The
+              <Fact label={copy.salida}>
+                {vitola ? (
+                  <Link
+                    href={routes.vitola(vitola.slug)}
+                    className="text-accent-bright hover:text-accent underline underline-offset-4"
+                  >
+                    {vitola.name_salida}
+                  </Link>
+                ) : (
+                  <span className="text-ink-faint">{copy.notProvidedF}</span>
+                )}
+              </Fact>
+              <Fact label={copy.galera}>
+                {vitola?.name_galera ?? <span className="text-ink-faint">{copy.notProvidedF}</span>}
+              </Fact>
+              <Fact label={copy.release}>
+                {releaseTypeLabel(cigar.release_type)}
+                {cigar.release_year ? ` · ${cigar.release_year}` : null}
+                {cigar.discontinued_year ? (
+                  <span className="text-ink-muted">
+                    {' '}
+                    {copy.discontinued.replace('{year}', String(cigar.discontinued_year))}
+                  </span>
+                ) : null}
+              </Fact>
+              {/* The price and its effective date are one fact, never two. The
                 table refuses a price without a source and a date; so does this
                 page. */}
-            {cigar.msrp_eur !== null && cigar.msrp_effective_on ? (
-              <Fact label={copy.price}>
-                <span className="font-mono">{formatPrice(cigar.msrp_eur)}</span>
-                <span className="text-ink-muted">
-                  {' '}
-                  {copy.priceAt.replace('{date}', formatEffectiveDate(cigar.msrp_effective_on))}
-                </span>
-                <span className="text-ink-faint block text-xs">{copy.priceSource}</span>
+              {cigar.msrp_eur !== null && cigar.msrp_effective_on ? (
+                <Fact label={copy.price}>
+                  <span className="font-mono">{formatPrice(cigar.msrp_eur)}</span>
+                  <span className="text-ink-muted">
+                    {' '}
+                    {copy.priceAt.replace('{date}', formatEffectiveDate(cigar.msrp_effective_on))}
+                  </span>
+                  <span className="text-ink-faint block text-xs">{copy.priceSource}</span>
+                </Fact>
+              ) : null}
+              <Fact label={copy.line}>
+                {cigar.lines?.name ?? <span className="text-ink-faint">{copy.notProvidedF}</span>}
               </Fact>
-            ) : null}
-            <Fact label={copy.line}>
-              {cigar.lines?.name ?? <span className="text-ink-faint">{copy.notProvidedF}</span>}
-            </Fact>
             </dl>
           </Disclosure>
 
@@ -352,7 +373,8 @@ export default async function CigarPage({ params, searchParams }: Props) {
         <aside className="flex flex-col gap-8 self-start lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <RailSection
             cigar={{ id: cigar.id, slug: cigar.slug, commercial_name: cigar.commercial_name }}
-            entries={entries}
+            entries={entries.ok ? entries.value : []}
+            entriesUnavailable={!entries.ok}
             gestureOpen={gestureOpen}
           />
 
@@ -360,20 +382,30 @@ export default async function CigarPage({ params, searchParams }: Props) {
             <span className="eyebrow">{copy.membersBand}</span>
           </Band>
 
-          <StatsPanel stats={stats} variant="rail" />
+          {stats.ok ? (
+            <StatsPanel stats={stats.value} variant="rail" />
+          ) : (
+            <section aria-labelledby="notes" className="flex flex-col gap-3">
+              <h2 id="notes" className="font-display text-display-sm">
+                {m.cigarStats.title}
+              </h2>
+              <Unavailable />
+            </section>
+          )}
 
           <section aria-labelledby="entrees" className="flex flex-col gap-2">
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
               <h2 id="entrees" className="font-display text-display-sm">
                 {m.cigarStats.entriesTitle}
               </h2>
-              {entries.length > 0 ? <p className="text-ink-faint text-sm">{entryCount}</p> : null}
             </div>
-            {entries.length === 0 ? (
+            {!entries.ok ? (
+              <Unavailable />
+            ) : entries.value.length === 0 ? (
               <p className="text-ink-faint text-sm">{m.cigarStats.entriesEmpty}</p>
             ) : (
               <div className="border-rule border-t">
-                {entries.map((entry) => (
+                {entries.value.map((entry) => (
                   <EntryRow
                     key={entry.id}
                     entry={entry}

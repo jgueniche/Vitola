@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -78,18 +80,25 @@ export default async function VenuePage({
   const done = venueConfirmation(query.fait)
 
   const user = await currentUser()
+  /* The venue is the subject and threw above. Its reviews, the agenda and
+     « mon avis » accompany it — and `venue_reviews` is one of the four tables
+     whose policies return zero rows legitimately, so an empty list from a
+     catch would read as « personne n'a écrit » (ADR 0020). The account is a
+     permission read: it falls back CLOSED, to a plain member. */
   const [account, reviews, mine, events, slaHours] = await Promise.all([
-    user ? getAccount(user.id) : Promise.resolve(null),
-    listVenueReviews(venue.id),
-    user ? myVenueReview(venue.id, user.id) : Promise.resolve(null),
-    upcomingEventsAtVenue(venue.id),
+    user ? accessory(getAccount(user.id)) : Promise.resolve({ ok: true, value: null } as const),
+    accessory(listVenueReviews(venue.id)),
+    user
+      ? accessory(myVenueReview(venue.id, user.id))
+      : Promise.resolve({ ok: true, value: null } as const),
+    accessory(upcomingEventsAtVenue(venue.id)),
     reportSlaHours(),
   ])
 
-  const isEditor = hasMinRole(account?.role ?? 'member', REVIEWER_ROLE)
+  const isEditor = hasMinRole(orElse(account, null)?.role ?? 'member', REVIEWER_ROLE)
   const isAuthor = user !== null && venue.created_by === user.id
   const isClaimant = user !== null && venue.claimed_by === user.id
-  const mean = meanRating(reviews.map((review) => review.rating))
+  const mean = reviews.ok ? meanRating(reviews.value.map((review) => review.rating)) : null
   const address = [venue.address, venue.postal_code, venue.city].filter(Boolean).join(', ')
 
   return (
@@ -217,11 +226,11 @@ export default async function VenuePage({
         </form>
       ) : null}
 
-      {events.length > 0 ? (
+      {events.ok && events.value.length > 0 ? (
         <section className="flex flex-col gap-3">
           <h2 className="font-display text-display-sm">{copy.sheet.eventsTitle}</h2>
           <ul className="flex flex-col gap-2">
-            {events.map((event) => (
+            {events.value.map((event) => (
               <li key={event.id} className="flex flex-wrap items-baseline gap-2 text-sm">
                 <Link href={routes.event(event.id)} className="text-accent hover:underline">
                   {event.title}
@@ -248,17 +257,21 @@ export default async function VenuePage({
                 ·{' '}
               </>
             ) : null}
-            {reviews.length === 1
-              ? copy.reviews.countOne
-              : copy.reviews.countMany.replace('{count}', String(reviews.length))}
+            {!reviews.ok
+              ? null
+              : reviews.value.length === 1
+                ? copy.reviews.countOne
+                : copy.reviews.countMany.replace('{count}', String(reviews.value.length))}
           </p>
         </div>
 
-        {reviews.length === 0 ? (
+        {!reviews.ok ? (
+          <Unavailable />
+        ) : reviews.value.length === 0 ? (
           <p className="lede">{copy.reviews.empty}</p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {reviews.map((review) => (
+            {reviews.value.map((review) => (
               <li
                 key={review.id}
                 className="border-rule bg-surface flex flex-col gap-2 rounded-[3px] border p-4"
@@ -313,12 +326,24 @@ export default async function VenuePage({
         )}
 
         {user && venue.status === 'published' ? (
-          <VenueReviewForm
-            key={mine ? `${mine.welcome}-${mine.comfort}-${mine.advice}-${mine.updated_at}` : 'new'}
-            venueId={venue.id}
-            slug={venue.slug}
-            existing={mine}
-          />
+          /* `null` here means « you have not written one », and the form then
+             offers to create. On a failed read that is the forbidden empty
+             value (ADR 0020): it would invite a second review over a first
+             one. So the form is withheld rather than shown with a guess. */
+          !mine.ok ? (
+            <Unavailable label={copy.reviews.title} />
+          ) : (
+            <VenueReviewForm
+              key={
+                mine.value
+                  ? `${mine.value.welcome}-${mine.value.comfort}-${mine.value.advice}-${mine.value.updated_at}`
+                  : 'new'
+              }
+              venueId={venue.id}
+              slug={venue.slug}
+              existing={mine.value}
+            />
+          )
         ) : null}
         {!user && venue.status === 'published' ? (
           <p className="text-ink-muted text-sm">

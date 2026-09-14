@@ -10,6 +10,7 @@ import { buttonClass } from '@/components/ui/button'
 import { listAromaWheel } from '@/lib/aromas/queries'
 import { formatCount } from '@/lib/format'
 import { m } from '@/lib/i18n'
+import { accessory, orElse } from '@/lib/degrade'
 import { publishedOriginCountries } from '@/lib/referential/queries'
 import { routes } from '@/lib/routes'
 import {
@@ -19,7 +20,7 @@ import {
   parseFacets,
   type RawSearchParams,
 } from '@/lib/search/facets'
-import { publishedCounts, searchCigars } from '@/lib/search/query'
+import { searchCigars } from '@/lib/search/query'
 import { getRole } from '@/lib/settings/queries'
 import { hasMinRole } from '@/lib/settings/roles'
 import { currentUser } from '@/lib/supabase/server'
@@ -55,18 +56,31 @@ export default async function CigarsPage({
   const facets = parseFacets(await searchParams)
   const user = await currentUser()
 
-  const [result, countries, counts, aromaFamilies, role] = await Promise.all([
+  /*
+   * `searchCigars` is the SUBJECT: this page is the search, and a search that
+   * could not run must fail rather than render an empty result set — which on
+   * a referential of 940 sheets would read as « nothing matches ».
+   *
+   * The two facet sources ACCOMPANY it. This is the read that produced the
+   * second line of the 14 septembre log (« Could not read the origin facet:
+   * Bad Gateway »), and the one the audit believed had degraded gracefully.
+   * It had not: it threw like the other, and only the moment of the flush
+   * differed. Now it degrades, and says so.
+   *
+   * The role falls back CLOSED, per ADR 0020's second exception: a failure
+   * never opens a door, so an unreadable role is a plain member.
+   */
+  const [result, countries, aromaFamilies, role] = await Promise.all([
     searchCigars(facets),
-    publishedOriginCountries(),
-    publishedCounts(),
-    listAromaWheel(),
-    user ? getRole(user.id) : Promise.resolve('member' as const),
+    accessory(publishedOriginCountries()),
+    accessory(listAromaWheel()),
+    user ? accessory(getRole(user.id)) : Promise.resolve({ ok: true, value: 'member' } as const),
   ])
 
   /* An empty field is a task, not information (QA du 12 septembre 2026). The
      role is read once, here, and the card is told — a card does not decide
      who sees what. */
-  const showGaps = hasMinRole(role, 'editor')
+  const showGaps = hasMinRole(orElse(role, 'member'), 'editor')
 
   const hasFilters = isFacetActive(facets)
   const nothingPublishedAtAll = result.total === 0 && !hasFilters
@@ -74,17 +88,12 @@ export default async function CigarsPage({
 
   return (
     <main id="contenu" className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12">
-      <SectionHead
-        eyebrow={m.referential.eyebrow}
-        title={m.referential.cigarsTitle}
-        /* How much of the referential is documented is the page's own truth,
-           not something to discover by scrolling. */
-        lede={m.referential.results.lede
-          .replace('{total}', formatCount(counts.total))
-          .replace('{withVitola}', formatCount(counts.withVitola))
-          .replace('{withStrength}', formatCount(counts.withStrength))
-          .replace('{withAromas}', formatCount(counts.withAromas))}
-      />
+      {/* No lede. The QA session of 14 septembre 2026 struck the four
+          documentation counts — « supprime tout c'est pas joli » — and the
+          title carries the page on its own. Removing them also removed the
+          four `count: exact, head: true` round trips they cost, which is a
+          consequence and was not the reason. */}
+      <SectionHead eyebrow={m.referential.eyebrow} title={m.referential.cigarsTitle} />
 
       {/* The referential's own sections, as a row of links rather than a hub
           page in front of them. The wheel and the vitolario are here because
@@ -141,7 +150,13 @@ export default async function CigarsPage({
         {/* A visitor gets no facets: they lead to pages a visitor cannot page
             through, and a control that narrows a preview narrows nothing. */}
         {user ? (
-          <FacetPanel facets={facets} countries={countries} aromaFamilies={aromaFamilies} />
+          <FacetPanel
+            facets={facets}
+            countries={countries.ok ? countries.value : []}
+            countriesUnavailable={!countries.ok}
+            aromaFamilies={aromaFamilies.ok ? aromaFamilies.value : []}
+            aromaFamiliesUnavailable={!aromaFamilies.ok}
+          />
         ) : null}
 
         <section className="flex flex-col gap-5" aria-live="polite">
@@ -182,7 +197,7 @@ export default async function CigarsPage({
                   <p className="lede">
                     {m.referential.teaser.body
                       .replace('{shown}', formatCount(shown.length))
-                      .replace('{total}', formatCount(counts.total))}
+                      .replace('{total}', formatCount(result.total))}
                   </p>
                   <Link href={routes.signIn()} className={buttonClass({ size: 'lg' })}>
                     {m.referential.teaser.cta}

@@ -70,7 +70,7 @@ export function SiteMenu({
         aria-expanded={open}
         aria-controls="menu-du-site"
         onClick={() => setOpen((value) => !value)}
-        className="text-ink-muted hover:text-ink -mr-2 inline-flex size-9 items-center justify-center transition-colors duration-(--duration-quick) lg:hidden"
+        className="text-header-ink-muted hover:text-header-ink -mr-2 inline-flex size-9 items-center justify-center transition-colors duration-(--duration-quick) lg:hidden"
       >
         {open ? (
           <X aria-hidden="true" strokeWidth={1.5} className="size-5" />
@@ -83,7 +83,7 @@ export function SiteMenu({
       <div
         id="menu-du-site"
         hidden={!open}
-        className="border-rule basis-full border-t pt-4 pb-1 lg:hidden"
+        className="border-header-rule basis-full border-t pt-4 pb-1 lg:hidden"
       >
         <form action={routes.cigars()} method="get" role="search" className="pb-3">
           <label htmlFor="recherche-menu" className="sr-only">
@@ -93,14 +93,14 @@ export function SiteMenu({
             <Search
               aria-hidden="true"
               strokeWidth={1.5}
-              className="text-ink-muted pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+              className="text-header-ink-muted pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
             />
             <input
               id="recherche-menu"
               type="search"
               name={FACET_PARAMS.query}
               placeholder={m.referential.search.placeholder}
-              className="border-rule bg-surface text-ink placeholder:text-ink-muted focus:border-accent rounded-band h-10 w-full border pr-3 pl-9 text-sm outline-none"
+              className="border-header-rule text-header-ink placeholder:text-header-ink-muted focus:border-header-accent rounded-band h-10 w-full border bg-transparent pr-3 pl-9 text-sm outline-none"
             />
           </div>
         </form>
@@ -108,20 +108,20 @@ export function SiteMenu({
         <nav aria-label={copy.menu.label}>
           <ul className="flex flex-col">
             {links.map((link) => (
-              <li key={link.href} className="border-rule border-t">
+              <li key={link.href} className="border-header-rule border-t">
                 <Link
                   href={link.href}
-                  className={`block py-3 text-sm ${link.accent ? 'text-accent' : 'text-ink'}`}
+                  className={`block py-3 text-sm ${link.accent ? 'text-header-accent' : 'text-header-ink'}`}
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
             {(trailing ?? []).map((link) => (
-              <li key={link.href} className="border-rule border-t">
+              <li key={link.href} className="border-header-rule border-t">
                 <Link
                   href={link.href}
-                  className={`block py-3 text-sm ${link.accent ? 'text-accent' : 'text-ink-muted'}`}
+                  className={`block py-3 text-sm ${link.accent ? 'text-header-accent' : 'text-header-ink-muted'}`}
                 >
                   {link.label}
                 </Link>
@@ -130,7 +130,7 @@ export function SiteMenu({
           </ul>
         </nav>
 
-        {footer ? <div className="border-rule border-t pt-3">{footer}</div> : null}
+        {footer ? <div className="border-header-rule border-t pt-3">{footer}</div> : null}
       </div>
     </>
   )

@@ -1,4 +1,5 @@
 import { ChevronDown } from 'lucide-react'
+import { Unavailable } from '@/components/layout/unavailable'
 import Link from 'next/link'
 
 import { strengthLabel, type Strength } from '@/components/data/strength-meter'
@@ -83,6 +84,8 @@ type PanelProps = {
   facets: Facets
   /** Origins present in the published set, so no facet leads to zero results. */
   countries: readonly string[]
+  /** The origin facet could not be read (ADR 0020) — say so, do not hide it. */
+  countriesUnavailable?: boolean
   /**
    * The eleven families, and only the families. « Affiner avec les arômes »
    * (QA du 12 septembre 2026) at the grain a side panel can hold: seventy-six
@@ -91,6 +94,8 @@ type PanelProps = {
    * `arome=` key — one filter, two entrances.
    */
   aromaFamilies: readonly AromaFamily[]
+  /** Same, for the aroma families. */
+  aromaFamiliesUnavailable?: boolean
 }
 
 /**
@@ -144,10 +149,7 @@ export function FacetPanel(props: PanelProps) {
         </div>
       </details>
 
-      <aside
-        className="hidden flex-col gap-6 md:flex"
-        aria-label={m.referential.facets.title}
-      >
+      <aside className="hidden flex-col gap-6 md:flex" aria-label={m.referential.facets.title}>
         <div className="flex items-baseline justify-between gap-4">
           <h2 className="text-base font-medium">{m.referential.facets.title}</h2>
           <ClearAll facets={props.facets} />
@@ -170,7 +172,13 @@ function ClearAll({ facets }: { facets: Facets }) {
   )
 }
 
-function FacetGroups({ facets, countries, aromaFamilies }: PanelProps) {
+function FacetGroups({
+  facets,
+  countries,
+  countriesUnavailable,
+  aromaFamilies,
+  aromaFamiliesUnavailable,
+}: PanelProps) {
   return (
     <>
       <FacetGroup title={m.referential.facets.strength}>
@@ -210,7 +218,11 @@ function FacetGroups({ facets, countries, aromaFamilies }: PanelProps) {
         ))}
       </FacetGroup>
 
-      {aromaFamilies.length > 0 ? (
+      {aromaFamiliesUnavailable ? (
+        <FacetGroup title={m.referential.facets.aroma}>
+          <Unavailable className="basis-full" />
+        </FacetGroup>
+      ) : aromaFamilies.length > 0 ? (
         <FacetGroup title={m.referential.facets.aroma}>
           {aromaFamilies.map((family) => (
             <FacetLink
@@ -240,7 +252,11 @@ function FacetGroups({ facets, countries, aromaFamilies }: PanelProps) {
         </p>
       </FacetGroup>
 
-      {countries.length > 0 ? (
+      {countriesUnavailable ? (
+        <FacetGroup title={m.referential.facets.country}>
+          <Unavailable className="basis-full" />
+        </FacetGroup>
+      ) : countries.length > 0 ? (
         <FacetGroup title={m.referential.facets.country}>
           {countries.map((code) => (
             <FacetLink

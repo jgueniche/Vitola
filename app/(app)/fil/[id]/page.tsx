@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -45,7 +47,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const post = await getPost(id)
   if (!post) notFound()
 
-  const [comments, slaHours] = await Promise.all([listPostComments(post.id), reportSlaHours()])
+  /* `post_comments` answers through policies that return zero rows all day
+     long — most publications have no reply — so a catch returning `[]` would
+     be indistinguishable from « personne n'a répondu » (ADR 0020). */
+  const [comments, slaHours] = await Promise.all([
+    accessory(listPostComments(post.id)),
+    reportSlaHours(),
+  ])
 
   const isMine = post.author_id === user.id
 
@@ -88,11 +96,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           {copy.comments.title}
         </h2>
 
-        {comments.length === 0 ? (
+        {!comments.ok ? (
+          <Unavailable />
+        ) : comments.value.length === 0 ? (
           <p className="lede">{copy.comments.empty}</p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {comments.map((comment) => {
+            {comments.value.map((comment) => {
               const name =
                 comment.author?.display_name ??
                 (comment.author ? `@${comment.author.handle}` : copy.post.authorHidden)

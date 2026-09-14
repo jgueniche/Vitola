@@ -138,6 +138,25 @@
   --color-rule: var(--vt-rule);
   --color-rule-strong: var(--vt-rule-strong);
 
+  /* --- The header band, QA of 14 septembre 2026 -------------------------
+     « le header … là il est extremement plat. » It was flat because it had no
+     ground of its own: it inherited the page's, and a hairline was the only
+     thing telling it apart. It is now a dark brown band in BOTH themes — the
+     « petite encart de couleur marron foncé » of the request — which is why
+     it carries its own ink tokens rather than the page's: in the light theme
+     the page's ink is brou on pale and would be invisible here, and the
+     page's accent (laiton sombre) is a dark brass that dies on a dark ground.
+
+     Measured before it was written, because the a11y floor is 0 violations:
+     on brou #2a1b0f the parchment reads 13.40:1, the smoke 5.56:1 and the
+     brass 6.88:1; on maduro #221b17, 13.67, 5.67 and 7.02. All AA normal. */
+  --color-header: var(--vt-header);
+  --color-header-ink: var(--vt-header-ink);
+  --color-header-ink-muted: var(--vt-header-ink-muted);
+  --color-header-accent: var(--vt-header-accent);
+  --color-on-header-accent: var(--vt-on-header-accent);
+  --color-header-rule: var(--vt-header-rule);
+
   --color-positive: var(--vt-positive);
   --color-caution: var(--vt-caution);
   --color-negative: var(--vt-negative);
@@ -170,6 +189,15 @@
   /* Separation is a hairline, not a shadow (§4.5). */
   --vt-rule: rgb(237 230 216 / 0.07);
   --vt-rule-strong: rgb(237 230 216 / 0.16);
+
+  /* The header band: one step up from the ground, not a second surface — a
+     card sits ON the page, the header IS the top of it. */
+  --vt-header: var(--color-maduro);
+  --vt-header-ink: var(--color-parchemin);
+  --vt-header-ink-muted: var(--color-fumee);
+  --vt-header-accent: var(--color-claro);
+  --vt-on-header-accent: var(--color-oscuro);
+  --vt-header-rule: rgb(237 230 216 / 0.12);
 
   --vt-positive: var(--color-succes-readable);
   --vt-caution: var(--color-alerte);
@@ -244,6 +272,16 @@
 
   --vt-rule: rgb(42 27 15 / 0.1);
   --vt-rule-strong: rgb(42 27 15 / 0.2);
+
+  /* The band does NOT flip with the theme, and that is the point: a dark
+     brown strip is what makes the header an object on a pale page. Its ink is
+     therefore the dark theme's ink, not this theme's. */
+  --vt-header: var(--color-brou);
+  --vt-header-ink: var(--color-parchemin);
+  --vt-header-ink-muted: var(--color-fumee);
+  --vt-header-accent: var(--color-claro);
+  --vt-on-header-accent: var(--color-oscuro);
+  --vt-header-rule: rgb(237 230 216 / 0.14);
 
   --vt-positive: #46603c;
   --vt-caution: #7a5620;

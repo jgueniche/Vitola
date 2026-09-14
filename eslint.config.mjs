@@ -79,9 +79,13 @@ export default [
   },
 
   /* Tooling scripts are Node programs: they are allowed to write to stdout.
-     Config files legitimately export an anonymous object or array. */
+     Config files legitimately export an anonymous object or array.
+
+     `.mjs` is in the glob for `tooling/audit/trace-roundtrips.mjs`, which has
+     to be plain ESM: it is loaded by `node --import` in FRONT of the Next
+     server, before any TypeScript loader exists. */
   {
-    files: ['tooling/**/*.ts', '*.config.*', 'eslint.config.mjs'],
+    files: ['tooling/**/*.{ts,mjs}', '*.config.*', 'eslint.config.mjs'],
     rules: {
       'no-console': 'off',
       'import/no-anonymous-default-export': 'off',

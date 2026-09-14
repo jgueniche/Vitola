@@ -48,13 +48,42 @@ export async function getRole(userId: string): Promise<AppRole> {
   return (data?.role as AppRole | undefined) ?? 'member'
 }
 
+export type HeaderIdentity = { role: AppRole; displayName: string | null; handle: string | null }
+
+/**
+ * Who the header is talking to: the role it gates the admin entry on, and the
+ * name it draws the initials from.
+ *
+ * One query, deliberately — it REPLACES `getRole()` in the header rather than
+ * joining it. The site header costs three round trips on every signed-in page
+ * (`auth.getUser`, the unread count, this one), measured on 14 septembre 2026,
+ * and a fourth to learn two letters would have been a fourth on every page of
+ * the site. Three columns cost exactly what one did.
+ */
+export async function getHeaderIdentity(userId: string): Promise<HeaderIdentity> {
+  const supabase = await createSupabaseServerClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('role, display_name, handle')
+    .eq('id', userId)
+    .maybeSingle()
+
+  return {
+    role: (data?.role as AppRole | undefined) ?? 'member',
+    displayName: data?.display_name ?? null,
+    handle: data?.handle ?? null,
+  }
+}
+
 export async function getAccount(userId: string): Promise<Account | null> {
   const supabase = await createSupabaseServerClient()
 
   const [profileResult, settingsResult, consentsResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('handle, display_name, bio, country, city, is_discoverable, role, reputation, created_at')
+      .select(
+        'handle, display_name, bio, country, city, is_discoverable, role, reputation, created_at',
+      )
       .eq('id', userId)
       .maybeSingle(),
     supabase

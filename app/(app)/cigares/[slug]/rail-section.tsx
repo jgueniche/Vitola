@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Unavailable } from '@/components/layout/unavailable'
 
 import { ScoreMark } from '@/components/reviews/entry-parts'
 import { buttonClass } from '@/components/ui/button'
@@ -37,10 +38,13 @@ const copy = m.sheet
 export async function RailSection({
   cigar,
   entries,
+  entriesUnavailable = false,
   gestureOpen,
 }: {
   cigar: { id: string; slug: string; commercial_name: string }
   entries: ReviewWithContext[]
+  /** The entries could not be read, so « rien encore » would be a guess. */
+  entriesUnavailable?: boolean
   gestureOpen: boolean
 }) {
   const user = await currentUser()
@@ -155,7 +159,12 @@ export async function RailSection({
                 </span>
               ) : null}
             </div>
-            {mine.length === 0 ? (
+            {entriesUnavailable ? (
+              /* « Rien encore sur ce cigare » is a claim about this reader's
+                 notebook. When the read failed we do not know, and guessing
+                 the empty answer is exactly the lie ADR 0020 forbids. */
+              <Unavailable />
+            ) : mine.length === 0 ? (
               <p className="text-ink-faint text-xs">{copy.myEntriesNone}</p>
             ) : (
               <ul className="flex flex-col gap-2">
@@ -179,8 +188,6 @@ export async function RailSection({
               </ul>
             )}
           </div>
-
-          <p className="text-ink-faint text-xs leading-relaxed">{copy.privacyNote}</p>
         </section>
 
         {gestureOpen ? (

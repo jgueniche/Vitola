@@ -44,35 +44,35 @@ export function PublicHeader({
   inJournal?: boolean
 }) {
   return (
-    <header className="border-rule border-b">
+    <header className="bg-header border-header-rule text-header-ink border-b">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4">
         {atHome ? (
-          <span className="wordmark text-ink">{BRAND.name}</span>
+          <span className="wordmark text-header-ink">{BRAND.name}</span>
         ) : (
-          <Link href={routes.home()} className="wordmark text-ink">
+          <Link href={routes.home()} className="wordmark text-header-ink">
             {BRAND.name}
           </Link>
         )}
 
         <nav aria-label={m.landing.nav.label} className="flex items-center gap-4 text-sm sm:gap-6">
-          <ThemeToggle />
+          <ThemeToggle className="text-header-ink-muted hover:text-header-ink" />
           {inJournal ? null : (
             <Link
               href={routes.journal()}
-              className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
+              className="text-header-ink-muted hover:text-header-ink text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-(--duration-quick)"
             >
               {m.journal.title}
             </Link>
           )}
           <Link
             href={routes.shop()}
-            className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
+            className="text-header-ink-muted hover:text-header-ink text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-(--duration-quick)"
           >
             {m.landing.nav.shop}
           </Link>
           <Link
             href={routes.ageGate()}
-            className="bg-accent text-on-accent hover:bg-accent-bright rounded-band inline-flex h-9 items-center px-4 text-sm font-medium transition-colors duration-(--duration-quick)"
+            className="bg-header-accent text-on-header-accent hover:bg-accent-bright rounded-band inline-flex h-9 items-center px-4 text-sm font-medium transition-colors duration-(--duration-quick)"
           >
             {m.home.enter}
           </Link>

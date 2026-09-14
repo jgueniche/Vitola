@@ -154,6 +154,26 @@ const findings: Finding[] = []
  */
 const gaps: string[] = []
 
+/**
+ * Dans QUEL ÉTAT chaque écran a été regardé.
+ *
+ * La lacune de couverture du 14 septembre 2026, et la seule de l'audit qui ne
+ * soit pas un contrôle manquant mais un contrôle **incomplet**. Beaucoup
+ * d'écrans ont un état vide et un état peuplé ; l'audit ne voit jamais que
+ * celui où le compte de test se trouve ce jour-là. Un `<dl>` invalide a vécu
+ * trois semaines derrière `{nothingYet ? <EmptyState/> : …}` sous une bannière
+ * « 0 violation, tous impacts confondus » — et la bannière ne mentait pas :
+ * sur un compte sans entrée, le `<dl>` n'existait pas.
+ *
+ * L'audit **lit seulement** (pas de fixtures, pas d'écriture : c'est la règle
+ * de l'outil et l'interdit de la session). Il ne peut donc pas auditer les
+ * deux états. Ce qu'il peut faire, et ce qu'il fait désormais, c'est **dire
+ * lequel des deux il a regardé**, écran par écran, et cesser d'annoncer une
+ * couverture qu'il n'a pas. `data-empty-state` sur `EmptyState` est le seul
+ * mot de code applicatif que cela coûte.
+ */
+const states: { viewport: string; page: string; state: 'vide' | 'peuplé' | 'mixte' }[] = []
+
 function gap(message: string): void {
   gaps.push(message)
   console.log(`  LACUNE ${message}`)
@@ -194,6 +214,23 @@ async function signIn(page: Page, email: string): Promise<void> {
  * confirmation) et pas seulement une adresse.
  */
 async function auditCurrent(page: Page, label: string): Promise<void> {
+  /* Compté AVANT axe, sur le document tel qu'il est analysé. Un écran peut
+     porter plusieurs états vides (trois sur `/statistiques`) : s'il en porte
+     et qu'il porte aussi autre chose, il est « mixte », et la moitié peuplée
+     est celle qui a été vue. */
+  const emptyBlocks = await page.locator('[data-empty-state]').count()
+  const mainText = (
+    (await page
+      .locator('main')
+      .innerText()
+      .catch(() => '')) ?? ''
+  ).trim()
+  states.push({
+    viewport: current.name,
+    page: label,
+    state: emptyBlocks === 0 ? 'peuplé' : mainText.length > 600 ? 'mixte' : 'vide',
+  })
+
   const results = await new AxeBuilder({ page }).analyze()
   for (const violation of results.violations) {
     findings.push({
@@ -329,7 +366,9 @@ async function auditMenuOpen(page: Page, role: string, path: string): Promise<vo
   await settle(page)
   const burger = page.locator('header button[aria-controls="menu-du-site"]')
   if ((await burger.count()) === 0) {
-    gap(`aucun menu à ouvrir sur ${path} en ${role} — un écran du portail sans menu est lui-même une trouvaille`)
+    gap(
+      `aucun menu à ouvrir sur ${path} en ${role} — un écran du portail sans menu est lui-même une trouvaille`,
+    )
     return
   }
   await burger.first().click()
@@ -385,7 +424,10 @@ async function auditFoldsOpen(page: Page, path: string, expected: number): Promi
  */
 async function runPass(browser: Browser, viewport: Viewport): Promise<void> {
   current = viewport
-  const shape = { viewport: { width: viewport.width, height: viewport.height }, isMobile: viewport.isMobile }
+  const shape = {
+    viewport: { width: viewport.width, height: viewport.height },
+    isMobile: viewport.isMobile,
+  }
   console.log(`\n########## ${viewport.name} (${viewport.width} × ${viewport.height})`)
 
   console.log('— pages publiques, en visiteur')
@@ -499,9 +541,37 @@ async function main(): Promise<void> {
     )
   }
 
+  /* La couverture, dite plutôt que supposée. Ce bloc existe pour que le bilan
+     cesse d'annoncer « 0 violation sur N écrans » sans dire de quels N. */
+  const byState = { vide: 0, peuplé: 0, mixte: 0 }
+  for (const entry of states) byState[entry.state] += 1
+  const screens = new Set(states.map((entry) => entry.page)).size
+
+  console.log(`\n=== Couverture — dans quel ÉTAT chaque écran a été regardé`)
+  console.log(
+    `  ${byState.peuplé} vu(s) peuplé(s), ${byState.vide} vu(s) vide(s), ` +
+      `${byState.mixte} mixte(s), sur ${screens} écran(s) × ${states.length / Math.max(screens, 1)} fenêtre(s).`,
+  )
+  const emptyOnly = states.filter((entry) => entry.state === 'vide')
+  if (emptyOnly.length > 0) {
+    console.log(
+      `  Les écrans ci-dessous n'ont été vus QUE vides. Leur état peuplé n'a pas été audité :`,
+    )
+    for (const entry of emptyOnly) console.log(`    [${entry.viewport}] ${entry.page}`)
+  }
+  console.log(
+    "  L'audit lit seulement : il ne fabrique pas de données, donc il ne peut pas auditer\n" +
+      "  les deux états d'un écran. Il dit lequel il a vu. « 0 violation sur " +
+      `${screens} écrans » veut dire\n` +
+      "  « 0 violation dans l'état où le compte de test les a trouvés », et rien de plus.",
+  )
+
   const critical = byImpact.get('critical')?.length ?? 0
   console.log(`\nCritère §9 : ${critical} violation(s) critique(s).`)
-  console.log(`Barre de P8 : ${findings.length} violation(s), tous impacts confondus.`)
+  console.log(
+    `Barre de P8 : ${findings.length} violation(s), tous impacts confondus, ` +
+      `sur ${screens} écran(s) dans l'état décrit ci-dessus.`,
+  )
   console.log(`Lacunes : ${gaps.length}.`)
   if (critical > 0 || gaps.length > 0) process.exitCode = 1
 }
