@@ -31,12 +31,30 @@ export async function refreshSession(request: NextRequest) {
     },
   })
 
-  // getUser(), not getSession(): getSession trusts the cookie as it stands,
-  // which is forgeable. getUser() asks the auth server, which is the whole
-  // difference between a session and a claim.
-  const { data } = await supabase.auth.getUser()
+  /*
+   * getClaims(), not getUser() — and not getSession() either (ADR 0021).
+   *
+   * getSession() trusts the cookie as it stands, which is forgeable. getUser()
+   * asks the auth server, and that is one network round trip on EVERY request
+   * the matcher lets through: pages, RSC navigations, and the 19 to 41
+   * prefetches a list page fires as its links scroll into view. Measured on
+   * 15 septembre 2026: 30 to 120 ms from the edge per call, and four auth
+   * lookups for every PostgREST query in the database's own statistics.
+   *
+   * getClaims() verifies the token's signature locally, against the project's
+   * public signing keys (ES256; fetched once, cached ten minutes per instance).
+   * A forged cookie still fails. What it does not see is a revocation inside
+   * the token's remaining lifetime — an hour at most — and that is exactly the
+   * trust the database already extends to the same token: PostgREST checks the
+   * signature and nothing else. The middleware is not a stricter door than the
+   * data behind it.
+   *
+   * The refresh is unchanged: an expired session is renewed on the same path
+   * getUser() used, and the new cookies ride on `response`.
+   */
+  await supabase.auth.getClaims()
 
-  return { response, user: data.user ?? null }
+  return { response }
 }
 
 /** Carries refreshed session cookies onto a response the middleware builds itself. */

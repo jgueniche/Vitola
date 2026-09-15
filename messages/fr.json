@@ -14,7 +14,8 @@
     "errorTitle": "Quelque chose n'a pas abouti.",
     "errorBody": "L'incident a été enregistré. Vous pouvez réessayer immédiatement.",
     "errorRetry": "Réessayer",
-    "escapeKey": "Échap"
+    "escapeKey": "Échap",
+    "loading": "Chargement en cours"
   },
   "brand": {
     "tagline": "Le référentiel du cigare",

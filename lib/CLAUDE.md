@@ -203,6 +203,15 @@ pendant que l'API d'auth répondait 502, un membre connecté ouvrant `/carnet`, 
 Le partage se fait désormais sur la **forme de l'erreur**, vérifiée contre l'API réelle et non
 devinée : `AuthSessionMissingError` porte un **400**, un jeton illisible un **403** — donc `null`
 est la vraie réponse ; tout le reste (5xx, transport, statut inconnu) **jette**.
+`tests/unit/session.test.ts` fixe les trois réponses.
+
+**Et depuis le 15 septembre 2026 elle ne demande rien à personne** (ADR 0021). Elle appelait
+`getUser()` — un aller-retour vers le serveur d'auth, sur chaque page, après que le middleware
+avait fait le même pour la même requête : 104 000 lectures de `auth.users` pour 25 700 requêtes
+PostgREST dans les statistiques de la base. `getClaims()` vérifie la signature du jeton sur place,
+contre les clés publiques du projet, et rend un `SessionUser` — `id` et `email`, rien de plus,
+parce que le dossier complet n'est nécessaire qu'à l'export RGPD, qui appelle `getUser()`
+lui-même et dit pourquoi. Un `getUser()` sur un chemin chaud est désormais un défaut.
 
 ### `accessory()` ne doit jamais attraper le contrôle de flux de Next
 

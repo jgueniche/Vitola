@@ -26,6 +26,7 @@ dans `docs/decisions-log.md`, pas ici.
 | [0018](./0018-l-abonnement-du-cercle.md)                | Deux formules : le carnet reste libre, la parole des autres est le Cercle                          | **Acceptée** pour ce qui s'annonce, **non armée** pour ce qui se facture                                     | 2026-09-12 |
 | [0019](./0019-deux-langues-un-build.md)                 | Deux langues, un build par langue : la locale est une décision de compilation                      | **Acceptée** — QA du 12 septembre ; pas de sélecteur en page                                                 | 2026-09-12 |
 | [0020](./0020-echouer-franchement-ou-se-rendre-vide.md) | Le sujet d'une page échoue franchement ; ce qui l'accompagne se rend vide en le disant             | **Acceptée** — audit du 14 sept. ; question tranchée le 15 (délégation)                                      | 2026-09-14 |
+| [0021](./0021-le-temps-d-un-clic.md)                    | Le temps d'un clic : une frontière de chargement, une session vérifiée sur place                   | **Acceptée** — audit de la latence du 15 sept. ; la question du palier reste au porteur                      | 2026-09-15 |
 
 ## Statuts
 

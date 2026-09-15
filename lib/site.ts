@@ -14,7 +14,9 @@
  *      production host — *not* `VERCEL_URL`, which is the per-deployment host
  *      and would put a preview's own hostname in a shared card;
  *   3. the production host as a literal, so a local build produces something
- *      that at least resolves.
+ *      that at least resolves. It is the Vercel host of THIS project —
+ *      `vitola.vercel.app` belongs to someone else and answers 451, found
+ *      on 15 septembre 2026 by measuring the wrong site for three minutes.
  *
  * Never a request header. An origin taken from `Host` is an origin an attacker
  * chooses, and this one ends up inside metadata other people fetch.
@@ -23,7 +25,7 @@ export const SITE_ORIGIN: string =
   process.env.NEXT_PUBLIC_SITE_URL ??
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'https://vitola.vercel.app')
+    : 'https://vitola-teal.vercel.app')
 
 /**
  * The opening-day indexing lever (ADR 0012, Q1).

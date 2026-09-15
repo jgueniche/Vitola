@@ -63,10 +63,11 @@ export default async function VenuesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const flag = await venuesFlag()
+  /* The flag, the parameters and the session start together (ADR 0021): none
+     of the three needs another to be asked. */
+  const [flag, query, user] = await Promise.all([venuesFlag(), searchParams, currentUser()])
   if (!flag.enabled) notFound()
 
-  const query = await searchParams
   const done = venueConfirmation(query.fait)
   const q = firstParam(query.q)?.trim() || undefined
   const rawType = firstParam(query.type)
@@ -84,8 +85,6 @@ export default async function VenuesPage({
       Math.round(Number(firstParam(query.rayon)) || VENUE_SEARCH.radiusDefaultKm),
     ),
   )
-
-  const user = await currentUser()
 
   const [nearby, listed, pending, total] = await Promise.all([
     hasPoint
@@ -195,6 +194,10 @@ export default async function VenuesPage({
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
                   href={routes.venue(venue.slug)}
+                  /* A list of a hundred rows is a hundred links: fifty-eight
+                     prefetches after one scroll, measured on 15 septembre
+                     2026, for one click at most (ADR 0021). */
+                  prefetch={false}
                   className="text-ink hover:text-accent text-base font-medium transition-colors duration-(--duration-quick)"
                 >
                   {venue.name}
