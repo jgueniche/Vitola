@@ -284,26 +284,27 @@
   "auth": {
     "eyebrow": "Account",
     "title": "Sign in",
-    "lede": "Enter your address and your password. If you have none, ask for a sign-in link: it arrives by e-mail and signs you in without a password.",
+    "lede": "Enter your address and your password. No account yet? The same two fields create it, with no confirmation e-mail.",
     "emailLabel": "E-mail address",
-    "submit": "Send the link",
-    "sent": "Link sent",
-    "sentBody": "Open the e-mail sent to {email} and follow the link. It works once, and for an hour.",
+    "passwordLabel": "Password",
+    "submitPassword": "Sign in",
+    "orSignUp": "No account yet?",
+    "submitSignUp": "Create an account",
+    "signUpHint": "The same two fields are enough: your address and a password of at least 8 characters. No confirmation e-mail.",
     "privacy": "Your address identifies you and does nothing else. No marketing, ever.",
     "signOut": "Sign out",
     "signedInAs": "Signed in",
     "errors": {
       "email": "That address does not look valid.",
       "link": "That link has expired. Ask for a new one.",
-      "rate": "Too many requests. Wait a few minutes before trying again.",
-      "unknown": "Sending failed. Try again in a moment.",
       "credentials": "Wrong address or password.",
-      "passwordRequired": "Enter your password, or ask for a sign-in link."
-    },
-    "passwordLabel": "Password",
-    "submitPassword": "Sign in",
-    "submitLink": "Send a link",
-    "orLink": "No password?"
+      "passwordRequired": "Enter your password.",
+      "passwordShort": "The password must be at least 8 characters long.",
+      "passwordWeak": "The authentication service refuses this password. Try a longer one.",
+      "exists": "This address already has an account: sign in.",
+      "signUpFailed": "Creating the account failed. Try again in a moment.",
+      "signUpPending": "The account is created, but the service asks for an e-mail confirmation. Open the message you received, then sign in."
+    }
   },
   "landing": {
     "nav": {
@@ -784,7 +785,7 @@
       "emptyBody": "The search covers the handle and the display name.",
       "countNote": "The {count} most recent accounts. Narrow it down with the search beyond that.",
       "invitationsTitle": "Invitations",
-      "invitationsLede": "These addresses will receive their role at their first sign-in — a magic link to their e-mail is enough. Promoting an account that already exists is done from its profile.",
+      "invitationsLede": "These addresses will receive their role at their first sign-in — creating an account with that address is enough. Promoting an existing account is done from its profile.",
       "invitationsPending": "Waiting",
       "invitationsClaimed": "Used on {date}",
       "invitationsEmpty": "No invitation waiting."

@@ -159,3 +159,23 @@ advisors, ni d'appliquer les migrations suivantes : chaque étape de P1 repasser
   seul. `sb_secret_…` contourne toute la RLS : elle ne va que dans Vercel et les secrets GitHub,
   jamais dans une conversation.
 - Je ne touche à aucun de vos autres projets, et toute action ayant un coût passe par vous.
+
+## L'inscription pendant la QA — 15 septembre 2026
+
+Le projet **confirme les adresses lui-même** : `mailer_autoconfirm = true`. Sans ce réglage, un
+compte créé par mot de passe attend un courriel de confirmation que le mailer intégré de Supabase
+n'envoie que deux fois par heure. C'est un réglage de projet, pas un schéma — il ne vit dans aucune
+migration — et il a été posé par l'API de gestion plutôt que par l'interface, pour qu'il soit
+rejouable :
+
+```bash
+curl -X PATCH "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/config/auth" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
+  -d '{"mailer_autoconfirm": true}'
+```
+
+Le même appel avec `false` le retire, le jour où l'inscription est reprise pour la
+pré-commercialisation (voir « À trancher avant commercialisation » dans le `CLAUDE.md` racine).
+Les autres valeurs qui comptent, lues le même jour : `disable_signup = false`,
+`external_email_enabled = true`, `password_min_length = 6` (le formulaire exige 8),
+`security_captcha_enabled = false`.

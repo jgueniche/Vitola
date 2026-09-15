@@ -9,7 +9,7 @@ import { expect, test } from '@playwright/test'
  * treats a failure as "nobody", which is exactly what CI produces.
  */
 
-test('sign-in offers both a password and a link, without clearing the gate', async ({
+test('sign-in offers a password sign-in and a sign-up, without clearing the gate', async ({
   page,
 }) => {
   await page.goto('/connexion')
@@ -17,18 +17,26 @@ test('sign-in offers both a password and a link, without clearing the gate', asy
   await expect(page.getByLabel('Adresse électronique')).toBeVisible()
   await expect(page.getByLabel('Mot de passe')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Recevoir un lien' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Créer un compte' })).toBeVisible()
 })
 
-test('submitting without a password asks for one rather than emailing a link', async ({
-  page,
-}) => {
+test('submitting without a password asks for one rather than guessing', async ({ page }) => {
   // The two buttons are distinguishable by intent, not by guessing from which
-  // fields happen to be filled. An empty password must not silently send mail.
+  // fields happen to be filled. An empty password must not create anything.
   await page.goto('/connexion')
   await page.getByLabel('Adresse électronique').fill('quelquun@example.test')
   await page.getByRole('button', { name: 'Se connecter' }).click()
   await expect(page.locator('#sign-in-error')).toContainText(/mot de passe/i)
+})
+
+test('a short password is refused before anything reaches the auth server', async ({ page }) => {
+  // Checked by our own schema first: CI has no auth server behind this page,
+  // and the refusal must be ours, in our words, whatever the service says.
+  await page.goto('/connexion')
+  await page.getByLabel('Adresse électronique').fill('quelquun@example.test')
+  await page.getByLabel('Mot de passe').fill('court')
+  await page.getByRole('button', { name: 'Créer un compte' }).click()
+  await expect(page.locator('#sign-in-error')).toContainText(/8 caractères/)
 })
 
 test('sign-in shows no product before the gate', async ({ page }) => {

@@ -284,26 +284,27 @@
   "auth": {
     "eyebrow": "Compte",
     "title": "Se connecter",
-    "lede": "Entrez votre adresse et votre mot de passe. Si vous n'en avez pas, demandez un lien de connexion : il vous arrive par courriel et vous connecte sans mot de passe.",
+    "lede": "Entrez votre adresse et votre mot de passe. Pas encore de compte ? Les mêmes deux champs le créent, sans courriel de confirmation.",
     "emailLabel": "Adresse électronique",
-    "submit": "Recevoir le lien",
-    "sent": "Lien envoyé",
-    "sentBody": "Ouvrez le courriel envoyé à {email} et suivez le lien. Il n'est valable qu'une fois, et pour une heure.",
+    "passwordLabel": "Mot de passe",
+    "submitPassword": "Se connecter",
+    "orSignUp": "Pas encore de compte ?",
+    "submitSignUp": "Créer un compte",
+    "signUpHint": "Les deux mêmes champs suffisent : votre adresse et un mot de passe d’au moins 8 caractères. Aucun courriel de confirmation.",
     "privacy": "Votre adresse sert à vous identifier et à rien d'autre. Aucune prospection, jamais.",
     "signOut": "Se déconnecter",
     "signedInAs": "Connecté",
     "errors": {
       "email": "Cette adresse ne semble pas valide.",
       "link": "Ce lien n'est plus valable. Demandez-en un nouveau.",
-      "rate": "Trop de demandes. Patientez quelques minutes avant de réessayer.",
-      "unknown": "L'envoi a échoué. Réessayez dans un instant.",
       "credentials": "Adresse ou mot de passe incorrect.",
-      "passwordRequired": "Renseignez votre mot de passe, ou demandez un lien de connexion."
-    },
-    "passwordLabel": "Mot de passe",
-    "submitPassword": "Se connecter",
-    "submitLink": "Recevoir un lien",
-    "orLink": "Pas de mot de passe ?"
+      "passwordRequired": "Renseignez votre mot de passe.",
+      "passwordShort": "Le mot de passe doit faire au moins 8 caractères.",
+      "passwordWeak": "Ce mot de passe est refusé par le service d’authentification. Essayez-en un plus long.",
+      "exists": "Cette adresse a déjà un compte : connectez-vous.",
+      "signUpFailed": "La création du compte a échoué. Réessayez dans un instant.",
+      "signUpPending": "Le compte est créé, mais le service demande une confirmation par courriel. Ouvrez le message reçu, puis connectez-vous."
+    }
   },
   "landing": {
     "nav": {
@@ -784,7 +785,7 @@
       "emptyBody": "La recherche porte sur le pseudo et le nom affiché.",
       "countNote": "Les {count} comptes les plus récents. Affinez par la recherche au-delà.",
       "invitationsTitle": "Invitations",
-      "invitationsLede": "Ces adresses recevront leur rôle à leur première connexion — un lien magique à leur e-mail suffit. Promouvoir un compte qui existe déjà se fait depuis son profil.",
+      "invitationsLede": "Ces adresses recevront leur rôle à leur première connexion — il leur suffit de créer leur compte avec cette adresse. Promouvoir un compte qui existe déjà se fait depuis son profil.",
       "invitationsPending": "En attente",
       "invitationsClaimed": "Utilisée le {date}",
       "invitationsEmpty": "Aucune invitation en attente."
