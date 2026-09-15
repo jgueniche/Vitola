@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -48,12 +49,18 @@ export default async function ShopProductPage({ params }: Props) {
   const product = await getShopProductBySlug(slug)
   if (!product) notFound()
 
+  /* A signed storage URL is decoration: the product page without its
+     photograph is still the product page, and the block it feeds already has
+     a no-image branch — so this one degrades to silence rather than a notice
+     (ADR 0020, `orElse`). */
   const [images, user, slaHours] = await Promise.all([
-    signShopImages([product.image_path]),
+    accessory(signShopImages([product.image_path])),
     currentUser(),
     reportSlaHours(),
   ])
-  const imageUrl = product.image_path ? images.get(product.image_path) : undefined
+  const imageUrl = product.image_path
+    ? orElse(images, new Map<string, string>()).get(product.image_path)
+    : undefined
   const here = routes.shopProduct(product.slug)
 
   return (

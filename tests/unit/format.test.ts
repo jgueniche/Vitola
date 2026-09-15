@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   formatDimensions,
+  initials,
   fromBrandZoneWallClock,
   millimetresToInches,
   toBrandZoneWallClock,
@@ -73,5 +74,47 @@ describe('fromBrandZoneWallClock', () => {
     const instant = fromBrandZoneWallClock('2026-07-15T20:30')
     expect(instant).not.toBeNull()
     expect(toBrandZoneWallClock(instant as Date)).toBe('2026-07-15T20:30')
+  })
+})
+
+describe('initials', () => {
+  it('takes the first and last word of a display name', () => {
+    expect(initials({ displayName: 'Test Deux' }, 'fr-FR')).toBe('TD')
+    expect(initials({ displayName: 'Jérémy Guéniche' }, 'fr-FR')).toBe('JG')
+  })
+
+  it('splits on hyphens and apostrophes, not only on spaces', () => {
+    expect(initials({ displayName: 'Jean-Luc' }, 'fr-FR')).toBe('JL')
+    expect(initials({ displayName: "d'Arcy" }, 'fr-FR')).toBe('DA')
+  })
+
+  it('gives one letter to a single word, never three to three', () => {
+    expect(initials({ displayName: 'Colomba' }, 'fr-FR')).toBe('C')
+    expect(initials({ displayName: 'Jean Paul Sartre' }, 'fr-FR')).toBe('JS')
+  })
+
+  it('keeps the accent of the first character', () => {
+    /* [...word][0], not word[0]: a surrogate pair would lose half of itself,
+       and « Émile » must not come back as « E ». */
+    expect(initials({ displayName: 'Émile Zola' }, 'fr-FR')).toBe('ÉZ')
+  })
+
+  it('falls back to the handle, then to the address', () => {
+    expect(initials({ displayName: null, handle: 'cigardeur' }, 'fr-FR')).toBe('C')
+    expect(initials({ displayName: '   ', handle: '@vitolier' }, 'fr-FR')).toBe('V')
+    expect(
+      initials({ displayName: null, handle: null, email: 'test1@cigardeur.com' }, 'fr-FR'),
+    ).toBe('T')
+  })
+
+  it('returns nothing rather than a placeholder when it knows nothing', () => {
+    expect(initials({}, 'fr-FR')).toBe('')
+    expect(initials({ displayName: null, handle: null, email: null }, 'fr-FR')).toBe('')
+  })
+
+  it("uppercases in the locale it is given, not the server's", () => {
+    /* The reason the parameter exists: a container running under a Turkish
+       locale maps « i » to « İ », which is correct Turkish and wrong here. */
+    expect(initials({ displayName: 'inès blanc' }, 'fr-FR')).toBe('IB')
   })
 })

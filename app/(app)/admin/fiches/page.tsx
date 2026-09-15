@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 
 import { EmptyState } from '@/components/layout/empty-state'
@@ -56,7 +57,11 @@ export default async function AdminSheetsPage({ searchParams }: Props) {
   const q = typeof query.q === 'string' ? query.q : ''
   const done = typeof query.fait === 'string' ? CONFIRMATIONS[query.fait] : undefined
 
-  const [sheets, counts] = await Promise.all([listSheets(filter, q), adminCounts()])
+  /* The sheets are the subject. The count under the title is one sentence:
+     a missing number reads as a missing number, so it degrades to silence
+     rather than to a notice (ADR 0020) — but never to « 0 non relues », which
+     would say the backlog is cleared. */
+  const [sheets, countsRead] = await Promise.all([listSheets(filter, q), accessory(adminCounts())])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -64,9 +69,11 @@ export default async function AdminSheetsPage({ searchParams }: Props) {
         <p className="eyebrow">{m.admin.eyebrow}</p>
         <h1 className="font-display text-display-md leading-tight">{copy.title}</h1>
         <p className="lede">{copy.lede}</p>
-        <p className="eyebrow">
-          {copy.countUnreviewed.replace('{count}', String(counts.sheetsUnreviewed))}
-        </p>
+        {countsRead.ok ? (
+          <p className="eyebrow">
+            {copy.countUnreviewed.replace('{count}', String(countsRead.value.sheetsUnreviewed))}
+          </p>
+        ) : null}
         <p className="text-sm">
           <Link
             href={routes.adminSheetsReview()}

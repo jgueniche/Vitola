@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 
 import { SectionHead } from '@/components/layout/section-head'
@@ -26,12 +28,22 @@ export default async function AdminPage() {
   const isAdmin = await adminView(routes.admin())
   if (!isAdmin) return <AdminRestricted />
 
+  /*
+   * A dashboard is nothing but numbers, and a number that could not be read
+   * must never be drawn as a zero: « 0 signalement ouvert » is the single most
+   * expensive lie this screen could tell — it says the queue is clear
+   * (ADR 0020). `adminView` above stays BARE on purpose: an admin page whose
+   * permission could not be read should fail, not claim the reader has no
+   * access.
+   */
   const slaHours = await reportSlaHours()
-  const [counts, openReports, shopOpen] = await Promise.all([
-    adminCounts(),
-    modQueueWithAge('open', slaHours),
+  const [countsRead, reportsRead, shopOpen] = await Promise.all([
+    accessory(adminCounts()),
+    accessory(modQueueWithAge('open', slaHours)),
     isFeatureEnabled('shop_enabled'),
   ])
+  const counts = countsRead.ok ? countsRead.value : null
+  const openReports = reportsRead.ok ? reportsRead.value : []
   const oldest = openReports[0]
 
   return (
@@ -60,92 +72,104 @@ export default async function AdminPage() {
             {copy.dash.shopSeePublic}
           </Link>
         </p>
-        <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-3">
-          <Queue
-            count={counts.productsSubmitted}
-            label={copy.dash.shopQueueLabel}
-            href={routes.adminShop()}
-            link={copy.dash.shopQueueLink}
-          />
-          <Queue
-            count={counts.productsTotal}
-            label={copy.dash.shopCatalogueLabel.replace(
-              '{published}',
-              String(counts.productsPublished),
-            )}
-            href={routes.adminShop()}
-            link={copy.dash.shopLink}
-          />
-          <Queue
-            count={counts.vendorsActive + counts.vendorsPending + counts.vendorsSuspended}
-            label={copy.dash.shopVendorsLabel
-              .replace('{active}', String(counts.vendorsActive))
-              .replace('{pending}', String(counts.vendorsPending))
-              .replace('{suspended}', String(counts.vendorsSuspended))}
-            href={routes.adminShopPartners()}
-            link={copy.dash.shopVendorsLink}
-          />
-        </ul>
+        {counts === null ? (
+          <Unavailable />
+        ) : (
+          <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-3">
+            <Queue
+              count={counts.productsSubmitted}
+              label={copy.dash.shopQueueLabel}
+              href={routes.adminShop()}
+              link={copy.dash.shopQueueLink}
+            />
+            <Queue
+              count={counts.productsTotal}
+              label={copy.dash.shopCatalogueLabel.replace(
+                '{published}',
+                String(counts.productsPublished),
+              )}
+              href={routes.adminShop()}
+              link={copy.dash.shopLink}
+            />
+            <Queue
+              count={counts.vendorsActive + counts.vendorsPending + counts.vendorsSuspended}
+              label={copy.dash.shopVendorsLabel
+                .replace('{active}', String(counts.vendorsActive))
+                .replace('{pending}', String(counts.vendorsPending))
+                .replace('{suspended}', String(counts.vendorsSuspended))}
+              href={routes.adminShopPartners()}
+              link={copy.dash.shopVendorsLink}
+            />
+          </ul>
+        )}
       </section>
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-display-sm">{copy.dash.queuesTitle}</h2>
-        <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-2">
-          <Queue
-            count={openReports.length}
-            label={copy.dash.moderationLabel}
-            note={
-              oldest
-                ? `${copy.dash.moderationSla.replace('{hours}', String(slaHours))} · ${copy.dash.moderationOldest.replace('{age}', `${oldest.ageHours} h`)}`
-                : copy.dash.moderationSla.replace('{hours}', String(slaHours))
-            }
-            href={routes.moderation()}
-            link={copy.dash.moderationLink}
-          />
-          <Queue
-            count={counts.revisionsPending}
-            label={copy.dash.revisionsLabel}
-            href={routes.contributions()}
-            link={copy.dash.revisionsLink}
-          />
-          <Queue
-            count={counts.venuesPending}
-            label={copy.dash.venuesLabel}
-            href={routes.venues()}
-            link={copy.dash.venuesLink}
-          />
-          <Queue
-            count={counts.articleDrafts}
-            label={copy.dash.articlesLabel}
-            href={routes.journalCompose()}
-            link={copy.dash.articlesLink}
-          />
-        </ul>
+        {!reportsRead.ok || counts === null ? (
+          <Unavailable />
+        ) : (
+          <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-2">
+            <Queue
+              count={openReports.length}
+              label={copy.dash.moderationLabel}
+              note={
+                oldest
+                  ? `${copy.dash.moderationSla.replace('{hours}', String(slaHours))} · ${copy.dash.moderationOldest.replace('{age}', `${oldest.ageHours} h`)}`
+                  : copy.dash.moderationSla.replace('{hours}', String(slaHours))
+              }
+              href={routes.moderation()}
+              link={copy.dash.moderationLink}
+            />
+            <Queue
+              count={counts.revisionsPending}
+              label={copy.dash.revisionsLabel}
+              href={routes.contributions()}
+              link={copy.dash.revisionsLink}
+            />
+            <Queue
+              count={counts.venuesPending}
+              label={copy.dash.venuesLabel}
+              href={routes.venues()}
+              link={copy.dash.venuesLink}
+            />
+            <Queue
+              count={counts.articleDrafts}
+              label={copy.dash.articlesLabel}
+              href={routes.journalCompose()}
+              link={copy.dash.articlesLink}
+            />
+          </ul>
+        )}
       </section>
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-display-sm">{copy.dash.stateTitle}</h2>
-        <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-2">
-          <Queue
-            count={counts.sheetsUnreviewed}
-            label={copy.dash.sheetsUnreviewed}
-            note={`${counts.sheetsPublished} ${copy.dash.sheetsPublished} · ${counts.sheetsDraft} ${copy.dash.sheetsDraft}`}
-            href={routes.adminSheets()}
-            link={copy.dash.sheetsLink}
-          />
-          <Queue
-            count={counts.linesTotal}
-            label={copy.dash.linesLabel.replace('{draft}', String(counts.linesDraft))}
-            href={routes.adminLines()}
-            link={copy.dash.linesLink}
-          />
-          <Queue
-            count={counts.accounts}
-            label={copy.dash.accountsLabel}
-            href={routes.adminAccounts()}
-            link={copy.dash.accountsLink}
-          />
-        </ul>
+        {counts === null ? (
+          <Unavailable />
+        ) : (
+          <ul className="border-rule grid gap-x-8 gap-y-5 border-t border-b py-4 sm:grid-cols-2">
+            <Queue
+              count={counts.sheetsUnreviewed}
+              label={copy.dash.sheetsUnreviewed}
+              note={`${counts.sheetsPublished} ${copy.dash.sheetsPublished} · ${counts.sheetsDraft} ${copy.dash.sheetsDraft}`}
+              href={routes.adminSheets()}
+              link={copy.dash.sheetsLink}
+            />
+            <Queue
+              count={counts.linesTotal}
+              label={copy.dash.linesLabel.replace('{draft}', String(counts.linesDraft))}
+              href={routes.adminLines()}
+              link={copy.dash.linesLink}
+            />
+            <Queue
+              count={counts.accounts}
+              label={copy.dash.accountsLabel}
+              href={routes.adminAccounts()}
+              link={copy.dash.accountsLink}
+            />
+          </ul>
+        )}
       </section>
 
       <section className="flex flex-col gap-2">

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import { redirect } from 'next/navigation'
 
 import { Band } from '@/components/band/band'
@@ -47,7 +49,10 @@ export default async function EventsPage({
   const query = await searchParams
   const done = eventConfirmation(query.fait)
 
-  const events = await listEvents({ viewerId: user.id, limit: 100 })
+  const [events, venuesRead] = await Promise.all([
+    listEvents({ viewerId: user.id, limit: 100 }),
+    accessory(venueOptions()),
+  ])
   const now = new Date()
   const upcoming = events.filter((event) => isUpcoming(event, now))
   const past = events.filter((event) => !isUpcoming(event, now)).reverse()
@@ -69,7 +74,18 @@ export default async function EventsPage({
         </p>
       ) : null}
 
-      <EventForm venueOptions={await venueOptions()} />
+      {/* The agenda is the subject. The venue dropdown is optional on an
+          event, so an unreadable list degrades to « pas de lieu » rather than
+          blocking the form — but it is SAID, because a silently empty list
+          reads as « aucun lieu au référentiel » (ADR 0020). */}
+      {venuesRead.ok ? (
+        <EventForm venueOptions={venuesRead.value} />
+      ) : (
+        <>
+          <Unavailable />
+          <EventForm venueOptions={[]} />
+        </>
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-display-sm">{copy.upcoming}</h2>

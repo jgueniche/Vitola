@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -66,7 +68,13 @@ export default async function ConversationPage({
   /* One extra query for the name at the top. `profiles` is under its own RLS,
      so a member who is not discoverable comes back missing and the heading says
      "Membre" — never an identifier. */
-  const profile = await getPersonById(otherId)
+  /* The conversation and its messages are the subject and threw above. The
+     other person's NAME accompanies them — and it is the sharpest small case
+     on the site: `null` already means « ce membre n'est pas dans l'annuaire »
+     (a privacy choice we honour), so a failed read collapsing to `null` would
+     be indistinguishable from that choice (ADR 0020). */
+  const profileRead = await accessory(getPersonById(otherId))
+  const profile = profileRead.ok ? profileRead.value : null
 
   const otherName = profile?.display_name ?? profile?.handle ?? copy.unknownPerson
   const unread = page.items.filter(
@@ -88,6 +96,7 @@ export default async function ConversationPage({
         <h1 className="font-display text-display-sm leading-tight">
           {copy.withPerson.replace('{name}', otherName)}
         </h1>
+        {!profileRead.ok ? <Unavailable /> : null}
         <p className="text-ink-faint text-xs">
           {profile?.handle ? (
             <>

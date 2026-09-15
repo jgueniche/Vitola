@@ -55,6 +55,11 @@ export default async function ModerationCasePage({ params, searchParams }: Props
   const report = await modReport(id)
   if (!report) notFound()
 
+  /* Deliberately NOT degraded (ADR 0020). `target` is the content the report
+     points at, and a moderator deciding without seeing it would be deciding
+     blind — the one screen on the site where a missing block is worse than a
+     missing page. The report itself is the subject and throws above; the
+     permission read stays bare for the reason /admin gives. */
   const [slaHours, target] = await Promise.all([
     reportSlaHours(),
     targetPreview(report.entity_schema, report.entity_table, report.entity_id),

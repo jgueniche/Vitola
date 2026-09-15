@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -132,9 +134,14 @@ export default async function NotebookPage({ searchParams }: Search) {
     ? (rawScope as ReviewVisibility)
     : undefined
 
+  /* The notebook is the subject and throws. What OTHERS have shared with you
+     is a second section with its own heading — and `review_shares` answers
+     through policies that return zero rows for almost everyone, so an empty
+     array from a catch would be indistinguishable from « personne ne vous a
+     rien partagé » (ADR 0020). */
   const [entries, shared] = await Promise.all([
     listMyNotebook(user.id, { kind, visibility: scope }),
-    listSharedWithMe(user.id),
+    accessory(listSharedWithMe(user.id)),
   ])
 
   const filtered = kind !== undefined || scope !== undefined
@@ -250,11 +257,13 @@ export default async function NotebookPage({ searchParams }: Search) {
         </Band>
         <p className="lede">{copy.sharedWithMeLede}</p>
 
-        {shared.length === 0 ? (
+        {!shared.ok ? (
+          <Unavailable />
+        ) : shared.value.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.sharedWithMeEmpty}</p>
         ) : (
           <div className="border-rule border-t">
-            {shared.map((entry) => (
+            {shared.value.map((entry) => (
               <EntryRow key={entry.id} entry={entry} showCigar showAuthor />
             ))}
           </div>

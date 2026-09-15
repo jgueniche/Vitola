@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 
 import { EmptyState } from '@/components/layout/empty-state'
 import { SectionHead } from '@/components/layout/section-head'
@@ -39,7 +41,9 @@ export default async function AdminLinesPage({ searchParams }: Props) {
   const query = await searchParams
   const done = typeof query.fait === 'string' ? CONFIRMATIONS[query.fait] : undefined
 
-  const [lines, brands] = await Promise.all([listAllLines(), listBrandOptions()])
+  /* The lines are the subject; the brand dropdown fills the create form, and
+     an empty one would read « aucune marque » on a referential of 940 sheets. */
+  const [lines, brandsRead] = await Promise.all([listAllLines(), accessory(listBrandOptions())])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -53,7 +57,7 @@ export default async function AdminLinesPage({ searchParams }: Props) {
 
       <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
         <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
-        <CreateLineForm brands={brands} />
+        {brandsRead.ok ? <CreateLineForm brands={brandsRead.value} /> : <Unavailable />}
       </section>
 
       <section className="flex flex-col gap-4">

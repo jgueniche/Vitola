@@ -1,5 +1,8 @@
 {
   "common": {
+    "unavailable": {
+      "body": "momentanément illisible. Rien n'est perdu : rechargez la page dans un instant."
+    },
     "skipToContent": "Aller au contenu",
     "back": "Retour",
     "search": "Rechercher",
@@ -61,7 +64,13 @@
       "label": "Suggestions"
     },
     "account": {
-      "label": "Mon compte"
+      "label": "Mon compte",
+      "profile": "Mon profil public",
+      "unavailable": "Compte indisponible",
+      "menuLabel": "Compte et réglages",
+      "open": "Ouvrir le menu du compte",
+      "close": "Fermer le menu du compte",
+      "unread": "{count} notification(s) non lue(s)"
     },
     "searchAction": "Rechercher"
   },
@@ -151,8 +160,7 @@
       "none": "Aucune fiche ne correspond",
       "noneHint": "Élargissez les critères, ou effacez les filtres.",
       "emptyTitle": "Le référentiel n'est pas encore ouvert au public",
-      "emptyBody": "Les fiches sont en base mais aucune n'a encore été relue. Une fiche n'est visible qu'une fois vérifiée par un relecteur : c'est la règle du référentiel, pas une limitation temporaire de l'affichage.",
-      "lede": "{total} fiches publiées · {withVitola} avec une vitole · {withStrength} avec une force · {withAromas} avec un profil aromatique — le reste attend vos corrections."
+      "emptyBody": "Les fiches sont en base mais aucune n'a encore été relue. Une fiche n'est visible qu'une fois vérifiée par un relecteur : c'est la règle du référentiel, pas une limitation temporaire de l'affichage."
     },
     "pagination": {
       "previous": "Précédent",
@@ -314,7 +322,6 @@
     "title": "Commentaires",
     "countOne": "1 commentaire",
     "countMany": "{count} commentaires",
-    "rule": "Un commentaire informe ; il ne vante pas. Ce qui incite à consommer est retiré.",
     "emptyTitle": "Personne n'a encore écrit ici",
     "emptyBody": "Dites ce que vous savez de ce cigare : sa construction, sa fumée, ou ce que cette fiche indique et qui ne correspond pas.",
     "formLabel": "Votre commentaire",
@@ -339,7 +346,6 @@
     "hiddenByModeration": "Masqué par la modération — {reason}",
     "hiddenNoReason": "motif au dossier",
     "discussionTitle": "Discussion de la fiche",
-    "discussionLede": "Ce qui se dit de la fiche elle-même — une construction, une fumée, une donnée qui ne correspond pas. Pour noter le cigare, c’est le carnet.",
     "signInLine": "La lecture est ouverte à tous ; écrire demande un compte."
   },
   "notebook": {
@@ -537,13 +543,11 @@
     "entriesLede": "Les entrées publiques, et les vôtres.",
     "entriesEmpty": "Aucune entrée à afficher sur cette fiche.",
     "mine": "Votre entrée",
-    "emptyLine": "Aucune note publique. La vôtre serait la première — elle ne compte que si vous la rendez publique.",
+    "emptyLine": "Aucune note publique.",
     "publicOne": "1 note publique",
     "publicMany": "{count} notes publiques",
     "citedAromas": "Arômes les plus cités par les membres",
     "citedAromasHint": "Dans les entrées publiques des membres — un autre fait que le profil du référentiel, plus haut, et jamais mélangé avec lui.",
-    "entriesCount": "{count} · les publiques, et les vôtres",
-    "entriesCountOne": "1 · la vôtre, ou une publique",
     "hint": "Moyenne bayésienne : un cigare noté une seule fois ne domine pas un cigare noté trente fois. Ne comptent ici que les entrées publiques.",
     "lastReviewLabel": "Dernière note",
     "bandOne": "1 bague",
@@ -2242,7 +2246,6 @@
     "myEntries": "Votre carnet",
     "myEntriesCount": "{count} entrée(s)",
     "myEntriesNone": "Rien encore sur ce cigare.",
-    "privacyNote": "La portée se choisit entrée par entrée. Le geste de cette fiche part en public ; une entrée écrite depuis votre carnet part en privé.",
     "signInTitle": "Tenir un carnet demande un compte",
     "signInBody": "Ce que vous avez fumé, quand, la note et le mot. Tout y naît privé ; rien ne s’y partage sans votre geste. La cave et la dégustation complète viennent avec.",
     "signInNote": "La lecture, elle, est ouverte.",

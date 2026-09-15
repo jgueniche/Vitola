@@ -149,3 +149,50 @@ export function formatCount(value: number): string {
 export function todayInBrandZone(now: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: BRAND.timeZone }).format(now)
 }
+
+/**
+ * The one or two letters an account wears in the header.
+ *
+ * Fed the display name first, the handle second, the address last — the same
+ * order the site uses to name someone anywhere else, so the mark in the corner
+ * and the name on a comment never come from different places.
+ *
+ * Two letters when the name has two words, one otherwise. Never three: a
+ * circle of 32px holds two letters at a readable size and three at none, and
+ * the mark is a recognition aid, not an identifier.
+ *
+ * `Intl`-free on purpose. `toLocaleUpperCase` without an explicit locale reads
+ * the *server's* locale, which is how a Turkish-locale container turns the `i`
+ * of « Inès » into a dotted capital the reader has never seen. The locale is a
+ * build decision here (ADR 0019), so it is passed explicitly.
+ */
+export function initials(
+  source: { displayName?: string | null; handle?: string | null; email?: string | null },
+  locale: string = FORMAT_LOCALE,
+): string {
+  const name = source.displayName?.trim()
+  if (name) {
+    /* Split on whitespace, hyphens and apostrophes so « Jean-Luc » and
+       « d'Arcy » give two letters rather than one long word. */
+    const words = name.split(/[\s\-’']+/u).filter((word) => word !== '')
+    const head = words.at(0)
+    const tail = words.at(-1)
+    if (head && tail && words.length >= 2) {
+      return (first(head) + first(tail)).toLocaleUpperCase(locale)
+    }
+    if (head) return first(head).toLocaleUpperCase(locale)
+  }
+
+  const handle = source.handle?.trim()
+  if (handle) return first(handle.replace(/^@/, '')).toLocaleUpperCase(locale)
+
+  const email = source.email?.trim()
+  if (email) return first(email).toLocaleUpperCase(locale)
+
+  return ''
+}
+
+/** The first CHARACTER, not the first code unit: « Émile » must not lose its accent. */
+function first(word: string): string {
+  return [...word][0] ?? ''
+}

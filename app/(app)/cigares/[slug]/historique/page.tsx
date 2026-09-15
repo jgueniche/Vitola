@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -42,12 +43,17 @@ export default async function HistoryPage({ params }: Params) {
   const [cigar, user] = await Promise.all([getCigarBySlug(slug), currentUser()])
   if (!cigar) notFound()
 
-  const [revisions, vitolas, lineNames, aromaNames] = await Promise.all([
+  /* The history is the subject — it is what this page IS. The three label
+     maps only turn ids into words inside a diff (ADR 0020). */
+  const [revisions, vitolasRead, lineNamesRead, aromaNamesRead] = await Promise.all([
     user ? listForCigar(cigar.id) : Promise.resolve([]),
-    listVitolaOptions(),
-    listLineNames(),
-    aromaNameMap(),
+    accessory(listVitolaOptions()),
+    accessory(listLineNames()),
+    accessory(aromaNameMap()),
   ])
+  const vitolas = orElse(vitolasRead, [])
+  const lineNames = orElse(lineNamesRead, new Map<string, string>())
+  const aromaNames = orElse(aromaNamesRead, new Map<string, string>())
 
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
 

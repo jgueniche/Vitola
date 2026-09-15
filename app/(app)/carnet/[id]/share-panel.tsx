@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Unavailable } from '@/components/layout/unavailable'
 import { Input, Label } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
 import type { ReviewVisibility } from '@/lib/reviews/model'
@@ -39,12 +40,19 @@ export function SharePanel({
   visibility,
   shares,
   results,
+  resultsUnavailable = false,
   query,
 }: {
   reviewId: string
   visibility: ReviewVisibility
   shares: ShareRow[]
   results: ReviewAuthor[]
+  /**
+   * The member search did not answer (ADR 0020). Without this, « aucun membre
+   * trouvé » would be printed about a search that never ran — and the author
+   * would conclude the person they are looking for has no account.
+   */
+  resultsUnavailable?: boolean
   query: string
 }) {
   const named = new Set(shares.map((share) => share.grantee_id))
@@ -113,7 +121,9 @@ export function SharePanel({
       </form>
 
       {query.trim().length >= 2 ? (
-        results.length === 0 ? (
+        resultsUnavailable ? (
+          <Unavailable />
+        ) : results.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.searchNoResult}</p>
         ) : (
           <ul className="flex flex-col gap-2">

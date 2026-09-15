@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -42,7 +43,12 @@ export default async function ShopPage({ searchParams }: Props) {
   }
 
   const { products, facets, total } = await searchShopProducts(filters)
-  const images = await signShopImages(products.map((p) => p.image_path))
+  /* Decoration: a product card without its photograph is still the card, and
+     the card already has a no-image branch (ADR 0020). */
+  const images = orElse(
+    await accessory(signShopImages(products.map((p) => p.image_path))),
+    new Map<string, string>(),
+  )
 
   const withFilters = (patch: Partial<ShopSearchFilters>): string => {
     const params = new URLSearchParams()

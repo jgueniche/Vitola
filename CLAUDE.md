@@ -524,7 +524,7 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   faire tourner en build, pas seulement le traduire.
 - **Un agrégat qui appelle `jsonb_object_keys` compte une clé par ligne.** L'auto-contrôle de la
   0028 affirmait que la répartition des bagues rendait cinq clés ; il lisait « r1,r1,r1,r1,r2,… »
-  parce que la fonction est *set-returning* et multiplie les lignes avant le `string_agg`. Une
+  parce que la fonction est _set-returning_ et multiplie les lignes avant le `string_agg`. Une
   assertion de forme sur du JSON agrégé passe par un `select distinct`.
 - **Un masque ou un filtre SVG a une région, et sa région par défaut est la boîte de ce qu'il
   habille.** `maskUnits` et `filterUnits` valent `objectBoundingBox` : la région est la boîte
@@ -783,7 +783,7 @@ politique de confidentialité décrivait encore une note sur 100 que la 0028 a r
 libellés d'administration affirmaient qu'un produit publié n'était pas encore visible, faux depuis
 l'ouverture de la boutique ; et le portail demandait « Quel est votre date de naissance ».
 
-**Une collision à ne pas « corriger »** : l'anglais de *vitole* **est** le nom commercial —
+**Une collision à ne pas « corriger »** : l'anglais de _vitole_ **est** le nom commercial —
 `vitola`. Le contrôle de `check-tokens` l'a trouvé sur sept libellés et il avait raison deux fois :
 un `<dt>` qui dit « Vitola » sur un site qui s'appelle Vitola est ambigu pour le lecteur. Le
 libellé nu dit **Format**, les termes d'art espagnols prennent la forme du vitolario (« Salida
@@ -808,3 +808,137 @@ la main.
   chose que de les avoir lus.
 - **Les 109 encarts `rounded-[3px] border` écrits à la main** qui restent (173 au 6 septembre) :
   l'allègement continue là où l'audit du 6 l'a laissé.
+
+## L'audit du 14 septembre 2026 — ce qu'une page fait d'un échec de son fournisseur
+
+Le site a rendu « Quelque chose n'a pas abouti » au porteur. La cause n'était pas notre code :
+l'API de Supabase mettait **0,44 à 18,2 s** pour lire cinq lignes et échouait **3 fois sur 20**,
+pendant que la base derrière répondait en **38 ms**. Elle s'est rétablie seule, sans redémarrage —
+et c'est le fait qui décide : **ce qui se rétablit seul peut redégrader seul**, donc le correctif
+est une règle de comportement, pas une intervention. Tout est mesuré dans
+[`docs/audit-2026-09-14.md`](docs/audit-2026-09-14.md).
+
+**La règle, [ADR 0020](docs/adr/0020-echouer-franchement-ou-se-rendre-vide.md)** : _ce qui est le
+sujet de la page échoue franchement ; ce qui l'accompagne se rend vide en le disant._ Le test qui
+tranche : **si ce bloc disparaissait, la page répondrait-elle encore à la question avec laquelle le
+lecteur est venu ?**
+
+**Cinq règles qui ne se contournent pas :**
+
+1. **La valeur de repli n'est jamais la valeur vide du type.** Jamais `[]`, jamais `null`, jamais
+   `0`. `accessory()` rend `{ ok: false }`, sans valeur à prendre pour de la donnée — parce que
+   `reviews`, `posts`, `venues` et `products` rendent **légitimement** zéro ligne, et qu'un
+   `catch { return [] }` est le doublage de policy que `lib/CLAUDE.md` interdit. **Un échec doit se
+   distinguer d'un refus.**
+2. **La décision vit au site d'appel, jamais dans `lib/**/queries.ts`.** Mesuré, pas supposé :
+   `listAromaWheel()` est le **sujet** de `/aromes` et une **facette** de `/cigares`. Une requête ne
+   sait pas qui l'appelle. Les 79 lectures continuent donc de jeter, et aucun `catch` ne s'ajoute
+   là-bas — `tests/unit/degrade.test.ts` échoue si un cinquième repli argumenté apparaît.
+3. **Trois choses ne sont jamais un accompagnement** : ce qui alimente un `notFound()` ou un
+   `redirect()` ; ce qui alimente une décision de droit (rôle, drapeau, confidentialité — repli
+   **fermé**, jamais ouvert) ; et une écriture.
+4. **Pas de cache posé pour masquer une panne.** Un cache posé pour cacher une panne cache aussi la
+   prochaine. La fraîcheur est une promesse au lecteur ; elle se décidera pour ses propres raisons,
+   jamais pendant une panne.
+5. **`currentUser()` jette quand il n'a pas pu savoir.** Il rendait `null` sur n'importe quelle
+   erreur : pendant la panne, un membre connecté était **renvoyé à la page de connexion** sur
+   `/carnet`, `/cave` et `/fil`. Le partage se fait sur la forme de l'erreur, vérifiée contre l'API
+   réelle — 400/403 veut dire « pas de session », tout le reste jette.
+
+**Deux chantiers voisins, mesurés le même soir :**
+
+- **Les allers-retours par page**, comptés en instrumentant le client (`--import` devant
+  `next start`, rien en production) et non en lisant le code. Les promesses de `lib/CLAUDE.md`
+  tiennent — `feed_page()` en un appel, `conversation_inbox()` en un, le carnet en quatre. Le fait
+  que la lecture du code ne donnait pas : **l'en-tête coûte trois allers-retours sur chaque page
+  connectée**, le poste unique le plus lourd du site. Les fonctions SQL qui les remplaceraient sont
+  **nommées et pas construites** : la base répond en 38 ms, donc réécrire une requête ne gagne rien
+  tant que l'API met huit secondes à la transmettre.
+- **La région est déclarée** (`vercel.json`, `cdg1`). La donnée n'avait jamais quitté Paris —
+  Supabase est en `eu-west-3`, et c'est la seule moitié de la phrase qui engage le RGPD ; ce qui
+  tournait à Washington, ce sont les fonctions, qui ne stockent rien. **Le document public n'est
+  exact qu'à partir du prochain déploiement** : à vérifier sur `x-vercel-id` avant de clore.
+
+**Et la couverture de l'audit a11y dit enfin ce qu'elle couvre.** L'audit **lit seulement** : il ne
+fabrique pas de fixtures, donc il ne peut pas auditer les deux états d'un écran. Il dit désormais
+**lequel** il a vu — 45 écrans, 30 peuplés, 6 vides, 9 mixtes — et **nomme les six écrans vus
+seulement vides**, dont l'état peuplé n'a pas été regardé. « 0 violation sur 45 écrans » veut dire
+« 0 violation dans l'état où le compte de test les a trouvés », et le bilan l'écrit. C'est l'angle
+mort où un `<dl>` invalide a vécu trois semaines.
+
+## La QA du 14 septembre 2026 — l'en-tête, et sept coupes
+
+Demandée en cours de session. L'en-tête portait **« Notifications · Mon compte · Se déconnecter »**
+en clair, quatre contrôles du même poids que les quatre sections à côté — « cette partie là dans le
+header n'a rien à faire là » — et il était « extrêmement plat ».
+
+- **Le compte tient derrière une marque.** `AccountMenu` : les initiales dans un cercle de 32 px, un
+  chevron, et un panneau qui porte l'adresse, les notifications avec leur compte, le profil public,
+  le compte, l'administration si le rôle l'ouvre, et **se déconnecter**. Une divulgation, pas une
+  modale : ni piège de focus, ni verrou de défilement, ni portail — mais elle **recouvre** au lieu
+  de pousser, donc elle se ferme sur Échap et sur un pointeur au-dehors. Les initiales se calculent
+  (`initials()`, `lib/format`), jamais ne se chargent : il n'existe pas d'envoi d'avatar, et une
+  image d'attente promettrait ce qui n'arrive pas.
+- **L'en-tête est une bande de marron foncé dans les deux thèmes**, ce qui lui donne un fond propre
+  au lieu d'emprunter celui de la page. Il porte donc ses propres encres (`--color-header-*`) :
+  celles de la page sont brou sur pâle en thème clair et seraient invisibles. **Contrastes mesurés
+  avant d'être écrits** — parchemin 13,40:1, fumée 5,56:1, laiton 6,88:1 sur brou — tous AA.
+- **Une ligne, à toutes les largeurs.** La première version en faisait deux : les capitales
+  espacées ont élargi la nav de 641 à 687 px et le sélecteur de thème est passé à la ligne.
+  Mesuré à 1024, 1280 et 1440 — 65 px de haut partout. Et la mesure elle-même a dû être
+  corrigée : compter les `top` distincts comptait les **hauteurs**, pas les lignes, parce que
+  `items-center` aligne par le centre.
+
+**Sept coupes, toutes demandées** : le lede des quatre compteurs de `/cigares` (qui emportait
+quatre allers-retours avec lui), la note de portée du rail, les deux phrases de la discussion de
+fiche, le sous-compte des entrées, et « Aucune note publique » réduit à cela seul. La discussion
+resserre aussi ses interlignes.
+
+**Un bug, et son arithmétique** : les bagues d'une entrée débordaient sur le nom de l'auteur.
+Cinq bagues `md` font 5 × 1 rem de glyphe + 4 × 0,25 rem d'espace = **6 rem exactement**, dans une
+colonne de **4,5 rem** — la largeur que la marge avait quand une note était deux chiffres sur cent,
+avant que la 0028 ne la passe en bagues. Débordement de 24 px, mesuré au navigateur avant et après.
+Toute retouche du glyphe `md` de `RingRating` doit repasser par `entry-row.tsx`.
+
+## Le 15 septembre 2026 — la question tranchée, et deux défauts que la vérification a trouvés
+
+Arbitrage du porteur sur la question ouverte de l'ADR 0020 (« fais selon tes reco ») : **l'écran
+d'erreur reste nu et gagne deux liens écrits en dur**, l'accueil et le journal. Garder l'en-tête du
+site y a été écarté **par une mesure** — il lit la base trois fois par page connectée, donc l'écran
+d'erreur aurait pu échouer pour la raison même qui le fait afficher. Les deux destinations sont
+choisies pareil : l'accueil fait **zéro** aller-retour, le journal **un**. Rien sur cet écran
+n'attend quoi que ce soit, et c'est la propriété à préserver si on le retouche.
+
+**Trois règles de plus, chacune payée par un défaut :**
+
+1. **Une lecture faite sur TOUTES les pages n'est jamais un sujet.** `SiteHeader` appelait
+   `currentUser()` nu ; comme cette fonction jette désormais, une panne de l'API d'auth
+   transformait **tout le groupe `(app)`** — y compris les pages sans session — en écran d'erreur.
+   L'en-tête dégrade donc, mais pas en mensonge : il a **trois** états, et le troisième n'affiche
+   ni le menu du compte ni « Se connecter », il dit qu'il n'a pas pu lire.
+2. **Un `catch` qui ne regarde pas ce qu'il attrape attrape aussi le framework.** `accessory()`
+   avalait `DynamicServerError` — la façon dont Next dit « cette route est dynamique » — et
+   l'aurait fait de `redirect()` et `notFound()`. Trouvé en lisant un **journal de build**, jamais
+   dans le code. Rien n'est passé en statique, et seulement par chance : chaque page avait encore
+   une lecture nue pour relancer le signal. Voir `lib/CLAUDE.md`.
+3. **Une règle de comportement se prouve en la provoquant.** `tooling/audit/fault-inject.mjs` rend
+   un 502 — la réponse exacte de Kong — sur une lecture nommée, et
+   `tooling/audit/degradation.ts` lit ce que la page en fait : `sain` → 200 sans encart,
+   `accessoire` → **200 avec l'encart**, `sujet` → **500 et l'écran d'erreur**, qui porte bien ses
+   deux liens. **13 assertions, 0 échec.** Le témoin `sain` n'est pas décoratif : sans lui, ne rien
+   trouver pourrait être un succès ou une lacune. Le scénario dégradé passe aussi **axe-core**,
+   parce que c'est le seul endroit d'où cet état est visible.
+
+**Et la quatrième leçon de mesure de la semaine** : le premier jet de ce contrôle ne se connectait
+pas, donc il cherchait un encart de facettes sur l'aperçu visiteur de `/cigares`, qui n'en a pas —
+et rendait « non » avec l'assurance d'un verdict. **La présence de la cible se vérifie avant toute
+assertion à son sujet**, et son absence est une lacune, pas un échec.
+
+**La règle est appliquée partout**, les 53 pages classées une par une : **33 converties**, les
+autres sans accompagnement à dégrader. **Cinq lectures restent nues alors qu'elles y
+ressemblent** — les lots d'une cave (« 0 cigare » serait un inventaire qu'on croirait), les
+partages d'une entrée (« personne » inviterait à repartager), le contenu visé d'un dossier de
+modération (décider à l'aveugle), la roue d'une dégustation (le formulaire enregistrerait moins
+qu'il n'annonce). Et **la nuance que l'exception 2 n'énonçait pas** : un repli fermé protège une
+porte, il ne justifie pas d'énoncer un refus. `adminView()` échoue donc plutôt que d'annoncer
+« vous n'avez pas accès » à un admin dont le droit n'a pas pu être lu.

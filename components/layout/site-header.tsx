@@ -2,13 +2,16 @@ import { Search } from 'lucide-react'
 import Link from 'next/link'
 
 import { signOut } from '@/app/(public)/connexion/actions'
+import { AccountMenu, type AccountLink } from '@/components/layout/account-menu'
 import { SiteMenu, type MenuLink } from '@/components/layout/site-menu'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { BRAND } from '@/lib/brand'
+import { accessory, orElse } from '@/lib/degrade'
+import { initials } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
 import { FACET_PARAMS } from '@/lib/search/facets'
-import { getRole } from '@/lib/settings/queries'
+import { getHeaderIdentity } from '@/lib/settings/queries'
 import { hasMinRole } from '@/lib/settings/roles'
 import { countUnreadNotifications } from '@/lib/social/queries'
 import { currentUser } from '@/lib/supabase/server'
@@ -60,17 +63,70 @@ const MEMBER_NAV = [
  * the old header three lines tall on a phone.
  */
 export async function SiteHeader() {
-  const user = await currentUser()
+  /*
+   * THREE states, not two — and the third is why this is wrapped (ADR 0020).
+   *
+   * `currentUser()` throws when it could not read the session, which is right
+   * for a page whose subject depends on who is reading. The header is not
+   * that: it is chrome on every page of the site, so letting it throw would
+   * turn a provider hiccup into the error screen for the WHOLE app group,
+   * including the pages that do not need a session at all. The blast radius
+   * would be larger than the failure.
+   *
+   * So the header degrades — but it must not degrade into a lie. Rendering
+   * « Se connecter » for an unreadable session claims the reader is signed
+   * out, which is the same false statement about identity the rest of this
+   * work exists to remove. The unknown state therefore shows NEITHER the
+   * account menu NOR the sign-in word: it says the account could not be read,
+   * and offers the visitor sections, which are the ones that work regardless.
+   */
+  const session = await accessory(currentUser())
+  const user = session.ok ? session.value : null
   /* A head count, so the badge costs no rows on every page of the site. Zero
      for a visitor without asking: `notifications_select_own` would answer
      nothing anyway, and a query per anonymous page view to learn that is a
      query too many. */
-  const [unread, role] = user
-    ? await Promise.all([countUnreadNotifications(), getRole(user.id)])
-    : [0, 'member' as const]
-  const isAdmin = hasMinRole(role, 'admin')
+  const [unreadRead, identityRead] = user
+    ? await Promise.all([
+        accessory(countUnreadNotifications()),
+        accessory(getHeaderIdentity(user.id)),
+      ])
+    : [
+        { ok: true, value: 0 } as const,
+        { ok: true, value: { role: 'member' as const, displayName: null, handle: null } } as const,
+      ]
+
+  /* Both fall back CLOSED: no badge rather than a wrong count, and a plain
+     member rather than an admin entry a failed read would have opened. */
+  const unread = orElse(unreadRead, 0)
+  const identity = orElse(identityRead, {
+    role: 'member' as const,
+    displayName: null,
+    handle: null,
+  })
+  const isAdmin = hasMinRole(identity.role, 'admin')
+
+  /* The name the corner wears, and the name a screen reader reads out. The
+     address is the last resort because it is the one thing every account has. */
+  const accountLabel =
+    identity.displayName ?? (identity.handle ? `@${identity.handle}` : (user?.email ?? ''))
+  /* Four destinations at most, each a DIFFERENT page: `m.settings.title` and
+     `m.nav.account.label` are both « Mon compte » and both /parametres, so
+     only one of them is here. The public profile is the second entry because
+     it is the only other page that is about you rather than about the site. */
+  const accountLinks: AccountLink[] = [
+    { label: m.notifications.eyebrow, href: routes.notifications(), badge: unread },
+    ...(identity.handle
+      ? [{ label: m.nav.account.profile, href: routes.member(identity.handle) }]
+      : []),
+    { label: m.settings.title, href: routes.settings() },
+    ...(isAdmin ? [{ label: m.nav.admin.label, href: routes.admin(), accent: true }] : []),
+  ]
 
   const nav = user ? [...VISITOR_NAV, ...MEMBER_NAV] : [...VISITOR_NAV]
+  /* The corner, in the third state. Not a link — there is nowhere honest to
+     send someone whose identity we could not read. */
+  const accountUnknown = !session.ok
 
   /* The menu carries the same sections plus the account rail, because on a
      phone there is nowhere else for the account rail to be. */
@@ -83,24 +139,26 @@ export async function SiteHeader() {
           },
           { label: m.settings.title, href: routes.settings() },
         ]
-      : [{ label: m.auth.title, href: routes.signIn(), accent: true }]),
+      : !session.ok
+        ? []
+        : [{ label: m.auth.title, href: routes.signIn(), accent: true }]),
     ...(isAdmin ? [{ label: m.nav.admin.label, href: routes.admin(), accent: true }] : []),
   ]
 
   return (
-    <header className="border-rule border-b">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 px-4 py-3.5">
-        <Link href={routes.home()} className="wordmark text-ink mr-auto">
+    <header className="bg-header border-header-rule text-header-ink border-b">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 px-4 py-3.5">
+        <Link href={routes.home()} className="wordmark text-header-ink mr-auto">
           {BRAND.name}
         </Link>
 
         <nav aria-label={m.nav.mainLabel} className="hidden lg:block">
-          <ul className="flex items-center gap-x-6 text-sm">
+          <ul className="flex items-center gap-x-4 text-sm xl:gap-x-5">
             {nav.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
+                  className="text-header-ink-muted hover:text-header-ink text-xs font-medium tracking-[0.05em] whitespace-nowrap uppercase transition-colors duration-(--duration-quick)"
                 >
                   {item.label}
                 </Link>
@@ -113,7 +171,7 @@ export async function SiteHeader() {
           action={routes.cigars()}
           method="get"
           role="search"
-          className="hidden w-44 lg:block xl:w-52"
+          className="hidden w-36 lg:block xl:w-48"
         >
           <label htmlFor="recherche-en-tete" className="sr-only">
             {m.nav.searchLabel}
@@ -122,72 +180,63 @@ export async function SiteHeader() {
             <Search
               aria-hidden="true"
               strokeWidth={1.5}
-              className="text-ink-muted pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
+              className="text-header-ink-muted pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2"
             />
             <input
               id="recherche-en-tete"
               type="search"
               name={FACET_PARAMS.query}
               placeholder={m.referential.search.placeholder}
-              className="border-rule bg-surface text-ink placeholder:text-ink-muted focus:border-accent rounded-band h-9 w-full border pr-2.5 pl-8 text-sm outline-none"
+              className="border-header-rule text-header-ink placeholder:text-header-ink-muted focus:border-header-accent rounded-band h-9 w-full border bg-transparent pr-2.5 pl-8 text-sm outline-none"
             />
           </div>
         </form>
 
-        {/* The account rail, on a desk. Everything here is a word or an icon,
-            never both: the header is read once and then ignored. */}
+        {/* The account, on a desk: one mark, not four links. QA of
+            14 septembre 2026 — « cette partie là dans le header n'a rien à
+            faire là ». A visitor still gets a word, because « Se connecter »
+            is the one thing we want them to read — unless we could not read
+            the session at all, in which case neither word is true. */}
         <div className="hidden items-center gap-x-4 text-sm lg:flex">
-          {user ? (
-            <Link
-              href={routes.notifications()}
-              className="text-ink-muted hover:text-ink inline-flex items-center gap-1.5 transition-colors duration-(--duration-quick)"
-            >
-              {m.notifications.eyebrow}
-              {unread > 0 ? (
-                <span className="border-accent text-accent rounded-band border px-1.5 text-xs tabular-nums">
-                  {unread}
-                </span>
-              ) : null}
-            </Link>
-          ) : null}
-          {isAdmin ? (
-            <Link
-              href={routes.admin()}
-              className="border-accent text-accent hover:text-accent-bright rounded-band border px-2 py-0.5 transition-colors duration-(--duration-quick)"
-            >
-              {m.nav.admin.label}
-            </Link>
-          ) : null}
-          {user ? (
-            <Link
-              href={routes.settings()}
-              className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
-            >
-              {m.settings.title}
-            </Link>
-          ) : null}
-          {user ? (
-            /* A POST, not a link: signing out changes state, and a GET that
-               changes state gets fired by any link prefetcher that passes. */
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="text-ink-muted hover:text-ink transition-colors duration-(--duration-quick)"
-              >
-                {m.auth.signOut}
-              </button>
-            </form>
+          {accountUnknown ? (
+            <span role="status" className="text-header-ink-muted text-xs">
+              {m.nav.account.unavailable}
+            </span>
+          ) : user ? (
+            <AccountMenu
+              initials={initials({
+                displayName: identity.displayName,
+                handle: identity.handle,
+                email: user.email ?? null,
+              })}
+              label={accountLabel}
+              email={user.email ?? null}
+              links={accountLinks}
+              footer={
+                /* A POST, not a link: signing out changes state, and a GET
+                   that changes state gets fired by any link prefetcher that
+                   passes. */
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="text-accent hover:text-accent-bright w-full py-1 text-left text-sm transition-colors duration-(--duration-quick)"
+                  >
+                    {m.auth.signOut}
+                  </button>
+                </form>
+              }
+            />
           ) : (
             <Link
               href={routes.signIn()}
-              className="text-accent hover:text-accent-bright transition-colors duration-(--duration-quick)"
+              className="text-header-accent hover:text-header-ink text-xs font-medium tracking-[0.08em] uppercase transition-colors duration-(--duration-quick)"
             >
               {m.auth.title}
             </Link>
           )}
         </div>
 
-        <ThemeToggle className="ml-auto lg:ml-0" />
+        <ThemeToggle className="text-header-ink-muted hover:text-header-ink ml-auto lg:ml-0" />
         <SiteMenu
           links={nav.map((item) => ({ ...item }))}
           trailing={trailing}
@@ -198,11 +247,11 @@ export async function SiteHeader() {
           footer={
             user ? (
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <span className="text-ink-faint text-xs">
+                <span className="text-header-ink-muted text-xs">
                   {user.email ? `${m.auth.signedInAs} · ${user.email}` : m.auth.signedInAs}
                 </span>
                 <form action={signOut}>
-                  <button type="submit" className="text-accent py-2 text-sm">
+                  <button type="submit" className="text-header-accent py-2 text-sm">
                     {m.auth.signOut}
                   </button>
                 </form>

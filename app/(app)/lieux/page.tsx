@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -90,8 +92,12 @@ export default async function VenuesPage({
       ? venuesNearby({ lat, lng, radiusKm, offeredTypes: flag.types, type })
       : Promise.resolve<NearbyVenue[]>([]),
     hasPoint ? Promise.resolve<VenueRow[]>([]) : listVenues({ offeredTypes: flag.types, type, q }),
-    user ? listPendingVenues() : Promise.resolve<VenueRow[]>([]),
-    countVenues(flag.types),
+    /* The pending queue is a block that only appears when it has rows, so a
+       failed read would simply remove it — exactly the silent absence ADR 0020
+       forbids. The count is a sentence about the seed; it degrades to nothing
+       because a missing number reads as a missing number. */
+    user ? accessory(listPendingVenues()) : Promise.resolve({ ok: true, value: [] } as const),
+    accessory(countVenues(flag.types)),
   ])
 
   /* Neither a needle nor a position: the list below is a sample of thirteen
@@ -104,7 +110,7 @@ export default async function VenuesPage({
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
       <p className="text-ink-faint measure -mt-4 text-xs leading-relaxed">
-        {copy.sourceNote.replace('{count}', formatCount(total))}
+        {total.ok ? copy.sourceNote.replace('{count}', formatCount(total.value)) : null}
       </p>
 
       {done ? (
@@ -215,21 +221,23 @@ export default async function VenuesPage({
         </p>
       ) : null}
 
-      {pending.length > 0 ? (
+      {!pending.ok ? (
+        <Unavailable label={copy.pending.titleMine} />
+      ) : pending.value.length > 0 ? (
         <section className="flex flex-col gap-3">
           <Band variant="divider" />
           <h2 className="font-display text-display-sm">
-            {pending.some((venue) => venue.created_by !== user?.id)
+            {pending.value.some((venue) => venue.created_by !== user?.id)
               ? copy.pending.titleEditor
               : copy.pending.titleMine}
           </h2>
           <p className="lede">
-            {pending.some((venue) => venue.created_by !== user?.id)
+            {pending.value.some((venue) => venue.created_by !== user?.id)
               ? copy.pending.ledeEditor
               : copy.pending.ledeMine}
           </p>
           <ul className="flex flex-col gap-2">
-            {pending.map((venue) => (
+            {pending.value.map((venue) => (
               <li key={venue.id} className="flex flex-wrap items-baseline gap-2 text-sm">
                 <Link href={routes.venue(venue.slug)} className="text-accent hover:underline">
                   {venue.name}

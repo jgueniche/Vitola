@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -69,7 +71,10 @@ export default async function EventPage({
      clicking the same button. */
   const refusedRaw = Array.isArray(query.erreur) ? query.erreur[0] : query.erreur
   const refused = refusedRaw === 'refus'
-  const attendees = await listAttendees(event.id)
+  /* The event is the subject and threw above. Its attendee list accompanies
+     it, and `event_attendees` answers through policies that return zero rows
+     legitimately — so a failure is said, never rendered as « personne ». */
+  const attendees = await accessory(listAttendees(event.id))
 
   const starts = new Date(event.starts_at)
   const ends = event.ends_at ? new Date(event.ends_at) : null
@@ -200,11 +205,13 @@ export default async function EventPage({
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-display-sm">{copy.attendeesTitle}</h2>
-        {attendees.length === 0 ? (
+        {!attendees.ok ? (
+          <Unavailable />
+        ) : attendees.value.length === 0 ? (
           <p className="text-ink-muted text-sm">{copy.attendeesEmpty}</p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {attendees.map((attendee) => (
+            {attendees.value.map((attendee) => (
               <li
                 key={attendee.id}
                 className="border-rule bg-surface flex items-center justify-between gap-3 rounded-[3px] border px-4 py-2 text-sm"

@@ -7,6 +7,7 @@ import { Moon, Sun } from 'lucide-react'
 import { useSyncExternalStore } from 'react'
 
 import { m } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
 import {
   DEFAULT_THEME,
   isTheme,
@@ -86,7 +87,14 @@ export function ThemeToggle({ className }: { className?: string }) {
       type="button"
       onClick={() => apply(goingLight ? 'light' : 'dark')}
       aria-label={goingLight ? copy.toLight : copy.toDark}
-      className={`text-ink-muted hover:text-ink inline-flex size-9 items-center justify-center transition-colors duration-(--duration-quick) ${className ?? ''}`}
+      /* `cn` and not a template string: the app header sits on the dark brown
+         band and passes its own ink, and two conflicting colour classes in one
+         attribute are resolved by stylesheet order, not by attribute order —
+         so the caller's would lose at random. tailwind-merge drops ours. */
+      className={cn(
+        'text-ink-muted hover:text-ink inline-flex size-9 items-center justify-center transition-colors duration-(--duration-quick)',
+        className,
+      )}
     >
       <Icon aria-hidden="true" strokeWidth={1.5} className="size-4" />
     </button>

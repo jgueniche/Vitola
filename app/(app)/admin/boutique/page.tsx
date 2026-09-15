@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 
 import { EmptyState } from '@/components/layout/empty-state'
@@ -61,7 +63,13 @@ export default async function AdminShopPage({ searchParams }: Props) {
   const done = typeof query.fait === 'string' ? CONFIRMATIONS[query.fait] : undefined
   const openId = typeof query.produit === 'string' ? query.produit : null
 
-  const [products, vendorOptions] = await Promise.all([listProducts(), listVendorOptions()])
+  /* The catalogue is the subject. The vendor list fills the create form's
+     dropdown: an empty one reads « aucun partenaire », which for a failed read
+     would invite creating one that already exists (ADR 0020). */
+  const [products, vendorOptionsRead] = await Promise.all([
+    listProducts(),
+    accessory(listVendorOptions()),
+  ])
   const open = openId ? (products.find((product) => product.id === openId) ?? null) : null
   const queue = products
     .filter((product) => product.status === 'draft' && product.submitted_at !== null)
@@ -198,7 +206,11 @@ export default async function AdminShopPage({ searchParams }: Props) {
       ) : (
         <section className="border-rule bg-surface flex flex-col gap-4 rounded-[3px] border p-4">
           <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
-          <CreateProductForm vendorOptions={vendorOptions} />
+          {vendorOptionsRead.ok ? (
+            <CreateProductForm vendorOptions={vendorOptionsRead.value} />
+          ) : (
+            <Unavailable />
+          )}
         </section>
       )}
 

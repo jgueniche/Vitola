@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -49,7 +51,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     redirect(`${routes.ageGate()}?suite=${encodeURIComponent(routes.journalArticle(slug))}`)
   }
 
-  const links = article.audience === 'gated' ? await listArticleLinks(article.id) : []
+  /* The article is the subject and threw above. Its linked sheets accompany
+     it: an article whose « à lire aussi » list is missing is still the
+     article, and ADR 0012 forbids that list on a public one anyway. */
+  const links =
+    article.audience === 'gated'
+      ? await accessory(listArticleLinks(article.id))
+      : ({ ok: true, value: [] } as const)
   const blocks = parseArticle(article.body_md)
 
   return (
@@ -86,12 +94,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
       <ArticleBody blocks={blocks} />
 
-      {links.length > 0 ? (
+      {!links.ok ? (
+        <Unavailable label={copy.linksTitle} />
+      ) : links.value.length > 0 ? (
         <section className="flex flex-col gap-3">
           <Band variant="divider" />
           <h2 className="font-display text-display-sm">{copy.linksTitle}</h2>
           <ul className="flex flex-col gap-1 text-sm">
-            {links.map((link) => (
+            {links.value.map((link) => (
               <li key={link.id}>
                 {link.cigar ? (
                   <Link

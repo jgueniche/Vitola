@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
+import type { Privacy } from '@/lib/settings/model'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -120,9 +122,18 @@ export default async function MemberPage({
 
   const isMe = profile.id === user.id
 
-  const [privacy, counts, followers, following, relation, slaHours, viewerRole] = await Promise.all(
-    [
-      readProfilePrivacy(profile.id),
+  /*
+   * `privacy` decides whether this member's entries and humidor are shown, so
+   * it is a permission read and falls back CLOSED (ADR 0020, exception 2): an
+   * unreadable privacy key hides everything rather than guessing the defaults,
+   * because the guess that goes wrong publishes someone's shelf.
+   *
+   * The rest — the counts, the two follow lists, the relation — accompanies
+   * the profile, which is the subject and threw above.
+   */
+  const [privacyRead, counts, followers, following, relation, slaHours, viewerRole] =
+    await Promise.all([
+      accessory(readProfilePrivacy(profile.id)),
       countFollows(profile.id),
       listFollowGraph(profile.id, 'followers', 30),
       listFollowGraph(profile.id, 'following', 30),
@@ -130,11 +141,14 @@ export default async function MemberPage({
         ? Promise.resolve({ iFollow: false, followsMe: false, blocked: false })
         : readFollowState(user.id, profile.id),
       reportSlaHours(),
-      currentAppRole(),
-    ],
-  )
+      accessory(currentAppRole()),
+    ])
 
-  const viewerIsAdmin = hasMinRole(viewerRole, 'admin')
+  const privacy: Privacy = privacyRead.ok
+    ? privacyRead.value
+    : { show_humidor: false, show_reviews: false, show_country: false }
+
+  const viewerIsAdmin = hasMinRole(orElse(viewerRole, 'member'), 'admin')
 
   /* Only fetched for the one reader who can act on it. A count of accepted
      proposals is what an admin actually judges on, and asking for it on every

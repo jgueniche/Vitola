@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -53,7 +54,13 @@ export default async function ShopCartPage({ searchParams }: Props) {
     return product ? [{ ...line, product }] : []
   })
   const missing = cart.length - lines.length
-  const images = await signShopImages(lines.map((line) => line.product.image_path))
+  /* The cart lines are the subject — a basket that cannot list what is in it
+     must fail. The signed image URLs are decoration, and the block that
+     renders them already has a no-image branch (ADR 0020). */
+  const images = orElse(
+    await accessory(signShopImages(lines.map((line) => line.product.image_path))),
+    new Map<string, string>(),
+  )
   const totals = cartTotals(
     lines.map((line) => ({ priceEur: line.product.price_eur, qty: line.qty })),
   )

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -70,7 +72,14 @@ export default async function SettingsPage({
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.settings())}`)
   }
 
-  const [account, blocked] = await Promise.all([getAccount(user.id), listBlockedPeople()])
+  /* The account is the subject — this page IS it. « Personnes bloquées » is a
+     section of its own, and `blocks` answers through policies that return zero
+     rows for almost everyone, so an empty list from a catch would tell someone
+     they had unblocked people they had not (ADR 0020). */
+  const [account, blockedRead] = await Promise.all([
+    getAccount(user.id),
+    accessory(listBlockedPeople()),
+  ])
   /* `tg_handle_new_user()` creates the profile with the account. Its absence is
      a broken trigger, not an empty state, and a 404 says so loudly. */
   if (!account) notFound()
@@ -164,11 +173,13 @@ export default async function SettingsPage({
           </p>
         ) : null}
 
-        {blocked.length === 0 ? (
+        {!blockedRead.ok ? (
+          <Unavailable />
+        ) : blockedRead.value.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.blockedEmpty}</p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {blocked.map((person) => (
+            {blockedRead.value.map((person) => (
               <li
                 key={person.id}
                 className="border-rule bg-surface flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-[3px] border px-4 py-3"

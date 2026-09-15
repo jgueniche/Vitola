@@ -17,7 +17,8 @@ const copy = m.notebook.entry
  * A row under a hairline, not a card: the design audit of 5 septembre 2026
  * found that an entry, a comment, a form and an empty state all wore the same
  * bordered box, so a two-word note took the frame of a four-thousand-sign
- * tasting. The score now sits in a 72px margin where the eye finds it first,
+ * tasting. The score now sits in a margin of its own where the eye finds it
+ * first (104px — see the note on the grid below),
  * the author and the nature share one 12px line, the text keeps its measure,
  * and a tasting carries its six criteria as 3px bars — the one thing that
  * used to distinguish it was an eyebrow.
@@ -52,8 +53,20 @@ export function EntryRow({
   const hasSubScores =
     entry.kind === 'tasting' && SCORE_KEYS.some((key) => typeof subScores[key] === 'number')
 
+  /*
+    6.5rem, and the figure is arithmetic rather than taste: five `md` bands
+    are 5 × 1rem of glyph plus 4 × 0.25rem of gap = 6rem exactly. The column
+    was 4.5rem — the width the score margin had when a note was two digits
+    out of a hundred — so since the note became five bands (migration 0028)
+    every row overflowed its own column by 24px and the bands were drawn
+    over the author's name. Found on a screenshot of the QA session of
+    14 septembre 2026, never in the code: nothing was clipped, nothing
+    wrapped, the grid simply let its first column overrun.
+
+    Any change to `RingRating`'s `md` glyph or gap has to come back here.
+  */
   return (
-    <article className="border-rule grid grid-cols-[4.5rem_minmax(0,1fr)] gap-4 border-b py-5">
+    <article className="border-rule grid grid-cols-[6.5rem_minmax(0,1fr)] gap-4 border-b py-5">
       <div className="flex flex-col">
         <ScoreMark score={entry.score_total} size="md" />
       </div>

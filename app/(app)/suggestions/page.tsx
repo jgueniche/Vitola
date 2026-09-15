@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -45,7 +46,14 @@ export default async function SuggestionsPage() {
   if (!user) redirect(routes.signIn())
 
   const suggestions = await readSuggestions(5)
-  const labels = await aromaLabels(suggestions.flatMap((item) => item.aroma_tags))
+  /* The five suggestions are the subject and throw. Their aroma chips are
+     decoration on each card: a card without them is still the suggestion, and
+     the block that renders them already has a no-aroma branch — so this one
+     degrades to silence rather than to a notice. */
+  const labels = orElse(
+    await accessory(aromaLabels(suggestions.flatMap((item) => item.aroma_tags))),
+    new Map<number, string>(),
+  )
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-12">
