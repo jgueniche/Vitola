@@ -22,7 +22,21 @@ async function settle(page: Page) {
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {})
 }
 
+/**
+ * A preview deployment sits behind Vercel Authentication. `PARCOURS_ACCESS_URL`
+ * is the temporary share link (`?_vercel_share=…`) that sets the bypass
+ * cookie on first visit; it is opened once per browser context, before
+ * anything is measured, and never appears in the numbers.
+ */
+async function unlock(page: Page) {
+  const access = process.env.PARCOURS_ACCESS_URL
+  if (!access) return
+  await page.goto(access)
+  await settle(page)
+}
+
 async function passGate(page: Page) {
+  await unlock(page)
   const r = await page.goto(`${BASE}/majorite`)
   console.log(
     `  gate GET status=${r?.status()} ttfb=${Math.round(r?.request().timing().responseStart ?? -1)}ms`,
