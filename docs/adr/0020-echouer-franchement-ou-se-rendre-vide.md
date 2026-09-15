@@ -203,6 +203,39 @@ Trois seuils, mesurables :
    un lecteur à qui l'on dit de quand date ce qu'il lit — elle change ce que « accessoire » veut
    dire, et cette ADR est à relire. Elle ne sera pas décidée pendant une panne.
 
+## L'application, page par page — et ce qui reste nu volontairement
+
+Les 53 pages qui lisent la base ont été classées une par une. **Trente-trois portent au moins un
+accompagnement et sont converties.** Les autres **n'en ont aucun**, et c'est un constat, pas un
+oubli : elles lisent une chose et la rendent.
+
+**Les pages sans accompagnement** — `/journal`, `/aromes`, `/marques`, `/marques/[slug]`,
+`/vitoles`, `/vitoles/[slug]`, `/codes-de-boite`, `/clubs`, `/fil`, `/notifications`,
+`/statistiques`, `/moderation`, `/admin/drapeaux`, `/admin/boutique/partenaires`,
+`/lieux/proposer`, `/mentions-legales`, et les trois écrans du tunnel d'achat. Une page qui lit
+une liste et affiche cette liste **est** son sujet ; il n'y a rien à dégrader. Si l'une gagne un
+encart demain, la règle se pose à ce moment-là, sur ce bloc.
+
+**Quatre lectures restent nues alors qu'elles ressemblent à un accompagnement**, et chacune porte
+la raison en commentaire à son site d'appel :
+
+| lecture            | page               | pourquoi elle ne dégrade pas                                                                               |
+| ------------------ | ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `listAllLots()`    | `/cave`            | « 0 cigare, 0 € » en face de chaque cave est un inventaire que le lecteur croirait                         |
+| `listLots(id)`     | `/cave/[id]`       | le même, à l'échelle d'une cave                                                                            |
+| `listShares(id)`   | `/carnet/[id]`     | une liste vide dit à l'auteur qu'il n'a partagé avec personne, et l'invite à repartager                    |
+| `target`           | `/moderation/[id]` | un modérateur qui décide sans voir le contenu visé décide à l'aveugle                                      |
+| `listAromaWheel()` | `…/degustation`    | six critères et une roue **sont** la dégustation ; le formulaire enregistrerait moins que ce qu'il annonce |
+
+**Et deux lectures de droit restent nues**, là où le repli fermé de l'exception 2 dirait un fait
+faux sur le lecteur plutôt que sur une donnée : `adminView()` et le rang de `/moderation`. Un
+écran d'administration dont le droit n'a pas pu être lu doit **échouer**, pas annoncer « vous
+n'avez pas accès ».
+
+C'est la nuance que l'exception 2 n'énonçait pas : **un repli fermé protège une porte, il ne
+justifie pas d'énoncer un refus.** Quand la conséquence du repli est une phrase sur la personne
+qui lit, l'échec franc est le bon choix.
+
 ## Question tranchée — « échouer franchement », est-ce le droit de rester nu ?
 
 **Posée le 14 septembre, arbitrée le 15 : option (b), sur délégation (« fais selon tes reco »).**

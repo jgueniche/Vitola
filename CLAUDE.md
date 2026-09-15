@@ -934,6 +934,11 @@ pas, donc il cherchait un encart de facettes sur l'aperçu visiteur de `/cigares
 et rendait « non » avec l'assurance d'un verdict. **La présence de la cible se vérifie avant toute
 assertion à son sujet**, et son absence est une lacune, pas un échec.
 
-**Où en est la règle** : **16 pages converties** sur les 53 qui lisent la base, plus l'en-tête qui
-compte pour toutes. Le reste garde ses lectures nues — ce n'est pas une régression, c'était le
-comportement de tout le site avant l'ADR, mais la règle n'est pas encore partout.
+**La règle est appliquée partout**, les 53 pages classées une par une : **33 converties**, les
+autres sans accompagnement à dégrader. **Cinq lectures restent nues alors qu'elles y
+ressemblent** — les lots d'une cave (« 0 cigare » serait un inventaire qu'on croirait), les
+partages d'une entrée (« personne » inviterait à repartager), le contenu visé d'un dossier de
+modération (décider à l'aveugle), la roue d'une dégustation (le formulaire enregistrerait moins
+qu'il n'annonce). Et **la nuance que l'exception 2 n'énonçait pas** : un repli fermé protège une
+porte, il ne justifie pas d'énoncer un refus. `adminView()` échoue donc plutôt que d'annoncer
+« vous n'avez pas accès » à un admin dont le droit n'a pas pu être lu.

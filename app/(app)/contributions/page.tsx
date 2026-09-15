@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -62,13 +63,19 @@ export default async function ContributionsPage({ searchParams }: Props) {
   const account = await getAccount(user.id)
   const isEditor = hasMinRole(account?.role ?? 'member', REVIEWER_ROLE)
 
-  const [mine, pending, vitolas, lineNames, aromaNames] = await Promise.all([
+  /* The queue is the subject. The three label maps only turn ids into words
+     in a diff; missing one shows the id, which is ugly and true, where
+     blocking the screen would stop the review over a caption (ADR 0020). */
+  const [mine, pending, vitolasRead, lineNamesRead, aromaNamesRead] = await Promise.all([
     listMine(user.id),
     isEditor ? listPending() : Promise.resolve([]),
-    listVitolaOptions(),
-    listLineNames(),
-    aromaNameMap(),
+    accessory(listVitolaOptions()),
+    accessory(listLineNames()),
+    accessory(aromaNameMap()),
   ])
+  const vitolas = orElse(vitolasRead, [])
+  const lineNames = orElse(lineNamesRead, new Map<string, string>())
+  const aromaNames = orElse(aromaNamesRead, new Map<string, string>())
 
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
 

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 
 import { EmptyState } from '@/components/layout/empty-state'
@@ -42,7 +44,13 @@ export default async function AdminAccountsPage({ searchParams }: Props) {
 
   const query = await searchParams
   const q = typeof query.q === 'string' ? query.q : ''
-  const [accounts, invitations] = await Promise.all([listAccounts(q), listInvitations()])
+  /* The directory is the subject. The invitations below are a second section
+     with its own empty state — « aucune invitation » from a failed read would
+     hide an account waiting to be claimed (ADR 0020). */
+  const [accounts, invitationsRead] = await Promise.all([
+    listAccounts(q),
+    accessory(listInvitations()),
+  ])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -110,11 +118,13 @@ export default async function AdminAccountsPage({ searchParams }: Props) {
           title={copy.invitationsTitle}
           lede={copy.invitationsLede}
         />
-        {invitations.length === 0 ? (
+        {!invitationsRead.ok ? (
+          <Unavailable />
+        ) : invitationsRead.value.length === 0 ? (
           <p className="text-ink-faint text-sm">{copy.invitationsEmpty}</p>
         ) : (
           <ul className="border-rule flex flex-col border-t">
-            {invitations.map((invitation) => (
+            {invitationsRead.value.map((invitation) => (
               <li
                 key={invitation.email}
                 className="border-rule flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b py-3"

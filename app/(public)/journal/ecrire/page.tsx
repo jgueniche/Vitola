@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -61,7 +63,11 @@ export default async function ComposePage({
         articleId ? getArticleById(articleId) : Promise.resolve(null),
       ])
     : [[], null]
-  const links = article && isEditor ? await listArticleLinks(article.id) : []
+  /* The drafts and the article being edited are the subject. The sheets an
+     article points at accompany it — and ADR 0012 forbids them on a public
+     one anyway, so an empty list is an ordinary state here (ADR 0020). */
+  const linksRead = article && isEditor ? await accessory(listArticleLinks(article.id)) : null
+  const links = linksRead ? orElse(linksRead, []) : []
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -154,6 +160,7 @@ export default async function ComposePage({
             article.audience === 'gated' ? (
               <section className="flex flex-col gap-3">
                 <Band variant="divider" />
+                {linksRead && !linksRead.ok ? <Unavailable /> : null}
                 {links.length > 0 ? (
                   <ul className="flex flex-col gap-1 text-sm">
                     {links.map((link) => (

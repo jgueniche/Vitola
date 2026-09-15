@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -49,7 +50,15 @@ export default async function TastingPage({ params }: Params) {
   /* The lots read alongside the wheel, so the form can offer to take the cigar
      out of the humidor in the same gesture (ADR 0006, D1). Empty for a member
      who keeps none, and the section then does not render. */
-  const [families, lots] = await Promise.all([listAromaWheel(), lotsForCigar(cigar.id)])
+  /* The wheel stays BARE: six criteria and an aroma wheel are what a tasting
+     IS, and a tasting form without it would silently record less than the
+     exercise it claims to be. The lots are the optional « décompter de la
+     cave » field — an empty list is its ordinary state (ADR 0020). */
+  const [families, lotsRead] = await Promise.all([
+    listAromaWheel(),
+    accessory(lotsForCigar(cigar.id)),
+  ])
+  const lots = orElse(lotsRead, [])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 
 import { EmptyState } from '@/components/layout/empty-state'
@@ -61,7 +63,11 @@ export default async function ComparePage({ searchParams }: Props) {
 
   const [cigars, found] = await Promise.all([
     Promise.all(slugs.map((slug) => getCigarBySlug(slug))),
-    term ? searchCigars({ ...EMPTY_FACETS, query: term }) : Promise.resolve(null),
+    /* The sheets being compared are the subject. This is the « ajouter une
+       fiche » search beside them: `found.cigars.length === 0` prints « aucune
+       fiche ne correspond », which for a failed read is a claim about the
+       referential and not about the query (ADR 0020). */
+    term ? accessory(searchCigars({ ...EMPTY_FACETS, query: term })) : Promise.resolve(null),
   ])
 
   const kept = cigars.filter((cigar): cigar is CigarDetail => cigar !== null)
@@ -264,13 +270,14 @@ export default async function ComparePage({ searchParams }: Props) {
               </Button>
             </form>
 
-            {found && found.cigars.length === 0 ? (
+            {found && !found.ok ? <Unavailable /> : null}
+            {found?.ok && found.value.cigars.length === 0 ? (
               <p className="text-ink-muted text-sm">{copy.searchNoResult}</p>
             ) : null}
 
-            {found && found.cigars.length > 0 ? (
+            {found?.ok && found.value.cigars.length > 0 ? (
               <ul className="flex flex-col gap-2">
-                {found.cigars
+                {found.value.cigars
                   .filter((cigar) => !slugs.includes(cigar.slug))
                   .slice(0, 8)
                   .map((cigar) => (

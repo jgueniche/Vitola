@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -75,12 +76,19 @@ export default async function SerialReviewPage({ searchParams }: Props) {
   const fallback = first(query.suivante)
   const decided = first(query.decidee)
 
-  const [sheets, vitolas, lineNames, aromaNames] = await Promise.all([
+  /* The queue is the subject — a reviewer with no sheets has nothing to do
+     here. The three label maps only turn ids into words in the diff; missing
+     one shows the id, which is ugly and true, where blocking the whole screen
+     would stop the review over a caption (ADR 0020). */
+  const [sheets, vitolasRead, lineNamesRead, aromaNamesRead] = await Promise.all([
     listPendingSheets(withSource),
-    listVitolaOptions(),
-    listLineNames(),
-    aromaNameMap(),
+    accessory(listVitolaOptions()),
+    accessory(listLineNames()),
+    accessory(aromaNameMap()),
   ])
+  const vitolas = orElse(vitolasRead, [])
+  const lineNames = orElse(lineNamesRead, new Map<string, string>())
+  const aromaNames = orElse(aromaNamesRead, new Map<string, string>())
   const vitolaNames = new Map(vitolas.map((vitola) => [vitola.id, vitola.name_salida]))
 
   /* The current sheet: the one asked for, else the one the last decision

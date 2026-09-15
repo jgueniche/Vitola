@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -73,11 +75,17 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
   const openLot = one(query.lot)
   const today = todayInBrandZone()
 
-  const [lots, readings, humidors] = await Promise.all([
+  /* `listLots` stays BARE: the inventory IS this page, and « 0 cigare, 0 € »
+     drawn from a failed read is an inventory the reader would believe
+     (ADR 0020, the same call as /cave). The hygrometry is its own section
+     with its own empty state, and the other humidors only fill the « déplacer
+     vers » dropdown — an empty one would hide the caves one owns. */
+  const [lots, readingsRead, humidorsRead] = await Promise.all([
     listLots(id),
-    listReadings(id),
-    listHumidors(),
+    accessory(listReadings(id)),
+    accessory(listHumidors()),
   ])
+  const humidors = orElse(humidorsRead, [])
 
   const held = lots.reduce((sum, lot) => sum + lot.qty, 0)
   const ratio = fillRatio(held, humidor.capacity)
@@ -91,7 +99,10 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
   const addingCigar = adding ? found.cigars.find((cigar) => cigar.id === adding) : undefined
 
   const lot = openLot ? lots.find((row) => row.id === openLot) : undefined
-  const ledger = lot ? await listLedger(lot.id) : []
+  /* The grand livre of an opened lot: a named panel, and « aucun mouvement »
+     on a lot that has some would be the wrong story about a stock. */
+  const ledgerRead = lot ? await accessory(listLedger(lot.id)) : null
+  const ledger = ledgerRead ? orElse(ledgerRead, []) : []
 
   const withParams = (next: Record<string, string | undefined>) => {
     const params = new URLSearchParams()
@@ -101,7 +112,9 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
     return qs ? `${routes.humidorDetail(id)}?${qs}` : routes.humidorDetail(id)
   }
 
-  const latest = readings[0]
+  /* The most recent reading, shown beside the fill ratio. Absent rather than
+     invented when the read failed — the section below says why. */
+  const latest = readingsRead.ok ? readingsRead.value[0] : undefined
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-12">
@@ -290,11 +303,13 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
 
         <ReadingForm humidorId={id} />
 
-        {readings.length === 0 ? (
+        {!readingsRead.ok ? (
+          <Unavailable />
+        ) : readingsRead.value.length === 0 ? (
           <p className="lede">{copy.readingsEmpty}</p>
         ) : (
           <ul className="flex flex-col gap-1">
-            {readings.map((reading) => (
+            {readingsRead.value.map((reading) => (
               <li
                 key={reading.id}
                 className="border-rule flex items-center justify-between gap-3 border-b py-2 text-sm last:border-0"
