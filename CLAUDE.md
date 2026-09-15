@@ -535,6 +535,19 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   était juste, la région ne l'était pas. Un masque ou un filtre qui étale quelque chose se déclare
   en `userSpaceOnUse`, avec une région plus large que ce qu'il étale.
 
+- **Un en-tête de réponse ne parle que de ce qui l'a produit.** `x-vercel-id` lu sur `/sante` disait
+  `iad1` avant ET après avoir déclaré la région en `cdg1` — parce que `/sante` est **prérendue** :
+  son en-tête vient du CDN, pas d'une fonction. La forme le dit et personne ne la lit : un segment
+  (`iad1::…`) est un PoP, deux (`iad1::cdg1::…`) sont le PoP **puis** la région de la fonction. Un
+  307 du portail compte comme un segment, lui aussi. **La région des fonctions ne se lit que sur
+  une route dynamique réellement exécutée** — et la même prudence vaut pour tout en-tête qu'un
+  cache, un proxy ou un middleware peut avoir produit à la place du code qu'on croit mesurer.
+- **Un statut d'API peut être périmé sans être faux.** `get_check_runs` a rendu `in_progress`
+  pendant plus de dix minutes sur un job que `get_workflow_job` donnait terminé depuis 08:37:43 —
+  et un diagnostic entier (« le job est bloqué ») a été construit là-dessus. Deux endpoints, deux
+  fraîcheurs. Quand une mesure surprend, la vérifier à une **seconde** source avant d'en tirer une
+  histoire ; c'est la cinquième fois de la semaine que la mesure, et non le code, était en cause.
+
 ## Style
 
 - Contenu de l'app en français, code et commentaires en **anglais** (§0.10).
@@ -856,8 +869,9 @@ lecteur est venu ?**
   tant que l'API met huit secondes à la transmettre.
 - **La région est déclarée** (`vercel.json`, `cdg1`). La donnée n'avait jamais quitté Paris —
   Supabase est en `eu-west-3`, et c'est la seule moitié de la phrase qui engage le RGPD ; ce qui
-  tournait à Washington, ce sont les fonctions, qui ne stockent rien. **Le document public n'est
-  exact qu'à partir du prochain déploiement** : à vérifier sur `x-vercel-id` avant de clore.
+  tournait à Washington, ce sont les fonctions, qui ne stockent rien. **Déployé et vérifié le
+  15 septembre** : la production rend `iad1::cdg1::…` sur `/journal` depuis 08:42:22 UTC, et le
+  document public est exact.
 
 **Et la couverture de l'audit a11y dit enfin ce qu'elle couvre.** L'audit **lit seulement** : il ne
 fabrique pas de fixtures, donc il ne peut pas auditer les deux états d'un écran. Il dit désormais
