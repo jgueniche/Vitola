@@ -63,10 +63,11 @@ export default async function VenuesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const flag = await venuesFlag()
+  /* The flag, the parameters and the session start together (ADR 0021): none
+     of the three needs another to be asked. */
+  const [flag, query, user] = await Promise.all([venuesFlag(), searchParams, currentUser()])
   if (!flag.enabled) notFound()
 
-  const query = await searchParams
   const done = venueConfirmation(query.fait)
   const q = firstParam(query.q)?.trim() || undefined
   const rawType = firstParam(query.type)
@@ -84,8 +85,6 @@ export default async function VenuesPage({
       Math.round(Number(firstParam(query.rayon)) || VENUE_SEARCH.radiusDefaultKm),
     ),
   )
-
-  const user = await currentUser()
 
   const [nearby, listed, pending, total] = await Promise.all([
     hasPoint

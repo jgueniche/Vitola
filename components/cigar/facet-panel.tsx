@@ -67,6 +67,10 @@ function FacetLink({ label, active, target }: { label: string; active: boolean; 
   return (
     <Link
       href={target}
+      /* Thirty facet links in view, thirty prefetches of the same page with
+         one parameter changed — none of them the one that gets clicked
+         (ADR 0021). */
+      prefetch={false}
       aria-current={active ? 'true' : undefined}
       className={cn(
         'border-rule rounded-[3px] border px-3 py-1.5 text-sm transition-colors',

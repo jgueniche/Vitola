@@ -14,7 +14,8 @@
     "errorTitle": "Something did not go through.",
     "errorBody": "The incident has been recorded. You can try again straight away.",
     "errorRetry": "Try again",
-    "escapeKey": "Esc"
+    "escapeKey": "Esc",
+    "loading": "Loading"
   },
   "brand": {
     "tagline": "The cigar reference",

@@ -32,8 +32,6 @@ function readFilter(value: string | string[] | undefined): string | undefined {
 }
 
 export default async function ShopPage({ searchParams }: Props) {
-  if (!(await isFeatureEnabled('shop_enabled'))) notFound()
-
   const query = await searchParams
   const filters: ShopSearchFilters = {
     q: readFilter(query.q),
@@ -42,7 +40,19 @@ export default async function ShopPage({ searchParams }: Props) {
     prix: readFilter(query.prix),
   }
 
-  const { products, facets, total } = await searchShopProducts(filters)
+  /*
+   * The shelf starts BEFORE the flag is known (ADR 0021). Read one after the
+   * other, this page was three round trips in a row — flag, shelf, signed
+   * URLs — and the flag is closed on no day but the kill-switch one, so
+   * waiting for it bought nothing. The `catch` is not a fallback: it only
+   * marks the read handled for the case where `notFound()` leaves it behind,
+   * and the `await` below still throws if the shelf could not be read.
+   */
+  const shelf = searchShopProducts(filters)
+  shelf.catch(() => {})
+  if (!(await isFeatureEnabled('shop_enabled'))) notFound()
+
+  const { products, facets, total } = await shelf
   /* Decoration: a product card without its photograph is still the card, and
      the card already has a no-image branch (ADR 0020). */
   const images = orElse(
@@ -149,6 +159,10 @@ export default async function ShopPage({ searchParams }: Props) {
                   <li key={product.id} className="border-rule bg-surface rounded-[3px] border">
                     <Link
                       href={routes.shopProduct(product.slug)}
+                      /* A grid of products is a grid of links, and each one in
+                         view is prefetched — 28 requests through the
+                         middleware for a shelf nobody clicks twice (ADR 0021). */
+                      prefetch={false}
                       className="flex h-full flex-col gap-2 p-4"
                     >
                       {product.image_path && images.get(product.image_path) ? (
@@ -197,7 +211,10 @@ function Facet({
       <ul className="flex flex-col gap-1">
         {options.map((option) => (
           <li key={option.label}>
+            {/* Same rule as the referential's facets: twenty links in view,
+                twenty prefetches of this page with one parameter changed. */}
             <Link
+              prefetch={false}
               href={option.href}
               aria-current={option.active ? 'true' : undefined}
               className={`text-sm underline-offset-2 ${option.active ? 'text-accent underline' : 'text-ink-muted'}`}

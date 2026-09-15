@@ -956,3 +956,58 @@ modération (décider à l'aveugle), la roue d'une dégustation (le formulaire e
 qu'il n'annonce). Et **la nuance que l'exception 2 n'énonçait pas** : un repli fermé protège une
 porte, il ne justifie pas d'énoncer un refus. `adminView()` échoue donc plutôt que d'annoncer
 « vous n'avez pas accès » à un admin dont le droit n'a pas pu être lu.
+
+## L'audit de la latence — 15 septembre 2026
+
+Demandé le 15 septembre (« un temps de latence anormalement long après les clics, notamment quand
+je change de section… vérifie de partout si c'est Supabase, Vercel, le front ou autre »). Tout est
+mesuré dans [`docs/audit-2026-09-15-latence.md`](docs/audit-2026-09-15-latence.md), la décision
+est l'[ADR 0021](docs/adr/0021-le-temps-d-un-clic.md).
+
+**Ce que c'était** : pas un fournisseur, trois défauts du dépôt qui se multipliaient. Aucune
+frontière de chargement, donc le routeur laissait l'ancienne page à l'écran, inchangée, jusqu'à
+l'arrivée entière de la nouvelle — **0,5 à 1,4 s de silence par clic**, mesuré en navigateur sur
+la production. Deux vérifications d'identité par requête, toutes deux des appels réseau au
+serveur d'auth — le middleware puis la page —, en tête de chaque chaîne : **104 000 lectures de
+`auth.users` pour 25 700 requêtes PostgREST** dans les statistiques de la base. Et le
+préchargement des grilles : **40 à 64 requêtes par page de liste**, chacune traversant le
+middleware, donc chacune un appel d'auth — 377 en cinq minutes pour un seul navigateur.
+
+**Ce qui est à l'écran** : trois `loading.tsx` (`(app)`, `boutique`, `journal`) et un
+`LoadingSkeleton` ; `getClaims()` à la place de `getUser()` dans le middleware et dans
+`currentUser()`, qui rend un `SessionUser` (`id`, `email`) ; le rayon de la boutique lancé avant
+son drapeau, les lieux en un `Promise.all` ; `prefetch={false}` sur les bagues, les facettes et
+les produits. Mesuré sur le même build local : **premier retour visuel 0,5–1,1 s → 36–135 ms**,
+contenu 150 à 650 ms plus tôt, zéro `/auth/v1/user` dans les journaux Supabase du rejeu.
+
+**Cinq règles qui ne se contournent pas :**
+
+1. **Un clic commet immédiatement.** Chaque groupe de routes dynamiques a son `loading.tsx` ;
+   en retirer un rend le silence, pas la vitesse. Le squelette est une ligne, jamais une carte,
+   et porte `aria-busy` avec un mot pour le lecteur d'écran.
+2. **`getUser()` n'a sa place que là où l'on a besoin du dossier, pas de l'identité.** Le jeton
+   se vérifie sur place (`getClaims()`, clés publiques ES256 gardées dix minutes) — la même
+   confiance que PostgREST accorde au même jeton. Le seul appelant légitime est l'export RGPD,
+   qui cite ses dates. Une session révoquée vit jusqu'à l'expiration de son jeton, une heure au
+   plus ; le jour où `suspend` s'arme, il devra aussi invalider les jetons.
+3. **Ce qui ne dépend de rien commence ensemble.** Un drapeau, des paramètres et une session ne
+   s'attendent pas l'un l'autre. Un `catch` vide posé sur une lecture lancée avant un
+   `notFound()` n'est pas un repli : il marque la promesse prise en charge, et l'`await` jette
+   toujours.
+4. **Une grille dense ne précharge pas.** La navigation principale, si : c'est elle qu'on clique.
+5. **Une navigation se mesure en navigation douce.** `roundtrips.ts` faisait des `page.goto` et
+   comptait l'en-tête sur chaque page ; sur un clic, l'en-tête n'est pas re-rendu. La mesure
+   était juste, ce qu'elle mesurait n'était pas le clic. `tooling/audit/soft-nav-trace.ts` pose un
+   marqueur avant et après chaque clic ; `tooling/audit/navigation.ts` lit ce que le navigateur
+   voit sur la production.
+
+**Ce qui n'est pas du code, et reste au porteur** : le palier Supabase (Nano — 75 à 120 ms à la
+porte de l'API pour une lecture de 0,04 ms en base ; Alpha Report est un cran au-dessus, et
+c'est le seul écart mesuré entre les deux projets) et le plan Vercel (Hobby, 0,6 vCPU par
+fonction). Aucun des deux ne rend un clic silencieux ; les deux allongent ce que le squelette
+couvre. Et `SUPABASE_SECRET_KEY` n'est pas posée chez Vercel : les journaux d'erreurs le disent
+quatre fois, et seul le `pg_cron` tient `cigar_stats` à jour.
+
+**Abracom a le même profil** — même architecture, pas un fournisseur commun en panne — et la
+même liste s'applique : une frontière de chargement par groupe, `getClaims()` dans le middleware,
+les lectures indépendantes lancées ensemble, le préchargement retiré des grilles.

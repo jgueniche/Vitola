@@ -72,6 +72,11 @@ export function CigarCard({
         <h2 className="text-base leading-tight font-medium">
           <Link
             href={routes.cigar(cigar.slug)}
+            /* Not prefetched: a grid of twenty-four bands fired forty-one
+               prefetch requests as it scrolled into view, each one a pass
+               through the middleware and a function invocation, for one
+               click at most (ADR 0021). The click itself is unchanged. */
+            prefetch={false}
             className="hover:text-accent-bright after:absolute after:inset-0 after:content-['']"
           >
             {cigar.commercial_name}
