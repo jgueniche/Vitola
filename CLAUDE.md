@@ -55,6 +55,25 @@ nulle part. Ce qui n'a pas été validé, c'est l'emplacement — devant le port
 **Quand.** Avant l'ouverture commerciale. Pas avant le prochain déploiement : tant que le site
 n'est pas commercialisé, on avance sans y revenir.
 
+### Inscription libre par mot de passe, sans confirmation d'e-mail
+
+**Assumé.** Depuis le 15 septembre 2026, sur instruction du porteur (« j'ai besoin que ceux à qui
+je présente le site puissent créer un compte très rapidement en entrant juste un email et un mot
+de passe »), `/connexion` crée un compte avec les deux mêmes champs que la connexion, et le projet
+Supabase confirme l'adresse lui-même : `mailer_autoconfirm = true`, posé par l'API de gestion et
+consigné dans `docs/setup/supabase.md`. Le lien magique n'est plus proposé — le mailer intégré
+envoie deux courriels par heure, ce qui ne tient pas une démonstration à trois personnes — et sa
+route d'atterrissage reste, pour les liens encore dans des boîtes et ceux qu'un admin génère.
+Deux choses sont acceptées en connaissance de cause : une adresse n'est pas vérifiée, et « cette
+adresse a déjà un compte » dit à un inconnu qu'elle en a un.
+
+**Ce qui rouvre.** La parole du porteur : « quand on sera en phase de pré-commercialisation, on
+reprendra cette partie sign-in et sign-up pour le faire beaucoup plus propre ». Le jour venu : un
+SMTP à nous (Q7, le domaine), la confirmation d'adresse remise, un message unique pour « existe
+déjà » et « mot de passe faux », et `suspend` qui invalide aussi les jetons (ADR 0021).
+
+**Quand.** Avant la pré-commercialisation. D'ici là, l'inscription en dix secondes est l'état voulu.
+
 ## Phases
 
 Une phase = une branche. Le brief prévoit `feat/pXX-nom` ; les sessions Claude Code distantes
