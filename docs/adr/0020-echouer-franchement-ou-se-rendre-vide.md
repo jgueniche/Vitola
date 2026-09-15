@@ -203,30 +203,43 @@ Trois seuils, mesurables :
    un lecteur à qui l'on dit de quand date ce qu'il lit — elle change ce que « accessoire » veut
    dire, et cette ADR est à relire. Elle ne sera pas décidée pendant une panne.
 
-## Question ouverte
+## Question tranchée — « échouer franchement », est-ce le droit de rester nu ?
 
-**« Échouer franchement », est-ce le droit de rester nu ?**
+**Posée le 14 septembre, arbitrée le 15 : option (b), sur délégation (« fais selon tes reco »).**
 
-Aujourd'hui, un sujet qui échoue rend `app/error.tsx` : un titre, une phrase, un bouton
-« Réessayer ». Pas d'en-tête, pas de navigation, pas de mot-marque — le lecteur est **hors du
-site**, et c'est ce que le porteur a appelé « le site blanc ». C'est cohérent avec le ton du §4.6
-(pas de théâtre d'excuse), et c'est peut-être une marche de trop : la même journée a ajouté un
-en-tête au journal précisément parce qu'un lecteur sans chemin vers le reste du site est un
-lecteur perdu.
+Un sujet qui échoue rend `app/error.tsx` : un titre, une phrase, un bouton « Réessayer ». Pas
+d'en-tête, pas de navigation, pas de mot-marque — le lecteur était **hors du site**, et c'est ce
+que le porteur a appelé « le site blanc ». Trois réponses étaient sur la table :
 
-Trois réponses possibles, et je n'en ai retenu aucune sans arbitrage :
+- **(a)** L'écran garde l'en-tête et le pied du site.
+- **(b)** L'écran reste nu et gagne deux liens écrits en dur, qui ne lisent rien.
+- **(c)** Rien ne change.
 
-- **(a)** L'écran d'erreur garde l'en-tête et le pied du site. Le lecteur peut aller ailleurs
-  pendant que la page qu'il voulait ne répond pas. Risque : l'en-tête lit lui-même la base
-  — trois allers-retours par page connectée, mesurés le 14 septembre et consignés dans
-  `docs/audit-2026-09-14.md` — donc l'écran d'erreur pourrait échouer à son tour ; il faudrait
-  un en-tête qui ne lit rien.
-- **(b)** L'écran reste nu, et gagne seulement un lien « Accueil » et un lien « Journal », écrits
-  en dur, qui ne lisent rien. Le coût est nul, le gain est un chemin.
-- **(c)** Rien ne change : un échec est un échec, et la page de réessai est la bonne réponse.
+**(a) est écartée par une mesure, pas par un goût** : l'en-tête lit la base **trois fois sur
+chaque page connectée** (`docs/audit-2026-09-14.md`, partie III). L'écran d'erreur pourrait donc
+échouer pour la raison même qui le fait afficher. Ce qu'il gagnerait en navigation, il le perdrait
+en fiabilité, au pire moment.
 
-**Mon avis, pour ce qu'il vaut : (b).** C'est le seul des trois qui ne peut pas échouer lui-même,
-et le manque que la journée a démontré est un _chemin_, pas un _cadre_. Mais c'est une décision de
-ton autant que d'architecture, et le ton est au porteur.
+**(b) est retenue**, et les deux destinations sont choisies par la même mesure : l'accueil fait
+**zéro** aller-retour (il est prérendu), le journal en fait **un** — les deux pages les moins
+chères du site, et l'accueil est la seule qui ne **peut pas** échouer pour la raison qui a amené
+le lecteur là. `routes` et `m` sont des lectures de module ; **rien sur cet écran n'attend quoi que
+ce soit**, et c'est la propriété à préserver si on le retouche.
 
-En attendant l'arbitrage, **(c)** tient : l'écran d'erreur n'a pas été touché par cette ADR.
+### La conséquence qu'il a fallu corriger en même temps
+
+L'arbitrage a fait remonter un défaut de la première livraison : **`SiteHeader` appelait
+`currentUser()` nu**. Comme cette fonction jette désormais plutôt que de mentir (D5), une panne
+de l'API d'auth transformait l'en-tête — donc **tout le groupe `(app)`, y compris les pages qui
+n'ont pas besoin de session** — en écran d'erreur. Le rayon d'explosion dépassait la panne.
+
+C'est la règle de cette ADR appliquée à l'en-tête lui-même : **l'en-tête n'est le sujet d'aucune
+page**, donc il dégrade. Mais il ne dégrade pas en mensonge — afficher « Se connecter » à qui a
+une session illisible est exactement la fausse affirmation d'identité que D5 retire. L'en-tête a
+donc **trois** états et non deux : connecté, déconnecté, et **illisible**, où le coin du compte
+n'affiche ni le menu ni « Se connecter » mais dit qu'il n'a pas pu lire, et où la navigation se
+réduit aux sections visiteur — les seules qui fonctionnent quoi qu'il arrive.
+
+**La règle générale à en retenir** : une lecture faite par un composant monté sur **toutes** les
+pages n'est jamais un sujet, quelle que soit son importance. Sa dégradation est obligatoire, et
+son repli doit être muet plutôt que faux.

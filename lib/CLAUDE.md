@@ -203,3 +203,41 @@ pendant que l'API d'auth répondait 502, un membre connecté ouvrant `/carnet`, 
 Le partage se fait désormais sur la **forme de l'erreur**, vérifiée contre l'API réelle et non
 devinée : `AuthSessionMissingError` porte un **400**, un jeton illisible un **403** — donc `null`
 est la vraie réponse ; tout le reste (5xx, transport, statut inconnu) **jette**.
+
+### `accessory()` ne doit jamais attraper le contrôle de flux de Next
+
+Trouvé dans un journal de build, pas par raisonnement. La première version du
+fichier imprimait quatorze fois, pendant `pnpm build` :
+
+```
+[accessory] a non-essential read failed: Error: Dynamic server usage:
+Route /cigares couldn't be rendered statically because it used `cookies`
+```
+
+Ce n'est pas un échec de lecture : c'est **la façon dont Next dit « cette route est dynamique »**.
+`redirect()` et `notFound()` marchent pareil — ce sont des exceptions lancées comme signal. Les
+avaler dit au constructeur l'inverse de ce qui est vrai.
+
+**Rien n'est passé en statique ce jour-là, et seulement par chance** : chaque page avait encore au
+moins une lecture **nue** pour relancer le signal. Une page dont toutes les lectures seraient
+enveloppées aurait été prérendue avec « indisponible » cuit dedans, définitivement, pour tout le
+monde. Une navigation `redirect()` enveloppée aurait été annulée en silence.
+
+`lib/degrade.ts` relance donc toute erreur portant un `digest` (ou un `code`) de la liste
+`NEXT_CONTROL_FLOW`, **avant** de considérer quoi que ce soit comme un échec. La reconnaissance se
+fait sur la valeur du digest et non par un import des internes de Next : les valeurs font partie du
+contrat RSC, les chemins d'import non. `tests/unit/degrade.test.ts` couvre les six.
+
+**La règle générale** : un `catch` qui ne regarde pas _ce qu'il attrape_ attrape aussi ce que le
+framework lui envoie.
+
+### Une lecture faite sur toutes les pages n'est jamais un sujet
+
+`SiteHeader` appelait `currentUser()` nu. Comme cette fonction jette désormais plutôt que de
+mentir, une panne de l'API d'auth transformait **tout le groupe `(app)`** — y compris les pages
+qui n'ont pas besoin de session — en écran d'erreur. Le rayon d'explosion dépassait la panne.
+
+L'en-tête dégrade donc, mais **pas en mensonge** : afficher « Se connecter » à qui a une session
+illisible est la même fausse affirmation d'identité que `currentUser()` vient de retirer. Il a
+**trois** états — connecté, déconnecté, illisible — et le troisième n'affiche ni le menu du compte
+ni « Se connecter », mais dit qu'il n'a pas pu lire.

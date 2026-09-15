@@ -30,6 +30,44 @@
  * mistake for data.
  */
 
+/**
+ * The exceptions Next.js throws as CONTROL FLOW, which must never be caught.
+ *
+ * Found by reading a build log, not by reasoning: the first version of this
+ * file printed
+ *
+ *   [accessory] a non-essential read failed: Error: Dynamic server usage:
+ *   Route /cigares couldn't be rendered statically because it used `cookies`
+ *
+ * fourteen times during `pnpm build`. That is not a failure — it is how Next
+ * signals « this route must be dynamic », and swallowing it tells the builder
+ * the opposite. Nothing flipped to static that day, and only by luck: every
+ * page still had at least one BARE read to re-throw the signal. A page whose
+ * reads were all wrapped would have been prerendered with « indisponible »
+ * baked into it, permanently, for everyone.
+ *
+ * `redirect()` and `notFound()` are the same mechanism. A wrapped read that
+ * called either would have had its navigation silently cancelled.
+ *
+ * Matched on `digest`/`code` rather than by importing Next's internals: the
+ * values are part of the RSC wire contract, the import paths are not.
+ */
+const NEXT_CONTROL_FLOW = [
+  'DYNAMIC_SERVER_USAGE', // a dynamic API used during static generation
+  'NEXT_REDIRECT', // redirect() — carries its target after a ';'
+  'NEXT_NOT_FOUND', // notFound(), before Next 15
+  'NEXT_HTTP_ERROR_FALLBACK', // notFound()/forbidden()/unauthorized(), Next 15+
+  'NEXT_STATIC_GEN_BAILOUT',
+  'BAILOUT_TO_CLIENT_SIDE_RENDERING',
+]
+
+function isNextControlFlow(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false
+  const marker = (error as { digest?: unknown }).digest ?? (error as { code?: unknown }).code
+  if (typeof marker !== 'string') return false
+  return NEXT_CONTROL_FLOW.some((known) => marker === known || marker.startsWith(`${known};`))
+}
+
 /** A read that may not have come back. No value on the failing branch, by design. */
 export type Accessory<T> = { readonly ok: true; readonly value: T } | { readonly ok: false }
 
@@ -55,6 +93,10 @@ export async function accessory<T>(read: Promise<T>): Promise<Accessory<T>> {
   try {
     return { ok: true, value: await read }
   } catch (error) {
+    /* Next's control flow is not a failed read. Re-thrown before anything
+       else, because catching it breaks the framework rather than the page. */
+    if (isNextControlFlow(error)) throw error
+
     /* Once, at error level, with the message the query built — « Could not
        read the origin facet: Bad Gateway » names both the read and the cause.
        A degradation nobody can see in a log is a degradation nobody fixes. */

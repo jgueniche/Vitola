@@ -6,6 +6,7 @@ import { AccountMenu, type AccountLink } from '@/components/layout/account-menu'
 import { SiteMenu, type MenuLink } from '@/components/layout/site-menu'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { BRAND } from '@/lib/brand'
+import { accessory, orElse } from '@/lib/degrade'
 import { initials } from '@/lib/format'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -62,14 +63,47 @@ const MEMBER_NAV = [
  * the old header three lines tall on a phone.
  */
 export async function SiteHeader() {
-  const user = await currentUser()
+  /*
+   * THREE states, not two — and the third is why this is wrapped (ADR 0020).
+   *
+   * `currentUser()` throws when it could not read the session, which is right
+   * for a page whose subject depends on who is reading. The header is not
+   * that: it is chrome on every page of the site, so letting it throw would
+   * turn a provider hiccup into the error screen for the WHOLE app group,
+   * including the pages that do not need a session at all. The blast radius
+   * would be larger than the failure.
+   *
+   * So the header degrades — but it must not degrade into a lie. Rendering
+   * « Se connecter » for an unreadable session claims the reader is signed
+   * out, which is the same false statement about identity the rest of this
+   * work exists to remove. The unknown state therefore shows NEITHER the
+   * account menu NOR the sign-in word: it says the account could not be read,
+   * and offers the visitor sections, which are the ones that work regardless.
+   */
+  const session = await accessory(currentUser())
+  const user = session.ok ? session.value : null
   /* A head count, so the badge costs no rows on every page of the site. Zero
      for a visitor without asking: `notifications_select_own` would answer
      nothing anyway, and a query per anonymous page view to learn that is a
      query too many. */
-  const [unread, identity] = user
-    ? await Promise.all([countUnreadNotifications(), getHeaderIdentity(user.id)])
-    : [0, { role: 'member' as const, displayName: null, handle: null }]
+  const [unreadRead, identityRead] = user
+    ? await Promise.all([
+        accessory(countUnreadNotifications()),
+        accessory(getHeaderIdentity(user.id)),
+      ])
+    : [
+        { ok: true, value: 0 } as const,
+        { ok: true, value: { role: 'member' as const, displayName: null, handle: null } } as const,
+      ]
+
+  /* Both fall back CLOSED: no badge rather than a wrong count, and a plain
+     member rather than an admin entry a failed read would have opened. */
+  const unread = orElse(unreadRead, 0)
+  const identity = orElse(identityRead, {
+    role: 'member' as const,
+    displayName: null,
+    handle: null,
+  })
   const isAdmin = hasMinRole(identity.role, 'admin')
 
   /* The name the corner wears, and the name a screen reader reads out. The
@@ -90,6 +124,9 @@ export async function SiteHeader() {
   ]
 
   const nav = user ? [...VISITOR_NAV, ...MEMBER_NAV] : [...VISITOR_NAV]
+  /* The corner, in the third state. Not a link — there is nowhere honest to
+     send someone whose identity we could not read. */
+  const accountUnknown = !session.ok
 
   /* The menu carries the same sections plus the account rail, because on a
      phone there is nowhere else for the account rail to be. */
@@ -102,7 +139,9 @@ export async function SiteHeader() {
           },
           { label: m.settings.title, href: routes.settings() },
         ]
-      : [{ label: m.auth.title, href: routes.signIn(), accent: true }]),
+      : !session.ok
+        ? []
+        : [{ label: m.auth.title, href: routes.signIn(), accent: true }]),
     ...(isAdmin ? [{ label: m.nav.admin.label, href: routes.admin(), accent: true }] : []),
   ]
 
@@ -156,9 +195,14 @@ export async function SiteHeader() {
         {/* The account, on a desk: one mark, not four links. QA of
             14 septembre 2026 — « cette partie là dans le header n'a rien à
             faire là ». A visitor still gets a word, because « Se connecter »
-            is the one thing we want them to read. */}
+            is the one thing we want them to read — unless we could not read
+            the session at all, in which case neither word is true. */}
         <div className="hidden items-center gap-x-4 text-sm lg:flex">
-          {user ? (
+          {accountUnknown ? (
+            <span role="status" className="text-header-ink-muted text-xs">
+              {m.nav.account.unavailable}
+            </span>
+          ) : user ? (
             <AccountMenu
               initials={initials({
                 displayName: identity.displayName,

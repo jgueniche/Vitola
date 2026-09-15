@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -73,13 +74,27 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
   const isMine = user?.id === entry.user_id
   const rawQuery = Array.isArray(query.q) ? (query.q[0] ?? '') : (query.q ?? '')
 
+  /*
+   * The entry is the subject and threw above. Of the rest (ADR 0020):
+   *
+   *   - the three thirds and the aroma labels ACCOMPANY it — a tasting whose
+   *     thirds did not load is still the tasting;
+   *   - `shares` stays BARE on purpose. It is the list of people who can read
+   *     this entry, which is the entry's own scope and therefore part of its
+   *     subject; showing an empty one would tell the author they had shared it
+   *     with nobody, and invite them to share it again.
+   */
   const [thirds, aromas, shares, results, slaHours] = await Promise.all([
-    entry.kind === 'tasting' ? listThirds(entry.id) : Promise.resolve([]),
-    aromaLabels(entry.aroma_tags),
+    entry.kind === 'tasting'
+      ? accessory(listThirds(entry.id))
+      : accessory(Promise.resolve<Awaited<ReturnType<typeof listThirds>>>([])),
+    accessory(aromaLabels(entry.aroma_tags)),
     isMine ? listShares(entry.id) : Promise.resolve([]),
+    /* A member search that answers nothing looks exactly like a member search
+       that found nothing — so a failure is said, never rendered as empty. */
     isMine && user && rawQuery.trim().length >= 2
-      ? searchMembers(rawQuery, user.id)
-      : Promise.resolve([]),
+      ? accessory(searchMembers(rawQuery, user.id))
+      : accessory(Promise.resolve<Awaited<ReturnType<typeof searchMembers>>>([])),
     reportSlaHours(),
   ])
 
@@ -168,11 +183,11 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
         </p>
       ) : null}
 
-      {thirds.length > 0 ? (
+      {thirds.ok && thirds.value.length > 0 ? (
         <section className="flex flex-col gap-3">
           <h2 className="text-base font-medium">{copy.thirds}</h2>
           <dl className="flex flex-col">
-            {thirds.map((third) => (
+            {thirds.value.map((third) => (
               <Row key={third.third} label={thirdLabels[third.third - 1] ?? String(third.third)}>
                 <span className="whitespace-pre-line">{third.notes}</span>
               </Row>
@@ -181,12 +196,12 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
         </section>
       ) : null}
 
-      {aromas.size > 0 ? (
+      {aromas.ok && aromas.value.size > 0 ? (
         <section className="flex flex-col gap-3">
           <h2 className="eyebrow">{copy.aromas}</h2>
           <ul className="flex flex-wrap gap-2">
             {entry.aroma_tags.map((tagId) => {
-              const tagLabel = aromas.get(tagId)
+              const tagLabel = aromas.value.get(tagId)
               if (!tagLabel) return null
               return (
                 <li
@@ -265,7 +280,8 @@ export default async function NotebookEntryPage({ params, searchParams }: Props)
                 reviewId={entry.id}
                 visibility={entry.visibility}
                 shares={shares}
-                results={results}
+                results={results.ok ? results.value : []}
+                resultsUnavailable={!results.ok}
                 query={rawQuery}
               />
             </div>

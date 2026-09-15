@@ -66,6 +66,41 @@ describe('accessory', () => {
   })
 })
 
+describe("accessory and Next's control flow", () => {
+  /* Found in a build log, not by reasoning — see the note in lib/degrade.ts.
+     These exceptions are how Next says « this route is dynamic », « redirect »
+     and « not found ». Catching one does not degrade a page, it breaks the
+     framework: a route whose reads were all wrapped would have been
+     prerendered with « indisponible » baked into it for everyone. */
+  const CONTROL_FLOW = [
+    'DYNAMIC_SERVER_USAGE',
+    'NEXT_REDIRECT;replace;/connexion;307;',
+    'NEXT_NOT_FOUND',
+    'NEXT_HTTP_ERROR_FALLBACK;404',
+    'NEXT_STATIC_GEN_BAILOUT',
+    'BAILOUT_TO_CLIENT_SIDE_RENDERING',
+  ]
+
+  for (const digest of CONTROL_FLOW) {
+    it(`re-throws ${digest.split(';')[0]} instead of degrading`, async () => {
+      const error = Object.assign(new Error('control flow'), { digest })
+      await expect(accessory(Promise.reject(error))).rejects.toBe(error)
+      expect(console.error).not.toHaveBeenCalled()
+    })
+  }
+
+  it('reads `code` as well as `digest` — StaticGenBailoutError carries it there', async () => {
+    const error = Object.assign(new Error('bailout'), { code: 'NEXT_STATIC_GEN_BAILOUT' })
+    await expect(accessory(Promise.reject(error))).rejects.toBe(error)
+  })
+
+  it('still degrades an ordinary error that happens to carry a digest', async () => {
+    const error = Object.assign(new Error('Bad Gateway'), { digest: '2094820398' })
+    const result = await accessory(Promise.reject(error))
+    expect(result.ok).toBe(false)
+  })
+})
+
 describe('orElse', () => {
   it('gives the value when there is one, the stand-in when there is not', async () => {
     expect(orElse(await accessory(Promise.resolve(7)), 0)).toBe(7)

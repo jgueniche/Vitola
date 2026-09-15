@@ -66,6 +66,7 @@
     "account": {
       "label": "Mon compte",
       "profile": "Mon profil public",
+      "unavailable": "Compte indisponible",
       "menuLabel": "Compte et réglages",
       "open": "Ouvrir le menu du compte",
       "close": "Fermer le menu du compte",

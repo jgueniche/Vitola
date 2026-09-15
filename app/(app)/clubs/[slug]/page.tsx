@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -69,10 +71,16 @@ export default async function ClubPage({
   const query = await searchParams
   const done = clubConfirmation(query.fait)
 
-  const [members, events] = await Promise.all([
-    listClubMembers(club.id),
-    listEvents({ viewerId: user.id, clubId: club.id, limit: 50 }),
+  /* The club is the subject and threw above. Its roster and its agenda
+     accompany it — but `isMember` gates the event form, so it falls back
+     CLOSED: an unreadable roster means « not a member », never the reverse
+     (ADR 0020, exception 2). */
+  const [membersRead, eventsRead] = await Promise.all([
+    accessory(listClubMembers(club.id)),
+    accessory(listEvents({ viewerId: user.id, clubId: club.id, limit: 50 })),
   ])
+  const members = membersRead.ok ? membersRead.value : []
+  const events = eventsRead.ok ? eventsRead.value : []
 
   const isOwner = club.owner_id === user.id
   const isMember = members.some((member) => member.id === user.id)
@@ -122,6 +130,7 @@ export default async function ClubPage({
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-display-sm">{copy.membersTitle}</h2>
         <p className="lede">{copy.membersLede}</p>
+        {!membersRead.ok ? <Unavailable /> : null}
         <ul className="flex flex-col gap-2">
           {members.map((member) => (
             <MemberRow

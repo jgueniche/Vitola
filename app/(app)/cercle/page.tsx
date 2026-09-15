@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { accessory, orElse } from '@/lib/degrade'
 import Link from 'next/link'
 
 import { Band } from '@/components/band/band'
@@ -40,14 +41,26 @@ const copy = m.circle
 export default async function CirclePage() {
   const user = await currentUser()
 
-  const [feed, clubs, events, graph] = user
-    ? await Promise.all([
-        readFeedPage('discover', null, 4),
-        listClubs(user.id),
-        listEvents({ viewerId: user.id, from: new Date().toISOString(), limit: 3 }),
-        listFollowGraph(user.id, 'following', 6),
-      ])
-    : [{ items: [], next: null }, [], [], []]
+  /* This page's subject is what it ANNOUNCES — the two plans of ADR 0018,
+     which are copy and read nothing. The four previews below are all
+     accompaniment, so none of them may take the page down (ADR 0020). */
+  const [feedRead, clubsRead, eventsRead, graphRead] = await Promise.all([
+    accessory(
+      user ? readFeedPage('discover', null, 4) : Promise.resolve({ items: [], next: null }),
+    ),
+    accessory(user ? listClubs(user.id) : Promise.resolve([])),
+    accessory(
+      user
+        ? listEvents({ viewerId: user.id, from: new Date().toISOString(), limit: 3 })
+        : Promise.resolve([]),
+    ),
+    accessory(user ? listFollowGraph(user.id, 'following', 6) : Promise.resolve([])),
+  ])
+
+  const feed = orElse(feedRead, { items: [], next: null })
+  const clubs = orElse(clubsRead, [])
+  const events = orElse(eventsRead, [])
+  const graph = orElse(graphRead, [])
 
   return (
     <main id="contenu" className="mx-auto flex max-w-4xl flex-col gap-10 px-4 py-12">

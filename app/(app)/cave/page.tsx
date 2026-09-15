@@ -40,6 +40,11 @@ export default async function HumidorPage() {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.humidor())}`)
   }
 
+  /* Both bare, and `listAllLots()` deliberately so (ADR 0020): this page is
+     « mes caves ET ce qu'elles tiennent ». Degrading the lots would print
+     « 0 cigare » and « 0 € » against every humidor — an inventory the reader
+     would read as true. A list of humidors claiming an empty stock is worse
+     than an error screen, so the stock is part of the subject. */
   const [humidors, lots] = await Promise.all([listHumidors(), listAllLots()])
 
   const totalCigars = lots.reduce((sum, lot) => sum + lot.qty, 0)

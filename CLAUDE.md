@@ -899,3 +899,41 @@ Cinq bagues `md` font 5 × 1 rem de glyphe + 4 × 0,25 rem d'espace = **6 rem ex
 colonne de **4,5 rem** — la largeur que la marge avait quand une note était deux chiffres sur cent,
 avant que la 0028 ne la passe en bagues. Débordement de 24 px, mesuré au navigateur avant et après.
 Toute retouche du glyphe `md` de `RingRating` doit repasser par `entry-row.tsx`.
+
+## Le 15 septembre 2026 — la question tranchée, et deux défauts que la vérification a trouvés
+
+Arbitrage du porteur sur la question ouverte de l'ADR 0020 (« fais selon tes reco ») : **l'écran
+d'erreur reste nu et gagne deux liens écrits en dur**, l'accueil et le journal. Garder l'en-tête du
+site y a été écarté **par une mesure** — il lit la base trois fois par page connectée, donc l'écran
+d'erreur aurait pu échouer pour la raison même qui le fait afficher. Les deux destinations sont
+choisies pareil : l'accueil fait **zéro** aller-retour, le journal **un**. Rien sur cet écran
+n'attend quoi que ce soit, et c'est la propriété à préserver si on le retouche.
+
+**Trois règles de plus, chacune payée par un défaut :**
+
+1. **Une lecture faite sur TOUTES les pages n'est jamais un sujet.** `SiteHeader` appelait
+   `currentUser()` nu ; comme cette fonction jette désormais, une panne de l'API d'auth
+   transformait **tout le groupe `(app)`** — y compris les pages sans session — en écran d'erreur.
+   L'en-tête dégrade donc, mais pas en mensonge : il a **trois** états, et le troisième n'affiche
+   ni le menu du compte ni « Se connecter », il dit qu'il n'a pas pu lire.
+2. **Un `catch` qui ne regarde pas ce qu'il attrape attrape aussi le framework.** `accessory()`
+   avalait `DynamicServerError` — la façon dont Next dit « cette route est dynamique » — et
+   l'aurait fait de `redirect()` et `notFound()`. Trouvé en lisant un **journal de build**, jamais
+   dans le code. Rien n'est passé en statique, et seulement par chance : chaque page avait encore
+   une lecture nue pour relancer le signal. Voir `lib/CLAUDE.md`.
+3. **Une règle de comportement se prouve en la provoquant.** `tooling/audit/fault-inject.mjs` rend
+   un 502 — la réponse exacte de Kong — sur une lecture nommée, et
+   `tooling/audit/degradation.ts` lit ce que la page en fait : `sain` → 200 sans encart,
+   `accessoire` → **200 avec l'encart**, `sujet` → **500 et l'écran d'erreur**, qui porte bien ses
+   deux liens. **13 assertions, 0 échec.** Le témoin `sain` n'est pas décoratif : sans lui, ne rien
+   trouver pourrait être un succès ou une lacune. Le scénario dégradé passe aussi **axe-core**,
+   parce que c'est le seul endroit d'où cet état est visible.
+
+**Et la quatrième leçon de mesure de la semaine** : le premier jet de ce contrôle ne se connectait
+pas, donc il cherchait un encart de facettes sur l'aperçu visiteur de `/cigares`, qui n'en a pas —
+et rendait « non » avec l'assurance d'un verdict. **La présence de la cible se vérifie avant toute
+assertion à son sujet**, et son absence est une lacune, pas un échec.
+
+**Où en est la règle** : **16 pages converties** sur les 53 qui lisent la base, plus l'en-tête qui
+compte pour toutes. Le reste garde ses lectures nues — ce n'est pas une régression, c'était le
+comportement de tout le site avant l'ADR, mais la règle n'est pas encore partout.

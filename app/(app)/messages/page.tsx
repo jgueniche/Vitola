@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Unavailable } from '@/components/layout/unavailable'
+import { accessory } from '@/lib/degrade'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -49,7 +51,14 @@ export default async function MessagesPage({
   const query = await searchParams
   const done = messagingConfirmation(query.fait)
 
-  const [inbox, reachable] = await Promise.all([readInbox(), listReachablePeople(user.id)])
+  /* The inbox is the subject. « À qui puis-je écrire » fills the composer's
+     dropdown: an empty list there means « personne », which for a failed read
+     is a false statement about the reader's own graph (ADR 0020). */
+  const [inbox, reachableRead] = await Promise.all([
+    readInbox(),
+    accessory(listReachablePeople(user.id)),
+  ])
+  const reachable = reachableRead.ok ? reachableRead.value : []
 
   return (
     <main id="contenu" className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12">
@@ -70,7 +79,9 @@ export default async function MessagesPage({
         </p>
       ) : null}
 
-      {reachable.length === 0 ? (
+      {!reachableRead.ok ? (
+        <Unavailable />
+      ) : reachable.length === 0 ? (
         <EmptyState
           title={copy.noReachableTitle}
           description={copy.noReachableBody}
