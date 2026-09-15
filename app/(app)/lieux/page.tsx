@@ -194,6 +194,10 @@ export default async function VenuesPage({
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <Link
                   href={routes.venue(venue.slug)}
+                  /* A list of a hundred rows is a hundred links: fifty-eight
+                     prefetches after one scroll, measured on 15 septembre
+                     2026, for one click at most (ADR 0021). */
+                  prefetch={false}
                   className="text-ink hover:text-accent text-base font-medium transition-colors duration-(--duration-quick)"
                 >
                   {venue.name}

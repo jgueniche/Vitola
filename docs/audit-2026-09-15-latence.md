@@ -183,7 +183,45 @@ lancées ensemble ; `prefetch={false}` sur les bagues, les facettes et les produ
 d'en-tête des chargements complets. C'est l'option B de l'ADR, une fonction SQL par écran, et
 elle ne vaut le coût que sur le palier où chaque traversée d'API ne coûte plus 75 ms.
 
-## Partie V — ce qui n'est pas du code
+## Partie V — le correctif mesuré sur Vercel, avant fusion
+
+Le déploiement de prévisualisation de la branche (`cdg1`, derrière l'authentification Vercel,
+ouvert par le lien de partage que `PARCOURS_ACCESS_URL` visite une fois), même script, même
+compte, même conteneur. Deux passes — la première sur un déploiement qui venait de naître, la
+seconde une fois ses instances chaudes ; c'est la seconde qui compte.
+
+| clic                   | URL change (avant → après) | contenu (avant → après) | TTFB du RSC |
+| ---------------------- | -------------------------- | ----------------------- | ----------- |
+| cigares → boutique     | 1 045 → **44 ms**          | 1 092 → 744             | 507 ms      |
+| boutique → carnet      | 1 000 → **63 ms**          | 1 010 → 674             | 492 ms      |
+| carnet → cave          | 834 → **51 ms**            | 854 → 729               | 444 ms      |
+| cave → cigares         | 950 → **40 ms**            | 969 → 740               | 534 ms      |
+| cigares → lieux        | 1 376 → **60 ms**          | 1 398 → 974             | 539 ms      |
+| lieux → boutique       | 735 → **44 ms**            | 753 → 758               | 334 ms      |
+| boutique → suggestions | 543 → **41 ms**            | 550 → 1 037             | 891 ms      |
+| suggestions → cigares  | 796 → **44 ms**            | 814 → 940               | 770 ms      |
+| cigares → boutique     | 609 → **44 ms**            | 621 → 726               | 517 ms      |
+| boutique → carnet      | 1 349 → **73 ms**          | 1 359 → 839             | 658 ms      |
+
+**Ce que cela dit, et ce que cela ne dit pas.**
+
+- **Le silence a disparu** : 40 à 73 ms entre le clic et le changement d'écran, quelle que soit
+  la page — c'est la frontière de chargement, et elle ne dépend d'aucun fournisseur.
+- **Le contenu arrive en 0,55 à 1,0 s d'ici** — 0,4 à 0,8 s depuis Paris —, contre 0,55 à 1,4 s
+  avant. Ce temps est désormais **tout entier le serveur** : le passage par le middleware, la
+  fonction, et une à trois traversées de l'API Supabase à 75–120 ms chacune au p50, avec la
+  variance d'un palier partagé (le même `/suggestions` répond en 348 ms un jour et 891 ms le
+  suivant, pour une seule lecture). Le squelette couvre ce temps ; il ne le raccourcit pas.
+- **Les journaux Supabase tranchent la question de l'auth.** Pendant la mesure d'avant sur la
+  production : **376 appels `/auth/v1/user`** en cinq minutes depuis « Vercel Edge Functions »,
+  plus 16 depuis les pages. Pendant les deux passes d'après sur la prévisualisation : **aucun** —
+  cinq lectures de `/.well-known/jwks.json` en tout, une par instance née, gardée dix minutes.
+- **Le préchargement au chargement de `/cigares` : 40–48 → 27–36, et 64 → 37 après défilement.**
+  Ce qui reste précharge la navigation, les sections et les liens que la page a en propre.
+  `/lieux` en garde 57 : ses lignes sont des liens, et elles suivent la même règle dans le
+  commit qui suit cette mesure.
+
+## Partie VI — ce qui n'est pas du code
 
 Deux leviers, tous deux à la main du porteur, et aucun ne remplace ce qui précède :
 

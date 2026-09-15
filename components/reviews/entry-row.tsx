@@ -76,6 +76,9 @@ export function EntryRow({
           entry.cigar ? (
             <Link
               href={routes.cigar(entry.cigar.slug)}
+              /* Rows, not a menu: a month of entries is thirty links, and the
+                 notebook fired thirty-four prefetches on load (ADR 0021). */
+              prefetch={false}
               className="text-ink hover:text-accent-bright text-base leading-tight font-medium"
             >
               {entry.cigar.brand ? (
@@ -111,6 +114,7 @@ export function EntryRow({
           {isMine ? (
             <Link
               href={routes.notebookEntry(entry.id)}
+              prefetch={false}
               className="text-ink-muted hover:text-ink underline underline-offset-4"
             >
               {m.notebook.openEntry}
