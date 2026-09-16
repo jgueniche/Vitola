@@ -566,6 +566,17 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   et un diagnostic entier (« le job est bloqué ») a été construit là-dessus. Deux endpoints, deux
   fraîcheurs. Quand une mesure surprend, la vérifier à une **seconde** source avant d'en tirer une
   histoire ; c'est la cinquième fois de la semaine que la mesure, et non le code, était en cause.
+- **Un contrôle qui ne lit que les `create table` croit qu'un schéma ne fait que grandir.**
+  `tests/compliance/gdpr-inventory.test.ts` relisait les migrations pour exiger que chaque colonne
+  pointant `auth.users` soit déclarée dans l'inventaire RGPD — et jamais l'inverse. Quand la 0034 a
+  supprimé `shop.vendors.owner_id`, l'entrée est restée, PostgREST a refusé l'export entier, et
+  **tout membre demandant ses données a reçu 500 du 12 au 16 septembre 2026** — d'abord derrière
+  la clé secrète absente chez Vercel, puis seul, une fois la clé posée. Le type qui valide
+  l'inventaire à la compilation n'a rien vu non plus : `database.types.ts` portait encore la
+  colonne, et le contrôle de dérive des types ne compte que les tables, pas les colonnes. Le test
+  lit désormais les `drop column` et les `drop table`, et affirme les deux sens. Même famille que
+  « un droit légal ne se vérifie qu'en l'exerçant » : l'export a été rejoué avec un compte réel le
+  jour où la clé est arrivée, et c'est ce rejeu qui a trouvé le second défaut.
 
 ## Style
 
@@ -1024,8 +1035,9 @@ contenu 150 à 650 ms plus tôt, zéro `/auth/v1/user` dans les journaux Supabas
 porte de l'API pour une lecture de 0,04 ms en base ; Alpha Report est un cran au-dessus, et
 c'est le seul écart mesuré entre les deux projets) et le plan Vercel (Hobby, 0,6 vCPU par
 fonction). Aucun des deux ne rend un clic silencieux ; les deux allongent ce que le squelette
-couvre. Et `SUPABASE_SECRET_KEY` n'est pas posée chez Vercel : les journaux d'erreurs le disent
-quatre fois, et seul le `pg_cron` tient `cigar_stats` à jour.
+couvre. `SUPABASE_SECRET_KEY` manquait chez Vercel — les journaux d'erreurs le disaient quatre
+fois, et seul le `pg_cron` tenait `cigar_stats` à jour — ; posée par le porteur le 16 septembre,
+et l'export RGPD rejoué le même matin a trouvé le défaut suivant (voir « Pièges connus »).
 
 **Abracom a le même profil** — même architecture, pas un fournisseur commun en panne — et la
 même liste s'applique : une frontière de chargement par groupe, `getClaims()` dans le middleware,

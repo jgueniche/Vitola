@@ -379,17 +379,16 @@ export type AdminVendorRow = {
   registration: string | null
   address: string | null
   status: string
-  owner_id: string | null
   created_at: string
-  ownerHandle: string | null
   productCount: number
 }
 
 /**
- * Every vendor, for /admin/boutique/vendeurs — `vendors_select_admin` is why
- * pending and suspended rows come back. The owner handle is hydrated in a
- * second query (owner_id points at auth.users, not profiles, so no embed),
- * under `profiles_select_directory` — the notebook pattern, never an N+1.
+ * Every partner, for /admin/boutique/partenaires — `vendors_select_admin` is
+ * why pending and suspended rows come back. No owner any more: migration 0034
+ * (ADR 0017) dropped `owner_id` with the vendor space, and the handle this
+ * used to hydrate from it had been `null` on every row since — a second read
+ * for a column that no longer existed.
  */
 export async function listVendors(): Promise<AdminVendorRow[]> {
   const db = await createSupabaseServerClient()
@@ -401,19 +400,11 @@ export async function listVendors(): Promise<AdminVendorRow[]> {
   if (error) throw new Error(`Could not read the vendors: ${error.message}`)
 
   const rows = (data ?? []) as unknown as Array<
-    Omit<AdminVendorRow, 'ownerHandle' | 'productCount'> & { products: Array<{ count: number }> }
+    Omit<AdminVendorRow, 'productCount'> & { products: Array<{ count: number }> }
   >
-
-  const ownerIds = rows.map((row) => row.owner_id).filter((id): id is string => id !== null)
-  const handles = new Map<string, string>()
-  if (ownerIds.length > 0) {
-    const { data: profiles } = await db.from('profiles').select('id, handle').in('id', ownerIds)
-    for (const profile of profiles ?? []) handles.set(profile.id, profile.handle)
-  }
 
   return rows.map(({ products, ...row }) => ({
     ...row,
-    ownerHandle: row.owner_id ? (handles.get(row.owner_id) ?? null) : null,
     productCount: products[0]?.count ?? 0,
   }))
 }
