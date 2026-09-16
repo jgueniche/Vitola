@@ -566,6 +566,14 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   et un diagnostic entier (« le job est bloqué ») a été construit là-dessus. Deux endpoints, deux
   fraîcheurs. Quand une mesure surprend, la vérifier à une **seconde** source avant d'en tirer une
   histoire ; c'est la cinquième fois de la semaine que la mesure, et non le code, était en cause.
+- **Un recadrage `slice` fait de la hauteur une fenêtre, pas une allure.** La planche est en
+  `xMinYMid slice` : la partie visible du dessin part de x = 0 et se ferme à
+  `520 × largeur / hauteur`. Personne ne lit une hauteur de boîte comme cela — on l'ajuste à l'œil.
+  Élargir la bague a poussé son bord droit à l'unité 1014 ; la fenêtre se fermait à 1013 sur un
+  téléphone de 390 px, et le signe que la bague venait de gagner était tranché. Le commentaire porte
+  désormais l'arithmétique **et les deux sens dans lesquels elle casse** : monter la hauteur recoupe
+  le signe, la baisser amincit le cigare. Vaut pour tout `preserveAspectRatio` en `slice`.
+
 - **Un contrôle qui ne lit que les `create table` croit qu'un schéma ne fait que grandir.**
   `tests/compliance/gdpr-inventory.test.ts` relisait les migrations pour exiger que chaque colonne
   pointant `auth.users` soit déclarée dans l'inventaire RGPD — et jamais l'inverse. Quand la 0034 a
@@ -1042,3 +1050,41 @@ et l'export RGPD rejoué le même matin a trouvé le défaut suivant (voir « Pi
 **Abracom a le même profil** — même architecture, pas un fournisseur commun en panne — et la
 même liste s'applique : une frontière de chargement par groupe, `getClaims()` dans le middleware,
 les lectures indépendantes lancées ensemble, le préchargement retiré des grilles.
+
+## Le cepo — le signe de la marque, 16 septembre 2026
+
+Six pistes de logo proposées le 14 septembre, **le cepo** retenu par le porteur : un anneau de
+laiton, l'initiale en didone. Le nom de la marque existait depuis P0 et n'avait pas de signe —
+`app/icon.tsx` dessinait la première lettre de `BRAND.name` sur un carré.
+
+**Ce qui est à l'écran** : l'icône (favicon, tuile, manifest), la carte de partage, les deux
+en-têtes, le portail 18+, le pied de page, et la bague de la planche d'accueil, qui l'estampe.
+`lib/mark.ts`, `components/brand/cepo.tsx`, `tests/unit/mark.test.ts`.
+
+**Quatre règles qui ne se contournent pas :**
+
+1. **Le signe est une géométrie, pas un glyphe, et il ne se redessine pas ailleurs.**
+   `lib/mark.ts` porte les tracés ; `<Cepo />`, `app/icon.tsx`, `app/opengraph-image.tsx` et la
+   bague de la planche les lisent. Deux de ces rendus sont des images `next/og` : pas de fonte, pas
+   de variable CSS. Un tracé est la seule forme que tous partagent, et la seule qui ne peut pas
+   manquer à l'arrivée — **un logo qui attend une fonte est un logo parfois absent**, et la première
+   surface où cela se voit est le favicon.
+2. **Le prix de la règle 1 est que le renommage ne suit plus.** Le tracé est un V dessiné, la Q7 est
+   ouverte, et `tests/unit/mark.test.ts` affirme que `BRAND.name` commence toujours par un V. Si ce
+   test casse, **on redessine — on ne l'assouplit pas.**
+3. **1,5 px est le nombre de la bande de l'interface, jamais une promesse sur toute la plage.**
+   Trois coupes : constante de 28 à 96 px, 1,33 % du diamètre au-dessus (un filet fixe sur un
+   anneau de 400 px est un fil), 6 % en dessous (1,33 % de 16 px est un cinquième de pixel). Une
+   image `next/og` demande sa coupe **par son nom** : elle est produite une fois et réduite par ce
+   qui l'affiche, donc sa taille de rendu n'est pas celle où on la lit.
+4. **Le signe prend les tokens de la surface qui le porte.** En en-tête, ceux du bandeau
+   (`stroke-header-accent`), parce que le bandeau est brun foncé dans les deux thèmes et que
+   l'accent de la page y mourrait. Sur la bague de la planche, l'encre et non le laiton : du laiton
+   sur du laiton ne fait rien. Jamais un pigment brut — `check-tokens` le refuse, et pour la bonne
+   raison.
+
+**Mesuré, pas supposé** : l'icône rendue à travers Satori puis réduite dans Chromium à 16, 20, 24,
+32, 48 et 64 px ; la planche relue à 360, 390, 430 et 767 px avec la position réelle de la bague
+lue dans le DOM ; les quatre utilitaires Tailwind du signe vérifiés dans la feuille compilée —
+sans eux l'anneau serait parchemin au lieu de laiton, **sans erreur**. Les quatre décisions prises
+en dessinant sont dans `docs/decisions-log.md`.
