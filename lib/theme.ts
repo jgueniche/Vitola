@@ -7,10 +7,13 @@
  * app/globals.css". tooling/scripts/check-tokens.ts allowlists this file and
  * nothing else — keep it to these constants.
  *
- * They must stay in sync with --color-oscuro and --color-tabac-pale.
+ * They must stay in sync with --color-oscuro, --color-tabac-pale and
+ * --color-claro.
  */
 export const THEME_COLOR_DARK = '#161210'
 export const THEME_COLOR_LIGHT = '#f4ece0'
+/** The ring of the mark. Must stay in sync with --color-claro. */
+export const THEME_BRASS = '#c9a227'
 
 export const THEMES = ['dark', 'light'] as const
 export type Theme = (typeof THEMES)[number]

@@ -2,6 +2,7 @@ import { Search } from 'lucide-react'
 import Link from 'next/link'
 
 import { signOut } from '@/app/(public)/connexion/actions'
+import { Cepo } from '@/components/brand/cepo'
 import { AccountMenu, type AccountLink } from '@/components/layout/account-menu'
 import { SiteMenu, type MenuLink } from '@/components/layout/site-menu'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
@@ -9,6 +10,7 @@ import { BRAND } from '@/lib/brand'
 import { accessory, orElse } from '@/lib/degrade'
 import { initials } from '@/lib/format'
 import { m } from '@/lib/i18n'
+import { lockupRingSize, WORDMARK_FONT_SIZE } from '@/lib/mark'
 import { routes } from '@/lib/routes'
 import { FACET_PARAMS } from '@/lib/search/facets'
 import { getHeaderIdentity } from '@/lib/settings/queries'
@@ -148,8 +150,17 @@ export async function SiteHeader() {
   return (
     <header className="bg-header border-header-rule text-header-ink border-b">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 px-4 py-3.5">
-        <Link href={routes.home()} className="wordmark text-header-ink mr-auto">
-          {BRAND.name}
+        <Link
+          href={routes.home()}
+          className="text-header-ink mr-auto flex items-center gap-3"
+        >
+          {/* Same lockup as the public header, same ratio — see lib/mark.ts. */}
+          <Cepo
+            size={lockupRingSize(WORDMARK_FONT_SIZE)}
+            ring="stroke-header-accent"
+            initial="fill-header-ink"
+          />
+          <span className="wordmark">{BRAND.name}</span>
         </Link>
 
         <nav aria-label={m.nav.mainLabel} className="hidden lg:block">

@@ -1,9 +1,11 @@
 import Link from 'next/link'
 
+import { Cepo } from '@/components/brand/cepo'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 
 import { BRAND } from '@/lib/brand'
 import { m } from '@/lib/i18n'
+import { lockupRingSize, WORDMARK_FONT_SIZE } from '@/lib/mark'
 import { routes } from '@/lib/routes'
 
 /**
@@ -43,14 +45,35 @@ export function PublicHeader({
   atHome?: boolean
   inJournal?: boolean
 }) {
+  /*
+   * The mark and the word, at the one ratio the lockup has: D = 1.75 x the
+   * wordmark's font size, gap 0.29 D — 42 px and 12 px here. `gap-3` is that
+   * 12 px; the ring is derived rather than typed, so a change to `.wordmark`
+   * moves both together.
+   *
+   * The band is dark brown in BOTH themes, which is why the mark takes the
+   * header tokens and not the page's: on a pale page, `--vt-accent` is a dark
+   * brass that would die on this ground.
+   */
+  const lockup = (
+    <>
+      <Cepo
+        size={lockupRingSize(WORDMARK_FONT_SIZE)}
+        ring="stroke-header-accent"
+        initial="fill-header-ink"
+      />
+      <span className="wordmark">{BRAND.name}</span>
+    </>
+  )
+
   return (
     <header className="bg-header border-header-rule text-header-ink border-b">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4">
         {atHome ? (
-          <span className="wordmark text-header-ink">{BRAND.name}</span>
+          <span className="text-header-ink flex items-center gap-3">{lockup}</span>
         ) : (
-          <Link href={routes.home()} className="wordmark text-header-ink">
-            {BRAND.name}
+          <Link href={routes.home()} className="text-header-ink flex items-center gap-3">
+            {lockup}
           </Link>
         )}
 
