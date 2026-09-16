@@ -420,7 +420,13 @@ export const PERSONAL_DATA_SOURCES = [
     column: 'member_b',
     erasure: 'erased',
   },
-  { key: 'messagesSent', schema: 'public', table: 'messages', column: 'sender_id', erasure: 'erased' },
+  {
+    key: 'messagesSent',
+    schema: 'public',
+    table: 'messages',
+    column: 'sender_id',
+    erasure: 'erased',
+  },
 
   /* The venue directory (migration 0016, ADR 0011). A proposal and a claim are
      both links to a person: the proposal survives anonymised — a venue entry
@@ -495,18 +501,15 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'anonymised',
   },
 
-  /* The marketplace (migration 0022, ADR 0016). A shopfront survives its
-     manager anonymised: the catalogue and the vendor identity are the shop's,
-     not the account's — the admin re-attaches or suspends an orphaned vendor.
-     The traceability columns (legal name, registration…) describe the
-     business, not the member, and carry no link to auth.users. */
-  {
-    key: 'vendorsManaged',
-    schema: 'shop',
-    table: 'vendors',
-    column: 'owner_id',
-    erasure: 'anonymised',
-  },
+  /* No `shop.vendors` entry, and this line says why so nobody puts it back.
+     The marketplace (0022, ADR 0016) linked a vendor to its manager through
+     `owner_id`; migration 0034 (ADR 0017, « personne ne vend ici que nous »)
+     dropped the column with the vendor space. The entry outlived it by four
+     days, and an export that asks PostgREST for a column that does not exist
+     is refused whole: every subject access request answered 500 from 12 to
+     16 septembre 2026, first behind a missing secret key, then on its own.
+     A partner's remaining columns (legal name, registration, address) describe
+     a business, not a member, and carry no link to auth.users. */
 
   /* Moderation. Read through migration 0006's function — see RpcSource above.
      The keys are the ones that function answers under, and they are the same

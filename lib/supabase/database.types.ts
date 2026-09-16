@@ -2252,7 +2252,6 @@ export type Database = {
           legal_name: string | null
           logo_path: string | null
           name: string
-          owner_id: string | null
           registration: string | null
           slug: string
           status: Database["shop"]["Enums"]["vendor_status"]
@@ -2268,7 +2267,6 @@ export type Database = {
           legal_name?: string | null
           logo_path?: string | null
           name: string
-          owner_id?: string | null
           registration?: string | null
           slug: string
           status?: Database["shop"]["Enums"]["vendor_status"]
@@ -2284,7 +2282,6 @@ export type Database = {
           legal_name?: string | null
           logo_path?: string | null
           name?: string
-          owner_id?: string | null
           registration?: string | null
           slug?: string
           status?: Database["shop"]["Enums"]["vendor_status"]

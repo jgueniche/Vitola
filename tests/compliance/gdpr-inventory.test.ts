@@ -32,13 +32,30 @@ const SCHEMA_FILES = [
 
 type Link = { source: string; erasure: 'erased' | 'anonymised' }
 
+/** What the migrations build, read in order: every column, and every drop. */
+type Schema = { links: Link[]; columns: Set<string>; tables: Set<string> }
+
 const TABLE_START = /^create table (?:if not exists )?(\w+)\.(\w+)\s*\(/
 const TABLE_END = /^\)\s*;/
+const COLUMN =
+  /^\s+(\w+)\s+(?:uuid|text|integer|smallint|bigint|numeric|boolean|timestamptz|date|jsonb|citext|(?:\w+\.)?\w+)\b/
 const USER_LINK = /^\s+(\w+)\s+uuid\b.*references auth\.users/
 const ON_DELETE = /on delete (cascade|set null)/
+/*
+ * A column that leaves. `alter table shop.vendors drop column if exists owner_id`
+ * (migration 0034) is what this parser did not see for four days: the export
+ * kept asking for a column the schema no longer had, and answered 500 to every
+ * member from 12 to 16 septembre 2026 — first hidden behind a missing secret
+ * key, then alone. A parser that reads only `create table` believes a schema
+ * only ever grows.
+ */
+const DROP_COLUMN = /^alter table (\w+)\.(\w+) drop column (?:if exists )?(\w+)/
+const DROP_TABLE = /^drop table (?:if exists )?(\w+)\.(\w+)/
 
-function userLinks(): Link[] {
+function readSchema(): Schema {
   const links: Link[] = []
+  const columns = new Set<string>()
+  const tables = new Set<string>()
 
   for (const file of SCHEMA_FILES) {
     let table: string | null = null
@@ -47,30 +64,56 @@ function userLinks(): Link[] {
       const start = TABLE_START.exec(line)
       if (start) {
         table = `${start[1]}.${start[2]}`
+        tables.add(table)
         continue
       }
       if (table && TABLE_END.test(line)) {
         table = null
         continue
       }
+
+      const dropped = DROP_COLUMN.exec(line)
+      if (dropped) {
+        const source = `${dropped[1]}.${dropped[2]}.${dropped[3]}`
+        columns.delete(source)
+        const index = links.findIndex((link) => link.source === source)
+        if (index !== -1) links.splice(index, 1)
+        continue
+      }
+      const droppedTable = DROP_TABLE.exec(line)
+      if (droppedTable) {
+        const name = `${droppedTable[1]}.${droppedTable[2]}`
+        tables.delete(name)
+        for (const column of [...columns]) if (column.startsWith(`${name}.`)) columns.delete(column)
+        for (let i = links.length - 1; i >= 0; i -= 1) {
+          if (links[i]?.source.startsWith(`${name}.`)) links.splice(i, 1)
+        }
+        continue
+      }
+
       if (!table) continue
 
-      const column = USER_LINK.exec(line)
-      if (!column) continue
+      const column = COLUMN.exec(line)
+      if (column && !/^(constraint|primary|unique|check|foreign)$/.test(column[1] ?? '')) {
+        columns.add(`${table}.${column[1]}`)
+      }
+
+      const link = USER_LINK.exec(line)
+      if (!link) continue
 
       const onDelete = ON_DELETE.exec(line)?.[1]
       links.push({
-        source: `${table}.${column[1]}`,
+        source: `${table}.${link[1]}`,
         erasure: onDelete === 'cascade' ? 'erased' : 'anonymised',
       })
     }
   }
 
-  return links
+  return { links, columns, tables }
 }
 
 describe('GDPR personal-data inventory', () => {
-  const links = userLinks()
+  const { links, columns, tables } = readSchema()
 
   /*
    * Guards the guard. An assertion whose test data does not exist passes
@@ -113,6 +156,34 @@ describe('GDPR personal-data inventory', () => {
   it('declares the tables that reach auth.users indirectly', () => {
     const declared = PERSONAL_DATA_SOURCES.map((s) => `${s.schema}.${s.table}.${s.column}`)
     expect(declared).toContain('public.profile_settings.id')
+  })
+
+  /*
+   * The other direction, and the one that was missing. The three assertions
+   * above ask « does the inventory declare everything the schema links? » —
+   * none asked « does everything the inventory declares still exist? ». So
+   * when migration 0034 dropped `shop.vendors.owner_id` (ADR 0017), the entry
+   * stayed, PostgREST refused the whole export, and every member's subject
+   * access request answered 500 for four days. The generated types could not
+   * catch it either: they still carried the column, so the mapped type that
+   * validates each entry at build time validated a ghost.
+   */
+  it('declares only columns the schema still has', () => {
+    expect(columns.size).toBeGreaterThan(100)
+
+    const stale = PERSONAL_DATA_SOURCES.filter((s) => !s.column.includes('.'))
+      .map((s) => `${s.schema}.${s.table}.${s.column}`)
+      .filter((source) => !columns.has(source))
+
+    expect(stale).toEqual([])
+  })
+
+  it('reaches embedded sources through tables the schema still has', () => {
+    const missing = PERSONAL_DATA_SOURCES.filter((s) => s.column.includes('.'))
+      .map((s) => `${s.schema}.${s.table}`)
+      .filter((table) => !tables.has(table))
+
+    expect(missing).toEqual([])
   })
 
   it('gives every source a unique key', () => {
