@@ -13,13 +13,23 @@
 }
 
 /* A phone gets the plate CROPPED rather than shrunk — a 30px-thick cigar
-   reads as a twig. `slice` scales the drawing to cover the box and centres
-   it: the ember and the band stay in frame, the head goes out of it. From
-   768px the box takes the drawing's own proportions, and `slice` is then a
-   plain fit. */
+   reads as a twig. `slice` scales the drawing to cover the box; the SVG is
+   anchored `xMinYMid`, so the window starts at drawing x = 0 and ends at
+   520 x width / height. The ember and the band stay in frame, the head goes
+   out of it. From 768px the box takes the drawing's own proportions, and
+   `slice` is then a plain fit.
+
+   THE HEIGHT IS THAT WINDOW, not a look. At 200px it ended at 936 units on a
+   360px phone and 1014 on a 390px one — and the band, which has carried the
+   mark since 16 septembre, ends at 1014. It was cut on every phone narrower
+   than 430px, and flush against the frame on the rest, which reads as a
+   mistake whether or not anything is missing. 168px puts the band's right
+   edge at 91% of the window at 360px, the width this site is responsive
+   down to, and still draws the cigar 37px thick. Raising this number crops
+   the mark again; lowering it thins the cigar toward the twig. */
 .cigar-plate__box {
   position: relative;
-  height: 200px;
+  height: 168px;
   overflow: hidden;
 }
 
@@ -45,15 +55,15 @@
 /* The ink stamped on the band. */
 .cigar-plate .plate-band-mark {
   font-family: var(--font-eyebrow);
-  font-size: 16px;
+  font-size: 13px;
   letter-spacing: 0.26em;
   fill: var(--plate-band-ink);
 }
 
 .cigar-plate .plate-band-sub {
   font-family: var(--font-eyebrow);
-  font-size: 7.5px;
-  letter-spacing: 0.24em;
+  font-size: 6.4px;
+  letter-spacing: 0.2em;
   fill: var(--plate-band-ink);
   opacity: 0.85;
 }

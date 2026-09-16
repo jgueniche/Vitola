@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Band } from '@/components/band/band'
+import { Cepo } from '@/components/brand/cepo'
 import { m } from '@/lib/i18n'
 
 import { AgeGateForm } from './age-gate-form'
@@ -20,6 +21,10 @@ export default async function AgeGatePage({
   return (
     <main id="contenu" className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-20">
       <div className="flex flex-col gap-4">
+        {/* The one page with no header, deliberately: a door does not offer a
+            way round itself. The mark is not a way round — it says whose door
+            this is, and it is the last thing a visitor sees before the gate. */}
+        <Cepo size={48} />
         <p className="eyebrow">{m.ageGate.eyebrow}</p>
         <h1 className="font-display text-display-md">{m.ageGate.title}</h1>
         <p className="text-ink-muted measure leading-relaxed">{m.ageGate.lede}</p>

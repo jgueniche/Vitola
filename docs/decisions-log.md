@@ -2,6 +2,42 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Le cepo — quatre décisions prises en le dessinant
+
+Session du 16 septembre 2026. Le porteur a choisi « le cepo » parmi six pistes de logo, puis a
+demandé de le pousser dans l'app et de l'intégrer à la bague de la planche d'accueil. Rien ici ne
+méritait une ADR : aucune n'engage le schéma, et chacune est gardée par un test ou par un
+commentaire à l'endroit où elle se défera.
+
+**Le signe est une géométrie, pas un glyphe — et le renommage ne le suit plus.** `app/icon.tsx`
+dessinait `BRAND.name.charAt(0)`, donc l'initiale suivait la Q7 toute seule. Trois rendus dessinent
+désormais le signe, et deux sont des images `next/og` : pas de fonte, pas de variable CSS. Un tracé
+est la seule forme que les trois partagent, et la seule qui ne peut pas manquer à l'arrivée — un
+logo qui attend une fonte est un logo parfois absent, et la première surface où cela se voit est le
+favicon. Le prix est réel : `lib/mark.ts` porte un V dessiné, donc renommer la marque casse le
+signe. `tests/unit/mark.test.ts` affirme que `BRAND.name` commence toujours par un V, ce qui rend
+la casse bruyante au lieu de silencieuse. **Ne pas assouplir ce test : redessiner.**
+
+**Le filet ne vaut 1,5 px que dans la bande de l'interface, et la première version prétendait le
+contraire.** Trois coupes : 28 à 96 px, un filet **constant** de 1,5 px — celui du site, celui que
+`<Band />` trace ; au-dessus, 1,33 % du diamètre, parce qu'un filet fixe sur un anneau de 400 px
+est un fil ; en dessous, 6 %, parce que 1,33 % de 16 px est un cinquième de pixel. Le commentaire
+d'origine promettait 1,5 px partout et avait l'affiche et le favicon à l'envers ; l'arithmétique
+vit maintenant dans le test plutôt que dans la prose.
+
+**Sur la bague de la planche, le signe prend l'encre et non le laiton.** Du laiton sur du laiton ne
+fait rien : la bague porte la variante « une seule encre » en `--plate-band-ink`, comme le nom sous
+elle — ce que fait une vraie bague sur sa feuille d'or. Et elle prend la **coupe tuile** malgré ses
+34 unités de dessin, parce que la planche est un seul SVG mis à l'échelle du viewport : sur un
+téléphone sa boîte fait un tiers de la largeur du bureau.
+
+**La hauteur de la boîte de la planche est une fenêtre, pas une allure.** En `xMinYMid slice`, la
+fenêtre part de x = 0 et se ferme à `520 × largeur / hauteur`. À 200 px elle se fermait à 1013
+unités sur un téléphone de 390 px, et la bague élargie finissait à 1014 : le signe était tranché.
+168 px la ferme à 1114 sur un 360 px. Le prochain qui touchera ce nombre croira ajuster une
+allure — le monter recoupe le signe, le baisser amincit le cigare vers la brindille.
+
+
 ## La première QA humaine — six décisions qu'il faut pouvoir retrouver
 
 Session du 12 septembre 2026, première phase de QA humaine. Les gros morceaux sont ailleurs :

@@ -1,7 +1,15 @@
 import { ImageResponse } from 'next/og'
 
 import { BRAND } from '@/lib/brand'
-import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from '@/lib/theme'
+import {
+  INITIAL_PATH,
+  LOCKUP_GAP_RATIO,
+  lockupRingSize,
+  MARK_VIEWBOX,
+  RING_RADIUS,
+  ringStrokeWidth,
+} from '@/lib/mark'
+import { THEME_BRASS, THEME_COLOR_DARK, THEME_COLOR_LIGHT } from '@/lib/theme'
 
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
@@ -31,8 +39,12 @@ export const alt = BRAND.tagline
  * No custom font is loaded. `next/og` would need the file fetched at render
  * time, and a display face is not worth an extra fetch on a card that carries
  * eleven words — nor worth the failure mode where the fetch is what breaks the
- * image.
+ * image. The mark beside the name is a path for that same reason: it is the
+ * one part of the card that must look like itself, and a path cannot fail to
+ * load. See lib/mark.ts.
  */
+const NAME_SIZE = 132
+const RING_SIZE = lockupRingSize(NAME_SIZE)
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -48,18 +60,42 @@ export default function OpengraphImage() {
           padding: 80,
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <div
-            style={{
-              fontSize: 28,
-              letterSpacing: 8,
-              textTransform: 'uppercase',
-              opacity: 0.6,
-            }}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: Math.round(RING_SIZE * LOCKUP_GAP_RATIO),
+          }}
+        >
+          <svg
+            width={RING_SIZE}
+            height={RING_SIZE}
+            viewBox={`0 0 ${MARK_VIEWBOX} ${MARK_VIEWBOX}`}
+            fill="none"
           >
-            {BRAND.tagline}
+            <circle
+              cx={MARK_VIEWBOX / 2}
+              cy={MARK_VIEWBOX / 2}
+              r={RING_RADIUS}
+              stroke={THEME_BRASS}
+              strokeWidth={ringStrokeWidth(RING_SIZE)}
+            />
+            <path d={INITIAL_PATH} fill={THEME_COLOR_LIGHT} />
+          </svg>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div
+              style={{
+                fontSize: 28,
+                letterSpacing: 8,
+                textTransform: 'uppercase',
+                opacity: 0.6,
+              }}
+            >
+              {BRAND.tagline}
+            </div>
+            <div style={{ fontSize: NAME_SIZE, lineHeight: 1 }}>{BRAND.name}</div>
           </div>
-          <div style={{ fontSize: 132, lineHeight: 1 }}>{BRAND.name}</div>
         </div>
 
         {/* The disclaimer travels with the card, because the card travels
