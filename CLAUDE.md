@@ -67,6 +67,15 @@ route d'atterrissage reste, pour les liens encore dans des boîtes et ceux qu'un
 Deux choses sont acceptées en connaissance de cause : une adresse n'est pas vérifiée, et « cette
 adresse a déjà un compte » dit à un inconnu qu'elle en a un.
 
+**Depuis le 16 septembre, ce sont deux écrans et non un formulaire à deux boutons** (QA du
+porteur : « quand je clique sur créer un compte je reste avec le bouton se connecter, ce qui n'a
+pas de sens »). Le mode vit dans l'URL — `/connexion?mode=inscription` — et le titre, le lede, le
+seul bouton, l'onglet et l'`autocomplete` du mot de passe le suivent ; la traversée est un
+**lien**, et elle emporte `suite`. L'action et ses deux intentions n'ont pas bougé. La règle qui
+généralise : **un contrôle qui a l'air d'un changement de mode ne doit pas être un submit** — le
+premier dessin renvoyait la même page, parfois avec une erreur, parfois avec rien du tout quand
+l'adresse était vide.
+
 **Ce qui rouvre.** La parole du porteur : « quand on sera en phase de pré-commercialisation, on
 reprendra cette partie sign-in et sign-up pour le faire beaucoup plus propre ». Le jour venu : un
 SMTP à nous (Q7, le domaine), la confirmation d'adresse remise, un message unique pour « existe

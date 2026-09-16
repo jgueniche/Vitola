@@ -9,20 +9,48 @@ import { expect, test } from '@playwright/test'
  * treats a failure as "nobody", which is exactly what CI produces.
  */
 
-test('sign-in offers a password sign-in and a sign-up, without clearing the gate', async ({
-  page,
-}) => {
+test('sign-in asks for two fields and offers a way to the sign-up screen', async ({ page }) => {
   await page.goto('/connexion')
   await expect(page).toHaveURL(/\/connexion/)
   await expect(page.getByLabel('Adresse électronique')).toBeVisible()
   await expect(page.getByLabel('Mot de passe')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible()
+  // The way across is a LINK, not a second submit on the same form.
+  await expect(page.getByRole('link', { name: 'Créer un compte' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Créer un compte' })).toHaveCount(0)
+})
+
+test('creating an account is its own screen, and nothing on it still says sign in', async ({
+  page,
+}) => {
+  // The QA report of 16 septembre: pressing « Créer un compte » left the
+  // reader on a page whose title and only button both said « Se connecter ».
+  await page.goto('/connexion')
+  await page.getByRole('link', { name: 'Créer un compte' }).click()
+
+  await expect(page).toHaveURL(/mode=inscription/)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Créer un compte')
   await expect(page.getByRole('button', { name: 'Créer un compte' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Se connecter' })).toHaveCount(0)
+  await expect(page).toHaveTitle(/Créer un compte/)
+
+  // And back, so neither screen is a dead end.
+  await page.getByRole('link', { name: 'Se connecter' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Se connecter')
+})
+
+test('the way across keeps where the reader was going', async ({ page }) => {
+  // `suite` is what sent them here; losing it on the way to sign-up would
+  // land them somewhere else once the account exists.
+  await page.goto('/connexion?suite=%2Fcarnet')
+  await page.getByRole('link', { name: 'Créer un compte' }).click()
+  await expect(page).toHaveURL(/suite=%2Fcarnet/)
+  await expect(page).toHaveURL(/mode=inscription/)
 })
 
 test('submitting without a password asks for one rather than guessing', async ({ page }) => {
-  // The two buttons are distinguishable by intent, not by guessing from which
-  // fields happen to be filled. An empty password must not create anything.
+  // The screen carries the intent, so a blank password is asked for rather
+  // than guessed at — and the sign-in screen can never create an account.
   await page.goto('/connexion')
   await page.getByLabel('Adresse électronique').fill('quelquun@example.test')
   await page.getByRole('button', { name: 'Se connecter' }).click()
@@ -32,7 +60,7 @@ test('submitting without a password asks for one rather than guessing', async ({
 test('a short password is refused before anything reaches the auth server', async ({ page }) => {
   // Checked by our own schema first: CI has no auth server behind this page,
   // and the refusal must be ours, in our words, whatever the service says.
-  await page.goto('/connexion')
+  await page.goto('/connexion?mode=inscription')
   await page.getByLabel('Adresse électronique').fill('quelquun@example.test')
   await page.getByLabel('Mot de passe').fill('court')
   await page.getByRole('button', { name: 'Créer un compte' }).click()
