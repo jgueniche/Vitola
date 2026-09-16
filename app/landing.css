@@ -45,15 +45,15 @@
 /* The ink stamped on the band. */
 .cigar-plate .plate-band-mark {
   font-family: var(--font-eyebrow);
-  font-size: 16px;
+  font-size: 13px;
   letter-spacing: 0.26em;
   fill: var(--plate-band-ink);
 }
 
 .cigar-plate .plate-band-sub {
   font-family: var(--font-eyebrow);
-  font-size: 7.5px;
-  letter-spacing: 0.24em;
+  font-size: 6.4px;
+  letter-spacing: 0.2em;
   fill: var(--plate-band-ink);
   opacity: 0.85;
 }

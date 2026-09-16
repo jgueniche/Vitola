@@ -1,4 +1,5 @@
 import { BRAND } from '@/lib/brand'
+import { INITIAL_PATH_TILE, MARK_VIEWBOX, RING_RADIUS, ringStrokeWidth } from '@/lib/mark'
 import { m } from '@/lib/i18n'
 
 /**
@@ -35,7 +36,7 @@ const TOP = AXIS - R
 const BOT = AXIS + R
 const BURN = 306
 const HEAD = 1312
-const BAND = { left: 872, right: 1006 } as const
+const BAND = { left: 864, right: 1014 } as const
 const TILT = -1.8
 
 const f = (n: number) => n.toFixed(1)
@@ -56,7 +57,7 @@ function helix(x: number, run: number, over = 6): string {
 
 /* Where the leaf overlaps itself. Spaced by hand, with a different run each
    time — a wrapper is rolled, not printed. The band hides the stretch
-   between 872 and 1006. */
+   between 864 and 1014. */
 const SEAMS = [
   { x: 371, run: 46, w: 1 },
   { x: 483, run: 54, w: 0.7 },
@@ -188,6 +189,12 @@ const THREADS = [
 ] as const
 
 const BAND_CENTER = (BAND.left + BAND.right) / 2
+
+/* The mark stamped on the foil. It takes the TILE cut and the blunt initial
+   even though it is drawn at 34 plate units: the plate is one SVG scaled to
+   the viewport, and on a phone its box is a third of the desktop width, where
+   a 1.33 % hairline is a fifth of a pixel. See lib/mark.ts. */
+const BAND_MARK = 34
 
 export function CigarPlate() {
   const t = m.landing.plate
@@ -347,13 +354,22 @@ export function CigarPlate() {
               <stop offset="0" stopColor="rgb(0 0 0)" stopOpacity={0.9} />
               <stop offset="0.05" stopColor="rgb(0 0 0)" stopOpacity={0.58} />
               <stop offset="0.14" stopColor="rgb(0 0 0)" stopOpacity={0.26} />
-              <stop offset="0.27" stopColor="rgb(0 0 0)" stopOpacity={0.05} />
-              <stop offset="0.36" stopColor="rgb(0 0 0)" stopOpacity={0} />
+              <stop offset="0.27" stopColor="rgb(0 0 0)" stopOpacity={0.04} />
+              {/* A narrow crest rather than a flat plateau of light. */}
+              <stop offset="0.32" stopColor="rgb(255 236 206)" stopOpacity={0.05} />
+              <stop offset="0.4" stopColor="rgb(0 0 0)" stopOpacity={0} />
               <stop offset="0.5" stopColor="rgb(0 0 0)" stopOpacity={0.03} />
               <stop offset="0.62" stopColor="rgb(0 0 0)" stopOpacity={0.18} />
-              <stop offset="0.78" stopColor="rgb(0 0 0)" stopOpacity={0.48} />
-              <stop offset="0.92" stopColor="rgb(0 0 0)" stopOpacity={0.76} />
-              <stop offset="1" stopColor="rgb(0 0 0)" stopOpacity={0.94} />
+              <stop offset="0.78" stopColor="rgb(0 0 0)" stopOpacity={0.5} />
+              <stop offset="0.9" stopColor="rgb(0 0 0)" stopOpacity={0.76} />
+              {/* The bounce: what the ground throws back onto the underside. It
+                  is the difference between a round thing and a gradient — and
+                  it has to stay soft and stop before the edge, because the very
+                  edge is a grazing angle and goes dark again. A bounce that
+                  reaches the silhouette reads as a fitted strip of light. */}
+              <stop offset="0.945" stopColor="rgb(255 198 140)" stopOpacity={0.045} />
+              <stop offset="0.985" stopColor="rgb(0 0 0)" stopOpacity={0.38} />
+              <stop offset="1" stopColor="rgb(0 0 0)" stopOpacity={0.72} />
             </linearGradient>
             <linearGradient id="vt-char" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0" style={{ stopColor: 'var(--plate-char)' }} stopOpacity={0.97} />
@@ -701,16 +717,50 @@ export function CigarPlate() {
                 strokeOpacity={0.75}
                 strokeWidth={0.8}
               />
-              <text x={BAND_CENTER} y={AXIS + 6} textAnchor="middle" className="plate-band-mark">
+              {/* Ink stamped on foil — the single-ink variant of the mark. The
+                  ring is never brass here: brass on brass is nothing. */}
+              <g
+                transform={`translate(${BAND_CENTER - BAND_MARK / 2} ${AXIS - 26 - BAND_MARK / 2}) scale(${BAND_MARK / MARK_VIEWBOX})`}
+              >
+                <circle
+                  cx={MARK_VIEWBOX / 2}
+                  cy={MARK_VIEWBOX / 2}
+                  r={RING_RADIUS}
+                  fill="none"
+                  style={{ stroke: 'var(--plate-band-ink)' }}
+                  strokeOpacity={0.8}
+                  strokeWidth={ringStrokeWidth(BAND_MARK, 'tile')}
+                />
+                <path
+                  d={INITIAL_PATH_TILE}
+                  style={{ fill: 'var(--plate-band-ink)' }}
+                  fillOpacity={0.84}
+                />
+              </g>
+              {/* `dx` pays back half the trailing letter-space: textAnchor
+                  centres the advance width, and the last space is part of it. */}
+              <text
+                x={BAND_CENTER}
+                y={AXIS + 10}
+                dx={1.7}
+                textAnchor="middle"
+                className="plate-band-mark"
+              >
                 {BRAND.name.toUpperCase()}
               </text>
               <path
-                d={`M${BAND_CENTER - 44} ${AXIS - 16} L${BAND_CENTER + 44} ${AXIS - 16}`}
+                d={`M${BAND_CENTER - 38} ${AXIS + 18} L${BAND_CENTER + 38} ${AXIS + 18}`}
                 style={{ stroke: 'var(--plate-band-ink)' }}
                 strokeOpacity={0.5}
                 strokeWidth={0.8}
               />
-              <text x={BAND_CENTER} y={AXIS + 24} textAnchor="middle" className="plate-band-sub">
+              <text
+                x={BAND_CENTER}
+                y={AXIS + 31}
+                dx={0.6}
+                textAnchor="middle"
+                className="plate-band-sub"
+              >
                 {t.bandVitola.toUpperCase()}
               </text>
               <rect

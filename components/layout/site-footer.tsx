@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { Cepo } from '@/components/brand/cepo'
 import { BRAND } from '@/lib/brand'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
@@ -34,8 +35,13 @@ export function SiteFooter() {
             ))}
           </ul>
         </nav>
-        {/* Required by §2: the site informs, it does not sell. */}
-        <p className="text-ink-muted text-xs">{BRAND.disclaimer}</p>
+        {/* Required by §2: the site informs, it does not sell. The mark
+            signs it — in one ink, because a brass ring at the foot of a page
+            would ask for attention the sentence beside it does not want. */}
+        <div className="flex items-center gap-3">
+          <Cepo size={28} ring="stroke-ink-faint" initial="fill-ink-faint" />
+          <p className="text-ink-muted text-xs">{BRAND.disclaimer}</p>
+        </div>
       </div>
     </footer>
   )
