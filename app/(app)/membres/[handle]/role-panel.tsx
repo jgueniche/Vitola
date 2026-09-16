@@ -52,18 +52,6 @@ export function RolePanel({
   const [state, setState] = useState<'idle' | 'sending' | 'done'>('idle')
   const [error, setError] = useState<string | null>(null)
 
-  if (currentRole === 'admin') {
-    return (
-      <div className="flex flex-col gap-2">
-        <h2 className="text-base font-medium">{copy.roleTitle}</h2>
-        <p className="text-ink-muted text-sm">
-          {copy.roleCurrent} : {LABELS[currentRole]}
-        </p>
-        <p className="text-ink-faint measure text-xs leading-relaxed">{copy.roleAdminLocked}</p>
-      </div>
-    )
-  }
-
   async function apply() {
     if (!role) return
     setState('sending')
@@ -76,7 +64,10 @@ export function RolePanel({
         body: JSON.stringify({ userId, role }),
       })
       if (!response.ok) {
-        setError(response.status === 403 ? copy.roleForbidden : copy.roleFailed)
+        /* 409 is the route's last-admin guard, and it is the one refusal a
+           reader can act on: it names a situation rather than a permission. */
+        if (response.status === 409) setError(copy.roleLastAdmin)
+        else setError(response.status === 403 ? copy.roleForbidden : copy.roleFailed)
         setState('idle')
         return
       }
@@ -133,6 +124,10 @@ export function RolePanel({
           {copy.roleApply}
         </Button>
       </div>
+
+      {role === 'admin' && currentRole !== 'admin' ? (
+        <p className="text-caution measure text-xs leading-relaxed">{copy.roleAdminWarning}</p>
+      ) : null}
 
       {error ? <FieldError>{error}</FieldError> : null}
       {state === 'done' ? <FieldStatus>{copy.roleDone}</FieldStatus> : null}

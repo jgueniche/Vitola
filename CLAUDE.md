@@ -583,6 +583,18 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   désormais l'arithmétique **et les deux sens dans lesquels elle casse** : monter la hauteur recoupe
   le signe, la baisser amincit le cigare. Vaut pour tout `preserveAspectRatio` en `slice`.
 
+- **Une action référentielle peut violer un CHECK posé juste à côté d'elle.** La 0033 déclare
+  `claimed_by … on delete set null` et, deux lignes plus bas, un CHECK qui exige que `claimed_at`
+  et `claimed_by` soient tous deux nuls ou tous deux remplis. Séparément justes, ensemble faux :
+  supprimer le compte qui a consommé une invitation déclenche l'action, qui met `claimed_by` à
+  null et laisse `claimed_at` — donc le CHECK refuse et **la suppression échoue**, avec un 23514
+  qui nomme une table que personne ne croyait toucher. Personne ne l'avait vu parce que personne
+  n'avait encore supprimé un compte invité. La 0035 répare en disant ce que la situation signifie
+  plutôt qu'en assouplissant le CHECK, qui a raison : une invitation dont le titulaire n'existe
+  plus n'a pas été consommée, elle repart en attente. Le trigger est **`before delete`**, et c'est
+  ce qui le fait marcher — les actions référentielles d'une clé étrangère sont des triggers AFTER
+  internes. Même famille que « une contrainte peut être cohérente et fausse ».
+
 - **Un contrôle qui ne lit que les `create table` croit qu'un schéma ne fait que grandir.**
   `tests/compliance/gdpr-inventory.test.ts` relisait les migrations pour exiger que chaque colonne
   pointant `auth.users` soit déclarée dans l'inventaire RGPD — et jamais l'inverse. Quand la 0034 a

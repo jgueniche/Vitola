@@ -58,14 +58,27 @@ describe('the ladder mirrors public.app_role', () => {
 })
 
 describe('what a screen may hand out', () => {
-  it('never includes admin', () => {
+  it('includes admin since 16 septembre 2026, at the owner\'s request', () => {
     /*
-     * The one right that compounds. An interface that can mint the role which
-     * operates the interface has no floor, and the route refuses to *edit* an
-     * admin for the same reason seen from the other side.
+     * It did not until then, and the reason was sound: an interface that mints
+     * the role which operates the interface has no floor. What paid that
+     * friction was the owner, by hand, on every person he showed the site to,
+     * so he asked for the rung.
+     *
+     * The blanket refusal is replaced by two narrower guards, and they live in
+     * app/api/roles/route.ts because that is where the write is: nobody edits
+     * their own role, and the last admin cannot be demoted. Together they hold
+     * the property the old rule was really protecting — that the interface can
+     * never leave the site with nobody able to operate it.
      */
-    expect(isGrantableRole('admin')).toBe(false)
-    expect(GRANTABLE_ROLES).not.toContain('admin')
+    expect(isGrantableRole('admin')).toBe(true)
+    expect(GRANTABLE_ROLES).toContain('admin')
+  })
+
+  it('is the whole ladder, so nothing is grantable that is not a rung', () => {
+    // The two lists must not drift: a rung missing here is a role no screen can
+    // hand out, and a value here that is not a rung is a 500 at the write.
+    expect([...GRANTABLE_ROLES]).toEqual([...APP_ROLES])
   })
 
   it('includes every other rung, so a demotion is possible', () => {

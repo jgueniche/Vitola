@@ -2,6 +2,48 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Le rang `admin` s'accorde depuis l'interface — 16 septembre 2026
+
+**Demandé par le porteur** : « il faut aussi que tu me donnes la possibilité en tant qu'admin de
+pouvoir passer en rôle des utilisateurs comme admin ». `GRANTABLE_ROLES` excluait `admin` depuis
+P3, et la raison écrite tenait : *une interface qui frappe le rôle qui opère l'interface n'a pas de
+plancher.* Ce que cette raison ne disait pas, c'est **qui payait la friction** — le porteur, à la
+main, en base, pour chaque personne à qui il montre le site.
+
+**Le refus global est remplacé par deux gardes plus étroites**, et elles vivent dans
+`app/api/roles/route.ts` parce que c'est là qu'est l'écriture :
+
+1. **Personne ne modifie son propre rôle.** Se rétrograder est le seul geste sans retour, et se
+   promouvoir n'a pas de sens — seul un admin arrive ici. Le panneau se cachait déjà sur son
+   propre profil ; cacher un contrôle n'a jamais protégé une écriture.
+2. **Le dernier administrateur ne se rétrograde pas.** Compté **au moment de l'écriture**, pas
+   supposé : une garde qui protège contre un site sans personne pour l'opérer ne peut pas
+   s'appuyer sur un compte pris ailleurs.
+
+Ensemble elles tiennent la propriété que l'ancienne règle protégeait vraiment — l'interface ne
+peut pas laisser le site sans administrateur — et elles rendent le geste **réversible**, ce que
+l'ancienne règle n'était pas : elle laissait donner un rôle sans jamais le reprendre. Chaque
+changement continue d'écrire sa trace dans `audit_log` **avant** l'écriture, et si la trace ne
+part pas, le rôle ne change pas.
+
+## Les trois comptes invités remis à zéro — 16 septembre 2026
+
+Sur instruction du porteur (« supprime les comptes luc, arieh et Théo, comme ça ils pourront
+recréer leur compte depuis zéro »). Trois choses valent d'être retrouvées :
+
+**Il n'y avait que deux comptes.** Luc et Arieh en avaient un, Théo n'en a jamais créé — son
+invitation du 12 septembre attendait toujours. Rien n'a donc été supprimé pour lui, et rien
+n'était à supprimer : il pouvait s'inscrire avant, il peut s'inscrire après.
+
+**La suppression était impossible avant la 0035** (voir « Pièges connus »), et c'est en tentant
+la première, dans une transaction annulée, qu'on l'a appris.
+
+**Les trois invitations sont reparties en attente avec leur rôle `admin`** — pour Luc et Arieh
+par le trigger de la 0035, pour Théo parce qu'elle n'avait jamais été consommée. Les trois
+recréeront leur compte par `/connexion?mode=inscription` et arriveront administrateurs sans
+qu'on ait à y toucher : c'est `tg_handle_new_user()` qui pose le rôle à l'insertion.
+
+
 ## Le cepo — quatre décisions prises en le dessinant
 
 Session du 16 septembre 2026. Le porteur a choisi « le cepo » parmi six pistes de logo, puis a
