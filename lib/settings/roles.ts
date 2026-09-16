@@ -17,21 +17,33 @@ export const APP_ROLES = [
 ] as const satisfies readonly AppRole[]
 
 /**
- * What `/api/roles` accepts as a target, which is everything but `admin`.
+ * What `/api/roles` accepts as a target: the whole ladder, `admin` included.
  *
- * Minting the role that operates the screen has no floor: one admin becomes
- * two, and neither can be undone from the interface. Making another admin
- * stays a database act — deliberate friction on the one right that compounds.
+ * It excluded `admin` until 16 septembre 2026, and the reason then was sound —
+ * a screen that mints the role that runs the screen has no floor, so making
+ * another admin stayed a database act. The owner asked for it («
+ * la possibilité en tant qu'admin de pouvoir passer en rôle des utilisateurs
+ * comme admin »), and the friction was paid by him alone, by hand, on every
+ * person he showed the site to.
  *
- * The route also refuses to *edit* someone who is already `admin`, which is the
- * same rule seen from the other side: demoting the person who could re-promote
- * you is the move an interface must not offer.
+ * What replaces the blanket refusal is NOT nothing. Two narrower guards hold
+ * the property that actually mattered — that the interface can never strand
+ * the site — and they live in the route, because that is where the write is:
+ *
+ *   - **Nobody edits their own role.** Self-demotion is the one move with no
+ *     way back, and self-promotion is meaningless: only an admin gets here.
+ *   - **The last admin cannot be demoted.** Counted at the moment of the
+ *     write, not assumed.
+ *
+ * Both directions are now reversible from the interface, which the old rule
+ * was not: it let a role be granted and never taken back.
  */
 export const GRANTABLE_ROLES = [
   'member',
   'contributor',
   'editor',
   'moderator',
+  'admin',
 ] as const satisfies readonly AppRole[]
 
 export type GrantableRole = (typeof GRANTABLE_ROLES)[number]

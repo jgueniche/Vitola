@@ -28,9 +28,12 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
  *     comment and handing out rights are different powers, and the second one
  *     compounds. The check is `has_min_role('admin')` evaluated **under the
  *     caller's own session**, before the service key is touched at all.
- *   - **What may be granted: everything except `admin`.** Making another admin
- *     stays a database act. A screen that can mint the role that runs the
- *     screen has no floor.
+ *   - **What may be granted: the whole ladder, `admin` included** since
+ *     16 septembre 2026, at the owner's request. Two narrower guards replace
+ *     the blanket refusal — nobody edits their own role, and the last admin
+ *     cannot be demoted — so the interface still cannot strand the site, and
+ *     unlike the old rule the grant is now reversible from the interface. See
+ *     lib/settings/roles.ts.
  *   - **On what criterion: the admin's judgement.** No numeric threshold is
  *     invented here. The profile shows reputation and accepted revisions, which
  *     is what the judgement is made on; picking "50 points" in passing would be
@@ -80,6 +83,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'invalid_body' }, { status: 400, headers: NO_STORE })
   }
 
+  /* Nobody edits their own role. Demoting yourself is the one move with no way
+     back — the panel already hides itself on your own profile, and hiding a
+     control has never protected a write. */
+  if (parsed.data.userId === auth.user.id) {
+    return NextResponse.json({ error: 'self_not_editable' }, { status: 403, headers: NO_STORE })
+  }
+
   const admin = createSupabaseAdminClient()
 
   const { data: before, error: readError } = await admin
@@ -95,11 +105,21 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'no_such_member' }, { status: 404, headers: NO_STORE })
   }
 
-  /* An admin's role is not editable from here either — in the other direction.
-     Demoting the person who could re-promote you is the one move this screen
-     must not offer, and `GRANTABLE_ROLES` only guards the target value. */
-  if (before.role === 'admin') {
-    return NextResponse.json({ error: 'admin_not_editable' }, { status: 403, headers: NO_STORE })
+  /* The last admin cannot be demoted. Counted here rather than assumed: the
+     guard exists so the interface can never leave the site with nobody able to
+     operate it, and a count taken anywhere but at the write is a guess. */
+  if (before.role === 'admin' && parsed.data.role !== 'admin') {
+    const { count, error: countError } = await admin
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('role', 'admin')
+
+    if (countError || count === null) {
+      return NextResponse.json({ error: 'read_failed' }, { status: 500, headers: NO_STORE })
+    }
+    if (count <= 1) {
+      return NextResponse.json({ error: 'last_admin' }, { status: 409, headers: NO_STORE })
+    }
   }
 
   if (before.role === parsed.data.role) {
