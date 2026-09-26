@@ -6,8 +6,11 @@ import { z } from 'zod'
 
 import { refreshCigarStats } from '@/app/api/_stats/refresh'
 import {
+  ANSWER_DONE,
+  HUMIDOR_DONE,
   HUMIDOR_LIMITS,
   OFFERED_EVENT_TYPES,
+  SHARE_ANSWERS,
   consumesStock,
   parseCsv,
   type OfferedEventType,
@@ -15,7 +18,7 @@ import {
 import { m } from '@/lib/i18n'
 import { REVIEW_SCOPES, type ReviewVisibility } from '@/lib/reviews/model'
 import { routes } from '@/lib/routes'
-import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
+import { createSupabaseServerClient, currentUser, referential } from '@/lib/supabase/server'
 
 /**
  * Every write of the humidor (migration 0008, ADR 0006).
@@ -38,6 +41,14 @@ import { createSupabaseServerClient, referential } from '@/lib/supabase/server'
  * The one place two tables are written together is `smokeFromLot`, and it does
  * not do the writing: `public.smoke_from_humidor()` does, in one transaction,
  * in caller's rights. This file could not have made that atomic and did not try.
+ *
+ * And one rule this file learned on 26 September 2026 (ADR 0022): **a write the
+ * database declines does not always raise.** An INSERT refused by a policy
+ * raises; an UPDATE or a DELETE refused by one matches no row and reports
+ * success. `deleteHumidor` did not read its result, so a deletion that removed
+ * nothing navigated exactly like one that worked — the cave was still there,
+ * and nothing said why. Every write below that can match nothing asks for the
+ * rows it touched and says so when there are none.
  */
 
 export type HumidorState = { error?: string; done?: boolean; id?: string }
@@ -192,21 +203,39 @@ export async function updateHumidor(
 }
 
 /**
- * Deletes a cave, and everything in it — lots, ledger and readings all cascade.
+ * Deletes a cave, and everything in it — lots, ledger, readings and shares all
+ * cascade.
  *
  * The notebook entries written from it survive: `humidor_events.review_id` is
  * the reference, and it points the other way. Emptying a cave does not unsay
  * what one thought of a cigar.
+ *
+ * The result is read, and that is the fix of 26 September 2026. The policy
+ * refuses somebody else's cave by matching no row — PostgREST answers 204 — so
+ * this action redirected after a deletion that had deleted nothing, and the
+ * page it landed on still listed the cave. A refusal is now a sentence next to
+ * the button, and a success says so on `/cave`, because the page the button
+ * lived on no longer exists.
  */
-export async function deleteHumidor(formData: FormData): Promise<void> {
+export async function deleteHumidor(
+  _previous: HumidorState,
+  formData: FormData,
+): Promise<HumidorState> {
   const parsed = z.object({ id: z.uuid() }).safeParse({ id: formData.get('id') })
-  if (!parsed.success) return
+  if (!parsed.success) return { error: copy.unknown }
 
   const supabase = await createSupabaseServerClient()
-  await supabase.from('humidors').delete().eq('id', parsed.data.id)
+  const { data, error } = await supabase
+    .from('humidors')
+    .delete()
+    .eq('id', parsed.data.id)
+    .select('id')
+
+  if (error) return { error: refusalMessage(error.code) }
+  if (!data || data.length === 0) return { error: copy.deleteGone }
 
   revalidatePath(routes.humidor())
-  redirect(routes.humidor())
+  redirect(`${routes.humidor()}?fait=${HUMIDOR_DONE.deleted}`)
 }
 
 /** Steps the current default aside so the unique partial index stays satisfied. */
@@ -215,6 +244,144 @@ async function clearDefault(except?: string): Promise<void> {
   let query = supabase.from('humidors').update({ is_default: false }).eq('is_default', true)
   if (except) query = query.neq('id', except)
   await query
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sharing a cave — public.humidor_shares (migration 0036, ADR 0022)            */
+/* -------------------------------------------------------------------------- */
+
+const shareSchema = z.object({ humidorId: z.uuid(), recipientId: z.uuid() })
+
+/**
+ * Offers one cave to one member.
+ *
+ * Only the owner may, never to themself, never across a block — three rules
+ * of `humidor_shares_insert_owner`, none restated here beyond the one a person
+ * can be told about kindly. The invitation is born pending: `accepted_at` is
+ * outside the INSERT grant, so nobody writes someone else's "yes". The trigger
+ * of 0036 tells the recipient; nothing here has to.
+ *
+ * Takes the previous state because the offer can be refused and the refusal
+ * has to be readable — `23505` when the person already has it, `42501` when a
+ * policy declines, `23503` when the member does not exist.
+ */
+export async function shareHumidor(
+  _previous: HumidorState,
+  formData: FormData,
+): Promise<HumidorState> {
+  const parsed = shareSchema.safeParse({
+    humidorId: formData.get('humidorId'),
+    recipientId: formData.get('recipientId'),
+  })
+  if (!parsed.success) return { error: copy.shareUnknownMember }
+
+  const user = await currentUser()
+  if (!user) return { error: copy.notAllowed }
+  if (user.id === parsed.data.recipientId) return { error: copy.shareSelf }
+
+  const supabase = await createSupabaseServerClient()
+  const { error } = await supabase.from('humidor_shares').insert({
+    humidor_id: parsed.data.humidorId,
+    recipient_id: parsed.data.recipientId,
+  })
+
+  if (error) {
+    if (error.code === '23505') return { error: copy.shareDuplicate }
+    if (error.code === '23503') return { error: copy.shareUnknownMember }
+    return { error: refusalMessage(error.code) }
+  }
+
+  revalidatePath(routes.humidorDetail(parsed.data.humidorId))
+  return { done: true, id: parsed.data.humidorId }
+}
+
+/**
+ * Withdraws a cave from one member — an invitation or an accepted share alike.
+ *
+ * A withdrawal that worked is visible by the row being gone, the notebook's
+ * rule for `removeShare`. The two `.eq()` are the key of the row, not a right:
+ * the owner may delete every share of their cave, and this deletes one.
+ */
+export async function revokeHumidorShare(formData: FormData): Promise<void> {
+  const parsed = shareSchema.safeParse({
+    humidorId: formData.get('humidorId'),
+    recipientId: formData.get('recipientId'),
+  })
+  if (!parsed.success) return
+
+  const supabase = await createSupabaseServerClient()
+  await supabase
+    .from('humidor_shares')
+    .delete()
+    .eq('humidor_id', parsed.data.humidorId)
+    .eq('recipient_id', parsed.data.recipientId)
+
+  revalidatePath(routes.humidorDetail(parsed.data.humidorId))
+}
+
+/**
+ * The recipient's five answers: accept, decline, hide, show again, leave.
+ *
+ * Every one of them moves or removes the control it was pressed on — the
+ * invitation leaves the invitations, the hidden cave leaves the list, the cave
+ * one leaves leaves everything — so a success navigates to `/cave` with its
+ * sentence in the URL, and a refusal stays where it happened.
+ *
+ * The recipient's id in the filter is the key of the row, and it is not
+ * optional. The owner's DELETE policy covers every share of their cave, so a
+ * « leave » sent about one's own cave without it would end every share that
+ * cave has. The row is named; nothing is left to a policy's breadth.
+ *
+ * The clock is the server's. `accepted_at` and `hidden_at` are the only two
+ * columns the recipient may write, and a timestamp from the browser would be a
+ * date somebody typed.
+ */
+export async function answerHumidorShare(
+  _previous: HumidorState,
+  formData: FormData,
+): Promise<HumidorState> {
+  const parsed = z
+    .object({ humidorId: z.uuid(), answer: z.enum(SHARE_ANSWERS) })
+    .safeParse({ humidorId: formData.get('humidorId'), answer: formData.get('answer') })
+  if (!parsed.success) return { error: copy.unknown }
+
+  const user = await currentUser()
+  if (!user) return { error: copy.notAllowed }
+
+  const { humidorId, answer } = parsed.data
+  const supabase = await createSupabaseServerClient()
+  const key = { humidor_id: humidorId, recipient_id: user.id }
+  const now = new Date().toISOString()
+
+  const { data, error } =
+    answer === 'accept'
+      ? await supabase
+          .from('humidor_shares')
+          .update({ accepted_at: now })
+          .match(key)
+          .is('accepted_at', null)
+          .select('humidor_id')
+      : answer === 'hide'
+        ? await supabase
+            .from('humidor_shares')
+            .update({ hidden_at: now })
+            .match(key)
+            .not('accepted_at', 'is', null)
+            .select('humidor_id')
+        : answer === 'show'
+          ? await supabase
+              .from('humidor_shares')
+              .update({ hidden_at: null })
+              .match(key)
+              .select('humidor_id')
+          : await supabase.from('humidor_shares').delete().match(key).select('humidor_id')
+
+  if (error) return { error: refusalMessage(error.code) }
+  if (!data || data.length === 0) return { error: copy.shareGone }
+
+  revalidatePath(routes.humidor())
+  revalidatePath(routes.humidorShared(humidorId))
+  redirect(`${routes.humidor()}?fait=${ANSWER_DONE[answer]}`)
 }
 
 /* -------------------------------------------------------------------------- */

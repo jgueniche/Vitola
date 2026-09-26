@@ -675,6 +675,38 @@ export type Database = {
           },
         ]
       }
+      humidor_shares: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          hidden_at: string | null
+          humidor_id: string
+          recipient_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          hidden_at?: string | null
+          humidor_id: string
+          recipient_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          hidden_at?: string | null
+          humidor_id?: string
+          recipient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "humidor_shares_humidor_id_fkey"
+            columns: ["humidor_id"]
+            isOneToOne: false
+            referencedRelation: "humidors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       humidors: {
         Row: {
           capacity: number | null
@@ -1468,6 +1500,20 @@ export type Database = {
         }
         Returns: number
       }
+      humidor_shares_received: {
+        Args: never
+        Returns: {
+          accepted_at: string
+          capacity: number
+          cigar_count: number
+          hidden_at: string
+          humidor_id: string
+          humidor_name: string
+          owner_display_name: string
+          owner_handle: string
+          shared_at: string
+        }[]
+      }
       immutable_unaccent: { Args: { value: string }; Returns: string }
       mod_acknowledge: { Args: { p_id: string }; Returns: Json }
       mod_decide: {
@@ -1543,6 +1589,14 @@ export type Database = {
       }
       profile_privacy: { Args: { owner: string }; Returns: Json }
       refresh_cigar_stats: { Args: never; Returns: undefined }
+      shared_humidor_lots: {
+        Args: { p_humidor: string }
+        Returns: {
+          aging_days: number
+          cigar_id: string
+          qty: number
+        }[]
+      }
       shared_humidor_shelf: {
         Args: { owner: string }
         Returns: {
@@ -1623,7 +1677,12 @@ export type Database = {
       feed_scope: "following" | "discover"
       humidor_event_type: "add" | "smoke" | "gift" | "loss" | "move" | "adjust"
       humidor_reading_source: "manual" | "device"
-      notification_kind: "follow" | "ember" | "post_comment" | "review_share"
+      notification_kind:
+        | "follow"
+        | "ember"
+        | "post_comment"
+        | "review_share"
+        | "humidor_share"
       post_kind: "post" | "session" | "review_share" | "question"
       reaction_kind: "ember"
       review_kind: "log" | "tasting"
@@ -2474,7 +2533,13 @@ export const Constants = {
       feed_scope: ["following", "discover"],
       humidor_event_type: ["add", "smoke", "gift", "loss", "move", "adjust"],
       humidor_reading_source: ["manual", "device"],
-      notification_kind: ["follow", "ember", "post_comment", "review_share"],
+      notification_kind: [
+        "follow",
+        "ember",
+        "post_comment",
+        "review_share",
+        "humidor_share",
+      ],
       post_kind: ["post", "session", "review_share", "question"],
       reaction_kind: ["ember"],
       review_kind: ["log", "tasting"],

@@ -1015,7 +1015,7 @@
   "humidor": {
     "eyebrow": "Humidor",
     "title": "My humidor",
-    "lede": "What you keep, since when, and what is left of it. Your humidor is visible to you alone.",
+    "lede": "What you keep, since when, and what is left of it. Your humidors are visible to you alone, except one you share — and only if the person you invite accepts it.",
     "emptyTitle": "Your humidor is empty",
     "emptyBody": "A humidor is created with a name. You will then put cigars in it from their sheet, or by importing an inventory you already keep elsewhere.",
     "emptyAction": "Create my first humidor",
@@ -1039,6 +1039,7 @@
     "created": "Humidor created.",
     "delete": "Delete this humidor",
     "deleteConfirm": "Delete this humidor? Its lots, its ledger and its readings go with it. Your notebook entries stay.",
+    "deleted": "Humidor deleted.",
     "open": "Open",
     "countOne": "1 humidor",
     "countMany": "{count} humidors",
@@ -1161,12 +1162,61 @@
       "csvTooLong": "That file is over {max} rows. Import it in several passes.",
       "csvUnknownSlug": "These identifiers do not exist in the reference: {slugs}.",
       "csvBadQty": "The quantity on row {line} is not a valid whole number.",
-      "unknown": "That action did not go through."
+      "unknown": "That action did not go through.",
+      "deleteGone": "This humidor was not deleted: it no longer exists, or it is not yours.",
+      "shareSelf": "A humidor is shared with someone other than yourself.",
+      "shareDuplicate": "This person has already been offered this humidor.",
+      "shareUnknownMember": "That member cannot be found.",
+      "shareGone": "This share no longer exists."
     },
     "deleteLot": "Delete this lot",
     "deleteLotConfirm": "Delete this lot? Its ledger goes with it, and with it the record of what you smoked. A used-up lot can stay: it costs nothing and it remembers.",
     "smokeLotNone": "Do not take one out",
-    "smokeLotHint": "If this cigar comes from one of your lots, the stock will drop by one when the tasting is saved. You can also do it afterwards, from the entry."
+    "smokeLotHint": "If this cigar comes from one of your lots, the stock will drop by one when the tasting is saved. You can also do it afterwards, from the entry.",
+    "share": {
+      "title": "Share this humidor",
+      "lede": "The person you invite will see it on their side if they accept — what it holds and since when. Never what you paid, nor where, nor your notes, nor what you smoked from it; and they cannot change anything in it.",
+      "empty": "This humidor is not shared with anyone.",
+      "pending": "Invitation pending",
+      "accepted": "Accepted",
+      "remove": "Remove",
+      "removeNote": "Removing someone closes the humidor to them. It does not undo what they have already seen.",
+      "searchLabel": "Invite a member",
+      "searchHint": "Two characters at least. A member who left the directory does not appear.",
+      "searchAction": "Search",
+      "searchNoResult": "No member matches.",
+      "invite": "Invite",
+      "invited": "Already invited"
+    },
+    "shared": {
+      "invitationsTitle": "Invitations",
+      "invitationsLede": "A humidor offered to you appears on your side only if you accept it. You can then hide it, or leave the share.",
+      "offeredBy": "Offered by {owner}",
+      "accept": "Accept",
+      "decline": "Decline",
+      "title": "Humidors shared with you",
+      "lede": "Read-only: what they hold and since when. They do not count in your totals.",
+      "by": "from {owner}",
+      "hide": "Hide",
+      "show": "Show again",
+      "leave": "Leave this share",
+      "leaveConfirm": "Leave this share? The humidor disappears from your side, and only the person who offered it can offer it again.",
+      "hiddenTitle": "Hidden humidors ({count})",
+      "hiddenLede": "Hiding tells no one: the person who offered it still sees that you accepted.",
+      "hiddenNotice": "You hid this humidor: it no longer appears in your list.",
+      "readOnly": "Read-only. What the humidor holds and since when — never what it cost, nor what was smoked from it: that stays with its owner.",
+      "sharedBy": "Shared by {owner}",
+      "emptyTitle": "This humidor is empty",
+      "emptyBody": "Nothing is stored in it for now.",
+      "someone": "a member",
+      "done": {
+        "accepted": "Invitation accepted: the humidor is below, with the ones shared with you.",
+        "declined": "Invitation declined.",
+        "hidden": "Humidor hidden. You will find it under « Hidden humidors ».",
+        "shown": "Humidor shown again.",
+        "left": "You left this share."
+      }
+    }
   },
   "statistics": {
     "eyebrow": "Figures",
@@ -1656,11 +1706,13 @@
       "follow": "{actor} started following you.",
       "ember": "{actor} gave your post an ember.",
       "post_comment": "{actor} commented on your post.",
-      "review_share": "{actor} named you on an entry of their notebook."
+      "review_share": "{actor} named you on an entry of their notebook.",
+      "humidor_share": "{actor} is offering to share their humidor with you."
     },
     "openPost": "See the post",
     "openEntry": "See the entry",
-    "openProfile": "See the profile"
+    "openProfile": "See the profile",
+    "openInvitation": "See the invitation"
   },
   "privacyPolicy": {
     "eyebrow": "Legal information",
@@ -1675,8 +1727,8 @@
     "notebookScope": "Every entry carries one of four scopes: you alone (the default), people you name one by one, your followers, or everyone. Only « everyone » entries enter a cigar's public average — a private entry moves no visible figure, which would be a way of deducing it.",
     "notebookRevoke": "Removing a recipient closes their future reading; it does not undo a past reading, and we will not pretend otherwise. The same principle holds for the « my followers » scope: following is free on this site, so the audience of an entry already written can grow without your being asked again. You can remove a follower at any time from their profile; their future reading closes.",
     "humidorTitle": "The humidor — what you own",
-    "humidorBody": "A humidor records its name, its capacity, its humidity and temperature set points. A lot records the cigar, the quantity, the purchase date, the price paid, the seller, the date from which it is ageing, its location and a box code. The ledger records every movement — in, smoked, given, lost, adjusted, moved — with its date. The humidity readings record the measurement and the time.",
-    "humidorScope": "All of this is strictly private by default. The « Show my humidor » setting opens to another signed-in member what your humidors hold — which cigars, how many, since when — and nothing else: neither what you paid, nor the ledger, and therefore not when you smoked what. This is not a display rule: the other columns stay unreadable whatever the path of access.",
+    "humidorBody": "A humidor records its name, its capacity, its humidity and temperature set points. A lot records the cigar, the quantity, the purchase date, the price paid, the seller, the date from which it is ageing, its location and a box code. The ledger records every movement — in, smoked, given, lost, adjusted, moved — with its date. The humidity readings record the measurement and the time. A share records the humidor, the person invited, and the dates of the invitation, of its acceptance and, where it applies, of its hiding — the last one readable by the invited person alone.",
+    "humidorScope": "All of this is strictly private by default, and the database enforces it: a humidor is read and written by its owner alone. Two gestures open a reading, and neither opens more than it says. The « Show my humidor » setting shows on your profile, to another signed-in member, what your humidors hold — which cigars, how many, since when. Sharing a humidor opens it to one person you name, and only if they accept it: they read the same things, without being able to write anything in it. In both cases, neither what you paid, nor the seller, nor your notes, nor the ledger — and therefore not when you smoked what. This is not a display rule: the other columns stay unreadable whatever the path of access.",
     "socialTitle": "The social side — what you post",
     "socialBody": "A post records its text, its type, its scope, possibly the cigar or the notebook entry it speaks of, and its dates. An « ember » reaction records who, what and when. A post comment records its text and its author. A following records both people and the date. A block records both people and the date, and is never shown to the person blocked.",
     "socialScope": "A post is readable by your followers or by everyone — never private: writing for yourself is the notebook. Notifications record another member's gesture that concerns you; they are born of a database trigger and nobody can manufacture one.",

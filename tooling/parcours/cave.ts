@@ -452,8 +452,9 @@ async function main(): Promise<void> {
           if (!(await del.isVisible())) break
           await del.click()
           // `waitForURL` et non `settle` : la suppression **navigue**, et lire
-          // la page pendant la navigation renvoie ce qu'on trouve.
-          await page.waitForURL(/\/cave$/, { timeout: 15000 }).catch(() => undefined)
+          // la page pendant la navigation renvoie ce qu'on trouve. Depuis
+          // l'ADR 0022 elle navigue vers `/cave?fait=supprimee`, qui le dit.
+          await page.waitForURL(/\/cave(\?|$)/, { timeout: 15000 }).catch(() => undefined)
           await settle(page)
         }
 

@@ -286,6 +286,28 @@ export const PERSONAL_DATA_SOURCES = [
     erasure: 'erased',
   },
 
+  /* Sharing a humidor (migration 0036, ADR 0022). Both sides are the member's
+     data: the humidors offered to them, and the people they offered theirs to.
+     The second is reached through the owning humidor and names its columns
+     rather than `*` — `hidden_at` is the RECIPIENT's choice, kept from the owner
+     by the column grant, and an export must not hand over what the schema
+     withholds. Both cascade: from the account, and from the humidor. */
+  {
+    key: 'humidorSharesReceived',
+    schema: 'public',
+    table: 'humidor_shares',
+    column: 'recipient_id',
+    erasure: 'erased',
+  },
+  {
+    key: 'humidorSharesGranted',
+    schema: 'public',
+    table: 'humidor_shares',
+    column: 'humidors.user_id',
+    select: 'humidor_id, recipient_id, created_at, accepted_at, humidors!inner(user_id)',
+    erasure: 'erased',
+  },
+
   /* Le social (migration 0010, ADR 0007). Onze colonnes pointent auth.users, et
      chacune est ici parce que `tests/compliance/gdpr-inventory.test.ts` relit le
      SQL et refuse d'en laisser passer une. C'est le garde-fou qui a mordu en

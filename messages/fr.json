@@ -1015,7 +1015,7 @@
   "humidor": {
     "eyebrow": "Cave",
     "title": "Ma cave",
-    "lede": "Ce que vous gardez, depuis quand, et ce qu'il en reste. Votre cave n'est visible que de vous.",
+    "lede": "Ce que vous gardez, depuis quand, et ce qu'il en reste. Vos caves ne sont visibles que de vous, sauf celle que vous partagez — et seulement si la personne invitée l'accepte.",
     "emptyTitle": "Votre cave est vide",
     "emptyBody": "Une cave se crée en un nom. Vous y rangerez ensuite des cigares depuis leur fiche, ou en important un inventaire que vous tenez déjà ailleurs.",
     "emptyAction": "Créer ma première cave",
@@ -1039,6 +1039,7 @@
     "created": "Cave créée.",
     "delete": "Supprimer cette cave",
     "deleteConfirm": "Supprimer cette cave ? Ses lots, son grand livre et ses relevés partent avec elle. Vos entrées de carnet, elles, restent.",
+    "deleted": "Cave supprimée.",
     "open": "Ouvrir",
     "countOne": "1 cave",
     "countMany": "{count} caves",
@@ -1161,12 +1162,61 @@
       "csvTooLong": "Ce fichier dépasse {max} lignes. Importez-le en plusieurs fois.",
       "csvUnknownSlug": "Ces identifiants n'existent pas dans le référentiel : {slugs}.",
       "csvBadQty": "La quantité de la ligne {line} n'est pas un nombre entier valable.",
-      "unknown": "Cette action n'a pas abouti."
+      "unknown": "Cette action n'a pas abouti.",
+      "deleteGone": "Cette cave n'a pas été supprimée : elle n'existe plus, ou elle n'est pas à vous.",
+      "shareSelf": "Une cave se partage avec quelqu'un d'autre que vous.",
+      "shareDuplicate": "Cette personne a déjà reçu cette cave.",
+      "shareUnknownMember": "Ce membre est introuvable.",
+      "shareGone": "Ce partage n'existe plus."
     },
     "deleteLot": "Supprimer ce lot",
     "deleteLotConfirm": "Supprimer ce lot ? Son grand livre part avec lui, et avec lui la trace de ce que vous en avez fumé. Un lot épuisé peut rester : il ne coûte rien et il se souvient.",
     "smokeLotNone": "Ne pas décompter",
-    "smokeLotHint": "Si ce cigare sort d'un de vos lots, le stock baissera d'un en enregistrant la dégustation. Vous pourrez aussi le faire après coup, depuis l'entrée."
+    "smokeLotHint": "Si ce cigare sort d'un de vos lots, le stock baissera d'un en enregistrant la dégustation. Vous pourrez aussi le faire après coup, depuis l'entrée.",
+    "share": {
+      "title": "Partager cette cave",
+      "lede": "La personne que vous invitez la verra chez elle si elle accepte — ce que la cave contient et depuis quand. Jamais ce que vous avez payé, ni où, ni vos notes, ni ce que vous en avez fumé ; et elle ne peut rien y changer.",
+      "empty": "Cette cave n'est partagée avec personne.",
+      "pending": "Invitation en attente",
+      "accepted": "A accepté",
+      "remove": "Retirer",
+      "removeNote": "Retirer une personne lui referme la cave. Cela ne défait pas ce qu'elle a déjà vu.",
+      "searchLabel": "Inviter un membre",
+      "searchHint": "Deux caractères au moins. Un membre qui s'est retiré de l'annuaire n'apparaît pas.",
+      "searchAction": "Chercher",
+      "searchNoResult": "Aucun membre ne correspond.",
+      "invite": "Inviter",
+      "invited": "Déjà invité"
+    },
+    "shared": {
+      "invitationsTitle": "Invitations",
+      "invitationsLede": "Une cave qu'on vous propose n'apparaît chez vous que si vous l'acceptez. Vous pourrez ensuite la masquer, ou quitter le partage.",
+      "offeredBy": "Proposée par {owner}",
+      "accept": "Accepter",
+      "decline": "Refuser",
+      "title": "Caves partagées avec vous",
+      "lede": "En lecture seule : ce qu'elles contiennent et depuis quand. Elles n'entrent pas dans vos totaux.",
+      "by": "de {owner}",
+      "hide": "Masquer",
+      "show": "Afficher de nouveau",
+      "leave": "Quitter ce partage",
+      "leaveConfirm": "Quitter ce partage ? La cave disparaît de chez vous, et seule la personne qui vous l'a proposée peut vous la proposer de nouveau.",
+      "hiddenTitle": "Caves masquées ({count})",
+      "hiddenLede": "Masquer ne prévient personne : la personne qui vous l'a proposée voit toujours que vous avez accepté.",
+      "hiddenNotice": "Vous avez masqué cette cave : elle n'apparaît plus dans votre liste.",
+      "readOnly": "Lecture seule. Ce que la cave contient et depuis quand — jamais ce qu'elle a coûté, ni ce qu'on en a fumé : cela reste à son propriétaire.",
+      "sharedBy": "Partagée par {owner}",
+      "emptyTitle": "Cette cave est vide",
+      "emptyBody": "Rien n'y est rangé pour l'instant.",
+      "someone": "un membre",
+      "done": {
+        "accepted": "Invitation acceptée : la cave est ci-dessous, avec celles qu'on vous partage.",
+        "declined": "Invitation refusée.",
+        "hidden": "Cave masquée. Vous la retrouverez sous « Caves masquées ».",
+        "shown": "Cave affichée de nouveau.",
+        "left": "Vous avez quitté ce partage."
+      }
+    }
   },
   "statistics": {
     "eyebrow": "Statistiques",
@@ -1656,11 +1706,13 @@
       "follow": "{actor} s'est abonné à vous.",
       "ember": "{actor} a braisé votre publication.",
       "post_comment": "{actor} a commenté votre publication.",
-      "review_share": "{actor} vous a nommé sur une entrée de son carnet."
+      "review_share": "{actor} vous a nommé sur une entrée de son carnet.",
+      "humidor_share": "{actor} vous propose de partager sa cave."
     },
     "openPost": "Voir la publication",
     "openEntry": "Voir l'entrée",
-    "openProfile": "Voir le profil"
+    "openProfile": "Voir le profil",
+    "openInvitation": "Voir l'invitation"
   },
   "privacyPolicy": {
     "eyebrow": "Informations légales",
@@ -1675,8 +1727,8 @@
     "notebookScope": "Chaque entrée porte l'une de quatre portées : vous seul (le défaut), des personnes que vous nommez une par une, vos abonnés, ou tout le monde. Seules les entrées « tout le monde » entrent dans la moyenne publique d'un cigare — une entrée privée ne déplace aucun chiffre visible, ce qui serait une façon de la déduire.",
     "notebookRevoke": "Retirer un destinataire ferme sa lecture à venir ; cela ne défait pas une lecture passée, et nous ne prétendrons pas le contraire. Le même principe vaut pour la portée « mes abonnés » : l'abonnement est libre sur ce site, donc l'audience d'une entrée déjà écrite peut grandir sans qu'on vous le redemande. Vous pouvez retirer un abonné à tout moment depuis son profil ; sa lecture à venir se referme.",
     "humidorTitle": "La cave — ce que vous possédez",
-    "humidorBody": "Une cave enregistre son nom, sa capacité, sa consigne d'hygrométrie et de température. Un lot enregistre le cigare, la quantité, la date d'achat, le prix payé, le vendeur, la date à partir de laquelle il vieillit, son emplacement et un code de boîte. Le grand livre enregistre chaque mouvement — entrée, cigare fumé, offert, perdu, ajusté, déplacé — avec sa date. Les relevés d'hygrométrie enregistrent la mesure et l'heure.",
-    "humidorScope": "Tout cela est strictement privé par défaut. Le réglage « Montrer ma cave » ouvre à un autre membre connecté ce que vos caves contiennent — quels cigares, combien, depuis quand — et rien d'autre : ni ce que vous avez payé, ni le grand livre, donc ni quand vous avez fumé quoi. Ce n'est pas une règle d'affichage : les autres colonnes restent illisibles quel que soit le chemin d'accès.",
+    "humidorBody": "Une cave enregistre son nom, sa capacité, sa consigne d'hygrométrie et de température. Un lot enregistre le cigare, la quantité, la date d'achat, le prix payé, le vendeur, la date à partir de laquelle il vieillit, son emplacement et un code de boîte. Le grand livre enregistre chaque mouvement — entrée, cigare fumé, offert, perdu, ajusté, déplacé — avec sa date. Les relevés d'hygrométrie enregistrent la mesure et l'heure. Un partage enregistre la cave, la personne invitée, et les dates de l'invitation, de son acceptation et, le cas échéant, du masquage — cette dernière n'est lisible que par la personne invitée.",
+    "humidorScope": "Tout cela est strictement privé par défaut, et c'est la base de données qui l'applique : une cave n'est lue et écrite que par son propriétaire. Deux gestes ouvrent une lecture, et aucun n'ouvre plus que ce qu'il dit. Le réglage « Montrer ma cave » montre sur votre profil, à un autre membre connecté, ce que vos caves contiennent — quels cigares, combien, depuis quand. Partager une cave l'ouvre à une personne que vous nommez, et seulement si elle l'accepte : elle y lit les mêmes choses, sans pouvoir rien y écrire. Dans les deux cas, ni ce que vous avez payé, ni le vendeur, ni vos notes, ni le grand livre — donc ni quand vous avez fumé quoi. Ce n'est pas une règle d'affichage : les autres colonnes restent illisibles quel que soit le chemin d'accès.",
     "socialTitle": "Le social — ce que vous publiez",
     "socialBody": "Une publication enregistre son texte, son type, sa portée, éventuellement le cigare ou l'entrée de carnet dont elle parle, et ses dates. Une réaction « braise » enregistre qui, quoi et quand. Un commentaire de publication enregistre son texte et son auteur. Un abonnement enregistre les deux personnes et la date. Un blocage enregistre les deux personnes et la date, et n'est jamais montré à la personne bloquée.",
     "socialScope": "Une publication est lisible par vos abonnés ou par tout le monde — jamais privée : écrire pour soi, c'est le carnet. Les notifications enregistrent le geste d'un autre membre qui vous concerne ; elles naissent d'un déclencheur en base et personne ne peut en fabriquer une.",

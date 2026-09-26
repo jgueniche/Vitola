@@ -25,6 +25,12 @@ export const SEGMENTS = {
   tasting: 'degustation',
   tastings: 'degustations',
   humidor: 'cave',
+  /* A humidor someone else owns and shared with you (ADR 0022). Its own
+     segment rather than `/cave/[id]`: that address is the owner's page — the
+     inventory, the ledger, the forms that write — and it answers 404 to
+     anyone else because the RLS returns no row. A shared cave is a different
+     reading of a different set of columns, so it gets a different page. */
+  humidorShared: 'partagee',
   statistics: 'statistiques',
   /* Cinq bagues déduites du carnet (QA du 12 septembre 2026). Le segment est
      au pluriel parce que la page EST la liste : il n'y a pas de suggestion
@@ -114,6 +120,7 @@ export const routes = {
      multi-cave case of §5.5 would otherwise nest three lists inside a fourth. */
   humidorDetail: (id: string) => `/${SEGMENTS.humidor}/${id}`,
   humidorExport: () => `/${SEGMENTS.humidor}/export`,
+  humidorShared: (id: string) => `/${SEGMENTS.humidor}/${SEGMENTS.humidorShared}/${id}`,
   statistics: () => `/${SEGMENTS.statistics}`,
   suggestions: () => `/${SEGMENTS.suggestions}`,
 
