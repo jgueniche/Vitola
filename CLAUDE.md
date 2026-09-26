@@ -607,6 +607,16 @@ preferences, privacy)`, et un trigger horodate le reste. `42501` était levé, l
   « un droit légal ne se vérifie qu'en l'exerçant » : l'export a été rejoué avec un compte réel le
   jour où la clé est arrivée, et c'est ce rejeu qui a trouvé le second défaut.
 
+- **Ouvrir une table en lecture peut ouvrir ses voisines en écriture.** `humidors_select_shown`
+  (0010) ouvrait la ligne `humidors` pour l'étagère du profil ; les tables filles disaient « ma
+  cave » par `exists (select 1 from humidors …)`, c'est-à-dire « toute cave que je peux lire ». Les
+  verrous restrictifs de la 0010 étaient `FOR SELECT` : du 23 août au 26 septembre 2026, un membre
+  pouvait écrire un relevé ou importer des lots dans la cave montrée d'un autre, et un `DELETE` nu
+  vidait toutes les caves montrées — une écriture qui ne lit aucune colonne n'évalue aucune policy
+  SELECT. Signalé comme « la suppression ne marche pas » : la cave d'un autre s'affichait chez
+  vous, et sa suppression, refusée par la policy, répondait 204 à une action qui ne lisait pas son
+  résultat. Voir `supabase/CLAUDE.md` et l'ADR 0022.
+
 ## Style
 
 - Contenu de l'app en français, code et commentaires en **anglais** (§0.10).
@@ -1109,3 +1119,60 @@ en-têtes, le portail 18+, le pied de page, et la bague de la planche d'accueil,
 lue dans le DOM ; les quatre utilitaires Tailwind du signe vérifiés dans la feuille compilée —
 sans eux l'anneau serait parchemin au lieu de laiton, **sans erreur**. Les quatre décisions prises
 en dessinant sont dans `docs/decisions-log.md`.
+
+## La cave à son propriétaire, et son partage — 26 septembre 2026
+
+Signalé le 26 septembre (« la suppression de cave ne marche pas […] sur le compte de Luc, il y a
+la cave que Arié a créée ») et demandé dans le même message : « il faut absolument que chaque cave
+soit strictement personnelle, hormis la possibilité de partager une cave » — un partage que le
+destinataire accepte, et qu'il peut masquer ensuite. [ADR 0022](docs/adr/0022-la-cave-a-son-proprietaire.md)
+avant le SQL, migration `0036`, `supabase/tests/23_cave_partage.sql`, deux écrans.
+
+**Les deux signalements étaient un seul défaut**, lu dans les journaux de l'API à la seconde près :
+« Montrer ma cave » ouvrait la ligne `humidors` à tout membre (0010), donc la cave d'un autre entrait
+dans « Ma cave » ; son bouton « Supprimer » partait vers une policy qui refusait en rendant zéro
+ligne — HTTP 204 —, et l'action redirigeait comme après un succès. Pire, et aucun signalement ne
+l'avait vu : les tables filles héritaient de l'ouverture **en écriture** (voir « Pièges connus »).
+
+**Ce qui est à l'écran** : sur `/cave/[id]`, « Partager cette cave » — chercher un membre,
+l'inviter, voir qui est en attente et qui a accepté, retirer ; sur `/cave`, les **invitations**
+(accepter, refuser), les **caves partagées avec vous** (hors de vos totaux, masquables) et les
+**caves masquées**, repliées (réafficher, quitter) ; `/cave/partagee/[id]`, la cave d'un autre en
+lecture seule ; une notification `humidor_share` ; et une suppression qui dit « Cave supprimée. »
+ou pourquoi elle ne l'est pas.
+
+**Cinq règles qui ne se contournent pas :**
+
+1. **Une cave n'est lue et écrite que par son propriétaire, par tout chemin qui passe par la RLS.**
+   Quatre verrous restrictifs `FOR ALL` qui nomment `auth.uid()` ; `humidors_select_shown` est
+   retirée, et l'étagère du profil passe par sa fonction comme avant. Une lecture nouvelle de la
+   cave d'un tiers sera une fonction `SECURITY DEFINER` de plus, jamais une policy permissive —
+   les verrous l'annuleraient.
+2. **Une invitation n'ouvre rien.** Elle naît en attente (`accepted_at` hors du `GRANT INSERT`),
+   seul le destinataire y répond (`GRANT UPDATE` de deux colonnes, une policy à une branche), et
+   avant sa réponse il ne lit que le nom de la cave et qui la propose.
+3. **Le destinataire lit une projection, et ne l'écrit pas.** Cigare, quantité, âge en jours —
+   jamais le prix, le vendeur, le code de boîte, l'emplacement, les notes, le grand livre ni les
+   relevés ; l'auto-contrôle de la 0036 relit les colonnes de sortie. Lecture seule en v1 : c'est
+   la première question ouverte de l'ADR.
+4. **Masquer appartient au destinataire.** `hidden_at` est hors du `GRANT SELECT` : le
+   propriétaire lit « en attente » ou « a accepté », jamais « masquée », et son export RGPD non
+   plus. Masquer se défait ; quitter supprime, et seul le propriétaire peut reproposer.
+5. **Une écriture qui peut ne rien toucher demande ce qu'elle a touché.** `deleteHumidor` et les
+   cinq réponses du destinataire lisent leurs lignes (`.select(…)`) : zéro ligne est un refus qui
+   se lit sous le bouton, jamais une navigation qui ressemble à un succès.
+
+**Mesuré, pas supposé** : la chaîne des 36 migrations rejouée en local dans l'ordre de `db.yml` —
+`23_cave_partage.sql` échoue sur l'ancienne (S1 « B voit la cave de A », S2 « C écrit un relevé
+chez A ») et passe sur la nouvelle, 12 assertions, les 17 de `07_cave_rls.sql` rejouées après la
+0036 ; PostgREST 12 devant cette base avec les appels supabase-js exacts des actions, 24
+vérifications — et sur l'ancienne, `addReading` chez autrui rendait **HTTP 201** ; un build de
+production branché dessus, avec un faux serveur d'auth qui signe des jetons ES256 :
+`tooling/parcours/partage.ts`, **22 assertions**, connexion par `/connexion` comprise ;
+**axe-core à 0 violation** sur six états peuplés ; `pnpm check` vert. Le parcours est à rejouer
+contre la vraie base une fois la 0036 appliquée — il nettoie derrière lui.
+
+**Ce qui reste au porteur** : appliquer la 0036 sur le projet — elle ne retire qu'une lecture que
+rien de légitime n'utilisait, donc le code déployé la supporte avant même ce commit — ; et les deux
+questions ouvertes de l'ADR 0022 : un destinataire doit-il pouvoir écrire, et « Montrer ma cave »
+doit-il survivre au partage.

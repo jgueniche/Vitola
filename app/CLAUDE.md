@@ -27,7 +27,9 @@ deux formulaires HTML posant sur des Server Actions qui naviguent. Quarante-troi
 | `components/reviews/aroma-wheel.tsx` | une roue est un contrôle, et un contrôle retient ce qu'on a pris |
 | `cave/humidor-form.tsx` | `useActionState` — créer et régler une cave partagent leurs champs |
 | `cave/[id]/lot-forms.tsx` | fumer, offrir, perdre, ajuster, déplacer, supprimer un lot |
-| `cave/[id]/cave-forms.tsx` | ranger un cigare, relever l'hygrométrie, importer un CSV |
+| `cave/[id]/cave-forms.tsx` | ranger un cigare, relever l'hygrométrie, importer un CSV — et supprimer la cave, dont le refus se lit désormais en place (ADR 0022) |
+| `cave/[id]/share-invite-button.tsx` | `useActionState` — inviter quelqu'un peut être refusé (déjà invité, membre disparu, policy), et un « Inviter » muet ferait croire la cave proposée |
+| `cave/share-answer-button.tsx` | `useActionState` — accepter, refuser, masquer, réafficher, quitter : un succès navigue vers `/cave?fait=…`, un refus se lit sous le bouton ; `window.confirm` pour quitter seulement |
 | `carnet/[id]/attach-smoke-form.tsx` | décompter après coup une dégustation de sa cave |
 | `parametres/forms.tsx` | profil, préférences, confidentialité, et l'effacement du compte |
 | `cigares/[slug]/proposer/propose-form.tsx` | une proposition part des valeurs de la fiche |
@@ -117,6 +119,11 @@ Les règles apprises en les écrivant :
   Ouvrir une conversation ne marque rien comme lu : `read_at` est visible de l'expéditeur, donc un
   accusé déclenché par le préchargement d'un lien mentirait **sur quelqu'un**. C'est un bouton, et
   répondre le fait aussi — répondre est la preuve.
+- **Une suppression qui navigue sans lire son résultat ment deux fois.** `deleteHumidor` redirigeait
+  vers `/cave` quoi qu'il arrive : une policy qui refuse un `DELETE` ne lève pas, PostgREST répond
+  204, et la page d'arrivée listait toujours la cave — sans une ligne pour dire pourquoi (ADR 0022).
+  Le geste demande maintenant les lignes touchées (`.select('id')`) : zéro ligne est un refus qui
+  reste sous le bouton, une ligne est un succès qui navigue avec `?fait=supprimee`.
 - **Trois écrans de plus qui naviguent plutôt que de rendre un état** : quitter un club, retirer un
   membre, annuler un événement. Même cause que `/contributions`. Le seul qui garde un état de
   retour est le composeur de message, parce que la boîte reste à l'écran.

@@ -2,6 +2,70 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La cave rendue à son propriétaire, et son partage — 26 septembre 2026
+
+**Signalé par le porteur** : une suppression de cave qui ne supprime rien sans rien dire, et la
+cave d'un membre qui apparaît sur le compte d'un autre ; **demandé dans le même message** : « il
+faut absolument que chaque cave soit strictement personnelle, hormis la possibilité de partager
+une cave », avec acceptation par le destinataire et la possibilité de la masquer ensuite.
+L'architecture est l'[ADR 0022](adr/0022-la-cave-a-son-proprietaire.md) ; restent les décisions
+prises en construisant.
+
+### Décisions prises en construisant
+
+1. **Masquer n'est pas quitter, et les deux existent.** Masquer se défait d'un clic et ne prévient
+   personne ; quitter supprime le partage, et seul le propriétaire peut le proposer de nouveau —
+   d'où la confirmation, sur ce geste-là seulement. Refuser une invitation est le même `DELETE`
+   que quitter, dit à un autre moment.
+2. **Le propriétaire lit « en attente » ou « a accepté », jamais « masquée ».** `hidden_at` est hors
+   du `GRANT SELECT` : masquer est une préférence d'affichage du destinataire, pas un message au
+   propriétaire. L'export RGPD du propriétaire nomme ses colonnes pour la même raison.
+3. **Refuser supprime la ligne ; il n'y a pas d'état « refusé ».** Garder la trace de ce que
+   quelqu'un a décliné ne sert à rien de ce que fait le site. Le propriétaire peut donc réinviter,
+   et le membre que cela gêne a le blocage, que la policy d'insertion respecte dans les deux sens.
+4. **Une invitation n'ouvre rien** : ni capacité, ni compte, ni lots avant l'acceptation — le nom de
+   la cave et qui la propose, sans quoi on ne sait pas ce qu'on accepte.
+5. **Les caves partagées n'entrent pas dans les totaux de `/cave`.** Un chiffre qui ajouterait le
+   stock d'un autre au sien serait l'inventaire de personne.
+6. **Une page à part, `/cave/partagee/[id]`**, plutôt qu'un second rendu de `/cave/[id]` : l'adresse
+   du propriétaire porte les formulaires qui écrivent, et rend 404 à tout autre parce que la RLS
+   ne rend aucune ligne. Mélanger les deux lectures dans un fichier, c'est l'invitation à refaire
+   le défaut du jour.
+7. **L'âge est rendu en jours, jamais en date**, calculé comme la vue `humidor_inventory` : le
+   chiffre que le §5.5 veut afficher, sans la date d'achat qui le produit.
+8. **La notification n'emporte pas l'identifiant de la cave.** Le destinataire ne peut pas l'ouvrir
+   avant d'accepter ; les invitations se lisent là où elles se répondent, `/cave#invitations`.
+9. **La 0035 entre dans `db.yml`.** Appliquée sur le projet depuis le 16 septembre, elle manquait à
+   la chaîne que la CI rejoue — et la 0036 ne s'éprouve pas sur une base qui n'existe nulle part.
+
+### Ce qui a été mesuré
+
+- **Les journaux de l'API**, le 26 septembre à 15:53 UTC : la cave d'un autre membre listée, ouverte,
+  puis `DELETE … → 204` et la cave toujours là. La cause lue en production : `humidors_select_shown`
+  présente, les verrous des tables filles en `FOR SELECT` seulement.
+- **La chaîne complète rejouée en local** (PostgreSQL 16 + PostGIS, les 35 migrations et leurs
+  assertions, dans l'ordre de `db.yml`) : avant la 0036, un membre écrit un relevé et un lot dans
+  la cave montrée d'un autre, et un `DELETE` nu vide lots et relevés de toutes les caves montrées ;
+  après, tout est refusé. `23_cave_partage.sql` échoue sur l'ancienne chaîne (S1, S2) et passe sur
+  la nouvelle — 12 assertions, plus les 17 de `07_cave_rls.sql` rejouées après la 0036.
+- **PostgREST 12 en local** devant cette base : les appels supabase-js exacts des actions,
+  24 vérifications. Sur l'ancienne chaîne, `addReading` dans la cave d'autrui rendait **HTTP 201**
+  et le relevé était écrit — la faille était joignable par l'écran, pas seulement en SQL.
+- **Un build de production** branché sur ce PostgREST, derrière un faux serveur d'auth qui publie
+  un JWKS et signe des jetons ES256 — ce que `getClaims()` vérifie sur place (ADR 0021) :
+  `tooling/parcours/partage.ts`, **22 assertions**, de la connexion par `/connexion` à la
+  suppression ; et **axe-core à 0 violation** sur six états peuplés (invitations, caves
+  partagées, caves masquées dépliées, les deux pages partagées, le panneau de partage avec des
+  résultats). Le parcours se rejoue contre la vraie base une fois la 0036 appliquée.
+
+### Un piège de plus
+
+**Une adresse introuvable répond 200 derrière `loading.tsx`.** Le squelette de l'ADR 0021 part en
+streaming avant que la page ne lève `notFound()`, donc la ligne de statut est déjà écrite : le corps
+dit « Page introuvable », l'en-tête dit 200. Vrai de toutes les pages du groupe `(app)` depuis le
+15 septembre, et sans conséquence pour un lecteur. Un contrôle qui voudrait prouver un 404 doit
+lire le corps, pas le statut.
+
 ## Le rang `admin` s'accorde depuis l'interface — 16 septembre 2026
 
 **Demandé par le porteur** : « il faut aussi que tu me donnes la possibilité en tant qu'admin de
