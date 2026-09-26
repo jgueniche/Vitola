@@ -16,13 +16,13 @@ Deux signalements le même jour, qui sont le même défaut vu des deux côtés.
 **« La suppression d'une cave ne marche pas, sans message d'erreur. »** Les journaux de l'API le
 racontent à la seconde près, le 26 septembre entre 15:53:13 et 15:53:42 UTC. Un membre B ouvre
 `/cave` : la liste rend **deux** caves (`content-range 0-1/*`), la sienne et celle d'un membre A.
-Il ouvre celle de A : une ligne, zéro lot, zéro relevé. Il clique « Supprimer cette cave » :
-`DELETE /rest/v1/humidors?id=eq.… → 204`. Il revient à la liste : deux caves. Le `204` est vrai —
+B ouvre celle de A : une ligne, zéro lot, zéro relevé. B clique « Supprimer cette cave » :
+`DELETE /rest/v1/humidors?id=eq.… → 204`. Retour à la liste : deux caves. Le `204` est vrai —
 PostgREST a exécuté la requête — et la suppression n'a rien supprimé : `humidors_delete_own`
 refuse la ligne d'autrui, et **une policy qui refuse ne lève pas**, elle rend zéro ligne.
 `deleteHumidor()` ne lisait pas ce zéro et redirigeait comme après un succès. Rejoué sur la
-chaîne complète des migrations : la suppression par la propriétaire, elle, rend une ligne et
-emporte lots, grand livre et relevés.
+chaîne complète des migrations : la même suppression, faite par le compte qui possède la cave,
+rend une ligne et emporte lots, grand livre et relevés.
 
 **Sur le compte d'un membre apparaît la cave qu'un autre a créée.** La 0010 a ajouté
 `humidors_select_shown` — `user_id <> auth.uid() and shows_humidor(user_id)` — pour que « Montrer
@@ -30,10 +30,10 @@ ma cave » ouvre la ligne `humidors` à tout membre connecté. Or `lib/humidor/q
 sur personne, par principe : « mes caves », c'était ce que rend `select * from humidors`. Le
 fichier l'avait écrit d'avance — « le jour où `show_humidor` ouvre une cave à un tiers, ces
 fonctions rendront celle de quelqu'un d'autre » — et `lib/CLAUDE.md` affirmait ensuite qu'elles
-restaient « mes caves ». Elles ne l'étaient plus depuis le 23 août. Trois membres sur neuf ont la clé
-cochée ; deux ont une cave ; chacun voyait celle de l'autre dans sa liste,
-dans le menu « déplacer vers », et à son adresse avec le bouton de suppression, le formulaire
-d'hygrométrie et l'import CSV.
+restaient « mes caves ». Elles ne l'étaient plus depuis le 23 août. Trois membres sur neuf ont la
+clé cochée ; deux ont une cave ; chacun voyait celle de l'autre dans sa liste, dans le menu
+« déplacer vers », et à son adresse avec le bouton de suppression, le formulaire d'hygrométrie et
+l'import CSV.
 
 **Le troisième fait est le plus grave, et aucun signalement ne l'avait vu.** Les policies
 restrictives de la 0010 ne ferment que le `SELECT` des tables filles. Leurs policies d'écriture
