@@ -2,6 +2,41 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## La liste des comptes dit à qui l'on a affaire — 26 septembre 2026
+
+**Demandé par le porteur** : `/admin/comptes` titrait chaque ligne par son pseudo — « du style
+member avec plein de chiffres » —, ce qui ne disait pas qui c'était ; il faut « nom et prénom,
+adresse email et potentiellement, si c'est renseigné, adresse ou numéro de téléphone ».
+
+1. **Le pseudo n'est plus un titre.** Quatre comptes sur neuf portent celui que
+   `tg_handle_new_user()` fabrique (`membre_` et douze chiffres hexadécimaux). La ligne est titrée
+   par le nom affiché, et par l'adresse e-mail quand il n'y en a pas — avec « Nom non renseigné »
+   en dessous, parce que c'est une information sur le compte. Le pseudo reste cherchable, et reste
+   dans l'adresse du profil.
+2. **L'adresse e-mail passe par une porte, pas par une policy.** Elle vit dans `auth.users`, que
+   PostgREST n'expose pas et qu'aucun rôle client ne lit. `admin_accounts()` (0037) est
+   `SECURITY DEFINER`, gardée par `has_min_role('admin')` à l'intérieur — le patron des quatre
+   portes du modérateur (0018) — et projette le nom, l'adresse, le téléphone, la ville et le pays ;
+   jamais le mot de passe haché, les jetons, les métadonnées ni la date de naissance. L'ADR 0014
+   dit « pas de porte quand une policy suffit » : ici aucune ne peut suffire.
+3. **Pas de « prénom » ni de « nom » séparés, pas de téléphone ni d'adresse collectés pour
+   l'occasion.** Le site n'en demande nulle part : le seul nom est le nom affiché, le seul lieu la
+   ville et le pays du profil, et le téléphone est celui que l'authentification porterait — vide
+   pour tous. Ajouter des champs pour qu'un écran d'administration les montre serait collecter des
+   données personnelles au service de rien ; c'est une question posée au porteur, pas un geste
+   pris en passant.
+4. **La politique de confidentialité le dit** : l'adresse e-mail n'apparaît à aucun autre membre,
+   seuls les administrateurs la lisent, dans la liste des comptes.
+5. **Les rôles se disent en français**, dans la liste comme dans les invitations — l'écran
+   imprimait la valeur de l'enum, « member », « admin ». La table des libellés vit dans
+   `lib/settings/roles.ts` et le panneau de rôle du profil la partage.
+
+Mesuré : `24_comptes_admin.sql` (4 assertions — un membre reçoit 42501, un administrateur lit
+nom, adresse et ville, la recherche trouve par adresse sans casse et un `%` reste du texte) ; les
+expressions de la porte vérifiées en lecture seule contre le vrai `auth.users` — dont la colonne
+`phone`, que le simulacre de la CI n'a pas, d'où sa lecture par nom ; l'écran relu en navigateur,
+axe-core à 0 violation.
+
 ## La cave rendue à son propriétaire, et son partage — 26 septembre 2026
 
 **Signalé par le porteur** : une suppression de cave qui ne supprime rien sans rien dire, et la

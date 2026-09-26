@@ -1422,6 +1422,22 @@ export type Database = {
           decided_at: string | null
         }[]
       }
+      admin_accounts: {
+        Args: { p_limit?: number; p_search?: string }
+        Returns: {
+          city: string
+          country: string
+          created_at: string
+          display_name: string
+          email: string
+          handle: string
+          id: string
+          is_discoverable: boolean
+          phone: string
+          reputation: number
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
       admin_set_flag: {
         Args: { p_enabled: boolean; p_key: string; p_payload?: Json }
         Returns: Json

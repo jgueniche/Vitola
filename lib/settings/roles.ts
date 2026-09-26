@@ -1,3 +1,4 @@
+import { m } from '@/lib/i18n'
 import type { Database } from '@/lib/supabase/database.types'
 
 /**
@@ -59,3 +60,20 @@ export function hasMinRole(role: AppRole, minimum: AppRole): boolean {
 
 /** The rung the wiki review queue needs — §6 of the brief. */
 export const REVIEWER_ROLE: AppRole = 'editor'
+
+/**
+ * A rung, as a reader says it. `/admin/comptes` printed the enum value itself —
+ * « member », « admin » — which is the database's word, not the site's; the
+ * member profile's role panel had its own copy of this table. One table now.
+ */
+const ROLE_LABELS: Record<AppRole, string> = {
+  member: m.members.role_member,
+  contributor: m.members.role_contributor,
+  editor: m.members.role_editor,
+  moderator: m.members.role_moderator,
+  admin: m.members.role_admin,
+}
+
+export function roleLabel(role: AppRole): string {
+  return ROLE_LABELS[role]
+}

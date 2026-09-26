@@ -1176,3 +1176,19 @@ contre la vraie base une fois la 0036 appliquée — il nettoie derrière lui.
 rien de légitime n'utilisait, donc le code déployé la supporte avant même ce commit — ; et les deux
 questions ouvertes de l'ADR 0022 : un destinataire doit-il pouvoir écrire, et « Montrer ma cave »
 doit-il survivre au partage.
+
+## La liste des comptes dit à qui l'on a affaire — 26 septembre 2026
+
+`/admin/comptes` titrait chaque ligne par son pseudo, et quatre comptes sur neuf portent celui que
+l'inscription fabrique (`membre_` et douze chiffres). Chaque ligne dit désormais **le nom affiché,
+l'adresse e-mail, et le téléphone et la ville s'ils sont renseignés** ; les rôles se lisent en
+français. L'adresse e-mail vit dans `auth.users`, qu'aucune policy ne peut ouvrir : elle passe par
+`admin_accounts()` (migration `0037`), une porte `SECURITY DEFINER` gardée par
+`has_min_role('admin')` **à l'intérieur**, qui projette et ne copie pas. Deux règles :
+
+1. **Une donnée de `auth.users` ne se lit que par une porte de ce genre**, jamais par une copie
+   dans `profiles` — deux sources de l'adresse e-mail divergeraient au premier changement.
+2. **On ne collecte pas un champ pour qu'un écran d'administration l'affiche.** Le site ne demande
+   ni prénom et nom séparés, ni téléphone, ni adresse postale ; les ajouter est une question au
+   porteur (voir `docs/decisions-log.md`).
+

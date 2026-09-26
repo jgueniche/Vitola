@@ -8,17 +8,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FieldError, FieldStatus, Label, Select } from '@/components/ui/field'
 import { m } from '@/lib/i18n'
-import { GRANTABLE_ROLES, type AppRole, type GrantableRole } from '@/lib/settings/roles'
+import { GRANTABLE_ROLES, roleLabel, type AppRole, type GrantableRole } from '@/lib/settings/roles'
 
 const copy = m.members
-
-const LABELS: Record<AppRole, string> = {
-  member: copy.role_member,
-  contributor: copy.role_contributor,
-  editor: copy.role_editor,
-  moderator: copy.role_moderator,
-  admin: copy.role_admin,
-}
 
 /**
  * The screen that was missing, and whose absence reserved the wiki queue to one
@@ -88,7 +80,7 @@ export function RolePanel({
       <dl className="text-ink-muted flex flex-wrap gap-x-8 gap-y-1 text-sm">
         <div className="flex gap-2">
           <dt className="eyebrow text-ink-faint">{copy.roleCurrent}</dt>
-          <dd>{LABELS[currentRole]}</dd>
+          <dd>{roleLabel(currentRole)}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="eyebrow text-ink-faint">{copy.reputation}</dt>
@@ -110,7 +102,7 @@ export function RolePanel({
           >
             {GRANTABLE_ROLES.map((value) => (
               <option key={value} value={value}>
-                {LABELS[value]}
+                {roleLabel(value)}
               </option>
             ))}
           </Select>

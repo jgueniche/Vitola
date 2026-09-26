@@ -546,6 +546,23 @@ jobs:
             exit 1
           fi
 
+      # 0037 : la liste des comptes dit à qui l'on a affaire — nom, adresse
+      # e-mail, téléphone et ville s'ils existent. L'adresse vit dans
+      # `auth.users`, qu'aucune policy n'ouvre : une porte gardée par le rôle
+      # admin à l'intérieur, sur le modèle de la 0018.
+      - name: Apply 0037 — les comptes de l'administration
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0037_comptes_admin.sql
+
+      - name: Comptes de l'administration — la porte admin et sa recherche
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/24_comptes_admin.sql 2>&1 \
+            | tee "$RUNNER_TEMP/comptes-admin.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/comptes-admin.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).
