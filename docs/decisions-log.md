@@ -2,6 +2,137 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Les deux questions de la cave partagée, tranchées — 27 septembre 2026
+
+**Arbitrage du porteur** sur les questions ouvertes de l'ADR 0022 : « Oui il peut juste consulter
+la cave » ; « Oui on garde la case montrer la cave (mais uniquement à quelqu'un à qui on l'a
+partagé) ». La première confirme la lecture seule sans rien changer ; la seconde est la D7 de
+l'ADR et la migration `0038`. Restent les décisions prises en l'écrivant :
+
+1. **Le propriétaire ne lit pas sa propre étagère.** Il n'est le destinataire d'aucune de ses
+   caves, donc la porte ne lui rend rien — et c'est juste : son profil lui dit **à qui** il se
+   montre (« vos caves n'apparaissent ici que pour les personnes avec qui vous en avez partagé
+   une »), pas ce qu'il possède, qu'il lit dans « Ma cave ». La page n'appelle même pas la porte
+   pour lui.
+2. **Un tiers lit « Rien à vous montrer », jamais « ce membre ne montre pas sa cave », quand la
+   case est cochée.** La seconde phrase serait fausse, et la page ne peut pas distinguer « pas de
+   partage » de « partage vide » ou « masqué » sans une lecture de plus : la phrase dit les trois
+   cas d'un coup.
+3. **Trois parcours suivent** : `partage.ts` gagne le profil (un tiers ne voit rien, le
+   destinataire voit la seule cave partagée, sans prix ; masquée, elle quitte le profil ; case
+   décochée, le profil se tait et le partage reste lisible), `social.ts` n'attend plus qu'un tiers
+   lise l'étagère, et `admin.ts` ne cherche plus dans `/admin/comptes` le pseudo que la 0037 a
+   retiré de la ligne.
+
+Mesuré : `25_cave_montree.sql` (8 assertions) passe sur la chaîne complète jusqu'à la 0038 et
+**échoue sur celle qui s'arrête à la 0037** — « un tiers sans partage lit 2 lot(s) », c'est-à-dire
+les deux caves d'un membre qui n'en avait partagé aucune avec lui.
+
+**En production, le même jour, avant le code** : 0036, 0037 et 0038 appliquées par
+`apply_migration` (sans leurs `begin;`/`commit;` — l'appel est une transaction), après avoir
+vérifié que les fonctions qu'elles remplacent y avaient l'empreinte de la chaîne locale à la 0035,
+et relues après : mêmes empreintes pour les portes et les policies qu'en local. Le jeton de l'API
+de gestion de l'environnement répond 401 ; le connecteur Supabase, lui, passe.
+
+## La liste des comptes dit à qui l'on a affaire — 26 septembre 2026
+
+**Demandé par le porteur** : `/admin/comptes` titrait chaque ligne par son pseudo — « du style
+member avec plein de chiffres » —, ce qui ne disait pas qui c'était ; il faut « nom et prénom,
+adresse email et potentiellement, si c'est renseigné, adresse ou numéro de téléphone ».
+
+1. **Le pseudo n'est plus un titre.** Quatre comptes sur neuf portent celui que
+   `tg_handle_new_user()` fabrique (`membre_` et douze chiffres hexadécimaux). La ligne est titrée
+   par le nom affiché, et par l'adresse e-mail quand il n'y en a pas — avec « Nom non renseigné »
+   en dessous, parce que c'est une information sur le compte. Le pseudo reste cherchable, et reste
+   dans l'adresse du profil.
+2. **L'adresse e-mail passe par une porte, pas par une policy.** Elle vit dans `auth.users`, que
+   PostgREST n'expose pas et qu'aucun rôle client ne lit. `admin_accounts()` (0037) est
+   `SECURITY DEFINER`, gardée par `has_min_role('admin')` à l'intérieur — le patron des quatre
+   portes du modérateur (0018) — et projette le nom, l'adresse, le téléphone, la ville et le pays ;
+   jamais le mot de passe haché, les jetons, les métadonnées ni la date de naissance. L'ADR 0014
+   dit « pas de porte quand une policy suffit » : ici aucune ne peut suffire.
+3. **Pas de « prénom » ni de « nom » séparés, pas de téléphone ni d'adresse collectés pour
+   l'occasion.** Le site n'en demande nulle part : le seul nom est le nom affiché, le seul lieu la
+   ville et le pays du profil, et le téléphone est celui que l'authentification porterait — vide
+   pour tous. Ajouter des champs pour qu'un écran d'administration les montre serait collecter des
+   données personnelles au service de rien ; c'est une question posée au porteur, pas un geste
+   pris en passant.
+4. **La politique de confidentialité le dit** : l'adresse e-mail n'apparaît à aucun autre membre,
+   seuls les administrateurs la lisent, dans la liste des comptes.
+5. **Les rôles se disent en français**, dans la liste comme dans les invitations — l'écran
+   imprimait la valeur de l'enum, « member », « admin ». La table des libellés vit dans
+   `lib/settings/roles.ts` et le panneau de rôle du profil la partage.
+
+Mesuré : `24_comptes_admin.sql` (4 assertions — un membre reçoit 42501, un administrateur lit
+nom, adresse et ville, la recherche trouve par adresse sans casse et un `%` reste du texte) ; les
+expressions de la porte vérifiées en lecture seule contre le vrai `auth.users` — dont la colonne
+`phone`, que le simulacre de la CI n'a pas, d'où sa lecture par nom ; l'écran relu en navigateur,
+axe-core à 0 violation.
+
+## La cave rendue à son propriétaire, et son partage — 26 septembre 2026
+
+**Signalé par le porteur** : une suppression de cave qui ne supprime rien sans rien dire, et la
+cave d'un membre qui apparaît sur le compte d'un autre ; **demandé dans le même message** : « il
+faut absolument que chaque cave soit strictement personnelle, hormis la possibilité de partager
+une cave », avec acceptation par le destinataire et la possibilité de la masquer ensuite.
+L'architecture est l'[ADR 0022](adr/0022-la-cave-a-son-proprietaire.md) ; restent les décisions
+prises en construisant.
+
+### Décisions prises en construisant
+
+1. **Masquer n'est pas quitter, et les deux existent.** Masquer se défait d'un clic et ne prévient
+   personne ; quitter supprime le partage, et seul le propriétaire peut le proposer de nouveau —
+   d'où la confirmation, sur ce geste-là seulement. Refuser une invitation est le même `DELETE`
+   que quitter, dit à un autre moment.
+2. **Le propriétaire lit « en attente » ou « a accepté », jamais « masquée ».** `hidden_at` est hors
+   du `GRANT SELECT` : masquer est une préférence d'affichage du destinataire, pas un message au
+   propriétaire. L'export RGPD du propriétaire nomme ses colonnes pour la même raison.
+3. **Refuser supprime la ligne ; il n'y a pas d'état « refusé ».** Garder la trace de ce que
+   quelqu'un a décliné ne sert à rien de ce que fait le site. Le propriétaire peut donc réinviter,
+   et le membre que cela gêne a le blocage, que la policy d'insertion respecte dans les deux sens.
+4. **Une invitation n'ouvre rien** : ni capacité, ni compte, ni lots avant l'acceptation — le nom de
+   la cave et qui la propose, sans quoi on ne sait pas ce qu'on accepte.
+5. **Les caves partagées n'entrent pas dans les totaux de `/cave`.** Un chiffre qui ajouterait le
+   stock d'un autre au sien serait l'inventaire de personne.
+6. **Une page à part, `/cave/partagee/[id]`**, plutôt qu'un second rendu de `/cave/[id]` : l'adresse
+   du propriétaire porte les formulaires qui écrivent, et rend 404 à tout autre parce que la RLS
+   ne rend aucune ligne. Mélanger les deux lectures dans un fichier, c'est l'invitation à refaire
+   le défaut du jour.
+7. **L'âge est rendu en jours, jamais en date**, calculé comme la vue `humidor_inventory` : le
+   chiffre que le §5.5 veut afficher, sans la date d'achat qui le produit.
+8. **La notification n'emporte pas l'identifiant de la cave.** Le destinataire ne peut pas l'ouvrir
+   avant d'accepter ; les invitations se lisent là où elles se répondent, `/cave#invitations`.
+9. **La 0035 entre dans `db.yml`.** Appliquée sur le projet depuis le 16 septembre, elle manquait à
+   la chaîne que la CI rejoue — et la 0036 ne s'éprouve pas sur une base qui n'existe nulle part.
+
+### Ce qui a été mesuré
+
+- **Les journaux de l'API**, le 26 septembre à 15:53 UTC : la cave d'un autre membre listée, ouverte,
+  puis `DELETE … → 204` et la cave toujours là. La cause lue en production : `humidors_select_shown`
+  présente, les verrous des tables filles en `FOR SELECT` seulement.
+- **La chaîne complète rejouée en local** (PostgreSQL 16 + PostGIS, les 35 migrations et leurs
+  assertions, dans l'ordre de `db.yml`) : avant la 0036, un membre écrit un relevé et un lot dans
+  la cave montrée d'un autre, et un `DELETE` nu vide lots et relevés de toutes les caves montrées ;
+  après, tout est refusé. `23_cave_partage.sql` échoue sur l'ancienne chaîne (S1, S2) et passe sur
+  la nouvelle — 12 assertions, plus les 17 de `07_cave_rls.sql` rejouées après la 0036.
+- **PostgREST 12 en local** devant cette base : les appels supabase-js exacts des actions,
+  24 vérifications. Sur l'ancienne chaîne, `addReading` dans la cave d'autrui rendait **HTTP 201**
+  et le relevé était écrit — la faille était joignable par l'écran, pas seulement en SQL.
+- **Un build de production** branché sur ce PostgREST, derrière un faux serveur d'auth qui publie
+  un JWKS et signe des jetons ES256 — ce que `getClaims()` vérifie sur place (ADR 0021) :
+  `tooling/parcours/partage.ts`, **22 assertions**, de la connexion par `/connexion` à la
+  suppression ; et **axe-core à 0 violation** sur six états peuplés (invitations, caves
+  partagées, caves masquées dépliées, les deux pages partagées, le panneau de partage avec des
+  résultats). Le parcours se rejoue contre la vraie base une fois la 0036 appliquée.
+
+### Un piège de plus
+
+**Une adresse introuvable répond 200 derrière `loading.tsx`.** Le squelette de l'ADR 0021 part en
+streaming avant que la page ne lève `notFound()`, donc la ligne de statut est déjà écrite : le corps
+dit « Page introuvable », l'en-tête dit 200. Vrai de toutes les pages du groupe `(app)` depuis le
+15 septembre, et sans conséquence pour un lecteur. Un contrôle qui voudrait prouver un 404 doit
+lire le corps, pas le statut.
+
 ## Le rang `admin` s'accorde depuis l'interface — 16 septembre 2026
 
 **Demandé par le porteur** : « il faut aussi que tu me donnes la possibilité en tant qu'admin de

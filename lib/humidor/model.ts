@@ -8,11 +8,14 @@
  *
  * Two things this file deliberately does NOT contain:
  *
- *   - **any notion of who may read a humidor.** Four owner-only policies decide
- *     that, and P3 will add a fifth for `privacy.show_humidor` rather than edit
- *     one. A TypeScript filter here would double a policy and outlive it — the
- *     same rule ADR 0004 states for the notebook, and it is not weaker because
- *     the current answer is "only me".
+ *   - **any notion of who may read a humidor.** The owner-only policies decide
+ *     that, locked since migration 0036 by four RESTRICTIVE ones that no later
+ *     policy can widen (ADR 0022); a shared humidor is read through two
+ *     SECURITY DEFINER projections, never through its tables. A TypeScript
+ *     filter here would double a policy and outlive it — the same rule ADR 0004
+ *     states for the notebook, and it is not weaker because the answer is
+ *     "only me". `answersFor()` below decides which buttons to offer, never
+ *     who may press them.
  *
  *   - **any writing of `qty`.** It is not exposed as a settable value anywhere
  *     in this module. The GRANT already refuses it (ADR 0006, D3); this file
@@ -281,4 +284,64 @@ export function parseCsv(text: string): CsvParse {
   }
 
   return { rows }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sharing — public.humidor_shares (migration 0036, ADR 0022)                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The five answers a recipient can give to a shared humidor.
+ *
+ * `decline` and `leave` are the same statement — a DELETE of the share — told
+ * apart because they are said at different moments: one refuses an
+ * invitation, the other walks away from a cave one had accepted. `hide` is
+ * not `leave`: the share stays, the cave stops being listed, and `show` puts
+ * it back. Nobody is told, the owner included — `hidden_at` is outside the
+ * column grant they read through.
+ */
+export const SHARE_ANSWERS = ['accept', 'decline', 'hide', 'show', 'leave'] as const
+
+export type ShareAnswer = (typeof SHARE_ANSWERS)[number]
+
+/**
+ * Which answers make sense for a share in the state it is in.
+ *
+ * An offer, not a rule. The database refuses what does not fit — hiding an
+ * invitation breaks `humidor_shares_hidden_once_accepted`, and only the
+ * recipient's policy lets an answer through at all — and this only keeps the
+ * page from offering a button that would be refused.
+ */
+export function answersFor(share: {
+  accepted_at: string | null
+  hidden_at: string | null
+}): ShareAnswer[] {
+  if (share.accepted_at === null) return ['accept', 'decline']
+  return share.hidden_at === null ? ['hide', 'leave'] : ['show', 'leave']
+}
+
+/**
+ * What `/cave` is told after a gesture that navigated there.
+ *
+ * Each of these removes or moves the control it was pressed on — an accepted
+ * invitation leaves the invitations, a hidden cave leaves the list, a deleted
+ * one leaves everything — so the confirmation travels in the URL and the page
+ * renders it (`app/CLAUDE.md`). The sentences are in `lib/social/confirmations.ts`.
+ */
+export const HUMIDOR_DONE = {
+  deleted: 'supprimee',
+  accepted: 'acceptee',
+  declined: 'refusee',
+  hidden: 'masquee',
+  shown: 'affichee',
+  left: 'quittee',
+} as const
+
+/** The `?fait=` code for each answer — one place, so the two cannot drift. */
+export const ANSWER_DONE: Record<ShareAnswer, (typeof HUMIDOR_DONE)[keyof typeof HUMIDOR_DONE]> = {
+  accept: HUMIDOR_DONE.accepted,
+  decline: HUMIDOR_DONE.declined,
+  hide: HUMIDOR_DONE.hidden,
+  show: HUMIDOR_DONE.shown,
+  leave: HUMIDOR_DONE.left,
 }

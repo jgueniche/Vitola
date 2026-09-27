@@ -520,6 +520,66 @@ jobs:
             exit 1
           fi
 
+      # 0035 : une invitation dont le titulaire disparaît repart en attente. Elle
+      # était appliquée sur le projet depuis le 16 septembre et absente d'ici —
+      # la chaîne que la CI rejoue doit rester celle du projet, sans quoi la 0036
+      # s'éprouverait sur une base qui n'existe nulle part.
+      - name: Apply 0035 — une invitation libérée
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0035_liberer_invitation.sql
+
+      # 0036 : la cave rendue à son propriétaire, et le partage par invitation
+      # (ADR 0022). `humidors_select_shown` ouvrait la cave de A dans la liste de
+      # B, et les tables filles héritaient de cette ouverture en écriture. Le
+      # fichier de tests exerce ce qu'aucun auto-contrôle ne peut voir : un
+      # INSERT sans RETURNING et un DELETE sans WHERE, qui n'évaluent aucune
+      # policy SELECT.
+      - name: Apply 0036 — la cave à son propriétaire, et son partage
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0036_cave_personnelle_et_partage.sql
+
+      - name: Cave personnelle et partage — verrous, invitation, projection
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/23_cave_partage.sql 2>&1 \
+            | tee "$RUNNER_TEMP/cave-partage.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/cave-partage.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0037 : la liste des comptes dit à qui l'on a affaire — nom, adresse
+      # e-mail, téléphone et ville s'ils existent. L'adresse vit dans
+      # `auth.users`, qu'aucune policy n'ouvre : une porte gardée par le rôle
+      # admin à l'intérieur, sur le modèle de la 0018.
+      - name: Apply 0037 — les comptes de l'administration
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0037_comptes_admin.sql
+
+      - name: Comptes de l'administration — la porte admin et sa recherche
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/24_comptes_admin.sql 2>&1 \
+            | tee "$RUNNER_TEMP/comptes-admin.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/comptes-admin.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
+      # 0038 : « Montrer ma cave » ne s'adresse qu'aux personnes à qui la cave
+      # est partagée (arbitrage du 27 septembre 2026 sur l'ADR 0022). Le test 23
+      # a tourné avant elle, sur l'étagère ouverte à tous : c'est l'état qu'il
+      # décrit. Le test 25 décrit celui-ci.
+      - name: Apply 0038 — la cave montrée aux seuls destinataires
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0038_cave_montree_aux_destinataires.sql
+
+      - name: Cave montrée — tiers, invité, destinataire, propriétaire
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/25_cave_montree.sql 2>&1 \
+            | tee "$RUNNER_TEMP/cave-montree.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/cave-montree.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).

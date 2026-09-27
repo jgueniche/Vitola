@@ -9,6 +9,7 @@ import {
   hasMinRole,
   isGrantableRole,
   REVIEWER_ROLE,
+  roleLabel,
 } from '@/lib/settings/roles'
 
 /**
@@ -58,7 +59,7 @@ describe('the ladder mirrors public.app_role', () => {
 })
 
 describe('what a screen may hand out', () => {
-  it('includes admin since 16 septembre 2026, at the owner\'s request', () => {
+  it("includes admin since 16 septembre 2026, at the owner's request", () => {
     /*
      * It did not until then, and the reason was sound: an interface that mints
      * the role which operates the interface has no floor. What paid that
@@ -114,6 +115,22 @@ describe('the column stays barred to clients', () => {
     for (const columns of grants) {
       expect(columns).not.toMatch(/\brole\b/)
       expect(columns).not.toMatch(/\breputation\b/)
+    }
+  })
+})
+
+/*
+ * `/admin/comptes` printed the enum itself — « member », « admin » — beside a
+ * made-up handle, and the owner could not tell who anyone was (26 September
+ * 2026). Every rung is now said in the site's words, one per rung.
+ */
+describe('roleLabel', () => {
+  it('names every rung, differently, and never by its enum value', () => {
+    const labels = APP_ROLES.map((role) => roleLabel(role))
+    expect(new Set(labels).size).toBe(APP_ROLES.length)
+    for (const [index, role] of APP_ROLES.entries()) {
+      expect(labels[index]).toBeTruthy()
+      expect(labels[index]).not.toBe(role)
     }
   })
 })

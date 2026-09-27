@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button'
 import { Input, Label } from '@/components/ui/field'
 import { formatPrice } from '@/lib/cigar'
 import { formatCount, todayInBrandZone } from '@/lib/format'
-import { fillRatio, maturityStage, needsRotation, type MaturityStage } from '@/lib/humidor/model'
+import { ageLabel, maturityLabel } from '@/lib/humidor/labels'
+import { fillRatio, needsRotation } from '@/lib/humidor/model'
 import {
   getHumidor,
+  listHumidorShares,
   listHumidors,
   listLedger,
   listLots,
@@ -21,6 +23,7 @@ import {
   type LotWithCigar,
 } from '@/lib/humidor/queries'
 import { m } from '@/lib/i18n'
+import { searchMembers } from '@/lib/reviews/queries'
 import { routes } from '@/lib/routes'
 import { EMPTY_FACETS } from '@/lib/search/facets'
 import { searchCigars } from '@/lib/search/query'
@@ -30,6 +33,7 @@ import { cn } from '@/lib/utils'
 import { HumidorForm } from '../humidor-form'
 import { AddLotForm, DeleteHumidorForm, ImportForm, ReadingForm } from './cave-forms'
 import { DeleteLotForm, EventForm, MoveForm, SmokeForm } from './lot-forms'
+import { SharePanel } from './share-panel'
 
 export const metadata: Metadata = { title: m.humidor.title }
 
@@ -58,6 +62,13 @@ function one(value: string | string[] | undefined): string | undefined {
  * that is the RLS answering rather than this page choosing: `getHumidor()`
  * returns null in both cases because the policy returns no row. "Interdit"
  * would confirm that somebody else's cave exists.
+ *
+ * That paragraph was false from 23 August to 26 September 2026: « Montrer ma
+ * cave » opened the row to every member, so this page rendered somebody else's
+ * cave — empty, since its lots stayed closed — with its delete button, its
+ * hygrometry form and its CSV import, and the last two WROTE into it. Migration
+ * 0036 made the paragraph true again (ADR 0022). A cave shared with the reader
+ * is not read here at all: it has its own page, `routes.humidorShared()`.
  */
 export default async function HumidorDetailPage({ params, searchParams }: Props) {
   const user = await currentUser()
@@ -73,6 +84,7 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
   const term = (one(query.q) ?? '').trim()
   const adding = one(query.ajouter)
   const openLot = one(query.lot)
+  const member = (one(query.membre) ?? '').trim()
   const today = todayInBrandZone()
 
   /* `listLots` stays BARE: the inventory IS this page, and « 0 cigare, 0 € »
@@ -80,10 +92,15 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
      (ADR 0020, the same call as /cave). The hygrometry is its own section
      with its own empty state, and the other humidors only fill the « déplacer
      vers » dropdown — an empty one would hide the caves one owns. */
-  const [lots, readingsRead, humidorsRead] = await Promise.all([
+  const [lots, readingsRead, humidorsRead, sharesRead, membersRead] = await Promise.all([
     listLots(id),
     accessory(listReadings(id)),
     accessory(listHumidors()),
+    /* Who has this cave accompanies the inventory: « partagée avec personne »
+       drawn from a failed read would invite the owner to share it twice. The
+       panel says it could not read instead (ADR 0020). */
+    accessory(listHumidorShares(id)),
+    accessory(member.length >= 2 ? searchMembers(member, user.id) : Promise.resolve([])),
   ])
   const humidors = orElse(humidorsRead, [])
 
@@ -342,6 +359,14 @@ export default async function HumidorDetailPage({ params, searchParams }: Props)
         <ImportForm humidorId={id} />
       </section>
 
+      {/* ------------------------------------------------------ sharing ---- */}
+      <SharePanel
+        humidorId={id}
+        shares={sharesRead.ok ? sharesRead.value : null}
+        results={membersRead.ok ? membersRead.value : null}
+        query={member}
+      />
+
       {/* ---------------------------------------------------- settings ----- */}
       <section className="border-rule flex flex-col gap-4 border-t pt-8">
         <h2 className="font-display text-display-sm">{copy.editTitle}</h2>
@@ -455,28 +480,5 @@ function ledgerLabel(type: string): string {
   return LEDGER_LABELS[type] ?? type
 }
 
-const MATURITY_LABELS: Record<MaturityStage, string> = {
-  fresh: copy.maturityFresh,
-  settling: copy.maturitySettling,
-  ready: copy.maturityReady,
-  mature: copy.maturityMature,
-}
-
-function maturityLabel(agingDays: number | null): string | null {
-  const stage = maturityStage(agingDays)
-  return stage ? MATURITY_LABELS[stage] : null
-}
-
-/**
- * An age, at the resolution it deserves.
- *
- * Days for the first three months, months to two years, then years. "742 jours"
- * is precise and unreadable; nobody rests a cigar to the day, and rendering it
- * that way suggests we measured something we did not.
- */
-function ageLabel(agingDays: number | null): string {
-  if (agingDays === null) return copy.ageUnknown
-  if (agingDays < 90) return copy.ageDays.replace('{count}', String(agingDays))
-  if (agingDays < 730) return copy.ageMonths.replace('{count}', String(Math.round(agingDays / 30)))
-  return copy.ageYears.replace('{count}', String(Math.floor(agingDays / 365)))
-}
+/* `ageLabel` and `maturityLabel` moved to `lib/humidor/labels.ts` when the
+   shared cave's page needed the same sentences (ADR 0022). */

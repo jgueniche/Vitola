@@ -24,7 +24,7 @@ Ces fichiers sont **la** définition de quelque chose. Dupliquer leur contenu ai
 | `release.ts`                  | La phase de la roadmap et le commit déployé, servis par `/api/health`.                                                                                                                       |
 | `reviews/model.ts`            | Les quatre portées, ce que chacune fait _aujourd'hui_, les bornes de `reviews`, et l'échelle des six critères.                                                                               |
 | `reviews/draft.ts`            | Ce qu'est un brouillon de dégustation valide, et ce qui le rend invalide.                                                                                                                    |
-| `humidor/model.ts`            | Le signe d'un mouvement, les bornes de la cave, la courbe de maturité, le format CSV.                                                                                                        |
+| `humidor/model.ts`            | Le signe d'un mouvement, les bornes de la cave, la courbe de maturité, le format CSV, et les cinq réponses à une cave partagée (ADR 0022).                                                   |
 | `stats/queries.ts`            | Ce que comptent les statistiques, et le plafond qu'elles annoncent.                                                                                                                          |
 | `settings/model.ts`           | Les défauts de `profile_settings`, et la base légale de chaque consentement.                                                                                                                 |
 | `wiki/model.ts`               | Les treize colonnes qu'une contribution peut proposer — le profil aromatique depuis la 0025 — et la forme d'un diff.                                                                         |
@@ -150,22 +150,39 @@ chaque écran plus lent que le budget des e2e du portail. Depuis la navigation e
 page qui la fait, et le délai reste disponible pour le prochain appelant qui tournerait partout.
 Un drapeau qui ne répond pas dans le délai répond « fermé » — le même repli qu'une erreur.
 
-## Les caves ne se filtrent pas ici non plus
+## Les caves ne se filtrent pas ici non plus — et ce paragraphe a menti un mois
 
-`humidor/queries.ts` ne contient aucun `.eq('user_id', …)` : `humidors` avait une seule policy
-`select`, `user_id = auth.uid()`, et les trois autres tables la rejoignent par un `EXISTS`.
-« Mes caves », c'était donc ce que rend `select * from humidors`.
+`humidor/queries.ts` ne contient aucun `.eq('user_id', …)` : « mes caves », c'est ce que rend
+`select * from humidors`, et un filtre ici doublerait une policy qu'il survivrait.
 
-**Ce paragraphe annonçait que P3 changerait cela, et P3 ne l'a pas changé.** La 0010 ouvre bien
-`humidors` à un tiers quand `privacy.show_humidor` est coché — donc ces fonctions rendraient la cave
-de quelqu'un d'autre — mais elle referme aussitôt les trois tables filles par des policies
-**restrictives** propriétaires. Sans elles, ouvrir une cave ouvrait son grand livre, c'est-à-dire
-quand la personne a fumé quoi.
+**Ce paragraphe affirmait, jusqu'au 26 septembre 2026, que ces fonctions « restaient mes caves »
+après la 0010. C'était faux.** La 0010 ouvrait la **ligne** `humidors` à tout membre dès que son
+propriétaire cochait `show_humidor` ; elle ne refermait que la **lecture** des trois tables
+filles. `listHumidors()` rendait donc la cave d'un autre — dans « Ma cave », dans le menu
+« déplacer vers », à son adresse avec son bouton de suppression —, et les tables filles, qui
+disaient « ma cave » par `exists (select 1 from humidors …)`, acceptaient les **écritures** d'un
+tiers : un relevé, un import de lots, un `DELETE` nu. Le signalement a été « la suppression ne
+marche pas » ; le défaut était « la cave d'un autre est à vous ».
 
-Conséquence pratique : ces fonctions restent « mes caves », et la cave d'un tiers se lit par
-`social/queries.ts` → `shared_humidor_shelf()`, qui projette trois colonnes et jamais le prix. Une
-policy filtre des lignes ; elle ne sait pas cacher une colonne, et un prix de tabac sur le profil
-d'un membre est précisément ce que le §2 regarde.
+**La 0036 rend la phrase vraie au lieu d'ajouter le filtre** (ADR 0022) : la policy d'ouverture
+est retirée, et quatre policies **restrictives `FOR ALL`** nomment `auth.uid()` sur les quatre
+tables, si bien qu'aucune policy permissive future ne peut rouvrir une cave, ni en lecture ni en
+écriture. La cave d'un tiers se lit par deux portes et pas une de plus :
+
+- `social/queries.ts` → `shared_humidor_shelf()` pour le profil (`show_humidor`, ADR 0007 D5) —
+  qui, depuis la 0038, ne répond qu'aux personnes à qui la cave est partagée, et seulement pour
+  cette cave ;
+- `humidor/queries.ts` → `humidor_shares_received()` et `shared_humidor_lots()` pour une cave
+  partagée et acceptée (ADR 0022).
+
+Les trois sont `SECURITY DEFINER` et projettent : quel cigare, combien, depuis quand — jamais le
+prix, le vendeur, les notes ni le grand livre. Une policy filtre des lignes ; elle ne sait pas
+cacher une colonne, et un prix de tabac chez un tiers est précisément ce que le §2 regarde. **Une
+lecture nouvelle de la cave d'autrui sera une fonction de plus, jamais une policy permissive** :
+les verrous l'annuleraient, et c'est voulu.
+
+`listHumidorShares()` porte un `.eq('humidor_id', …)` qui ressemble à une policy doublée sans en
+être une : il dit de quelle cave parle le panneau, jamais qui a le droit de la lire.
 
 ## Un échec de lecture n'est pas un refus de lecture
 

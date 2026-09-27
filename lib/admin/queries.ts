@@ -177,35 +177,41 @@ export type AccountRow = {
   id: string
   handle: string
   display_name: string | null
-  role: string
+  email: string | null
+  phone: string | null
+  city: string | null
+  country: string | null
+  role: AppRole
   reputation: number
   is_discoverable: boolean
   created_at: string
 }
 
 /**
- * Newest first: the account an admin looks for is usually the one that just
- * arrived. The search is a filter on what the page shows; the reason an admin
- * sees non-discoverable profiles at all is `profiles_select_directory`.
+ * Who each account is — the name they show, their e-mail, and a phone or a city
+ * when they gave one — newest first.
+ *
+ * Through `admin_accounts()` (migration 0037) and not through `profiles`: the
+ * list used to title every row by its handle, and four accounts in nine carry
+ * the one `tg_handle_new_user()` makes up — `membre_` and twelve hex digits —
+ * which told an admin nothing about who it was. The e-mail that does tell lives
+ * in `auth.users`, which no client role reads and no policy can open, so the
+ * read is a door guarded by `has_min_role('admin')` inside, the pattern of the
+ * moderator's doors (0018). A member calling it gets 42501, which this throws.
+ *
+ * The search runs in SQL and covers the name, the e-mail and the handle — the
+ * e-mail because it is how an admin finds someone who wrote to them.
  */
 export async function listAccounts(search: string): Promise<AccountRow[]> {
   const db = await createSupabaseServerClient()
-  let query = db
-    .from('profiles')
-    .select('id, handle, display_name, role, reputation, is_discoverable, created_at')
-    .order('created_at', { ascending: false })
-    .limit(PAGE)
+  const term = search.trim()
+  const { data, error } = await db.rpc('admin_accounts', {
+    p_search: term === '' ? undefined : term,
+    p_limit: PAGE,
+  })
 
-  /* Commas and parentheses are PostgREST `or=` syntax, not search text: kept,
-     they would turn a typed name into a filter expression that errors out. */
-  const term = search.trim().replace(/[,()]/g, ' ').trim()
-  if (term !== '') {
-    query = query.or(`handle.ilike.%${term}%,display_name.ilike.%${term}%`)
-  }
-
-  const { data, error } = await query
   if (error) throw new Error(`Could not read the accounts: ${error.message}`)
-  return (data ?? []) as AccountRow[]
+  return (data ?? []) as unknown as AccountRow[]
 }
 
 /* -------------------------------------------------------------------------- */

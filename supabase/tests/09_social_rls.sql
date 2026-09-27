@@ -640,6 +640,11 @@ begin
   reset role;
 end $$;
 
+-- H2 décrit la chaîne telle qu'elle est ICI, après la 0013 : la ligne `humidors`
+-- s'ouvre. La 0036 retire cette ouverture (ADR 0022) — elle faisait entrer la
+-- cave de A dans la liste « mes caves » de B, et les tables filles en héritaient
+-- en écriture. `23_cave_partage.sql` (S1) affirme l'inverse après la 0036 ;
+-- l'étagère du profil, elle, passe par `shared_humidor_shelf()` des deux côtés.
 \echo '=== H2  show_humidor a true : la cave s ouvre, le grand livre NON'
 do $$
 declare n integer;

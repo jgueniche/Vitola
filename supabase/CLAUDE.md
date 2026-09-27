@@ -138,6 +138,29 @@ partagées → tables → recherche → index → grants → RLS → storage →
   `private`, republiée par une porte de côté. Trois policies restrictives
   propriétaires referment cela, et l'auto-contrôle de 0010 vérifie qu'elles y
   sont : rien ne casse si elles disparaissent, une lecture rend simplement plus.
+  **Et elles ne suffisaient pas** : elles étaient `FOR SELECT`, et l'ouverture
+  cascadait aussi dans les policies d'**écriture** des tables filles, qui disent
+  « ma cave » par le même `EXISTS`. Du 23 août au 26 septembre 2026, un membre
+  pouvait écrire un relevé et importer des lots dans la cave montrée d'un autre,
+  et la cave elle-même apparaissait dans sa liste « mes caves ». La 0036 retire
+  l'ouverture et pose quatre verrous restrictifs **`FOR ALL`** qui nomment
+  `auth.uid()` (ADR 0022). Un verrou qui ne couvre qu'une commande laisse passer
+  les autres.
+- **Un INSERT sans `RETURNING` et un DELETE sans `WHERE` n'évaluent aucune
+  policy SELECT** — restrictive comprise. PostgreSQL n'applique les policies
+  SELECT à une écriture que si elle **lit** une colonne (clause `WHERE`,
+  `RETURNING`). PostgREST envoie `RETURNING 1` quand le client ne demande rien
+  en retour : c'est le chemin de `addReading` et de l'import CSV, et c'est par
+  là qu'on écrivait dans la cave d'autrui. Un `delete from humidor_items` nu, lui,
+  vidait toutes les caves montrées. Un test RLS doit exercer ces deux formes
+  exprès (`tests/23_cave_partage.sql`, S2) : celles qu'on écrit naturellement ont
+  un `WHERE`, et c'est ce `WHERE` qui les protégeait — par hasard.
+- **Une policy qui dit « à moi » par la visibilité d'une autre table hérite de
+  tout ce qui ouvre cette table.** `exists (select 1 from humidors h where
+  h.id = humidor_id)` voulait dire « ma cave » tant que `humidors` était
+  propriétaire ; il a voulu dire « toute cave que je peux lire » dès qu'une
+  policy l'a ouverte. Écrire `h.user_id = (select auth.uid())` coûte une
+  comparaison et ne dépend de personne.
 - **Un prédicat dans une policy s'évalue une fois PAR LIGNE examinée.**
   `blocks_between(author_id)` en `SECURITY DEFINER` coûtait 2 420 appels pour
   rendre vingt lignes de fil — l'essentiel du coût de la page. La même règle
@@ -206,6 +229,13 @@ colonne ne sait pas distinguer deux rôles applicatifs (`admin` et vendeur) du m
 PostgreSQL (`authenticated`). Les triggers de garde suivent la lettre de la 0009 — prédicat de
 privilège inline, `SECURITY INVOKER`, `has_min_role()` appelable par l'appelant — parce que
 chacun des trois écarts de cette recette a déjà coûté son bug.
+
+Depuis 0036, deux de plus, et une colonne qu'il ne doit pas **lire** : `humidor_shares.accepted_at`
+et `humidor_shares.hidden_at` sont hors du `GRANT INSERT` — une invitation naît en attente, et
+personne n'écrit le « oui » d'un autre —, et **`hidden_at` est hors du `GRANT SELECT`** : masquer
+une cave qu'on vous a partagée est votre affaire, pas un message au propriétaire. Le destinataire
+relit ce choix par `humidor_shares_received()`. Un `select('*')` sur la table lève donc `42501`,
+et c'est voulu.
 
 ## Seed
 

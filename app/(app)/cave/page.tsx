@@ -7,20 +7,30 @@ import { EmptyState } from '@/components/layout/empty-state'
 import { MineTabs } from '@/components/layout/mine-tabs'
 import { SectionHead } from '@/components/layout/section-head'
 import { Button } from '@/components/ui/button'
+import { Unavailable } from '@/components/layout/unavailable'
 import { formatPrice } from '@/lib/cigar'
+import { accessory } from '@/lib/degrade'
 import { formatCount } from '@/lib/format'
 import { fillRatio, needsRotation } from '@/lib/humidor/model'
-import { listAllLots, listHumidors } from '@/lib/humidor/queries'
+import {
+  listAllLots,
+  listHumidors,
+  listReceivedShares,
+  type ReceivedShare,
+} from '@/lib/humidor/queries'
 import { m } from '@/lib/i18n'
 import { routes } from '@/lib/routes'
+import { humidorConfirmation } from '@/lib/social/confirmations'
 import { currentUser } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 
 import { HumidorForm } from './humidor-form'
+import { ShareAnswerButton } from './share-answer-button'
 
 export const metadata: Metadata = { title: m.humidor.title }
 
 const copy = m.humidor
+const shared = m.humidor.shared
 
 /**
  * Ma cave — every humidor, and what they hold together.
@@ -33,19 +43,46 @@ const copy = m.humidor
  * Signed out redirects rather than showing an empty state. A humidor has
  * nothing to show an anonymous visitor, and "connectez-vous" dressed as a
  * destination is a page pretending to be one — the notebook settled this.
+ *
+ * Since 26 September 2026 (ADR 0022) the page also holds what others offered:
+ * invitations first, because they wait on an answer; the humidors shared with
+ * this member after their own, never mixed into them nor into the totals — a
+ * figure that added somebody else's stock to yours would be an inventory of
+ * nothing anyone owns; and the hidden ones last, folded away. None of them is
+ * read from `humidors`, which returns this member's rows and nobody else's
+ * since migration 0036: they come through `humidor_shares_received()`.
  */
-export default async function HumidorPage() {
+export default async function HumidorPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   const user = await currentUser()
   if (!user) {
     redirect(`${routes.signIn()}?suite=${encodeURIComponent(routes.humidor())}`)
   }
+
+  const done = humidorConfirmation((await searchParams).fait)
 
   /* Both bare, and `listAllLots()` deliberately so (ADR 0020): this page is
      « mes caves ET ce qu'elles tiennent ». Degrading the lots would print
      « 0 cigare » and « 0 € » against every humidor — an inventory the reader
      would read as true. A list of humidors claiming an empty stock is worse
      than an error screen, so the stock is part of the subject. */
-  const [humidors, lots] = await Promise.all([listHumidors(), listAllLots()])
+  const [humidors, lots, sharesRead] = await Promise.all([
+    listHumidors(),
+    listAllLots(),
+    /* What others offered accompanies « mes caves » and is not it: a failed
+       read says so in its section, and the reader's own stock still renders. */
+    accessory(listReceivedShares()),
+  ])
+
+  const received = sharesRead.ok ? sharesRead.value : []
+  const invitations = received.filter((share) => share.accepted_at === null)
+  const sharedWithMe = received.filter(
+    (share) => share.accepted_at !== null && share.hidden_at === null,
+  )
+  const hidden = received.filter((share) => share.accepted_at !== null && share.hidden_at !== null)
 
   const totalCigars = lots.reduce((sum, lot) => sum + lot.qty, 0)
   const totalValue = lots.reduce((sum, lot) => sum + (lot.stock_value_eur ?? 0), 0)
@@ -62,6 +99,57 @@ export default async function HumidorPage() {
       <MineTabs current="humidor" />
 
       <SectionHead eyebrow={copy.eyebrow} title={copy.title} lede={copy.lede} />
+
+      {done ? (
+        <p role="status" className="border-accent text-ink border-l-2 py-1 pl-3 text-sm">
+          {done}
+        </p>
+      ) : null}
+
+      {!sharesRead.ok ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="font-display text-display-sm">{shared.title}</h2>
+          <Unavailable />
+        </section>
+      ) : invitations.length > 0 ? (
+        <section aria-labelledby="invitations" className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 id="invitations" className="font-display text-display-sm">
+              {shared.invitationsTitle}
+            </h2>
+            <p className="lede">{shared.invitationsLede}</p>
+          </div>
+          <ul className="border-rule flex flex-col border-t">
+            {invitations.map((share) => (
+              <li
+                key={share.humidor_id}
+                className="border-rule flex flex-wrap items-center justify-between gap-3 border-b py-3"
+              >
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-ink">{share.humidor_name}</span>
+                  <span className="text-ink-muted text-sm">
+                    {shared.offeredBy.replace('{owner}', ownerName(share))}
+                  </span>
+                </span>
+                <span className="flex flex-wrap items-start gap-2">
+                  <ShareAnswerButton
+                    humidorId={share.humidor_id}
+                    answer="accept"
+                    label={shared.accept}
+                    variant="primary"
+                  />
+                  <ShareAnswerButton
+                    humidorId={share.humidor_id}
+                    answer="decline"
+                    label={shared.decline}
+                    variant="ghost"
+                  />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {humidors.length === 0 ? (
         <EmptyState
@@ -152,6 +240,85 @@ export default async function HumidorPage() {
         </>
       )}
 
+      {sharedWithMe.length > 0 ? (
+        <section aria-labelledby="partagees" className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 id="partagees" className="font-display text-display-sm">
+              {shared.title}
+            </h2>
+            <p className="lede">{shared.lede}</p>
+          </div>
+          <ul className="border-rule flex flex-col border-t">
+            {sharedWithMe.map((share) => (
+              <li
+                key={share.humidor_id}
+                className="border-rule flex flex-wrap items-center justify-between gap-3 border-b py-3"
+              >
+                <Link
+                  href={routes.humidorShared(share.humidor_id)}
+                  className="group flex flex-col gap-0.5"
+                >
+                  <span className="text-ink group-hover:text-accent">{share.humidor_name}</span>
+                  <span className="text-ink-muted text-sm">
+                    {shared.by.replace('{owner}', ownerName(share))} ·{' '}
+                    {fillLabel(share.cigar_count ?? 0, share.capacity)}
+                  </span>
+                </Link>
+                <ShareAnswerButton
+                  humidorId={share.humidor_id}
+                  answer="hide"
+                  label={shared.hide}
+                  variant="ghost"
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {hidden.length > 0 ? (
+        /* Folded, because it is what the reader asked not to see — and a
+           `<details>` rather than a toggle, so it needs no JavaScript and
+           nothing to remember. */
+        <details className="border-rule border-t pt-4">
+          <summary className="text-ink-muted hover:text-ink cursor-pointer text-sm">
+            {shared.hiddenTitle.replace('{count}', String(hidden.length))}
+          </summary>
+          <div className="flex flex-col gap-3 pt-3">
+            <p className="text-ink-faint measure text-xs leading-relaxed">{shared.hiddenLede}</p>
+            <ul className="border-rule flex flex-col border-t">
+              {hidden.map((share) => (
+                <li
+                  key={share.humidor_id}
+                  className="border-rule flex flex-wrap items-center justify-between gap-3 border-b py-3"
+                >
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-ink">{share.humidor_name}</span>
+                    <span className="text-ink-muted text-sm">
+                      {shared.by.replace('{owner}', ownerName(share))}
+                    </span>
+                  </span>
+                  <span className="flex flex-wrap items-start gap-2">
+                    <ShareAnswerButton
+                      humidorId={share.humidor_id}
+                      answer="show"
+                      label={shared.show}
+                    />
+                    <ShareAnswerButton
+                      humidorId={share.humidor_id}
+                      answer="leave"
+                      label={shared.leave}
+                      confirm={shared.leaveConfirm}
+                      variant="ghost"
+                    />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      ) : null}
+
       <section className="border-rule flex flex-col gap-3 border-t pt-8">
         <h2 className="font-display text-display-sm">{copy.createTitle}</h2>
         <p className="lede">{copy.createLede}</p>
@@ -159,6 +326,18 @@ export default async function HumidorPage() {
       </section>
     </main>
   )
+}
+
+/** Who offered a shared humidor, by the name they chose to show. */
+function ownerName(share: ReceivedShare): string {
+  if (share.owner_display_name) return share.owner_display_name
+  return share.owner_handle ? `@${share.owner_handle}` : shared.someone
+}
+
+function fillLabel(held: number, capacity: number | null): string {
+  return capacity
+    ? copy.fill.replace('{count}', String(held)).replace('{capacity}', String(capacity))
+    : copy.fillNoCapacity.replace('{count}', String(held))
 }
 
 /** A fill level, drawn rather than written. Capped: over-full is still full. */

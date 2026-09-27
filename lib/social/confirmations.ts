@@ -1,3 +1,4 @@
+import { HUMIDOR_DONE } from '@/lib/humidor/model'
 import { m } from '@/lib/i18n'
 import { CLUB_DONE, EVENT_DONE, MESSAGE_DONE } from '@/lib/social/groups'
 import { PERSON_DONE } from '@/lib/social/model'
@@ -71,4 +72,25 @@ export function eventConfirmation(raw: string | string[] | undefined): string | 
 
 export function messagingConfirmation(raw: string | string[] | undefined): string | null {
   return lookup(MESSAGE_SENTENCES, raw)
+}
+
+/**
+ * The humidor's, for `/cave` (ADR 0022).
+ *
+ * Deleting a cave, answering an invitation and hiding or leaving a shared one
+ * all remove the control they were pressed on, so all of them navigate to
+ * `/cave` and say what happened here. A deletion used to navigate there saying
+ * nothing, and a deletion the database had refused looked exactly the same.
+ */
+const HUMIDOR_SENTENCES: Record<string, string> = {
+  [HUMIDOR_DONE.deleted]: m.humidor.deleted,
+  [HUMIDOR_DONE.accepted]: m.humidor.shared.done.accepted,
+  [HUMIDOR_DONE.declined]: m.humidor.shared.done.declined,
+  [HUMIDOR_DONE.hidden]: m.humidor.shared.done.hidden,
+  [HUMIDOR_DONE.shown]: m.humidor.shared.done.shown,
+  [HUMIDOR_DONE.left]: m.humidor.shared.done.left,
+}
+
+export function humidorConfirmation(raw: string | string[] | undefined): string | null {
+  return lookup(HUMIDOR_SENTENCES, raw)
 }

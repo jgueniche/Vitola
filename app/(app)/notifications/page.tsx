@@ -132,6 +132,17 @@ export default async function NotificationsPage({
                         {copy.openEntry}
                       </Link>
                     ) : null}
+                    {/* An invitation carries no id of the cave, on purpose: the
+                        recipient cannot open it before accepting, and the
+                        invitations are listed where they are answered. */}
+                    {row.kind === 'humidor_share' ? (
+                      <Link
+                        href={`${routes.humidor()}#invitations`}
+                        className="text-accent hover:underline"
+                      >
+                        {copy.openInvitation}
+                      </Link>
+                    ) : null}
                     {row.actor ? (
                       <Link
                         href={routes.member(row.actor.handle)}

@@ -197,19 +197,32 @@ export function ImportForm({ humidorId }: { humidorId: string }) {
   )
 }
 
-/** Deleting a cave takes its lots, its ledger and its readings with it. */
+/**
+ * Deleting a cave takes its lots, its ledger, its readings and its shares with
+ * it.
+ *
+ * The one form in this file that used to post to a bare action, and the one
+ * that could not say it had been refused: the policy declines somebody else's
+ * cave by deleting nothing, the action redirected all the same, and the cave
+ * was still listed on arrival (ADR 0022). A success navigates, because the page
+ * holding this button is gone; a refusal stays here and says why.
+ */
 export function DeleteHumidorForm({ id }: { id: string }) {
+  const [state, action, pending] = useActionState<HumidorState, FormData>(deleteHumidor, {})
+
   return (
     <form
-      action={deleteHumidor}
+      action={action}
       onSubmit={(event) => {
         if (!window.confirm(copy.deleteConfirm)) event.preventDefault()
       }}
+      className="flex flex-col items-start gap-2"
     >
       <input type="hidden" name="id" value={id} />
-      <Button type="submit" variant="ghost" size="sm">
+      <Button type="submit" variant="ghost" size="sm" disabled={pending}>
         {copy.delete}
       </Button>
+      {state.error ? <FieldError>{state.error}</FieldError> : null}
     </form>
   )
 }
