@@ -1188,11 +1188,16 @@ destinataire, tiers, propriétaire — avec axe-core à 0 violation. Le parcours
 la vraie base une fois les migrations appliquées — il nettoie derrière lui.
 
 **Les deux questions de l'ADR 0022 sont tranchées** (27 septembre) : le destinataire consulte et
-n'écrit pas, et « Montrer ma cave » reste, pour les seuls destinataires (règle 6). **L'ordre de mise
-en production** : les migrations 0036, 0037 et 0038 sur le projet, **puis** le code — la 0036 ne
-retire qu'une lecture que rien de légitime n'utilisait et la 0038 ne change pas la forme de la
-porte, donc le code déjà déployé les supporte ; l'inverse rendrait `/admin/comptes` et les écrans
-du partage sur des fonctions qui n'existent pas.
+n'écrit pas, et « Montrer ma cave » reste, pour les seuls destinataires (règle 6). **Les migrations
+0036, 0037 et 0038 sont appliquées sur le projet le 27 septembre 2026, avant le code** (versions
+`20260927205454`, `20260927205543`, `20260927205624`) — la 0036 ne retire qu'une lecture que rien
+de légitime n'utilisait et la 0038 ne change pas la forme de la porte, donc le code déjà déployé
+les supportait ; l'inverse aurait rendu `/admin/comptes` et les écrans du partage sur des
+fonctions absentes. Vérifié avant : les six fonctions que la 0036 et la 0038 remplacent ou
+appellent avaient en production **la même empreinte** (`md5(prosrc)`) qu'au terme de la 0035 dans
+la chaîne locale. Vérifié après : les quatre portes et les vingt et une policies des cinq tables
+de la cave ont la même empreinte qu'en local, où les tests 23 à 25 passent. Le connecteur
+Supabase ne peut pas endosser `authenticated`, donc l'effet se prouve par l'application.
 
 ## La liste des comptes dit à qui l'on a affaire — 26 septembre 2026
 

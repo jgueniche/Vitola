@@ -28,6 +28,12 @@ Mesuré : `25_cave_montree.sql` (8 assertions) passe sur la chaîne complète ju
 **échoue sur celle qui s'arrête à la 0037** — « un tiers sans partage lit 2 lot(s) », c'est-à-dire
 les deux caves d'un membre qui n'en avait partagé aucune avec lui.
 
+**En production, le même jour, avant le code** : 0036, 0037 et 0038 appliquées par
+`apply_migration` (sans leurs `begin;`/`commit;` — l'appel est une transaction), après avoir
+vérifié que les fonctions qu'elles remplacent y avaient l'empreinte de la chaîne locale à la 0035,
+et relues après : mêmes empreintes pour les portes et les policies qu'en local. Le jeton de l'API
+de gestion de l'environnement répond 401 ; le connecteur Supabase, lui, passe.
+
 ## La liste des comptes dit à qui l'on a affaire — 26 septembre 2026
 
 **Demandé par le porteur** : `/admin/comptes` titrait chaque ligne par son pseudo — « du style
