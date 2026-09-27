@@ -9,7 +9,10 @@
  * montrée sur le profil apparaissait dans la liste d'un autre membre, avec un
  * bouton de suppression qui ne supprimait rien —, puis la vie entière d'un
  * partage : inviter, être prévenu, accepter, lire sans rien voir du prix,
- * masquer, réafficher, quitter, et supprimer la cave.
+ * masquer, réafficher, quitter, et supprimer la cave. Et, depuis la 0038, ce
+ * que le profil du propriétaire montre : rien à qui n'a pas de partage, la
+ * seule cave partagée à qui l'a acceptée, rien une fois la case décochée — sans
+ * que décocher la case reprenne le partage.
  *
  * Il **nettoie derrière lui** : la cave de parcours est supprimée à la fin, et
  * ses partages partent avec elle (`on delete cascade`). « Montrer ma cave » est
@@ -28,6 +31,8 @@ const ACCOUNTS = {
   un: process.env.PARCOURS_USER_ONE ?? 'test1@cigardeur.com',
   deux: process.env.PARCOURS_USER_TWO ?? 'test2@cigardeur.com',
 }
+/** Le pseudo de « un », dont « deux » ouvre le profil. */
+const HANDLE_ONE = process.env.PARCOURS_HANDLE_ONE ?? 'test_un'
 /** Le pseudo de « deux », que « un » cherche pour l'inviter. */
 const HANDLE_TWO = process.env.PARCOURS_HANDLE_TWO ?? 'test_deux'
 /** Une fiche publiée, que « un » range avec un prix — le prix qui ne doit pas traverser. */
@@ -110,8 +115,15 @@ async function showHumidor(page: Page, on: boolean): Promise<boolean> {
   const before = await box.isChecked()
   if (before !== on) {
     await box.setChecked(on)
-    await page.locator('form', { has: box }).getByRole('button', { name: 'Enregistrer' }).click()
-    await seen(page, 'Enregistré')
+    const form = page.locator('form', { has: box })
+    await form.getByRole('button', { name: 'Enregistrer' }).click()
+    /* The form's own confirmation, not the word: `/parametres` already reads
+       « enregistré » twice in its prose, so waiting for the text returned at
+       once and the next step raced the write. */
+    await form
+      .locator('[role="status"]', { hasText: 'Enregistré' })
+      .waitFor({ timeout: 15000 })
+      .catch(() => undefined)
   }
   return before
 }
@@ -133,6 +145,7 @@ async function run(): Promise<void> {
   for (const page of [owner, guest]) page.on('dialog', (dialog) => void dialog.accept())
 
   let humidorUrl: string | null = null
+  let sharedUrl: string | null = null
   let shownBefore: boolean | null = null
 
   try {
@@ -184,6 +197,18 @@ async function run(): Promise<void> {
       )
     }
 
+    /* La case est cochée, et « deux » n'a encore aucun partage : depuis la 0038,
+       le profil ne lui montre rien, et ne prétend pas non plus que la cave est
+       masquée. */
+    await guest.goto(`${BASE}/membres/${HANDLE_ONE}`)
+    await settle(guest)
+    const strangerView = await text(guest)
+    check(
+      'case cochée, le profil ne montre pas la cave à qui ne l’a pas acceptée',
+      !contains(strangerView, CAVE_NAME) && !contains(strangerView, 'ne montre pas sa cave'),
+      strangerView.slice(0, 300),
+    )
+
     /* ------------------------------------------------- 2. l'invitation */
     console.log('\n2. Inviter, être prévenu, accepter')
     await owner.goto(`${humidorUrl}?membre=${encodeURIComponent(HANDLE_TWO)}#partage`)
@@ -216,6 +241,7 @@ async function run(): Promise<void> {
     await row(guest, CAVE_NAME).getByRole('link').click()
     await guest.waitForURL(/\/cave\/partagee\//, { timeout: 15000 }).catch(() => undefined)
     await settle(guest)
+    sharedUrl = guest.url()
     const shared = await text(guest)
     check(
       'la page se dit en lecture seule',
@@ -229,6 +255,40 @@ async function run(): Promise<void> {
       (await guest.locator('input[type="file"], input[name="rh"], input[name="qty"]').count()) ===
         0,
     )
+
+    /* ------------------------------------ 3 bis. le profil, pour elle seule */
+    console.log('\n3 bis. Le profil montre la cave à la personne qui l’a acceptée, et à elle seule')
+    await guest.goto(`${BASE}/membres/${HANDLE_ONE}`)
+    await settle(guest)
+    const recipientView = await text(guest)
+    check(
+      'la cave partagée est sur le profil de son propriétaire',
+      contains(recipientView, CAVE_NAME),
+      recipientView.slice(0, 400),
+    )
+    check('avec ses quatre cigares', contains(recipientView, '4 en cave'))
+    check('et toujours sans prix', !recipientView.includes('€') && !recipientView.includes('17,50'))
+
+    await owner.goto(`${BASE}/membres/${HANDLE_ONE}`)
+    await settle(owner)
+    check(
+      'le propriétaire lit à qui son profil montre ses caves',
+      await seen(owner, 'avec qui vous en avez partagé une'),
+    )
+
+    await showHumidor(owner, false)
+    await guest.goto(`${BASE}/membres/${HANDLE_ONE}`)
+    await settle(guest)
+    check('case décochée, le profil ne la montre plus', await seen(guest, 'ne montre pas sa cave'))
+    if (sharedUrl) {
+      await guest.goto(sharedUrl)
+      await settle(guest)
+      check(
+        'mais le partage, lui, reste lisible : décocher ne reprend rien',
+        contains(await text(guest), CAVE_NAME) && contains(await text(guest), 'Lecture seule'),
+      )
+    }
+    await showHumidor(owner, true)
 
     /* ------------------------------------------- 4. masquer, réafficher */
     console.log('\n4. Masquer, sans que le propriétaire le sache ; réafficher')
@@ -245,6 +305,12 @@ async function run(): Promise<void> {
       contains(panel, 'A accepté') && !contains(panel, 'masqu'),
     )
 
+    await guest.goto(`${BASE}/membres/${HANDLE_ONE}`)
+    await settle(guest)
+    check('masquée, elle quitte aussi le profil', !contains(await text(guest), CAVE_NAME))
+
+    await guest.goto(`${BASE}/cave`)
+    await settle(guest)
     await main(guest).locator('details summary').click()
     await row(guest, CAVE_NAME).getByRole('button', { name: 'Afficher de nouveau' }).click()
     await guest.waitForURL(/fait=affichee/, { timeout: 15000 }).catch(() => undefined)

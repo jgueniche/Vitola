@@ -563,6 +563,23 @@ jobs:
             exit 1
           fi
 
+      # 0038 : « Montrer ma cave » ne s'adresse qu'aux personnes à qui la cave
+      # est partagée (arbitrage du 27 septembre 2026 sur l'ADR 0022). Le test 23
+      # a tourné avant elle, sur l'étagère ouverte à tous : c'est l'état qu'il
+      # décrit. Le test 25 décrit celui-ci.
+      - name: Apply 0038 — la cave montrée aux seuls destinataires
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/0038_cave_montree_aux_destinataires.sql
+
+      - name: Cave montrée — tiers, invité, destinataire, propriétaire
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/25_cave_montree.sql 2>&1 \
+            | tee "$RUNNER_TEMP/cave-montree.log"
+          if grep -q 'SET LOCAL can only be used in transaction blocks' "$RUNNER_TEMP/cave-montree.log"; then
+            echo "::error::Une assertion change de rôle hors transaction : elle ne teste rien."
+            exit 1
+          fi
+
       # Rejoué APRÈS 0021 et 0022 : sa première exécution (après 0007) précède
       # la naissance de shop, donc sa clause shop y est vide — c'est ici
       # qu'elle mord (l'export RGPD lira shop.vendors et product_reviews).

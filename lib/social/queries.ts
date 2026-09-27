@@ -274,7 +274,8 @@ export async function getProfileByHandle(handle: string): Promise<PublicProfile 
  * would hide a profile its owner chose to open (ADR 0006, D4).
  *
  * Two of the three govern what this page *shows*; only `show_humidor` governs
- * what may be *read*, and that one is a policy. Migration 0011 explains the
+ * what may be *read*, and `shared_humidor_shelf()` is what enforces it — it was
+ * a policy until migration 0036 removed it (ADR 0022). Migration 0011 explains the
  * distinction at length, and it is the reason these two are honoured here in
  * TypeScript without breaking the rule that audiences never are: an entry
  * scoped `public` stays public whatever this returns. What the key decides is
@@ -386,7 +387,11 @@ export async function listFollowGraph(
 }
 
 /**
- * The shelf a member chose to show — `privacy.show_humidor` honoured at last.
+ * The shelf a member chose to show — `privacy.show_humidor` honoured at last,
+ * and, since migration 0038, shown only to the members a humidor is shared
+ * with: the function answers the reader alone, with the humidors shared with
+ * them (accepted, not hidden), and nothing to anyone else. The page does not
+ * decide who may read; an empty result is what a non-recipient gets.
  *
  * Goes through `shared_humidor_shelf()` rather than through `humidor_items`,
  * and ADR 0007's D5 is the reason: a policy filters rows and cannot project a

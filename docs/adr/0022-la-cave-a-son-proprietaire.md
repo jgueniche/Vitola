@@ -1,13 +1,15 @@
 # 0022 — Rendre chaque cave à son propriétaire, et n'en ouvrir une que par une invitation acceptée
 
 - **Statut** : **Acceptée** le 26 septembre 2026 — demande du porteur (« il faut absolument que
-  chaque cave soit strictement personnelle, hormis la possibilité de partager une cave ») ; deux
-  questions ouvertes ci-dessous
+  chaque cave soit strictement personnelle, hormis la possibilité de partager une cave ») ; ses
+  deux questions **tranchées le 27 septembre 2026** (voir la dernière section) — lecture seule
+  confirmée, « Montrer ma cave » gardé pour les seuls destinataires (D7, migration `0038`)
 - **Date** : 2026-09-26
 - **Décideur** : @jgueniche
 - **Concerne** : `public.humidors` · `public.humidor_items` · `public.humidor_events` ·
   `public.humidor_readings` · `public.humidor_shares` (nouvelle) · `public.notifications` ·
-  migration `0036` · `app/(app)/cave/**` · `lib/humidor/**` · ADR 0006 (D4) · ADR 0007 (D5)
+  `public.shared_humidor_shelf()` · migrations `0036` et `0038` · `app/(app)/cave/**` ·
+  `app/(app)/membres/[handle]` · `lib/humidor/**` · ADR 0006 (D4) · ADR 0007 (D5)
 
 ## Contexte
 
@@ -144,7 +146,9 @@ ce que la suppression a rendu, et dit « refusée » plutôt que de rediriger co
 - **« Montrer ma cave » continue de faire ce qu'il promet**, sur le profil, par
   `shared_humidor_shelf()`. Il n'ouvre plus la ligne `humidors`, et la promesse du réglage — « sans
   lui, votre cave est illisible d'un tiers, par n'importe quel chemin » — devient enfin exacte : le
-  seul chemin est la fonction, qui lit la clé.
+  seul chemin est la fonction, qui lit la clé. _(Le lendemain, la D7 borne ce chemin aux
+  destinataires d'un partage, et le partage devient un second chemin, qui ne lit pas la clé : la
+  promesse du réglage a été réécrite en conséquence.)_
 - **Le destinataire ne voit aucune valeur**, puisqu'il ne voit aucun prix : ni « valeur du stock »,
   ni prix par lot. L'âge en jours dérive de la date d'achat quand la date de vieillissement manque ;
   c'est la donnée que le §5.5 veut afficher, et le propriétaire a choisi la personne.
@@ -163,7 +167,9 @@ Le jour où un destinataire demande à **écrire** dans une cave partagée — l
 club. La D4 se rouvre alors avec deux questions qui ne se tranchent pas en passant : un rôle porté
 par le partage, et **dans quel carnet s'écrit l'entrée** quand on fume le cigare d'un autre.
 
-## Question ouverte
+## Questions tranchées — 27 septembre 2026
+
+Les deux questions étaient posées ainsi :
 
 1. **Un destinataire doit-il pouvoir écrire ?** Lecture seule par défaut, parce que fumer depuis une
    cave écrit une entrée de carnet au nom du fumeur et décompte le stock d'un autre.
@@ -171,3 +177,35 @@ par le partage, et **dans quel carnet s'écrit l'entrée** quand on fume le ciga
    membres, et ne montre qu'une projection sur le profil. Si « strictement personnelle » veut aussi
    dire « pas même sur mon profil », le retirer est une migration d'une page — la fonction, la clé
    et son écran.
+
+**Arbitrage du porteur** : « Oui il peut juste consulter la cave » ; « Oui on garde la case montrer
+la cave (mais uniquement à quelqu'un à qui on l'a partagé) ».
+
+**La première confirme la D4** : lecture seule, et rien ne change dans le code. La section « Quand
+rouvrir » reste le déclencheur.
+
+**La seconde devient une septième décision.**
+
+7. **« Montrer ma cave » ne s'adresse qu'aux personnes à qui une cave est partagée (0038).**
+   `shared_humidor_shelf(owner)` ne rend plus que les caves de ce propriétaire partagées avec
+   l'appelant, **acceptées et non masquées**, tant que la case est cochée et qu'aucun blocage ne
+   les sépare. Trois lectures de la phrase du porteur ont été tranchées en l'écrivant :
+
+   - **Par cave, pas par personne.** Un destinataire lit sur le profil la cave qu'on lui a
+     partagée, jamais les autres caves du même propriétaire : le partage se fait cave par cave
+     (D2), et l'étagère ne peut pas ouvrir plus que lui. Lire « à quelqu'un à qui on l'a
+     partagée » comme « à quiconque a reçu une de mes caves » aurait rouvert, pour chaque
+     destinataire, toutes les autres — la fuite du 26 septembre, en plus petit.
+   - **Masquée, elle quitte aussi le profil.** Masquer, c'est « ne plus l'avoir affichée » (D5) ;
+     qu'elle revienne par la page de quelqu'un d'autre démentirait le geste. La réafficher la rend
+     partout.
+   - **La case ne reprend pas le partage.** Décochée, l'étagère est vide pour tout le monde, mais
+     une cave acceptée reste lisible par sa porte, `shared_humidor_lots()`, qui ne lit pas la clé.
+     Deux gestes, deux portes : retirer un partage se fait sur la cave, et une case de profil qui
+     reprendrait sans le dire ce qu'on a donné nommément serait un second interrupteur caché.
+
+   Le propriétaire n'étant le destinataire d'aucune de ses caves, son propre profil ne lit pas
+   l'étagère : il dit à qui elle se montre. Le type de retour de la fonction ne change pas — même
+   projection qu'en 0010, jamais le prix — et `25_cave_montree.sql` éprouve un tiers, un invité,
+   un destinataire, le masquage, la case décochée, le blocage et le propriétaire ; il échoue sur la
+   chaîne qui s'arrête à la 0037 (« un tiers sans partage lit 2 lot(s) »).

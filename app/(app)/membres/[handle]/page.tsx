@@ -84,11 +84,16 @@ function PersonList({
  * Three keys decide what it shows, and they are not the same kind of promise.
  * Migration 0011 spells the distinction out; here is what it looks like:
  *
- *   - **`show_humidor`** is a right. The shelf comes from
- *     `shared_humidor_shelf()`, which re-checks the key and the block itself,
- *     and a direct read of `humidor_items` returns nothing whatever this page
- *     does — a RESTRICTIVE policy sees to that. The price never crosses,
- *     because the function does not return it.
+ *   - **`show_humidor`** is a right, and since migration 0038 it speaks only
+ *     to the members a humidor is shared with. The shelf comes from
+ *     `shared_humidor_shelf()`, which re-checks the key, the block and the
+ *     share itself — accepted, not hidden — and answers the reader alone: a
+ *     member without a share reads nothing, a recipient reads the humidor
+ *     shared with them and not the owner's others. A direct read of
+ *     `humidor_items` returns nothing whatever this page does — a RESTRICTIVE
+ *     policy sees to that. The price never crosses, because the function does
+ *     not return it. The owner is nobody's recipient, so their own profile
+ *     says to whom it shows rather than reading an empty shelf.
  *   - **`show_reviews`** is a display. A `public` entry stays public: it is on
  *     the cigar page and in its average whatever this says. What the key
  *     decides is whether the profile lists them, and the page says so rather
@@ -175,7 +180,7 @@ export default async function MemberPage({
     privacy.show_reviews
       ? listMyNotebook(profile.id, { visibility: 'public' })
       : Promise.resolve([]),
-    privacy.show_humidor ? readSharedShelf(profile.id) : Promise.resolve([]),
+    privacy.show_humidor && !isMe ? readSharedShelf(profile.id) : Promise.resolve([]),
   ])
 
   /* Two follow-up queries for the whole page, never one per card. The feed gets
@@ -358,10 +363,14 @@ export default async function MemberPage({
       </Section>
 
       <Section title={copy.humidorTitle}>
-        {!privacy.show_humidor ? (
+        {isMe ? (
+          <p className="text-ink-faint measure text-sm leading-relaxed">
+            {privacy.show_humidor ? copy.humidorSelfShown : copy.humidorSelfHidden}
+          </p>
+        ) : !privacy.show_humidor ? (
           <p className="text-ink-faint measure text-sm leading-relaxed">{copy.humidorHidden}</p>
         ) : shelf.length === 0 ? (
-          <p className="text-ink-faint text-sm">{copy.humidorEmpty}</p>
+          <p className="text-ink-faint measure text-sm leading-relaxed">{copy.humidorEmpty}</p>
         ) : (
           <>
             <p className="lede">{copy.humidorNote}</p>

@@ -430,13 +430,16 @@ async function main(): Promise<void> {
 
     await other.goto(`${BASE}/membres/${HANDLES.un}`)
     await settle(other)
+    /* Depuis la 0038, la case ne s'adresse qu'aux personnes à qui une cave est
+       partagée : un tiers sans partage ne lit rien, case cochée, et la page le
+       lui dit au lieu de parler d'une cave masquée. Ce qu'un destinataire lit
+       sur le profil — et seulement la cave partagée avec lui — est dans
+       `partage.ts`. */
     const shown = await other.locator('main').innerText()
-    check('la cave apparaît chez le tiers', !contains(shown, 'ne montre pas sa cave'), shown.slice(0, 400))
     check(
-      'et la page dit que le prix ne traverse pas',
-      contains(shown, 'Jamais ce qu’elle a coûté') || contains(shown, "Jamais ce qu'elle a coûté") ||
-        contains(shown, 'Sa cave est vide'),
-      shown.slice(0, 500),
+      'case cochée, le tiers sans partage ne lit toujours rien',
+      !contains(shown, 'ne montre pas sa cave') && contains(shown, 'Rien à vous montrer'),
+      shown.slice(0, 400),
     )
 
     /* ---------------------------------- 11. la dette 3 : les deux clés */

@@ -114,7 +114,9 @@ begin
   select count(*) into n from public.humidors where id = 'c0ca0000-0000-4000-8000-0000000000a1';
   if n <> 0 then raise exception 'FAIL: la cave montree de A est lisible en direct'; end if;
 
-  -- La promesse du réglage est tenue par sa porte, et par elle seule.
+  -- La promesse du réglage est tenue par sa porte, et par elle seule. C'est
+  -- l'état d'après la 0036 : la 0038 borne ensuite cette porte aux personnes à
+  -- qui la cave est partagée, et `25_cave_montree.sql` le décrit.
   select count(*) into n from public.shared_humidor_shelf('c0ca0001-0000-4000-8000-000000000001');
   if n <> 1 then raise exception 'FAIL: l etagere du profil rend % lot(s) au lieu de 1', n; end if;
 

@@ -169,7 +169,9 @@ est retirée, et quatre policies **restrictives `FOR ALL`** nomment `auth.uid()`
 tables, si bien qu'aucune policy permissive future ne peut rouvrir une cave, ni en lecture ni en
 écriture. La cave d'un tiers se lit par deux portes et pas une de plus :
 
-- `social/queries.ts` → `shared_humidor_shelf()` pour le profil (`show_humidor`, ADR 0007 D5) ;
+- `social/queries.ts` → `shared_humidor_shelf()` pour le profil (`show_humidor`, ADR 0007 D5) —
+  qui, depuis la 0038, ne répond qu'aux personnes à qui la cave est partagée, et seulement pour
+  cette cave ;
 - `humidor/queries.ts` → `humidor_shares_received()` et `shared_humidor_lots()` pour une cave
   partagée et acceptée (ADR 0022).
 

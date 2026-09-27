@@ -108,12 +108,15 @@ export function readPrivacy(value: unknown): Privacy {
  * three switches are not the same *kind* of promise:
  *
  *   - `right`   — the data is unreadable without it. `show_humidor` is enforced
- *     by `shared_humidor_shelf()`, which reads the key itself and is the only
- *     route to another member's humidor — so turning it off does not merely
- *     hide the humidor from a page: it makes it unreadable, by any route.
- *     (It was enforced by a policy, `humidors_select_shown`, until migration
- *     0036 removed it: the policy opened the whole row, and with it the
- *     humidor into other members' « Ma cave » — ADR 0022.)
+ *     by `shared_humidor_shelf()`, which reads the key itself — so turning it
+ *     off does not merely hide the shelf from a page: the profile route
+ *     returns nothing, to anyone. (It was enforced by a policy,
+ *     `humidors_select_shown`, until migration 0036 removed it: the policy
+ *     opened the whole row, and with it the humidor into other members'
+ *     « Ma cave » — ADR 0022.) Since 0038 the key speaks only to the members a
+ *     humidor is shared with, and it is no longer the only route: an accepted
+ *     share is a second one, `shared_humidor_lots()`, which does not read the
+ *     key — unticking it does not take back a humidor one has shared.
  *   - `display` — the data is readable, and the switch decides whether the
  *     profile *shows* it. A `public` notebook entry stays on the cigar page and
  *     in its average whatever `show_reviews` says; `profiles` is a public

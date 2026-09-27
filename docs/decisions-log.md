@@ -2,6 +2,32 @@
 
 Ce qui ne mérite pas une ADR mais qu'il faut pouvoir retrouver. Ordre antichronologique.
 
+## Les deux questions de la cave partagée, tranchées — 27 septembre 2026
+
+**Arbitrage du porteur** sur les questions ouvertes de l'ADR 0022 : « Oui il peut juste consulter
+la cave » ; « Oui on garde la case montrer la cave (mais uniquement à quelqu'un à qui on l'a
+partagé) ». La première confirme la lecture seule sans rien changer ; la seconde est la D7 de
+l'ADR et la migration `0038`. Restent les décisions prises en l'écrivant :
+
+1. **Le propriétaire ne lit pas sa propre étagère.** Il n'est le destinataire d'aucune de ses
+   caves, donc la porte ne lui rend rien — et c'est juste : son profil lui dit **à qui** il se
+   montre (« vos caves n'apparaissent ici que pour les personnes avec qui vous en avez partagé
+   une »), pas ce qu'il possède, qu'il lit dans « Ma cave ». La page n'appelle même pas la porte
+   pour lui.
+2. **Un tiers lit « Rien à vous montrer », jamais « ce membre ne montre pas sa cave », quand la
+   case est cochée.** La seconde phrase serait fausse, et la page ne peut pas distinguer « pas de
+   partage » de « partage vide » ou « masqué » sans une lecture de plus : la phrase dit les trois
+   cas d'un coup.
+3. **Trois parcours suivent** : `partage.ts` gagne le profil (un tiers ne voit rien, le
+   destinataire voit la seule cave partagée, sans prix ; masquée, elle quitte le profil ; case
+   décochée, le profil se tait et le partage reste lisible), `social.ts` n'attend plus qu'un tiers
+   lise l'étagère, et `admin.ts` ne cherche plus dans `/admin/comptes` le pseudo que la 0037 a
+   retiré de la ligne.
+
+Mesuré : `25_cave_montree.sql` (8 assertions) passe sur la chaîne complète jusqu'à la 0038 et
+**échoue sur celle qui s'arrête à la 0037** — « un tiers sans partage lit 2 lot(s) », c'est-à-dire
+les deux caves d'un membre qui n'en avait partagé aucune avec lui.
+
 ## La liste des comptes dit à qui l'on a affaire — 26 septembre 2026
 
 **Demandé par le porteur** : `/admin/comptes` titrait chaque ligne par son pseudo — « du style
