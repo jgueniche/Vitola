@@ -145,11 +145,28 @@ async function main(): Promise<void> {
     check('et revient', off.ok, off.message)
 
     console.log('\n4. Les comptes : tout l’annuaire, y compris ce que la salle ne voit pas')
+    /* La liste ne montre plus le pseudo (0037) : une ligne se titre par le nom
+       affiché, ou par l'adresse e-mail, et l'adresse est toujours sur la ligne.
+       La recherche, elle, trouve encore par pseudo. */
     await admin.goto(`${BASE}/admin/comptes?q=test_un`)
     await settle(admin)
     const accounts = await text(admin)
-    check('la recherche trouve le compte', contains(accounts, 'test_un'), accounts.slice(0, 400))
-    check('avec son rôle', contains(accounts, 'member'))
+    check(
+      'la recherche par pseudo trouve le compte, nommé par qui il est',
+      contains(accounts, MEMBER) && !contains(accounts, 'Aucun compte ne correspond'),
+      accounts.slice(0, 400),
+    )
+    const line =
+      (await admin
+        .locator('main li', { hasText: MEMBER })
+        .first()
+        .innerText()
+        .catch(() => '')) ?? ''
+    check(
+      'avec son rôle, en français — et sans le pseudo fabriqué',
+      line.includes('Membre') && !line.includes('member') && !line.includes('membre_'),
+      line,
+    )
     check('et le chemin vers le profil, où vit la promotion', contains(accounts, 'Voir le profil'))
 
     console.log('\n5. La relecture d’une fiche, de bout en bout')
